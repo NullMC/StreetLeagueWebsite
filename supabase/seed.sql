@@ -1,0 +1,2 @@
+-- Intentionally empty. Street League has no placeholder/demo data by design.
+-- Add real competitions, teams, players, matches and events through the Admin UI or SQL after connecting Supabase.
