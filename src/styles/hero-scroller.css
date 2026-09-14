@@ -1,0 +1,106 @@
+/* Hero sponsor strip: full-bleed white baseline */
+.hero--data-only {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero--data-only .hero-inner {
+  position: relative;
+  padding-bottom: 104px;
+}
+
+.hero--data-only .hero-data-panels--full {
+  width: 100%;
+}
+
+.hero-sponsor-line {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: 5;
+  width: 100vw;
+  min-height: 78px;
+  margin: 0;
+  padding: 0 clamp(18px, 4vw, 58px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 34px);
+  background: #ffffff;
+  border-top: 1px solid rgba(1,10,8,.10);
+  box-shadow: 0 -10px 28px rgba(1,10,8,.16);
+}
+
+.hero-sponsor-line__label {
+  color: #010A08;
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.hero-sponsor-line .logo-scroller {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-sponsor-line .logo-scroller__viewport {
+  width: 100%;
+  mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%);
+}
+
+.hero-sponsor-line .logo-scroller__item {
+  height: 46px;
+  width: 138px;
+  padding: 7px 12px;
+  border-color: rgba(1,10,8,.10);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.hero-sponsor-line .logo-scroller__item span {
+  color: #010A08;
+}
+
+.hero-sponsor-line .logo-scroller__track {
+  animation-duration: 36s;
+}
+
+@media (max-width: 820px) {
+  .hero--data-only .hero-inner {
+    padding-bottom: 94px;
+  }
+
+  .hero-sponsor-line {
+    min-height: 72px;
+    padding-inline: 16px;
+    gap: 14px;
+  }
+
+  .hero-sponsor-line__label {
+    font-size: 15px;
+  }
+
+  .hero-sponsor-line .logo-scroller__item {
+    width: 120px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero--data-only .hero-inner {
+    padding-bottom: 88px;
+  }
+
+  .hero-sponsor-line {
+    min-height: 68px;
+    padding-inline: 12px;
+  }
+
+  .hero-sponsor-line__label {
+    font-size: 13px;
+  }
+}
