@@ -58,18 +58,18 @@ export default function Home() {
       >
         <div className="hero-inner">
           <div className="hero-content">
-            <div className="hero-brand-lockup">
+            <h1 id="home-hero-title" className="sr-only">Street League</h1>
+
+            <div className="hero-brand-lockup" aria-hidden="true">
               <img
                 className="hero-brand-lockup__mark"
                 src="/assets/favicon.png"
                 alt=""
-                aria-hidden="true"
               />
               <img
                 className="hero-brand-lockup__wordmark"
                 src="/assets/street-league-logo.png"
-                alt="Street League"
-                id="home-hero-title"
+                alt=""
               />
               <span className="hero-brand-lockup__subline">
                 Football tournament / live platform
