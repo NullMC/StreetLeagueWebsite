@@ -57,10 +57,19 @@ export default function Partners() {
       </section>
 
       <section className="section--edge partners-tier-section partners-tier-section--gold">
-        <div className="partners-tier-heading">
-          <div><h2>Partner Gold</h2></div>
-          <p>La fascia di partnership con maggiore visibilità.</p>
+        <div className="partners-tier-heading partners-tier-heading--with-collabs">
+          <div className="partners-tier-heading__copy">
+            <span className="eyebrow">Main partners</span>
+            <h2>Partner Gold</h2>
+            <p>La fascia di partnership con maggiore visibilità.</p>
+          </div>
+          {collaborations.length ? (
+            <div className="partners-tier-heading__collabs">
+              <CollabCarousel items={collaborations} />
+            </div>
+          ) : null}
         </div>
+
         {gold.length ? (
           <div className="partners-grid partners-grid--gold">
             {gold.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}
@@ -68,12 +77,6 @@ export default function Partners() {
         ) : (
           <EmptyState title="Gold sponsor in attesa" text="I partner Gold verranno mostrati qui dal database." />
         )}
-
-        {collaborations.length ? (
-          <div className="partners-active-collabs">
-            <CollabCarousel items={collaborations} />
-          </div>
-        ) : null}
       </section>
 
       <section className="section--edge partners-tier-section partners-tier-section--silver">
