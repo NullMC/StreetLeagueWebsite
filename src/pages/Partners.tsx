@@ -73,7 +73,6 @@ export default function Partners() {
         <div className="partners-page__hero-bg" aria-hidden="true" />
         <div className="partners-page__hero-content partners-page__hero-content--with-collabs">
           <div className="partners-page__hero-copy">
-            <span className="eyebrow">Street League network</span>
             <h1>I nostri partner</h1>
             <p>
               Il network di brand e attività che sostiene il progetto dentro e

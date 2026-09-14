@@ -32,6 +32,20 @@
   box-shadow: none !important;
 }
 
+.sponsor-tier--silver .empty-state {
+  background: transparent !important;
+  border-color: rgba(255,255,255,.30) !important;
+}
+
+.section--edge{
+  padding-left: 10vw !important;
+  padding-right: 10vw !important;
+}
+
+.sponsor-tier--silver .empty-state p {
+  color: rgba(255,255,255,.72) !important;
+}
+
 .partner-card__logo {
   background: transparent !important;
 }
