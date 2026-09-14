@@ -1,11 +1,13 @@
+import { Link } from "react-router-dom";
+
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
-    <a
+    <Link
       className={`brand ${compact ? "brand--compact" : ""}`}
-      href="/"
+      to="/"
       aria-label="Street League home"
     >
       <img src="/assets/street-league-logo.png" alt="Street League" />
-    </a>
+    </Link>
   );
 }
