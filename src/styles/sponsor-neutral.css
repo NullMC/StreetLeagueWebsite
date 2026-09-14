@@ -1,0 +1,19 @@
+.sponsor-band--redesign {
+  background: var(--ink) !important;
+}
+
+.sponsor-band--redesign::before,
+.sponsor-band--redesign::after,
+.partners-page__hero-bg::before,
+.partners-page__hero-bg::after {
+  display: none !important;
+}
+
+.partners-page__hero-bg {
+  background: linear-gradient(
+    180deg,
+    rgba(1,10,8,.96) 0%,
+    rgba(1,10,8,.88) 100%
+  ) !important;
+  filter: none !important;
+}
