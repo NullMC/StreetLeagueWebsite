@@ -152,7 +152,6 @@ export default function Home() {
         style={{ "--hero-image": `url("${heroBackground}")` } as CSSProperties}
         aria-labelledby="home-hero-title"
       >
-        <h1 id="home-hero-title" className="sr-only">Street League</h1>
         <div className="hero-inner">
           <div className="hero-data-panels hero-data-panels--full" aria-label="Calendario e classifica della competizione">
             <section className="hero-calendar" id="home-matches" aria-labelledby="home-matches-title">
