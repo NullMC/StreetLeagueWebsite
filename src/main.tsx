@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./styles/global.css";
 import "./styles/street.css";
 import "./styles/hero-scroller.css";
+import "./styles/app-layout.css";
 import Home from "./pages/Home";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
@@ -19,26 +20,29 @@ import Partners from "./pages/Partners";
 import Collaborate from "./pages/Collaborate";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import { AppLayout } from "./components/AppLayout";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/competizioni" element={<Competitions />} />
-      <Route path="/competizioni/:competitionId" element={<CompetitionDetail />} />
-      <Route path="/classifica" element={<Standings />} />
-      <Route path="/squadre" element={<Teams />} />
-      <Route path="/squadre/:teamId" element={<TeamDetail />} />
-      <Route path="/giocatori" element={<Players />} />
-      <Route path="/giocatori/:playerId" element={<PlayerDetail />} />
-      <Route path="/statistiche" element={<Stats />} />
-      <Route path="/partite" element={<Matches />} />
-      <Route path="/partite/:matchId" element={<MatchDetail />} />
-      <Route path="/partner" element={<Partners />} />
-      <Route path="/collabora" element={<Collaborate />} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <AppLayout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/competizioni" element={<Competitions />} />
+        <Route path="/competizioni/:competitionId" element={<CompetitionDetail />} />
+        <Route path="/classifica" element={<Standings />} />
+        <Route path="/squadre" element={<Teams />} />
+        <Route path="/squadre/:teamId" element={<TeamDetail />} />
+        <Route path="/giocatori" element={<Players />} />
+        <Route path="/giocatori/:playerId" element={<PlayerDetail />} />
+        <Route path="/statistiche" element={<Stats />} />
+        <Route path="/partite" element={<Matches />} />
+        <Route path="/partite/:matchId" element={<MatchDetail />} />
+        <Route path="/partner" element={<Partners />} />
+        <Route path="/collabora" element={<Collaborate />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AppLayout>
   );
 }
 
