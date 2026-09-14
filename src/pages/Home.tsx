@@ -6,9 +6,11 @@ import { SectionTitle } from "../components/SectionTitle";
 import { TeamCard } from "../components/TeamCard";
 import { EmptyState } from "../components/EmptyState";
 import { ContentCarousel } from "../components/ContentCarousel";
+import { CollabCarousel } from "../components/CollabCarousel";
 import { LogoScroller } from "../components/LogoScroller";
 import {
   calculateStandings,
+  getActiveCollaborations,
   getActiveCompetition,
   getAllPlayerStats,
   getMatches,
@@ -18,6 +20,7 @@ import {
   subscribeToCompetition,
 } from "../lib/api";
 import type {
+  ActiveCollaboration,
   Competition,
   Match,
   Partner,
@@ -103,16 +106,18 @@ export default function Home() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]);
   const [social, setSocial] = useState<SocialContent[]>([]);
   const [playerStats, setPlayerStats] = useState<PlayerWithStats[]>([]);
 
   const load = async () => {
     try {
       const active = await getActiveCompetition();
-      const [nextMatches, nextTeams, nextPartners, nextSocial, nextStats] = await Promise.all([
+      const [nextMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextStats] = await Promise.all([
         getMatches(active?.id),
         getTeams(active?.id),
         getPartners(),
+        getActiveCollaborations(),
         getSocialContent(),
         getAllPlayerStats(),
       ]);
@@ -120,6 +125,7 @@ export default function Home() {
       setMatches(nextMatches);
       setTeams(nextTeams);
       setPartners(nextPartners);
+      setCollaborations(nextCollabs);
       setSocial(nextSocial);
       setPlayerStats(nextStats);
     } catch (error) {
@@ -128,6 +134,7 @@ export default function Home() {
       setMatches([]);
       setTeams([]);
       setPartners([]);
+      setCollaborations([]);
       setSocial([]);
       setPlayerStats([]);
     }
@@ -152,6 +159,7 @@ export default function Home() {
         style={{ "--hero-image": `url("${heroBackground}")` } as CSSProperties}
         aria-labelledby="home-hero-title"
       >
+        <h1 id="home-hero-title" className="sr-only">Street League</h1>
         <div className="hero-inner">
           <div className="hero-data-panels hero-data-panels--full" aria-label="Calendario e classifica della competizione">
             <section className="hero-calendar" id="home-matches" aria-labelledby="home-matches-title">
@@ -265,8 +273,7 @@ export default function Home() {
         <div className="section--edge sponsor-band__inner">
           <SectionTitle eyebrow="Sponsors" title="Chi sostiene il gioco" />
           <div className="sponsor-tier sponsor-tier--gold">
-            <div className="sponsor-tier__heading">
-            </div>
+            <div className="sponsor-tier__heading" />
             {goldPartners.length ? (
               <div className="partners-grid partners-grid--gold">
                 {goldPartners.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}
@@ -275,9 +282,15 @@ export default function Home() {
               <EmptyState title="Gold sponsor in attesa" text="I partner Gold verranno mostrati qui dal database." />
             )}
           </div>
-          <div className="sponsor-tier sponsor-tier--silver">
-            <div className="sponsor-tier__heading">
+
+          {collaborations.length ? (
+            <div className="sponsor-tier sponsor-tier--collab">
+              <CollabCarousel items={collaborations} />
             </div>
+          ) : null}
+
+          <div className="sponsor-tier sponsor-tier--silver">
+            <div className="sponsor-tier__heading" />
             {silverPartners.length ? (
               <ContentCarousel>
                 {silverPartners.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}
@@ -286,10 +299,10 @@ export default function Home() {
               <EmptyState title="Silver sponsor in attesa" text="I partner Silver verranno mostrati qui dal database." />
             )}
           </div>
+
           <div className="sponsor-tier sponsor-tier--network">
             <div className="sponsor-tier__heading sponsor-tier__heading--row">
-              <div>
-              </div>
+              <div />
               <a className="btn btn--ghost" href="/partners">Tutti i partner</a>
             </div>
             {bronzePartners.length ? (
