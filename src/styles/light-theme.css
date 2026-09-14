@@ -120,12 +120,13 @@ body { background: var(--ink); color: var(--white); }
 .collaborate-invoice-note { color: #fff !important; }
 .sponsorship-card { box-shadow: 0 18px 44px rgba(1,10,8,.08) !important; }
 .sponsorship-card__label, .sponsorship-card__price { color: var(--white) !important; }
-.sponsorship-card__price-value { filter: blur(4px); display: inline-block; }
+.sponsorship-card__price-value { filter: blur(10px); display: inline-block; }
 .sponsorship-card__price-currency { filter: none !important; margin-left: 3px; }
 .sponsorship-card__benefits { color: rgba(1,10,8,.70); }
 .sponsorship-card__bullet { color: var(--pink); }
 .collaborate-cta { background: linear-gradient(120deg,#fff,#f5d3dd) !important; border-color: rgba(228,34,120,.25) !important; }
 .collaborate-cta h2 { color: var(--white) !important; }
+.collaborate-cta p { color: rgba(1,10,8,.62) !important; }
 
 .site-footer { background: #F9F9F9 !important; color: #010A08 !important; border-top: 1px solid rgba(1,10,8,.08); }
 .site-footer .eyebrow, .site-footer a, .site-footer span, .site-footer .footer-nav span { color: #010A08 !important; }
