@@ -3,9 +3,10 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { ContentCarousel } from "../components/ContentCarousel";
+import { CollabCarousel } from "../components/CollabCarousel";
 import { LogoScroller } from "../components/LogoScroller";
-import { getPartners } from "../lib/api";
-import type { Partner } from "../types";
+import { getActiveCollaborations, getPartners } from "../lib/api";
+import type { ActiveCollaboration, Partner } from "../types";
 
 function SponsorCard({ partner }: { partner: Partner }) {
   const body = partner.logo_url ? <img src={partner.logo_url} alt={partner.name} /> : <strong>{partner.name}</strong>;
@@ -27,9 +28,18 @@ function SponsorCard({ partner }: { partner: Partner }) {
 
 export default function Partners() {
   const [items, setItems] = useState<Partner[]>([]);
+  const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]);
 
   useEffect(() => {
-    getPartners().then(setItems).catch(() => setItems([]));
+    Promise.all([getPartners(), getActiveCollaborations()])
+      .then(([partners, collabs]) => {
+        setItems(partners);
+        setCollaborations(collabs);
+      })
+      .catch(() => {
+        setItems([]);
+        setCollaborations([]);
+      });
   }, []);
 
   const gold = useMemo(() => items.filter((partner) => partner.tier === "gold"), [items]);
@@ -50,10 +60,7 @@ export default function Partners() {
 
         <section className="section--edge partners-tier-section partners-tier-section--gold">
           <div className="partners-tier-heading">
-            <div>
-              
-              <h2>Partner Gold</h2>
-            </div>
+            <div><h2>Partner Gold</h2></div>
             <p>La fascia di partnership con maggiore visibilità.</p>
           </div>
           {gold.length ? (
@@ -63,16 +70,16 @@ export default function Partners() {
           ) : (
             <EmptyState title="Gold sponsor in attesa" text="I partner Gold verranno mostrati qui dal database." />
           )}
+
+          {collaborations.length ? (
+            <div className="partners-active-collabs">
+              <CollabCarousel items={collaborations} />
+            </div>
+          ) : null}
         </section>
 
         <section className="section--edge partners-tier-section partners-tier-section--silver">
-          <div className="partners-tier-heading">
-            <div>
-              
-              <h2>Partner Silver</h2>
-            </div>
-            
-          </div>
+          <div className="partners-tier-heading"><div><h2>Partner Silver</h2></div></div>
           {silver.length ? (
             <ContentCarousel>
               {silver.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}
@@ -83,13 +90,7 @@ export default function Partners() {
         </section>
 
         <section className="section--edge partners-tier-section partners-tier-section--bronze">
-          <div className="partners-tier-heading">
-            <div>
-              
-              <h2>Partner Bronze</h2>
-            </div>
-          
-          </div>
+          <div className="partners-tier-heading"><div><h2>Partner Bronze</h2></div></div>
           {bronze.length ? (
             <LogoScroller partners={bronze} label="Bronze partners" />
           ) : (
