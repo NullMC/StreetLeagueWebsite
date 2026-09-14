@@ -9,6 +9,7 @@ import "./styles/chrome-responsive.css";
 import "./styles/sponsor-neutral.css";
 import "./styles/partner-tweaks.css";
 import "./styles/light-theme.css";
+import "./styles/light-ui-polish.css";
 import Home from "./pages/Home";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
