@@ -47,7 +47,7 @@ export default function Home() {
 
   const upcoming = useMemo(() => matches.slice(0, 6), [matches]);
   const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
-  const heroBackground = competition?.hero_image_url || "/assets/nebula-landscape.jpg";
+  const heroBackground = competition?.hero_image_url || "/assets/nebula-vertical.png";
 
   return (
     <PageShell>
@@ -58,22 +58,12 @@ export default function Home() {
       >
         <div className="hero-inner">
           <div className="hero-content">
-            <h1 id="home-hero-title" className="sr-only">Street League</h1>
-
             <div className="hero-brand-lockup" aria-hidden="true">
-              <img
-                className="hero-brand-lockup__mark"
-                src="/assets/favicon.png"
-                alt=""
-              />
               <img
                 className="hero-brand-lockup__wordmark"
                 src="/assets/street-league-logo.png"
                 alt=""
               />
-              <span className="hero-brand-lockup__subline">
-                Football tournament / live platform
-              </span>
             </div>
 
             <div className="hero-actions">
