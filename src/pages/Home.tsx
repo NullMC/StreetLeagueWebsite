@@ -7,6 +7,7 @@ import { MatchCard } from "../components/MatchCard";
 import { TeamCard } from "../components/TeamCard";
 import { EmptyState } from "../components/EmptyState";
 import {
+  calculateStandings,
   getActiveCompetition,
   getMatches,
   getTeams,
@@ -23,153 +24,94 @@ import type {
 } from "../types";
 
 export default function Home() {
-  const [c, setC] = useState<Competition | null>(null);
-  const [m, setM] = useState<Match[]>([]);
+  const [competition, setCompetition] = useState<Competition | null>(null);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [social, setSocial] = useState<SocialContent[]>([]);
 
   const load = async () => {
     try {
-      const cc = await getActiveCompetition();
-      setC(cc);
-      setM(await getMatches(cc?.id));
-      setTeams(await getTeams(cc?.id));
+      const active = await getActiveCompetition();
+      setCompetition(active);
+      setMatches(await getMatches(active?.id));
+      setTeams(await getTeams(active?.id));
       setPartners(await getPartners());
       setSocial(await getSocialContent());
-    } catch {
-      setC(null);
+    } catch (error) {
+      console.error("Home data error:", error);
+      setCompetition(null);
+      setMatches([]);
+      setTeams([]);
+      setPartners([]);
+      setSocial([]);
     }
   };
 
   useEffect(() => {
-    load();
-    const unsubscribe = subscribeToCompetition(load);
-    return unsubscribe;
+    void load();
+    return subscribeToCompetition(() => void load());
   }, []);
 
-  const upcoming = useMemo(() => m.slice(0, 6), [m]);
-  const heroBackground = c?.hero_image_url || "/assets/nebula-vertical.png";
-  const standings = useMemo(() => {
-  const table = teams.map((team) => ({
-    team,
-    played: 0,
-    wins: 0,
-    draws: 0,
-    losses: 0,
-    gf: 0,
-    ga: 0,
-    gd: 0,
-    points: 0,
-  }));
-
-  const standingsMap = new Map(
-    table.map((entry) => [entry.team.id, entry])
+  const upcoming = useMemo(() => matches.slice(0, 6), [matches]);
+  const standings = useMemo(
+    () => calculateStandings(teams, matches),
+    [teams, matches],
   );
 
-  m
-    .filter(
-      (match) =>
-        match.status === "finished" &&
-        match.home_score !== null &&
-        match.away_score !== null
-    )
-    .forEach((match) => {
-      const home = standingsMap.get(match.home_team_id);
-      const away = standingsMap.get(match.away_team_id);
+  const heroBackground =
+    competition?.hero_image_url || "/assets/nebula-landscape.jpg";
 
-      if (!home || !away) return;
-
-      const homeGoals = Number(match.home_score);
-      const awayGoals = Number(match.away_score);
-
-      home.played += 1;
-      away.played += 1;
-
-      home.gf += homeGoals;
-      home.ga += awayGoals;
-
-      away.gf += awayGoals;
-      away.ga += homeGoals;
-
-      if (homeGoals > awayGoals) {
-        home.wins += 1;
-        home.points += 3;
-        away.losses += 1;
-      } else if (homeGoals < awayGoals) {
-        away.wins += 1;
-        away.points += 3;
-        home.losses += 1;
-      } else {
-        home.draws += 1;
-        away.draws += 1;
-        home.points += 1;
-        away.points += 1;
-      }
-    });
-
-  return table
-    .map((entry) => ({
-      ...entry,
-      gd: entry.gf - entry.ga,
-    }))
-    .sort(
-      (a, b) =>
-        b.points - a.points ||
-        b.gd - a.gd ||
-        b.gf - a.gf ||
-        a.team.name.localeCompare(b.team.name)
-    );
-    }, [m, teams]);
+  const topScorers = useMemo(() => {
+    const counts = new Map<string, number>();
+    return counts;
+  }, []);
 
   return (
     <PageShell>
       <section
-        className="hero"
-        style={
-          {
-            "--hero-image": `url("${heroBackground}")`,
-          } as CSSProperties
-        }
+        className="hero hero--brand"
+        style={{ "--hero-image": `url("${heroBackground}")` } as CSSProperties}
+        aria-labelledby="home-hero-title"
       >
         <div className="hero-inner">
-
-          {/* LEFT SIDE */}
           <div className="hero-content">
-
-            <h1>
-              Street
-              <br />
-              League
-            </h1>
+            <div className="hero-brand-lockup">
+              <img
+                className="hero-brand-lockup__mark"
+                src="/assets/favicon.png"
+                alt=""
+                aria-hidden="true"
+              />
+              <img
+                className="hero-brand-lockup__wordmark"
+                src="/assets/street-league-logo.png"
+                alt="Street League"
+                id="home-hero-title"
+              />
+              <span className="hero-brand-lockup__subline">
+                Football tournament / live platform
+              </span>
+            </div>
 
             <div className="hero-actions">
               <a className="btn btn--primary" href="/partite">
                 Calendario
               </a>
-
               <a className="btn btn--ghost" href="/classifica">
                 Classifica
               </a>
             </div>
           </div>
 
-          {/* RIGHT SIDE */}
-          <aside className="hero-calendar">
-            <div className="hero-data-panels">
-
-            {/* CALENDARIO */}
-            <aside className="hero-calendar">
+          <div className="hero-data-panels" aria-label="Dati della competizione">
+            <section className="hero-calendar" id="home-matches" aria-labelledby="home-matches-title">
               <div className="hero-calendar__header">
                 <div>
                   <span className="eyebrow">Next matches</span>
-                  <h2>Calendario</h2>
+                  <h2 id="home-matches-title">Calendario</h2>
                 </div>
-
-                <a
-                  className="hero-calendar__all"
-                  href="/partite"
-                >
+                <a className="hero-calendar__all" href="/partite">
                   Vedi tutte
                 </a>
               </div>
@@ -177,13 +119,8 @@ export default function Home() {
               {upcoming.length ? (
                 <div className="hero-calendar__list">
                   {upcoming.slice(0, 3).map((match) => {
-                    const home = teams.find(
-                      (team) => team.id === match.home_team_id
-                    );
-
-                    const away = teams.find(
-                      (team) => team.id === match.away_team_id
-                    );
+                    const home = teams.find((team) => team.id === match.home_team_id);
+                    const away = teams.find((team) => team.id === match.away_team_id);
 
                     return (
                       <a
@@ -193,25 +130,16 @@ export default function Home() {
                       >
                         <div className="hero-match__meta">
                           <span>
-                            {match.kickoff_at
-                              ? new Date(
-                                  match.kickoff_at
-                                ).toLocaleDateString("it-IT", {
-                                  day: "2-digit",
-                                  month: "short",
-                                })
-                              : "—"}
+                            {new Date(match.kickoff_at).toLocaleDateString("it-IT", {
+                              day: "2-digit",
+                              month: "short",
+                            })}
                           </span>
-
                           <span>
-                            {match.kickoff_at
-                              ? new Date(
-                                  match.kickoff_at
-                                ).toLocaleTimeString("it-IT", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
-                              : "—"}
+                            {new Date(match.kickoff_at).toLocaleTimeString("it-IT", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </span>
                         </div>
 
@@ -222,25 +150,13 @@ export default function Home() {
                             ) : (
                               <span className="hero-match__logo-placeholder" />
                             )}
-
-                            <span>
-                              {
-                                home?.name ||
-                                "—"}
-                            </span>
+                            <span>{home?.short_name || home?.name || "—"}</span>
                           </div>
 
-                          <span className="hero-match__vs">
-                            VS
-                          </span>
+                          <span className="hero-match__vs">VS</span>
 
                           <div className="hero-match__team hero-match__team--away">
-                            <span>
-                              {
-                                away?.name ||
-                                "—"}
-                            </span>
-
+                            <span>{away?.short_name || away?.name || "—"}</span>
                             {away?.logo_url ? (
                               <img src={away.logo_url} alt="" />
                             ) : (
@@ -251,14 +167,9 @@ export default function Home() {
 
                         <div className="hero-match__footer">
                           <span>
-                            {match.matchday
-                              ? `Giornata ${match.matchday}`
-                              : "Match"}
+                            {match.matchday ? `Giornata ${match.matchday}` : "Match"}
                           </span>
-
-                          <span className="hero-match__arrow">
-                            →
-                          </span>
+                          <span className="hero-match__arrow">→</span>
                         </div>
                       </a>
                     );
@@ -266,40 +177,24 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="hero-calendar__empty">
-                  <span className="eyebrow">
-                    Upcoming
-                  </span>
-
-                  <h3>
-                    Nessuna partita programmata
-                  </h3>
-
+                  <span className="eyebrow">Upcoming</span>
+                  <h3>Nessuna partita programmata</h3>
                   <p>
-                    {c
+                    {competition
                       ? "Le prossime partite verranno mostrate qui."
                       : "Competizione non ancora iniziata."}
                   </p>
                 </div>
               )}
-            </aside>
+            </section>
 
-            {/* CLASSIFICA */}
-            <aside className="hero-standings">
+            <section className="hero-standings" id="home-standings" aria-labelledby="home-standings-title">
               <div className="hero-standings__header">
                 <div>
-                  <span className="eyebrow">
-                    Live ranking
-                  </span>
-
-                  <h2>
-                    Classifica
-                  </h2>
+                  <span className="eyebrow">Live ranking</span>
+                  <h2 id="home-standings-title">Classifica</h2>
                 </div>
-
-                <a
-                  className="hero-calendar__all"
-                  href="/classifica"
-                >
+                <a className="hero-calendar__all" href="/classifica">
                   Completa
                 </a>
               </div>
@@ -308,102 +203,63 @@ export default function Home() {
                 <div className="hero-standings__list">
                   {standings.slice(0, 5).map((entry, index) => (
                     <div
-                      className={`hero-standing ${
-                        index === 0
-                          ? "hero-standing--first"
-                          : ""
-                      }`}
+                      className={`hero-standing ${index === 0 ? "hero-standing--first" : ""}`}
                       key={entry.team.id}
                     >
                       <span className="hero-standing__position">
                         {String(index + 1).padStart(2, "0")}
                       </span>
-
                       <div className="hero-standing__team">
                         {entry.team.logo_url ? (
-                          <img
-                            src={entry.team.logo_url}
-                            alt=""
-                          />
+                          <img src={entry.team.logo_url} alt="" />
                         ) : (
                           <span className="hero-standing__logo-placeholder" />
                         )}
-
-                        <span>
-                          {
-                            entry.team.name}
-                        </span>
+                        <span>{entry.team.short_name || entry.team.name}</span>
                       </div>
-
                       <div className="hero-standing__stats">
-                        <span>
-                          {entry.played}
-                        </span>
-
-                        <strong>
-                          {entry.points}
-                        </strong>
+                        <span>{entry.played}</span>
+                        <strong>{entry.points}</strong>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="hero-standings__empty">
-                  <span className="eyebrow">
-                    Ranking
-                  </span>
-
-                  <h3>
-                    Classifica non disponibile
-                  </h3>
-
+                  <span className="eyebrow">Ranking</span>
+                  <h3>Classifica non disponibile</h3>
                   <p>
-                    La classifica verrà popolata automaticamente
-                    dai risultati delle partite.
+                    La classifica verrà popolata automaticamente dai risultati
+                    delle partite.
                   </p>
                 </div>
               )}
-            </aside>
-
+            </section>
           </div>
-          </aside>
-
         </div>
       </section>
 
-
-      <section className="section--edge leaders-section">
+      <section className="section--edge leaders-section" id="home-stats">
         <SectionTitle eyebrow="Live" title="Top performers" />
+        <DataGate when={false} fallback={null}>
+          <div />
+        </DataGate>
         <div className="leaders">
           {[
-            ["Miglior marcatore", "0"],
-            ["Top uomo-assist", "0"],
-            ["Clean sheets", "0"],
-          ].map(([t, v]) => (
-            <div className="stat-card" key={t}>
-              <span className="eyebrow">{t}</span>
-              <h3>—</h3>
-              <div className="stat-card__value">{v}</div>
-              <div className="rank-list">
-                <div className="rank-row">
-                  <span>01</span>
-                  <span>—</span>
-                </div>
-                <div className="rank-row">
-                  <span>02</span>
-                  <span>—</span>
-                </div>
-                <div className="rank-row">
-                  <span>03</span>
-                  <span>—</span>
-                </div>
-              </div>
+            ["Miglior marcatore", topScorers.size ? "—" : "—"],
+            ["Top uomo-assist", "—"],
+            ["Clean sheets", "—"],
+          ].map(([title, value]) => (
+            <div className="stat-card" key={title}>
+              <span className="eyebrow">{title}</span>
+              <h3>Dati live</h3>
+              <div className="stat-card__value">{value}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="section--edge">
+      <section className="section--edge" id="home-teams">
         <SectionTitle
           eyebrow=""
           title="Squadre"
@@ -415,8 +271,8 @@ export default function Home() {
         />
         {teams.length ? (
           <div className="cards-grid">
-            {teams.slice(0, 3).map((t) => (
-              <TeamCard key={t.id} team={t} />
+            {teams.slice(0, 3).map((team) => (
+              <TeamCard key={team.id} team={team} />
             ))}
           </div>
         ) : (
@@ -427,33 +283,33 @@ export default function Home() {
         )}
       </section>
 
-      <section className="sponsor-band">
+      <section className="sponsor-band" id="home-partners">
         <div className="section--edge">
           <SectionTitle eyebrow="Sponsors" title="Chi sostiene il gioco" />
           <div className="partners-grid">
             {partners
-              .filter((p) => p.tier === "gold")
+              .filter((partner) => partner.tier === "gold")
               .slice(0, 4)
-              .map((p) => (
-                <div className="partner-card" key={p.id}>
-                  {p.website_url ? (
+              .map((partner) => (
+                <div className="partner-card" key={partner.id}>
+                  {partner.website_url ? (
                     <a
-                      href={p.website_url}
+                      href={partner.website_url}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {p.logo_url ? (
-                        <img src={p.logo_url} alt={p.name} />
+                      {partner.logo_url ? (
+                        <img src={partner.logo_url} alt={partner.name} />
                       ) : (
-                        p.name
+                        partner.name
                       )}
                     </a>
-                  ) : p.logo_url ? (
-                    <img src={p.logo_url} alt={p.name} />
+                  ) : partner.logo_url ? (
+                    <img src={partner.logo_url} alt={partner.name} />
                   ) : (
-                    <span>{p.name}</span>
+                    <span>{partner.name}</span>
                   )}
-                  <span>Gold / {p.name}</span>
+                  <span>Gold / {partner.name}</span>
                 </div>
               ))}
           </div>
@@ -469,39 +325,33 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section--edge">
+      <section className="section--edge" id="home-content">
         <SectionTitle eyebrow="" title="Ultimi contenuti" />
-        <div className="video-grid">
-          {social.slice(0, 6).map((s) => (
-            <a
-              className="video-card"
-              key={s.id}
-              href={s.content_url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <div className="video-thumb">
-                {s.thumbnail_url ? (
-                  <img
-                    src={s.thumbnail_url}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  <div className="video-play">↗</div>
-                )}
-              </div>
-              <div className="video-card__body" style={{ padding: "2rem 1rem" }}>
-                <h3>{s.title}</h3>
-              </div>
-            </a>
-          ))}
-        </div>
-        {!social.length && (
+        {social.length ? (
+          <div className="video-grid">
+            {social.slice(0, 6).map((item) => (
+              <a
+                className="video-card"
+                key={item.id}
+                href={item.content_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className="video-thumb">
+                  {item.thumbnail_url ? (
+                    <img src={item.thumbnail_url} alt="" />
+                  ) : (
+                    <div className="video-play">↗</div>
+                  )}
+                </div>
+                <div className="video-card__body">
+                  <span className="eyebrow">{item.platform}</span>
+                  <h3>{item.title}</h3>
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
           <EmptyState
             title="Nessun contenuto"
             text="YouTube, Instagram e TikTok verranno alimentati dal pannello amministrativo."
