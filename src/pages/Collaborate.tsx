@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { PageShell } from "../components/PageShell";
 
 type SponsorshipPackage = {
   name: string;
@@ -70,83 +69,81 @@ const sponsorshipPackages: SponsorshipPackage[] = [
 
 export default function Collaborate() {
   return (
-    <PageShell>
-      <div className="collaborate-page collaborate-page--redesign">
+    <div className="collaborate-page collaborate-page--redesign">
 
-        <section className="collaborate-section collaborate-section--intro">
-          <div className="collaborate-container">
-            <div className="collaborate-intro-layout">
-              <div>
-                
-                <h2>Una presenza che resta dentro e fuori dal campo.</h2>
+      <section className="collaborate-section collaborate-section--intro">
+        <div className="collaborate-container">
+          <div className="collaborate-intro-layout">
+            <div>
+              
+              <h2>Una presenza che resta dentro e fuori dal campo.</h2>
+            </div>
+            <div className="collaborate-intro-copy">
+              <p>
+                <strong>Street League</strong> nasce con l’obiettivo di organizzare tornei di calcio amatoriali a Bari, ospitati presso il centro sportivo{" "}
+                <a href="https://www.dicagno.it/" target="_blank" rel="noopener noreferrer"><strong>Di Cagno Abrescia</strong></a>.
+              </p>
+              <p>
+                Con l’obiettivo di migliorare costantemente l’esperienza offerta e garantire servizi sempre più efficaci e professionali ai partecipanti, Street League sviluppa collaborazioni con attività e aziende del territorio interessate a sostenere il progetto attraverso partnership e sponsorizzazioni.
+              </p>
+              <p>
+                La collaborazione offre alle aziende un’ampia visibilità, sia online che offline, grazie a una presenza costante sui nostri canali social, alla visibilità diretta all’interno del centro sportivo e al contatto con centinaia di partecipanti e spettatori durante gli eventi.
+              </p>
+              <p>
+                Le attività di sponsorizzazione sono strutturate per garantire ai partner un ritorno in termini di visibilità, riconoscibilità del brand e presenza sul territorio, creando una collaborazione vantaggiosa per entrambe le parti.
+              </p>
+              <div className="collaborate-invoice-note">
+                <strong>PER OGNI QUOTA DI SPONSORIZZAZIONE VIENE EMESSA REGOLARE FATTURA</strong>
               </div>
-              <div className="collaborate-intro-copy">
-                <p>
-                  <strong>Street League</strong> nasce con l’obiettivo di organizzare tornei di calcio amatoriali a Bari, ospitati presso il centro sportivo{" "}
-                  <a href="https://www.dicagno.it/" target="_blank" rel="noopener noreferrer"><strong>Di Cagno Abrescia</strong></a>.
-                </p>
-                <p>
-                  Con l’obiettivo di migliorare costantemente l’esperienza offerta e garantire servizi sempre più efficaci e professionali ai partecipanti, Street League sviluppa collaborazioni con attività e aziende del territorio interessate a sostenere il progetto attraverso partnership e sponsorizzazioni.
-                </p>
-                <p>
-                  La collaborazione offre alle aziende un’ampia visibilità, sia online che offline, grazie a una presenza costante sui nostri canali social, alla visibilità diretta all’interno del centro sportivo e al contatto con centinaia di partecipanti e spettatori durante gli eventi.
-                </p>
-                <p>
-                  Le attività di sponsorizzazione sono strutturate per garantire ai partner un ritorno in termini di visibilità, riconoscibilità del brand e presenza sul territorio, creando una collaborazione vantaggiosa per entrambe le parti.
-                </p>
-                <div className="collaborate-invoice-note">
-                  <strong>PER OGNI QUOTA DI SPONSORIZZAZIONE VIENE EMESSA REGOLARE FATTURA</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="collaborate-section collaborate-section--packages">
+        <div className="collaborate-container">
+          <div className="collaborate-packages-heading">
+            <div>
+              
+              <h2>PACCHETTI DI<br />SPONSORIZZAZIONE</h2>
+            </div>
+          </div>
+
+          <div className="sponsorship-grid">
+            {sponsorshipPackages.map((pkg) => (
+              <article key={pkg.name} className={`sponsorship-card sponsorship-card--${pkg.accent}`}>
+                <div className="sponsorship-card__top">
+                  <span className="sponsorship-card__label">{pkg.name}</span>
+                  <strong className="sponsorship-card__price">{pkg.price}</strong>
                 </div>
-              </div>
-            </div>
+                <div className="sponsorship-card__divider" />
+                <p className="sponsorship-card__description">{pkg.description}</p>
+                <ul className="sponsorship-card__benefits">
+                  {pkg.benefits.map((benefit, idx) => (
+                    <li key={`${pkg.name}-${idx}`}>
+                      <span className="sponsorship-card__bullet">+</span>
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="collaborate-section collaborate-section--packages">
-          <div className="collaborate-container">
-            <div className="collaborate-packages-heading">
-              <div>
-                
-                <h2>PACCHETTI DI<br />SPONSORIZZAZIONE</h2>
-              </div>
+      <section className="collaborate-section collaborate-section--cta">
+        <div className="collaborate-container">
+          <div className="collaborate-cta">
+            <div>
+              
+              <h2>COSTRUIAMO INSIEME<br />LA PROSSIMA STAGIONE</h2>
+              <p>Scegli il livello di partnership più adatto alla tua attività e porta il tuo brand all’interno della Street League.</p>
             </div>
-
-            <div className="sponsorship-grid">
-              {sponsorshipPackages.map((pkg) => (
-                <article key={pkg.name} className={`sponsorship-card sponsorship-card--${pkg.accent}`}>
-                  <div className="sponsorship-card__top">
-                    <span className="sponsorship-card__label">{pkg.name}</span>
-                    <strong className="sponsorship-card__price">{pkg.price}</strong>
-                  </div>
-                  <div className="sponsorship-card__divider" />
-                  <p className="sponsorship-card__description">{pkg.description}</p>
-                  <ul className="sponsorship-card__benefits">
-                    {pkg.benefits.map((benefit, idx) => (
-                      <li key={`${pkg.name}-${idx}`}>
-                        <span className="sponsorship-card__bullet">+</span>
-                        <span>{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
-            </div>
+            <a className="btn btn--primary collaborate-cta__button" href="mailto:streetleaguebari@gmail.com">Contatta il team</a>
           </div>
-        </section>
-
-        <section className="collaborate-section collaborate-section--cta">
-          <div className="collaborate-container">
-            <div className="collaborate-cta">
-              <div>
-                
-                <h2>COSTRUIAMO INSIEME<br />LA PROSSIMA STAGIONE</h2>
-                <p>Scegli il livello di partnership più adatto alla tua attività e porta il tuo brand all’interno della Street League.</p>
-              </div>
-              <a className="btn btn--primary collaborate-cta__button" href="mailto:streetleaguebari@gmail.com">Contatta il team</a>
-            </div>
-          </div>
-        </section>
-      </div>
-    </PageShell>
+        </div>
+      </section>
+    </div>
   );
 }
