@@ -168,7 +168,7 @@ main {
   right: 0;
   bottom: 0;
   height: 28%;
-  background: linear-gradient(to top, var(--ink), transparent);
+  background: linear-gradient(to top, #FFF, transparent);
   pointer-events: none;
   z-index: 1;
 }
@@ -1372,7 +1372,7 @@ section,
   letter-spacing: -0.04em;
   text-transform: uppercase;
 
-  color: #f9f9f9;
+  color: var(--black);
 }
 
 .collaborate-packages-heading p {
@@ -1479,7 +1479,7 @@ section,
   grid-template-columns: 13px 1fr;
   gap: 10px;
 
-  color: rgba(249, 249, 249, 0.7);
+  color: rgba(0, 0, 0, 0.7);
   font-size: 0.88rem;
   line-height: 1.55;
 }
