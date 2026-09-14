@@ -1,0 +1,91 @@
+/* Sponsor / partner refinements */
+
+/* Keep the Home sponsor heading aligned to the left. */
+.sponsor-band--redesign > .sponsor-band__inner > .section-head {
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  text-align: left !important;
+}
+
+.sponsor-band--redesign > .sponsor-band__inner > .section-head > div {
+  align-items: flex-start !important;
+  text-align: left !important;
+}
+
+/* Neutral card border: tier identity stays in the content, not on the edge. */
+.sponsor-band--redesign .partner-card,
+.partners-page .partner-card,
+.sponsor-band--redesign .partner-card--gold,
+.sponsor-band--redesign .partner-card--silver,
+.sponsor-band--redesign .partner-card--bronze {
+  border-color: rgba(1,10,8,.16) !important;
+  box-shadow: none !important;
+}
+
+/* Flyers on the pink sponsor background need a darker, softer elevation. */
+.sponsor-band--redesign .collab-carousel__poster {
+  border-color: rgba(1,10,8,.16) !important;
+  background: #f9f9f9;
+  box-shadow: 0 18px 44px rgba(1,10,8,.22) !important;
+}
+
+.sponsor-band--redesign .collab-carousel__item.is-active .collab-carousel__poster {
+  border-color: rgba(1,10,8,.22) !important;
+  box-shadow: 0 26px 60px rgba(1,10,8,.28), 0 0 0 1px rgba(249,249,249,.28) !important;
+}
+
+/* Partners hero: title/copy on the left, active flyer carousel on the right. */
+.partners-page__hero-content--with-collabs {
+  width: min(var(--max), calc(100% - 56px)) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 520px) !important;
+  align-items: center !important;
+  gap: clamp(34px, 6vw, 88px) !important;
+}
+
+.partners-page__hero-copy {
+  min-width: 0;
+}
+
+.partners-page__hero-collabs {
+  min-width: 0;
+  width: 100%;
+}
+
+.partners-page__hero-collabs .collab-carousel__toolbar {
+  justify-content: flex-end;
+}
+
+.partners-page__hero-collabs .collab-carousel__viewport {
+  padding-inline: 0;
+  justify-content: flex-start;
+}
+
+.partners-page__hero-collabs .collab-carousel__item.is-active {
+  flex-basis: min(390px, 100%);
+}
+
+@media (max-width: 900px) {
+  .sponsor-band--redesign > .sponsor-band__inner > .section-head {
+    align-items: flex-start !important;
+  }
+
+  .partners-page__hero-content--with-collabs {
+    grid-template-columns: 1fr !important;
+    gap: 34px !important;
+  }
+
+  .partners-page__hero-collabs {
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 600px) {
+  .partners-page__hero-content--with-collabs {
+    width: calc(100% - 28px) !important;
+  }
+
+  .partners-page__hero-collabs .collab-carousel__viewport {
+    padding-inline: max(4px, calc((100% - 300px) / 2));
+  }
+}
