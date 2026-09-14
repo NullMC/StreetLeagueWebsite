@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { ContentCarousel } from "../components/ContentCarousel";
 import { CollabCarousel } from "../components/CollabCarousel";
@@ -9,19 +8,17 @@ import type { ActiveCollaboration, Partner } from "../types";
 
 function SponsorCard({ partner }: { partner: Partner }) {
   const body = partner.logo_url ? <img src={partner.logo_url} alt={partner.name} /> : <strong>{partner.name}</strong>;
+  const hasLink = Boolean(partner.website_url);
   return (
-    <a
-      className={`partner-card partner-card--${partner.tier}`}
-      href={partner.website_url || "#"}
-      target={partner.website_url ? "_blank" : undefined}
-      rel={partner.website_url ? "noopener noreferrer" : undefined}
-      onClick={(event) => {
-        if (!partner.website_url) event.preventDefault();
-      }}
-    >
-      {body}
+    <article className={`partner-card partner-card--${partner.tier}`}>
+      <div className="partner-card__logo">{body}</div>
       <span>{partner.name}</span>
-    </a>
+      {(partner.tier === "gold" || partner.tier === "silver") && hasLink ? (
+        <a className="btn btn--small btn--primary sponsor-link-btn" href={partner.website_url!} target="_blank" rel="noopener noreferrer">
+          Visita piattaforma ↗
+        </a>
+      ) : null}
+    </article>
   );
 }
 
@@ -31,14 +28,8 @@ export default function Partners() {
 
   useEffect(() => {
     Promise.all([getPartners(), getActiveCollaborations()])
-      .then(([partners, collabs]) => {
-        setItems(partners);
-        setCollaborations(collabs);
-      })
-      .catch(() => {
-        setItems([]);
-        setCollaborations([]);
-      });
+      .then(([partners, collabs]) => { setItems(partners); setCollaborations(collabs); })
+      .catch(() => { setItems([]); setCollaborations([]); });
   }, []);
 
   const gold = useMemo(() => items.filter((partner) => partner.tier === "gold"), [items]);
@@ -56,50 +47,23 @@ export default function Partners() {
             <p>Il network di brand e attività che sostiene il progetto dentro e fuori dal campo.</p>
             <a className="btn btn--primary" href="/collabora">Collabora con noi</a>
           </div>
-          {collaborations.length ? (
-            <div className="partners-page__hero-collabs">
-              <CollabCarousel items={collaborations} />
-            </div>
-          ) : null}
+          {collaborations.length ? <div className="partners-page__hero-collabs"><CollabCarousel items={collaborations} /></div> : null}
         </div>
       </section>
 
       <section className="section--edge partners-tier-section partners-tier-section--gold">
-        <div className="partners-tier-heading">
-          <div>
-            <span className="eyebrow">Main partners</span>
-            <h2>Partner Gold</h2>
-            <p>La fascia di partnership con maggiore visibilità.</p>
-          </div>
-        </div>
-
-        {gold.length ? (
-          <div className="partners-grid partners-grid--gold">
-            {gold.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}
-          </div>
-        ) : (
-          <EmptyState title="Gold sponsor in attesa" text="I partner Gold verranno mostrati qui dal database." />
-        )}
+        <div className="partners-tier-heading"><div><span className="eyebrow">Main partners</span><h2>Partner Gold</h2><p>La fascia di partnership con maggiore visibilità.</p></div></div>
+        {gold.length ? <div className="partners-grid partners-grid--gold">{gold.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}</div> : <EmptyState title="Gold sponsor in attesa" text="I partner Gold verranno mostrati qui dal database." />}
       </section>
 
       <section className="section--edge partners-tier-section partners-tier-section--silver">
-        <div className="partners-tier-heading"><div><h2>Partner Silver</h2></div></div>
-        {silver.length ? (
-          <ContentCarousel>
-            {silver.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}
-          </ContentCarousel>
-        ) : (
-          <EmptyState title="Silver sponsor in attesa" text="I partner Silver verranno mostrati qui dal database." />
-        )}
+        <div className="partners-tier-heading"><div><h2>Partner Silver</h2><p>Presenza editoriale e digitale dedicata.</p></div></div>
+        {silver.length ? <ContentCarousel>{silver.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}</ContentCarousel> : <EmptyState title="Silver sponsor in attesa" text="I partner Silver verranno mostrati qui dal database." />}
       </section>
 
       <section className="section--edge partners-tier-section partners-tier-section--bronze">
         <div className="partners-tier-heading"><div><h2>Partner Bronze</h2></div></div>
-        {bronze.length ? (
-          <LogoScroller partners={bronze} label="Bronze partners" />
-        ) : (
-          <LogoScroller partners={items.filter((partner) => partner.tier !== "gold")} label="League partners" />
-        )}
+        {bronze.length ? <LogoScroller partners={bronze} label="Bronze sponsors" /> : <LogoScroller partners={items.filter((partner) => partner.tier !== "gold")} label="League partners" />}
       </section>
     </div>
   );
