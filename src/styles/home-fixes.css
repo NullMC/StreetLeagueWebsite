@@ -94,6 +94,27 @@
   border-top: 1px solid rgba(249,249,249,.09);
 }
 
+/* Keep the collaborations heading aligned with the carousel content. */
+.sponsor-tier--collab .collab-carousel__toolbar,
+.partners-active-collabs .collab-carousel__toolbar {
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.sponsor-tier--collab .collab-carousel__toolbar > div:first-child,
+.partners-active-collabs .collab-carousel__toolbar > div:first-child {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.sponsor-tier--collab .collab-carousel__toolbar .eyebrow,
+.partners-active-collabs .collab-carousel__toolbar .eyebrow {
+  display: block;
+  text-align: left;
+}
+
 @media (max-width: 700px) {
   .content-carousel__item {
     height: 380px;
