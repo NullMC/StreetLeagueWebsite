@@ -1,0 +1,105 @@
+name: Integrate admin collaborations
+
+on:
+  push:
+    branches:
+      - feat/home-sponsors-carousel-redesign
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor == 'NullMC'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: feat/home-sponsors-carousel-redesign
+
+      - name: Patch admin navigation and generic CRUD
+        shell: python
+        run: |
+          from pathlib import Path
+
+          admin = Path('src/pages/Admin.tsx')
+          text = admin.read_text(encoding='utf-8')
+
+          replacements = [
+            (
+              '  | "mvp"\n  | "partners"\n  | "social_contents";',
+              '  | "mvp"\n  | "partners"\n  | "active_collaborations"\n  | "social_contents";',
+            ),
+            (
+              '  mvp: "MVP",\n  partners: "Sponsor",\n  social_contents: "Social / Video",',
+              '  mvp: "MVP",\n  partners: "Sponsor",\n  active_collaborations: "Collab attive",\n  social_contents: "Social / Video",',
+            ),
+            (
+              '  mvp: "match_mvp",\n  partners: "partners",\n  social_contents: "social_contents",',
+              '  mvp: "match_mvp",\n  partners: "partners",\n  active_collaborations: "active_collaborations",\n  social_contents: "social_contents",',
+            ),
+            (
+              '  mvp: "match_id",\n  partners: "id",\n  social_contents: "id",',
+              '  mvp: "match_id",\n  partners: "id",\n  active_collaborations: "id",\n  social_contents: "id",',
+            ),
+            (
+              '  mvp: ["match_id", "player_id"],\n  partners: ["name", "tier", "logo_url", "website_url", "sort_order"],\n  social_contents: [',
+              '  mvp: ["match_id", "player_id"],\n  partners: ["name", "tier", "logo_url", "website_url", "sort_order"],\n  active_collaborations: ["flyer_url", "sort_order"],\n  social_contents: [',
+            ),
+            (
+              '  published_at: "Pubblicato",\n  starter: "Titolare",',
+              '  published_at: "Pubblicato",\n  flyer_url: "Volantino",\n  starter: "Titolare",',
+            ),
+            (
+              '  mvp: ["match_id", "player_id"],\n  partners: ["name", "tier"],\n  social_contents: ["platform", "title", "content_url"],',
+              '  mvp: ["match_id", "player_id"],\n  partners: ["name", "tier"],\n  active_collaborations: ["flyer_url"],\n  social_contents: ["platform", "title", "content_url"],',
+            ),
+            (
+              '      const folder = field.includes("logo")\n        ? "logos"\n        : field.includes("bg_less")',
+              '      const folder = field.includes("flyer")\n        ? "collaborations"\n        : field.includes("logo")\n          ? "logos"\n          : field.includes("bg_less")',
+            ),
+            (
+              '    const acceptsImage =\n      field.includes("logo") ||\n      field.includes("image") ||\n      field.includes("thumbnail");',
+              '    const acceptsImage =\n      field.includes("logo") ||\n      field.includes("image") ||\n      field.includes("thumbnail") ||\n      field === "flyer_url";',
+            ),
+            (
+              '            "mvp",\n            "partners",\n            "social_contents",',
+              '            "mvp",\n            "partners",\n            "active_collaborations",\n            "social_contents",',
+            ),
+          ]
+
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'Missing expected Admin.tsx fragment:\n{old}')
+              text = text.replace(old, new, 1)
+
+          admin.write_text(text, encoding='utf-8')
+
+          main = Path('src/main.tsx')
+          main_text = main.read_text(encoding='utf-8')
+          main_replacements = [
+              ('import Admin from "./pages/Admin";\nimport AdminCollaborations from "./pages/AdminCollaborations";\n', 'import Admin from "./pages/Admin";\n'),
+              ('      <Route path="/admin" element={<Admin />} />\n      <Route path="/admin/collab" element={<AdminCollaborations />} />\n', '      <Route path="/admin" element={<Admin />} />\n'),
+          ]
+          for old, new in main_replacements:
+              if old not in main_text:
+                  raise SystemExit(f'Missing expected main.tsx fragment:\n{old}')
+              main_text = main_text.replace(old, new, 1)
+          main.write_text(main_text, encoding='utf-8')
+
+          # Remove the old standalone admin page now that the feature lives in the dashboard.
+          old_page = Path('src/pages/AdminCollaborations.tsx')
+          if old_page.exists():
+              old_page.unlink()
+
+      - name: Commit integration and remove temporary workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/integrate-admin-collab.yml
+          git add src/pages/Admin.tsx src/main.tsx src/pages/AdminCollaborations.tsx .github/workflows/integrate-admin-collab.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: move active collaborations into admin dashboard"
+          git push origin HEAD:feat/home-sponsors-carousel-redesign
