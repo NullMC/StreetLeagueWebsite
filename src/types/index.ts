@@ -79,6 +79,13 @@ export interface Partner {
   sort_order: number;
 }
 
+export interface ActiveCollaboration {
+  id: string;
+  flyer_url: string;
+  sort_order: number;
+  created_at: string;
+}
+
 export interface SocialContent {
   id: string;
   platform: "youtube" | "instagram" | "tiktok";
