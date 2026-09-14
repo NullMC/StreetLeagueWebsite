@@ -1,0 +1,283 @@
+@import url("https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&display=swap");
+
+:root {
+  --display: "Teko", "Arial Narrow", Impact, sans-serif;
+  --street-grid: rgba(249,249,249,.055);
+  --street-glass: rgba(1,10,8,.72);
+  --street-pink-soft: rgba(228,34,120,.18);
+}
+
+html { scroll-padding-top: 104px; }
+
+body::selection { background: var(--pink); color: var(--white); }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.hero-content h1,
+.hero-calendar h2,
+.hero-standings h2,
+.detail-hero h1,
+.stat-card h3,
+.section-title h2,
+.section-title h3,
+.admin-hero h1,
+.admin-resource h2,
+.error-page h1 {
+  font-family: var(--display) !important;
+  font-style: normal !important;
+  font-weight: 600;
+  letter-spacing: .015em;
+  text-transform: uppercase;
+}
+
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 16px;
+  z-index: 100;
+  padding: 10px 14px;
+  background: var(--pink);
+  color: var(--white);
+  border: 1px solid rgba(249,249,249,.25);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transform: translateY(-180%);
+  transition: transform .18s ease;
+}
+
+.skip-link:focus { transform: translateY(0); outline: 3px solid var(--white); outline-offset: 3px; }
+.skip-link--nav { left: 172px; }
+.skip-link--footer { left: 330px; }
+
+main:focus { outline: none; }
+
+.desktop-nav a[aria-current="page"] {
+  color: var(--white);
+  position: relative;
+}
+
+.desktop-nav a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 2px;
+  background: var(--pink);
+  transform: skewX(-24deg);
+}
+
+.mobile-menu a[aria-current="page"] { color: var(--pink); }
+
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .55;
+  background-image:
+    linear-gradient(90deg, transparent 0 95%, rgba(228,34,120,.08) 95%),
+    linear-gradient(0deg, transparent 0 95%, rgba(249,249,249,.03) 95%);
+  background-size: 28px 28px;
+}
+
+.hero {
+  isolation: isolate;
+}
+
+.hero::before {
+  background:
+    linear-gradient(135deg, rgba(228,34,120,.11), transparent 32%),
+    radial-gradient(circle at 78% 42%, rgba(228,34,120,.2), transparent 31%),
+    linear-gradient(90deg, rgba(1,10,8,.95) 0%, rgba(1,10,8,.72) 47%, rgba(1,10,8,.44) 100%);
+}
+
+.hero-inner::before {
+  content: "STREET / SPORT / COMPETE";
+  position: absolute;
+  right: 0;
+  top: 22px;
+  color: rgba(249,249,249,.26);
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  transform: rotate(-90deg) translateX(100%);
+  transform-origin: right top;
+}
+
+.hero-content {
+  position: relative;
+}
+
+.hero-brand-lockup {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 600px;
+}
+
+.hero-brand-lockup__mark {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  padding: 8px;
+  border: 1px solid rgba(249,249,249,.16);
+  background: rgba(1,10,8,.48);
+  box-shadow: 10px 10px 0 rgba(228,34,120,.12);
+}
+
+.hero-brand-lockup__wordmark {
+  width: min(100%, 620px);
+  height: auto;
+  display: block;
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 18px 34px rgba(0,0,0,.25));
+}
+
+.hero-brand-lockup__subline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--pink2);
+  font-size: .66rem;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.hero-brand-lockup__subline::before {
+  content: "";
+  width: 34px;
+  height: 2px;
+  background: var(--pink);
+  transform: skewX(-28deg);
+}
+
+.hero-actions .btn,
+.btn {
+  border-radius: 0 !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.hero-actions .btn::after,
+.btn::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  background: var(--ink);
+  clip-path: polygon(100% 0,100% 100%,0 100%);
+}
+
+.btn:hover { transform: translateY(-2px); }
+
+.hero-data-panels {
+  position: relative;
+  box-shadow: 16px 16px 0 rgba(228,34,120,.08);
+}
+
+.hero-data-panels::before,
+.hero-data-panels::after {
+  content: "";
+  position: absolute;
+  width: 90px;
+  height: 1px;
+  background: var(--pink);
+}
+.hero-data-panels::before { top: -8px; left: 18px; }
+.hero-data-panels::after { bottom: -8px; right: 18px; }
+
+.hero-calendar,
+.hero-standings,
+.stat-card,
+.match-card,
+.partner-card,
+.video-card {
+  border-radius: 0 !important;
+}
+
+.hero-match:hover,
+.hero-standing:hover,
+.match-card:hover,
+.stat-card:hover,
+.partner-card:hover,
+.video-card:hover {
+  background: linear-gradient(90deg, var(--street-pink-soft), transparent 70%);
+}
+
+.section--edge {
+  position: relative;
+}
+
+.section--edge::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 34px;
+  height: 3px;
+  background: var(--pink);
+  transform: skewX(-25deg);
+}
+
+.section-title {
+  position: relative;
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 84px;
+  height: 2px;
+  margin-top: 12px;
+  background: var(--pink);
+  transform: skewX(-28deg);
+}
+
+.site-footer {
+  position: relative;
+}
+
+.site-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42%;
+  height: 3px;
+  background: var(--pink);
+  transform: skewX(-32deg);
+  transform-origin: left;
+}
+
+.error-page__code {
+  font-family: var(--display) !important;
+  font-style: normal !important;
+}
+
+@media (max-width: 700px) {
+  .skip-link { left: 10px; }
+  .skip-link--nav { top: 56px; left: 10px; }
+  .skip-link--footer { top: 102px; left: 10px; }
+  .hero-inner::before { display: none; }
+  .hero-brand-lockup__mark { width: 48px; height: 48px; }
+  .hero-brand-lockup__wordmark { max-width: 94vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
