@@ -36,8 +36,8 @@ export function LogoScroller({ partners, label, compact = false }: LogoScrollerP
       {label && <span className="logo-scroller__label">{label}</span>}
       <div className="logo-scroller__viewport">
         <div className="logo-scroller__track">
-          {[0, 1].map((copy) => (
-            <div className="logo-scroller__set" key={copy} aria-hidden={copy === 1}>
+          {Array.from({ length: 6 }, (_, copy) => (
+            <div className="logo-scroller__set" key={copy} aria-hidden={copy > 0}>
               {partners.map((partner) => (
                 <PartnerItem key={`${copy}-${partner.id}`} partner={partner} />
               ))}
