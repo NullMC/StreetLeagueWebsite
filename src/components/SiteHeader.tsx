@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { Logo } from "./Logo";
 import { useAdminSession } from "../hooks/useAdminSession";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -48,14 +48,6 @@ export function SiteHeader() {
       <header className="site-header">
         <Logo />
 
-        <nav className="desktop-nav" id="site-navigation" aria-label="Navigazione principale">
-          {links.map(([label, to]) => (
-            <NavLink key={to} to={to} end={to === "/"}>
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-
         {!loading && profile && (
           <div className="header-admin" aria-label="Utente autenticato">
             <span className="header-admin__label">
@@ -101,29 +93,58 @@ export function SiteHeader() {
         </div>
       </header>
 
-      {open && (
-        <div className="mobile-menu" id="mobile-navigation">
-          <nav aria-label="Navigazione mobile">
-            {links.map(([label, to]) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={to === "/"}
-                onClick={() => setOpen(false)}
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-
-          <a
-            href="mailto:streetleaguebari@gmail.com"
+      <aside
+        className={`mobile-menu${open ? " is-open" : ""}`}
+        id="mobile-navigation"
+        aria-label="Navigazione principale"
+        aria-hidden={!open}
+      >
+        <div className="mobile-menu__head">
+          <span className="eyebrow">Street League</span>
+          <button
+            className="mobile-menu__close"
+            type="button"
+            aria-label="Chiudi menu"
             onClick={() => setOpen(false)}
           >
+            ×
+          </button>
+        </div>
+
+        <nav className="mobile-menu__nav">
+          {links.map(([label, to]) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === "/"}
+              onClick={() => setOpen(false)}
+            >
+              <span>{label}</span>
+              <span aria-hidden="true">↗</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="mobile-menu__footer">
+          <a className="mobile-menu__contact" href="mailto:streetleaguebari@gmail.com" onClick={() => setOpen(false)}>
             Contact
           </a>
+          <div className="mobile-menu__socials" aria-label="Social Street League">
+            {socialLinks.map(({ label, href, icon }) => (
+              <a
+                className="social-link"
+                href={href}
+                key={label}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+              >
+                <FontAwesomeIcon icon={icon} aria-hidden="true" />
+              </a>
+            ))}
+          </div>
         </div>
-      )}
+      </aside>
     </>
   );
 }
