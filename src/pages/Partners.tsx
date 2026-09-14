@@ -49,25 +49,28 @@ export default function Partners() {
     <div className="partners-page partners-page--redesign">
       <section className="partners-page__hero">
         <div className="partners-page__hero-bg" aria-hidden="true" />
-        <div className="partners-page__hero-content">
-          <h1>I nostri partner</h1>
-          <p>Il network di brand e attività che sostiene il progetto dentro e fuori dal campo.</p>
-          <a className="btn btn--primary" href="/collabora">Collabora con noi</a>
+        <div className="partners-page__hero-content partners-page__hero-content--with-collabs">
+          <div className="partners-page__hero-copy">
+            <span className="eyebrow">Street League network</span>
+            <h1>I nostri partner</h1>
+            <p>Il network di brand e attività che sostiene il progetto dentro e fuori dal campo.</p>
+            <a className="btn btn--primary" href="/collabora">Collabora con noi</a>
+          </div>
+          {collaborations.length ? (
+            <div className="partners-page__hero-collabs">
+              <CollabCarousel items={collaborations} />
+            </div>
+          ) : null}
         </div>
       </section>
 
       <section className="section--edge partners-tier-section partners-tier-section--gold">
-        <div className="partners-tier-heading partners-tier-heading--with-collabs">
-          <div className="partners-tier-heading__copy">
+        <div className="partners-tier-heading">
+          <div>
             <span className="eyebrow">Main partners</span>
             <h2>Partner Gold</h2>
             <p>La fascia di partnership con maggiore visibilità.</p>
           </div>
-          {collaborations.length ? (
-            <div className="partners-tier-heading__collabs">
-              <CollabCarousel items={collaborations} />
-            </div>
-          ) : null}
         </div>
 
         {gold.length ? (
