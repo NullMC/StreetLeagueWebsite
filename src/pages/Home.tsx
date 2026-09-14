@@ -164,7 +164,7 @@ export default function Home() {
 
   const upcoming = useMemo(() => matches.slice(0, 6), [matches]);
   const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
-  const heroBackground = competition?.hero_image_url || "/assets/nebula-landscape.jpg";
+  const heroBackground = competition?.hero_image_url || "/assets/nebula-vertical.png";
   const goldPartners = useMemo(() => partners.filter((partner) => partner.tier === "gold"), [partners]);
   const silverPartners = useMemo(() => partners.filter((partner) => partner.tier === "silver"), [partners]);
   const bronzePartners = useMemo(() => partners.filter((partner) => partner.tier === "bronze"), [partners]);
