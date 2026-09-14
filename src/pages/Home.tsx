@@ -1,3 +1,4 @@
+import "../styles/home-fixes.css";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { PageShell } from "../components/PageShell";
@@ -36,7 +37,7 @@ type LeaderConfig = {
 
 const leaderConfigs: LeaderConfig[] = [
   { key: "goals", title: "Miglior marcatore", eyebrow: "Gol" },
-  { key: "assists", title: "Top assist-man", eyebrow: "Assist" },
+  { key: "assists", title: "Top uomo-assist", eyebrow: "Assist" },
   { key: "clean_sheets", title: "Clean sheets", eyebrow: "Portieri" },
 ];
 
@@ -56,53 +57,28 @@ function LeaderPanel({ config, players }: { config: LeaderConfig; players: Playe
   );
 
   const featured = ranked[0];
-  const rest = ranked.slice(1);
   const statLabel = config.key === "goals" ? "gol" : config.key === "assists" ? "assist" : "clean sheet";
-  const image = featured?.bg_less_image_url || featured?.profile_image_url;
 
   return (
-    <article className="leader-panel">
-      <div className="leader-panel__heading">
-        <div>
-          <span className="eyebrow">{config.eyebrow}</span>
-          <h3>{config.title}</h3>
-        </div>
-        <span className="leader-panel__index">TOP 03</span>
+    <article className="stat-card leader-stat-card">
+      <span className="eyebrow">{config.title}</span>
+      <h3>{featured ? `${featured.first_name} ${featured.last_name}` : "—"}</h3>
+      <div className="stat-card__value">{featured ? String(featured.stats[config.key]).padStart(2, "0") : "0"}</div>
+      <div className="rank-list">
+        {[0, 1, 2].map((index) => {
+          const player = ranked[index];
+          return (
+            <div className="rank-row" key={player?.id || `${config.key}-${index}`}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <span>
+                {player ? `${player.first_name} ${player.last_name}` : "—"}
+                {player && index === 0 ? <small> · {player.stats[config.key]} {statLabel}</small> : null}
+                {player && index > 0 ? <small> · {player.stats[config.key]}</small> : null}
+              </span>
+            </div>
+          );
+        })}
       </div>
-
-      {featured ? (
-        <>
-          <div className="leader-featured">
-            <span className="leader-featured__rank">01</span>
-            <div className="leader-featured__visual">
-              {image ? <img src={image} alt="" /> : <span className="leader-featured__placeholder">SL</span>}
-            </div>
-            <div className="leader-featured__info">
-              <span className="eyebrow">1° posto</span>
-              <strong>{featured.first_name} {featured.last_name}</strong>
-              <div className="leader-featured__stat">
-                <span>{String(featured.stats[config.key]).padStart(2, "0")}</span>
-                <small>{statLabel}</small>
-              </div>
-            </div>
-          </div>
-          <div className="leader-ranking">
-            {rest.map((player, index) => (
-              <div className="leader-ranking__row" key={player.id}>
-                <span>{String(index + 2).padStart(2, "0")}</span>
-                <span>{player.first_name} {player.last_name}</span>
-                <strong>{player.stats[config.key]}</strong>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <div className="leader-panel__empty">
-          <span className="eyebrow">Live data</span>
-          <strong>Statistiche in aggiornamento</strong>
-          <p>Il podio comparirà automaticamente quando saranno registrati i dati delle partite.</p>
-        </div>
-      )}
     </article>
   );
 }
@@ -187,7 +163,6 @@ export default function Home() {
                 </div>
                 <a className="hero-calendar__all" href="/partite">Vedi tutte</a>
               </div>
-
               {upcoming.length ? (
                 <div className="hero-calendar__list">
                   {upcoming.slice(0, 4).map((match) => {
@@ -235,7 +210,6 @@ export default function Home() {
                 </div>
                 <a className="hero-calendar__all" href="/classifica">Completa</a>
               </div>
-
               {standings.length ? (
                 <div className="hero-standings__list">
                   {standings.slice(0, 6).map((entry, index) => (
@@ -261,7 +235,6 @@ export default function Home() {
               )}
             </section>
           </div>
-
           {partners.length ? (
             <div className="hero-sponsor-line">
               <span className="hero-sponsor-line__label">Powered by</span>
@@ -292,7 +265,6 @@ export default function Home() {
       <section className="sponsor-band sponsor-band--redesign" id="home-partners">
         <div className="section--edge sponsor-band__inner">
           <SectionTitle eyebrow="Sponsors" title="Chi sostiene il gioco" />
-
           <div className="sponsor-tier sponsor-tier--gold">
             <div className="sponsor-tier__heading">
               <span className="eyebrow">01 / Gold</span>
@@ -306,7 +278,6 @@ export default function Home() {
               <EmptyState title="Gold sponsor in attesa" text="I partner Gold verranno mostrati qui dal database." />
             )}
           </div>
-
           <div className="sponsor-tier sponsor-tier--silver">
             <div className="sponsor-tier__heading">
               <span className="eyebrow">02 / Silver</span>
@@ -320,7 +291,6 @@ export default function Home() {
               <EmptyState title="Silver sponsor in attesa" text="I partner Silver verranno mostrati qui dal database." />
             )}
           </div>
-
           <div className="sponsor-tier sponsor-tier--network">
             <div className="sponsor-tier__heading sponsor-tier__heading--row">
               <div>
@@ -335,7 +305,6 @@ export default function Home() {
               <LogoScroller partners={partners.filter((partner) => partner.tier !== "gold")} label="Street League partners" />
             )}
           </div>
-
           <div className="sponsor-cta-row">
             <p>Porta il tuo brand in campo con Street League.</p>
             <a className="btn btn--primary" href="/collabora">Collabora con noi</a>
