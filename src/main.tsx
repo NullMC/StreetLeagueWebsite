@@ -10,6 +10,7 @@ import "./styles/sponsor-neutral.css";
 import "./styles/partner-tweaks.css";
 import "./styles/light-theme.css";
 import "./styles/light-ui-polish.css";
+import "./styles/final-light-polish.css";
 import Home from "./pages/Home";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
