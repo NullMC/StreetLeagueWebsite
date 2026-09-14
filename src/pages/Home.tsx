@@ -26,7 +26,13 @@ function LeaderPanel({ config, players }: { config: LeaderConfig; players: Playe
 function SponsorCard({ partner }: { partner: Partner }) {
   const body = partner.logo_url ? <img src={partner.logo_url} alt={partner.name} /> : <strong>{partner.name}</strong>;
   const hasLink = Boolean(partner.website_url);
-  return <article className={`partner-card partner-card--${partner.tier}`}><div className="partner-card__logo">{body}</div><span className="partner-card__name">{partner.name}</span>{(partner.tier === "gold" || partner.tier === "silver") ? <a className={`sponsor-link-btn ${hasLink ? "" : "sponsor-link-btn--disabled"}`} href={hasLink ? partner.website_url! : "#"} target={hasLink ? "_blank" : undefined} rel={hasLink ? "noopener noreferrer" : undefined} aria-disabled={!hasLink} onClick={(event) => { if (!hasLink) event.preventDefault(); }}><span>Info</span><span aria-hidden="true">↗</span></a> : null}</article>;
+  return <article className={`partner-card partner-card--${partner.tier}`}>
+    <div className="partner-card__logo">{body}</div>
+    <div className="partner-card__meta">
+      <span className="partner-card__name">{partner.name}</span>
+      {(partner.tier === "gold" || partner.tier === "silver") ? <a className={`sponsor-link-btn ${hasLink ? "" : "sponsor-link-btn--disabled"}`} href={hasLink ? partner.website_url! : "#"} target={hasLink ? "_blank" : undefined} rel={hasLink ? "noopener noreferrer" : undefined} aria-disabled={!hasLink} onClick={(event) => { if (!hasLink) event.preventDefault(); }}><span>Info</span><span aria-hidden="true">↗</span></a> : null}
+    </div>
+  </article>;
 }
 export default function Home() {
   const [competition, setCompetition] = useState<Competition | null>(null); const [matches, setMatches] = useState<Match[]>([]); const [teams, setTeams] = useState<Team[]>([]); const [partners, setPartners] = useState<Partner[]>([]); const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]); const [social, setSocial] = useState<SocialContent[]>([]); const [playerStats, setPlayerStats] = useState<PlayerWithStats[]>([]);
