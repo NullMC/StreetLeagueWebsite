@@ -1,0 +1,139 @@
+.collab-carousel {
+  min-width: 0;
+}
+
+.collab-carousel__toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.collab-carousel__toolbar p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.collab-carousel__controls {
+  display: flex;
+  gap: 7px;
+}
+
+.collab-carousel__controls button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(249,249,249,.16);
+  background: rgba(1,10,8,.58);
+  color: var(--white);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.collab-carousel__viewport {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 18px max(8px, calc((100% - 1120px) / 2)) 28px;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+}
+
+.collab-carousel__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.collab-carousel__item {
+  flex: 0 0 min(250px, 70vw);
+  height: 340px;
+  scroll-snap-align: center;
+  border-radius: 5px;
+  opacity: .62;
+  transform: scale(.88);
+  transition: transform .28s ease, opacity .28s ease, filter .28s ease;
+  filter: saturate(.78);
+}
+
+.collab-carousel__item.is-active {
+  flex-basis: min(390px, 82vw);
+  height: 500px;
+  opacity: 1;
+  transform: scale(1);
+  filter: none;
+  z-index: 2;
+}
+
+.collab-carousel__poster {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(249,249,249,.12);
+  border-radius: 5px;
+  background: #050806;
+  box-shadow: 0 18px 44px rgba(0,0,0,.28);
+}
+
+.collab-carousel__poster img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  background: #050806;
+}
+
+.collab-carousel__item.is-active .collab-carousel__poster {
+  border-color: rgba(228,34,120,.42);
+  box-shadow: 0 26px 60px rgba(0,0,0,.38), 0 0 0 1px rgba(228,34,120,.10);
+}
+
+.collab-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.collab-carousel__dots span {
+  width: 20px;
+  height: 3px;
+  background: rgba(249,249,249,.16);
+  transform: skewX(-20deg);
+}
+
+.collab-carousel__dots span.is-active {
+  background: var(--pink);
+}
+
+@media (max-width: 700px) {
+  .collab-carousel__toolbar {
+    align-items: start;
+  }
+
+  .collab-carousel__item {
+    flex-basis: min(200px, 58vw);
+    height: 280px;
+  }
+
+  .collab-carousel__item.is-active {
+    flex-basis: min(300px, 78vw);
+    height: 420px;
+  }
+
+  .collab-carousel__viewport {
+    padding-inline: max(4px, calc((100% - 300px) / 2));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collab-carousel__item {
+    transition: none;
+  }
+
+  .collab-carousel__viewport {
+    scroll-behavior: auto;
+  }
+}
