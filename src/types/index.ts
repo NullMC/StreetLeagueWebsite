@@ -81,7 +81,9 @@ export interface Partner {
 
 export interface ActiveCollaboration {
   id: string;
-  flyer_url: string;
+  title: string;
+  description: string;
+  flyer_url: string | null;
   sort_order: number;
   created_at: string;
 }
