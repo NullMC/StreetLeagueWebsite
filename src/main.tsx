@@ -7,6 +7,7 @@ import "./styles/hero-scroller.css";
 import "./styles/app-layout.css";
 import "./styles/chrome-responsive.css";
 import "./styles/sponsor-neutral.css";
+import "./styles/partner-tweaks.css";
 import Home from "./pages/Home";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
