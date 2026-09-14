@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
-import { DataGate } from "../components/DataGate";
-import { MatchCard } from "../components/MatchCard";
 import { TeamCard } from "../components/TeamCard";
 import { EmptyState } from "../components/EmptyState";
 import {
@@ -15,13 +13,7 @@ import {
   getSocialContent,
   subscribeToCompetition,
 } from "../lib/api";
-import type {
-  Competition,
-  Match,
-  Team,
-  Partner,
-  SocialContent,
-} from "../types";
+import type { Competition, Match, Team, Partner, SocialContent } from "../types";
 
 export default function Home() {
   const [competition, setCompetition] = useState<Competition | null>(null);
@@ -54,18 +46,8 @@ export default function Home() {
   }, []);
 
   const upcoming = useMemo(() => matches.slice(0, 6), [matches]);
-  const standings = useMemo(
-    () => calculateStandings(teams, matches),
-    [teams, matches],
-  );
-
-  const heroBackground =
-    competition?.hero_image_url || "/assets/nebula-landscape.jpg";
-
-  const topScorers = useMemo(() => {
-    const counts = new Map<string, number>();
-    return counts;
-  }, []);
+  const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
+  const heroBackground = competition?.hero_image_url || "/assets/nebula-landscape.jpg";
 
   return (
     <PageShell>
@@ -95,12 +77,8 @@ export default function Home() {
             </div>
 
             <div className="hero-actions">
-              <a className="btn btn--primary" href="/partite">
-                Calendario
-              </a>
-              <a className="btn btn--ghost" href="/classifica">
-                Classifica
-              </a>
+              <a className="btn btn--primary" href="/partite">Calendario</a>
+              <a className="btn btn--ghost" href="/classifica">Classifica</a>
             </div>
           </div>
 
@@ -111,9 +89,7 @@ export default function Home() {
                   <span className="eyebrow">Next matches</span>
                   <h2 id="home-matches-title">Calendario</h2>
                 </div>
-                <a className="hero-calendar__all" href="/partite">
-                  Vedi tutte
-                </a>
+                <a className="hero-calendar__all" href="/partite">Vedi tutte</a>
               </div>
 
               {upcoming.length ? (
@@ -121,54 +97,25 @@ export default function Home() {
                   {upcoming.slice(0, 3).map((match) => {
                     const home = teams.find((team) => team.id === match.home_team_id);
                     const away = teams.find((team) => team.id === match.away_team_id);
-
                     return (
-                      <a
-                        key={match.id}
-                        href={`/partite/${match.id}`}
-                        className="hero-match"
-                      >
+                      <a key={match.id} href={`/partite/${match.id}`} className="hero-match">
                         <div className="hero-match__meta">
-                          <span>
-                            {new Date(match.kickoff_at).toLocaleDateString("it-IT", {
-                              day: "2-digit",
-                              month: "short",
-                            })}
-                          </span>
-                          <span>
-                            {new Date(match.kickoff_at).toLocaleTimeString("it-IT", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
+                          <span>{new Date(match.kickoff_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short" })}</span>
+                          <span>{new Date(match.kickoff_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</span>
                         </div>
-
                         <div className="hero-match__teams">
                           <div className="hero-match__team">
-                            {home?.logo_url ? (
-                              <img src={home.logo_url} alt="" />
-                            ) : (
-                              <span className="hero-match__logo-placeholder" />
-                            )}
+                            {home?.logo_url ? <img src={home.logo_url} alt="" /> : <span className="hero-match__logo-placeholder" />}
                             <span>{home?.short_name || home?.name || "—"}</span>
                           </div>
-
                           <span className="hero-match__vs">VS</span>
-
                           <div className="hero-match__team hero-match__team--away">
                             <span>{away?.short_name || away?.name || "—"}</span>
-                            {away?.logo_url ? (
-                              <img src={away.logo_url} alt="" />
-                            ) : (
-                              <span className="hero-match__logo-placeholder" />
-                            )}
+                            {away?.logo_url ? <img src={away.logo_url} alt="" /> : <span className="hero-match__logo-placeholder" />}
                           </div>
                         </div>
-
                         <div className="hero-match__footer">
-                          <span>
-                            {match.matchday ? `Giornata ${match.matchday}` : "Match"}
-                          </span>
+                          <span>{match.matchday ? `Giornata ${match.matchday}` : "Match"}</span>
                           <span className="hero-match__arrow">→</span>
                         </div>
                       </a>
@@ -179,11 +126,7 @@ export default function Home() {
                 <div className="hero-calendar__empty">
                   <span className="eyebrow">Upcoming</span>
                   <h3>Nessuna partita programmata</h3>
-                  <p>
-                    {competition
-                      ? "Le prossime partite verranno mostrate qui."
-                      : "Competizione non ancora iniziata."}
-                  </p>
+                  <p>{competition ? "Le prossime partite verranno mostrate qui." : "Competizione non ancora iniziata."}</p>
                 </div>
               )}
             </section>
@@ -194,27 +137,16 @@ export default function Home() {
                   <span className="eyebrow">Live ranking</span>
                   <h2 id="home-standings-title">Classifica</h2>
                 </div>
-                <a className="hero-calendar__all" href="/classifica">
-                  Completa
-                </a>
+                <a className="hero-calendar__all" href="/classifica">Completa</a>
               </div>
 
               {standings.length ? (
                 <div className="hero-standings__list">
                   {standings.slice(0, 5).map((entry, index) => (
-                    <div
-                      className={`hero-standing ${index === 0 ? "hero-standing--first" : ""}`}
-                      key={entry.team.id}
-                    >
-                      <span className="hero-standing__position">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
+                    <div className={`hero-standing ${index === 0 ? "hero-standing--first" : ""}`} key={entry.team.id}>
+                      <span className="hero-standing__position">{String(index + 1).padStart(2, "0")}</span>
                       <div className="hero-standing__team">
-                        {entry.team.logo_url ? (
-                          <img src={entry.team.logo_url} alt="" />
-                        ) : (
-                          <span className="hero-standing__logo-placeholder" />
-                        )}
+                        {entry.team.logo_url ? <img src={entry.team.logo_url} alt="" /> : <span className="hero-standing__logo-placeholder" />}
                         <span>{entry.team.short_name || entry.team.name}</span>
                       </div>
                       <div className="hero-standing__stats">
@@ -228,10 +160,7 @@ export default function Home() {
                 <div className="hero-standings__empty">
                   <span className="eyebrow">Ranking</span>
                   <h3>Classifica non disponibile</h3>
-                  <p>
-                    La classifica verrà popolata automaticamente dai risultati
-                    delle partite.
-                  </p>
+                  <p>La classifica verrà popolata automaticamente dai risultati delle partite.</p>
                 </div>
               )}
             </section>
@@ -241,18 +170,11 @@ export default function Home() {
 
       <section className="section--edge leaders-section" id="home-stats">
         <SectionTitle eyebrow="Live" title="Top performers" />
-        <DataGate when={false} fallback={null}>
-          <div />
-        </DataGate>
         <div className="leaders">
-          {[
-            ["Miglior marcatore", topScorers.size ? "—" : "—"],
-            ["Top uomo-assist", "—"],
-            ["Clean sheets", "—"],
-          ].map(([title, value]) => (
+          {[["Miglior marcatore", "—"], ["Top uomo-assist", "—"], ["Clean sheets", "—"]].map(([title, value]) => (
             <div className="stat-card" key={title}>
               <span className="eyebrow">{title}</span>
-              <h3>Dati live</h3>
+              <h3>Statistiche live</h3>
               <div className="stat-card__value">{value}</div>
             </div>
           ))}
@@ -260,26 +182,11 @@ export default function Home() {
       </section>
 
       <section className="section--edge" id="home-teams">
-        <SectionTitle
-          eyebrow=""
-          title="Squadre"
-          action={
-            <a className="btn btn--ghost" href="/squadre">
-              Esplora
-            </a>
-          }
-        />
+        <SectionTitle eyebrow="" title="Squadre" action={<a className="btn btn--ghost" href="/squadre">Esplora</a>} />
         {teams.length ? (
-          <div className="cards-grid">
-            {teams.slice(0, 3).map((team) => (
-              <TeamCard key={team.id} team={team} />
-            ))}
-          </div>
+          <div className="cards-grid">{teams.slice(0, 3).map((team) => <TeamCard key={team.id} team={team} />)}</div>
         ) : (
-          <EmptyState
-            title="Nessuna squadra"
-            text="Le squadre compariranno qui quando saranno registrate nel database."
-          />
+          <EmptyState title="Nessuna squadra" text="Le squadre compariranno qui quando saranno registrate nel database." />
         )}
       </section>
 
@@ -287,41 +194,19 @@ export default function Home() {
         <div className="section--edge">
           <SectionTitle eyebrow="Sponsors" title="Chi sostiene il gioco" />
           <div className="partners-grid">
-            {partners
-              .filter((partner) => partner.tier === "gold")
-              .slice(0, 4)
-              .map((partner) => (
-                <div className="partner-card" key={partner.id}>
-                  {partner.website_url ? (
-                    <a
-                      href={partner.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {partner.logo_url ? (
-                        <img src={partner.logo_url} alt={partner.name} />
-                      ) : (
-                        partner.name
-                      )}
-                    </a>
-                  ) : partner.logo_url ? (
-                    <img src={partner.logo_url} alt={partner.name} />
-                  ) : (
-                    <span>{partner.name}</span>
-                  )}
-                  <span>Gold / {partner.name}</span>
-                </div>
-              ))}
+            {partners.filter((partner) => partner.tier === "gold").slice(0, 4).map((partner) => (
+              <div className="partner-card" key={partner.id}>
+                {partner.website_url ? (
+                  <a href={partner.website_url} target="_blank" rel="noopener noreferrer">
+                    {partner.logo_url ? <img src={partner.logo_url} alt={partner.name} /> : partner.name}
+                  </a>
+                ) : partner.logo_url ? <img src={partner.logo_url} alt={partner.name} /> : <span>{partner.name}</span>}
+                <span>Gold / {partner.name}</span>
+              </div>
+            ))}
           </div>
-          <a className="btn btn--primary" href="/collabora">
-            Collabora con noi
-          </a>
-          {!partners.length && (
-            <EmptyState
-              title="Partner in attesa"
-              text="La sezione è pronta per i partner Gold, Silver e Bronze da Supabase."
-            />
-          )}
+          <a className="btn btn--primary" href="/collabora">Collabora con noi</a>
+          {!partners.length && <EmptyState title="Partner in attesa" text="La sezione è pronta per i partner da Supabase." />}
         </div>
       </section>
 
@@ -330,19 +215,9 @@ export default function Home() {
         {social.length ? (
           <div className="video-grid">
             {social.slice(0, 6).map((item) => (
-              <a
-                className="video-card"
-                key={item.id}
-                href={item.content_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a className="video-card" key={item.id} href={item.content_url} target="_blank" rel="noopener noreferrer">
                 <div className="video-thumb">
-                  {item.thumbnail_url ? (
-                    <img src={item.thumbnail_url} alt="" />
-                  ) : (
-                    <div className="video-play">↗</div>
-                  )}
+                  {item.thumbnail_url ? <img src={item.thumbnail_url} alt="" /> : <div className="video-play">↗</div>}
                 </div>
                 <div className="video-card__body">
                   <span className="eyebrow">{item.platform}</span>
@@ -352,10 +227,7 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <EmptyState
-            title="Nessun contenuto"
-            text="YouTube, Instagram e TikTok verranno alimentati dal pannello amministrativo."
-          />
+          <EmptyState title="Nessun contenuto" text="YouTube, Instagram e TikTok verranno alimentati dal pannello amministrativo." />
         )}
       </section>
     </PageShell>
