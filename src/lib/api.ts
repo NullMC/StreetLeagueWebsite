@@ -5,6 +5,7 @@ import type {
   Team,
   Player,
   Partner,
+  ActiveCollaboration,
   SocialContent,
   MatchEvent,
   MatchLineup,
@@ -12,9 +13,7 @@ import type {
   PlayerStats,
 } from "../types";
 
-async function getRows<T>(
-  query: any,
-): Promise<T[]> {
+async function getRows<T>(query: any): Promise<T[]> {
   const { data, error } = await query;
   if (error) throw error;
   return (data ?? []) as T[];
@@ -65,6 +64,17 @@ export async function getPartners(): Promise<Partner[]> {
   if (!supabase) return [];
   return getRows<Partner>(
     supabase.from("partners").select("*").order("tier").order("sort_order").order("name"),
+  );
+}
+
+export async function getActiveCollaborations(): Promise<ActiveCollaboration[]> {
+  if (!supabase) return [];
+  return getRows<ActiveCollaboration>(
+    supabase
+      .from("active_collaborations")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false }),
   );
 }
 
@@ -142,9 +152,7 @@ export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
   const redCards = playerEvents.filter((x) => x.player_id === playerId && x.event_type === "red_card").length;
   const fouls = playerEvents.filter((x) => x.player_id === playerId && x.event_type === "foul").length;
 
-  const finishedMatches = new Map(
-    matches.filter((m) => m.status === "finished").map((m) => [m.id, m]),
-  );
+  const finishedMatches = new Map(matches.filter((m) => m.status === "finished").map((m) => [m.id, m]));
 
   let cleanSheets = 0;
   for (const lineup of playerLineups) {
@@ -168,9 +176,7 @@ export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
   };
 }
 
-export async function getAllPlayerStats(): Promise<
-  Array<Player & { stats: PlayerStats }>
-> {
+export async function getAllPlayerStats(): Promise<Array<Player & { stats: PlayerStats }>> {
   const [players, matches, events, lineups, mvps] = await Promise.all([
     getPlayers(),
     getMatches(),
@@ -179,9 +185,7 @@ export async function getAllPlayerStats(): Promise<
     getAllMatchMvps(),
   ]);
 
-  const finishedMatches = new Map(
-    matches.filter((m) => m.status === "finished").map((m) => [m.id, m]),
-  );
+  const finishedMatches = new Map(matches.filter((m) => m.status === "finished").map((m) => [m.id, m]));
 
   return players.map((player) => {
     const playerLineups = lineups.filter((x) => x.player_id === player.id);
@@ -213,42 +217,23 @@ export async function getAllPlayerStats(): Promise<
 }
 
 export function calculateStandings(teams: Team[], matches: Match[]) {
-  const table = teams.map((team) => ({
-    team,
-    played: 0,
-    wins: 0,
-    draws: 0,
-    losses: 0,
-    gf: 0,
-    ga: 0,
-    gd: 0,
-    points: 0,
-  }));
-
+  const table = teams.map((team) => ({ team, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }));
   const map = new Map(table.map((entry) => [entry.team.id, entry]));
 
   matches
-    .filter(
-      (match) =>
-        match.status === "finished" &&
-        match.home_score !== null &&
-        match.away_score !== null,
-    )
+    .filter((match) => match.status === "finished" && match.home_score !== null && match.away_score !== null)
     .forEach((match) => {
       const home = map.get(match.home_team_id);
       const away = map.get(match.away_team_id);
       if (!home || !away) return;
-
       const hg = Number(match.home_score);
       const ag = Number(match.away_score);
-
       home.played++;
       away.played++;
       home.gf += hg;
       home.ga += ag;
       away.gf += ag;
       away.ga += hg;
-
       if (hg > ag) {
         home.wins++;
         home.points += 3;
@@ -267,57 +252,26 @@ export function calculateStandings(teams: Team[], matches: Match[]) {
 
   return table
     .map((entry) => ({ ...entry, gd: entry.gf - entry.ga }))
-    .sort(
-      (a, b) =>
-        b.points - a.points ||
-        b.gd - a.gd ||
-        b.gf - a.gf ||
-        a.team.name.localeCompare(b.team.name, "it"),
-    );
+    .sort((a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || a.team.name.localeCompare(b.team.name, "it"));
 }
 
 export function subscribeToCompetition(onChange: () => void) {
   if (!supabase) return () => {};
-
   const client = supabase;
-  const existingChannel = client
-    .getChannels()
-    .find((channel) => channel.topic === "realtime:street-league-live");
-
-  if (existingChannel) {
-    void client.removeChannel(existingChannel);
-  }
+  const existingChannel = client.getChannels().find((channel) => channel.topic === "realtime:street-league-live");
+  if (existingChannel) void client.removeChannel(existingChannel);
 
   const channel = client
     .channel("street-league-live")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "competitions" },
-      onChange,
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "matches" },
-      onChange,
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "match_events" },
-      onChange,
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "match_lineups" },
-      onChange,
-    )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "match_mvp" },
-      onChange,
-    )
+    .on("postgres_changes", { event: "*", schema: "public", table: "competitions" }, onChange)
+    .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, onChange)
+    .on("postgres_changes", { event: "*", schema: "public", table: "match_events" }, onChange)
+    .on("postgres_changes", { event: "*", schema: "public", table: "match_lineups" }, onChange)
+    .on("postgres_changes", { event: "*", schema: "public", table: "match_mvp" }, onChange)
+    .on("postgres_changes", { event: "*", schema: "public", table: "partners" }, onChange)
+    .on("postgres_changes", { event: "*", schema: "public", table: "social_contents" }, onChange)
+    .on("postgres_changes", { event: "*", schema: "public", table: "active_collaborations" }, onChange)
     .subscribe();
 
-  return () => {
-    void client.removeChannel(channel);
-  };
+  return () => void client.removeChannel(channel);
 }
