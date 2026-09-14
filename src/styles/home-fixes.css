@@ -45,3 +45,64 @@
 .logo-scroller__set {
   flex: 0 0 auto;
 }
+
+/* Keep every content carousel card on one stable height. */
+.content-carousel__item {
+  height: 430px;
+  min-height: 430px;
+  display: flex;
+  overflow: hidden;
+}
+
+.content-carousel__item > * {
+  width: 100%;
+  height: 100% !important;
+  min-height: 0;
+}
+
+.content-carousel .video-card {
+  display: flex;
+  flex-direction: column;
+  height: 100% !important;
+  min-height: 0;
+}
+
+.content-carousel .video-thumb {
+  flex: 0 0 230px;
+  height: 230px;
+  min-height: 230px;
+  overflow: hidden;
+}
+
+.content-carousel .video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.content-carousel .video-card__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sponsor-tier--collab,
+.partners-active-collabs {
+  margin-top: 34px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(249,249,249,.09);
+}
+
+@media (max-width: 700px) {
+  .content-carousel__item {
+    height: 380px;
+    min-height: 380px;
+  }
+
+  .content-carousel .video-thumb {
+    flex-basis: 195px;
+    height: 195px;
+    min-height: 195px;
+  }
+}
