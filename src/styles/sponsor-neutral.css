@@ -1,7 +1,15 @@
 .sponsor-band--redesign {
   background:
-    radial-gradient(circle at 14% 20%, rgba(228,34,120,.34), transparent 30%),
-    radial-gradient(circle at 86% 78%, rgba(237,123,171,.22), transparent 28%),
+    radial-gradient(
+      circle at 14% 20%,
+      rgba(228, 34, 120, 0.34),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 86% 78%,
+      rgba(237, 123, 171, 0.22),
+      transparent 28%
+    ),
     linear-gradient(135deg, #250817 0%, #e42278 48%, #8f124b 100%) !important;
 }
 
@@ -31,12 +39,12 @@
 
 /* Cleaner flyer shadows: depth without a pink outline competing with the artwork. */
 .collab-carousel__poster {
-  box-shadow: 0 16px 34px rgba(0,0,0,.34) !important;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34) !important;
 }
 
 .collab-carousel__item.is-active .collab-carousel__poster {
-  border-color: rgba(249,249,249,.16) !important;
-  box-shadow: 0 24px 54px rgba(0,0,0,.48) !important;
+  border-color: rgba(249, 249, 249, 0.16) !important;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.48) !important;
 }
 
 /* Partners hero: clean, optically centered title block. */
@@ -66,7 +74,7 @@
   margin: 0 0 12px !important;
   max-width: 760px;
   text-align: left !important;
-  line-height: .82 !important;
+  line-height: 0.82 !important;
 }
 
 .partners-page__hero-content p {

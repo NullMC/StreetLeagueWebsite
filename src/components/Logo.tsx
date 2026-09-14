@@ -7,7 +7,7 @@ export function Logo({ compact = false }: { compact?: boolean }) {
       to="/"
       aria-label="Street League home"
     >
-      <img src="/assets/street-league-logo.png" alt="Street League" />
+      <img src="/assets/pittogrammaBlack.png" alt="Street League" />
     </Link>
   );
 }

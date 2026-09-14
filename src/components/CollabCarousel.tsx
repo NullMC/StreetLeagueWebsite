@@ -5,14 +5,21 @@ import type { ActiveCollaboration } from "../types";
 export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const ordered = useMemo(() => [...items].sort((a, b) => a.sort_order - b.sort_order), [items]);
+  const ordered = useMemo(
+    () => [...items].sort((a, b) => a.sort_order - b.sort_order),
+    [items],
+  );
 
   if (!ordered.length) return null;
 
   const move = (direction: 1 | -1) => {
     const next = (active + direction + ordered.length) % ordered.length;
     setActive(next);
-    viewportRef.current?.children[next]?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    viewportRef.current?.children[next]?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
   };
 
   const updateActive = () => {
@@ -42,14 +49,33 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
         </div>
         {ordered.length > 1 && (
           <div className="collab-carousel__controls">
-            <button type="button" onClick={() => move(-1)} aria-label="Collaborazione precedente">←</button>
-            <button type="button" onClick={() => move(1)} aria-label="Collaborazione successiva">→</button>
+            <button
+              type="button"
+              onClick={() => move(-1)}
+              aria-label="Collaborazione precedente"
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              onClick={() => move(1)}
+              aria-label="Collaborazione successiva"
+            >
+              →
+            </button>
           </div>
         )}
       </div>
-      <div className="collab-carousel__viewport" ref={viewportRef} onScroll={updateActive}>
+      <div
+        className="collab-carousel__viewport"
+        ref={viewportRef}
+        onScroll={updateActive}
+      >
         {ordered.map((item, index) => (
-          <article className={`collab-carousel__item ${index === active ? "is-active" : ""}`} key={item.id}>
+          <article
+            className={`collab-carousel__item ${index === active ? "is-active" : ""}`}
+            key={item.id}
+          >
             <div className="collab-carousel__ad">
               <div className="collab-carousel__copy">
                 <span className="eyebrow">In evidenza</span>
@@ -61,7 +87,10 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
                   <img src={item.flyer_url} alt="" />
                 </div>
               ) : (
-                <div className="collab-carousel__poster collab-carousel__poster--empty" aria-hidden="true" />
+                <div
+                  className="collab-carousel__poster collab-carousel__poster--empty"
+                  aria-hidden="true"
+                />
               )}
             </div>
           </article>
@@ -69,7 +98,12 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
       </div>
       {ordered.length > 1 && (
         <div className="collab-carousel__dots" aria-hidden="true">
-          {ordered.map((item, index) => <span key={item.id} className={index === active ? "is-active" : ""} />)}
+          {ordered.map((item, index) => (
+            <span
+              key={item.id}
+              className={index === active ? "is-active" : ""}
+            />
+          ))}
         </div>
       )}
     </div>

@@ -18,20 +18,24 @@
 .sponsor-band--redesign .partner-card--gold,
 .sponsor-band--redesign .partner-card--silver,
 .sponsor-band--redesign .partner-card--bronze {
-  border-color: rgba(1,10,8,.16) !important;
+  border-color: rgba(1, 10, 8, 0.16) !important;
   box-shadow: none !important;
 }
 
 /* Flyers on the pink sponsor background need a darker, softer elevation. */
 .sponsor-band--redesign .collab-carousel__poster {
-  border-color: rgba(1,10,8,.16) !important;
+  border-color: rgba(1, 10, 8, 0.16) !important;
   background: #f9f9f9;
-  box-shadow: 0 18px 44px rgba(1,10,8,.22) !important;
+  box-shadow: 0 18px 44px rgba(1, 10, 8, 0.22) !important;
 }
 
-.sponsor-band--redesign .collab-carousel__item.is-active .collab-carousel__poster {
-  border-color: rgba(1,10,8,.22) !important;
-  box-shadow: 0 26px 60px rgba(1,10,8,.28), 0 0 0 1px rgba(249,249,249,.28) !important;
+.sponsor-band--redesign
+  .collab-carousel__item.is-active
+  .collab-carousel__poster {
+  border-color: rgba(1, 10, 8, 0.22) !important;
+  box-shadow:
+    0 26px 60px rgba(1, 10, 8, 0.28),
+    0 0 0 1px rgba(249, 249, 249, 0.28) !important;
 }
 
 /* Partners hero: title/copy on the left, active flyer carousel on the right. */
@@ -89,16 +93,18 @@
   border: 2px solid var(--pink) !important;
   background: #050806;
   box-shadow:
-    0 22px 48px rgba(0,0,0,.34),
-    0 0 0 1px rgba(228,34,120,.10) !important;
+    0 22px 48px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(228, 34, 120, 0.1) !important;
 }
 
-.partners-page__hero-collabs .collab-carousel__item.is-active .collab-carousel__poster {
+.partners-page__hero-collabs
+  .collab-carousel__item.is-active
+  .collab-carousel__poster {
   border-color: var(--pink) !important;
   box-shadow:
-    0 34px 74px rgba(0,0,0,.45),
-    0 0 0 2px rgba(228,34,120,.16),
-    0 0 36px rgba(228,34,120,.16) !important;
+    0 34px 74px rgba(0, 0, 0, 0.45),
+    0 0 0 2px rgba(228, 34, 120, 0.16),
+    0 0 36px rgba(228, 34, 120, 0.16) !important;
 }
 
 @media (max-width: 900px) {

@@ -34,7 +34,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/competizioni" element={<Competitions />} />
-        <Route path="/competizioni/:competitionId" element={<CompetitionDetail />} />
+        <Route
+          path="/competizioni/:competitionId"
+          element={<CompetitionDetail />}
+        />
         <Route path="/classifica" element={<Standings />} />
         <Route path="/squadre" element={<Teams />} />
         <Route path="/squadre/:teamId" element={<TeamDetail />} />

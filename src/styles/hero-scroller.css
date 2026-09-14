@@ -28,17 +28,17 @@
   align-items: center;
   gap: clamp(14px, 2vw, 26px);
   background: var(--pink);
-  border-top: 1px solid rgba(1,10,8,.10);
-  box-shadow: 0 -8px 20px rgba(1,10,8,.12);
+  border-top: 1px solid rgba(1, 10, 8, 0.1);
+  box-shadow: 0 -8px 20px rgba(1, 10, 8, 0.12);
 }
 
 .hero-sponsor-line__label {
   flex: 0 0 auto;
-  color: #010A08;
+  color: #010a08;
   font-family: var(--display);
   font-size: 15px;
   font-weight: 600;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
   line-height: 1;
   white-space: nowrap;
 }
@@ -52,8 +52,20 @@
   width: 100%;
   min-width: 0;
   overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent 0, #000 2%, #000 98%, transparent 100%);
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 2%, #000 98%, transparent 100%);
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 2%,
+    #000 98%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 2%,
+    #000 98%,
+    transparent 100%
+  );
 }
 
 /* Keep every duplicated set at its intrinsic width. The old flex behaviour
@@ -84,7 +96,7 @@
   padding: 5px 10px;
   border-radius: 5px;
   background: var(--pink);
-  border: 1px solid rgba(249,249,249,.18);
+  border: 1px solid rgba(249, 249, 249, 0.18);
 }
 
 .hero-sponsor-line .logo-scroller__item img {
@@ -94,12 +106,16 @@
 }
 
 .hero-sponsor-line .logo-scroller__item span {
-  color: #F9F9F9;
+  color: #f9f9f9;
 }
 
 @keyframes hero-logo-loop {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

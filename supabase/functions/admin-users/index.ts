@@ -25,11 +25,15 @@ function response(body: unknown, status = 200) {
 }
 
 function normalizeUsername(value: unknown) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 function normalizeEmail(value: unknown) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 function cleanText(value: unknown) {
@@ -120,7 +124,10 @@ Deno.serve(async (req: Request) => {
         return response({ error: "Email obbligatoria." }, 400);
       }
       if (code.length < 8) {
-        return response({ error: "Il codice di accesso deve avere almeno 8 caratteri." }, 400);
+        return response(
+          { error: "Il codice di accesso deve avere almeno 8 caratteri." },
+          400,
+        );
       }
       if (!["admin", "operator", "viewer"].includes(role)) {
         return response({ error: "Ruolo non consentito." }, 400);
@@ -209,7 +216,13 @@ Deno.serve(async (req: Request) => {
       if (targetError) throw targetError;
       if (!target) return response({ error: "Utente non trovato." }, 404);
       if (target.role === "super_admin") {
-        return response({ error: "Il Super Admin non può essere modificato da questa procedura." }, 400);
+        return response(
+          {
+            error:
+              "Il Super Admin non può essere modificato da questa procedura.",
+          },
+          400,
+        );
       }
 
       const { data: duplicateUsername } = await adminClient
@@ -273,10 +286,7 @@ Deno.serve(async (req: Request) => {
       return response({ ok: true });
     }
 
-    if (
-      action === "activate" ||
-      action === "deactivate"
-    ) {
+    if (action === "activate" || action === "deactivate") {
       const userId = cleanText(body.user_id);
       if (!userId) return response({ error: "user_id obbligatorio." }, 400);
 
@@ -289,7 +299,10 @@ Deno.serve(async (req: Request) => {
       if (targetError) throw targetError;
       if (!target) return response({ error: "Utente non trovato." }, 404);
       if (target.role === "super_admin") {
-        return response({ error: "Il Super Admin non può essere disattivato." }, 400);
+        return response(
+          { error: "Il Super Admin non può essere disattivato." },
+          400,
+        );
       }
 
       const { error } = await adminClient
@@ -306,7 +319,10 @@ Deno.serve(async (req: Request) => {
       const userId = cleanText(body.user_id);
       if (!userId) return response({ error: "user_id obbligatorio." }, 400);
       if (userId === currentUser.id) {
-        return response({ error: "Non puoi eliminare il tuo stesso account." }, 400);
+        return response(
+          { error: "Non puoi eliminare il tuo stesso account." },
+          400,
+        );
       }
 
       const { data: target, error: targetError } = await adminClient
@@ -318,7 +334,10 @@ Deno.serve(async (req: Request) => {
       if (targetError) throw targetError;
       if (!target) return response({ error: "Utente non trovato." }, 404);
       if (target.role === "super_admin") {
-        return response({ error: "Il Super Admin non può essere eliminato." }, 400);
+        return response(
+          { error: "Il Super Admin non può essere eliminato." },
+          400,
+        );
       }
 
       const { error } = await adminClient.auth.admin.deleteUser(userId);
@@ -332,10 +351,7 @@ Deno.serve(async (req: Request) => {
     console.error("admin-users error:", error);
     return response(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Errore interno.",
+        error: error instanceof Error ? error.message : "Errore interno.",
       },
       500,
     );

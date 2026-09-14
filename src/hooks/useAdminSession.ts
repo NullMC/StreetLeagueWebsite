@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import {
-  getCurrentAdminProfile,
-  type AdminProfile,
-} from "../lib/admin";
+import { getCurrentAdminProfile, type AdminProfile } from "../lib/admin";
 
 export function useAdminSession() {
   const [profile, setProfile] = useState<AdminProfile | null>(null);
@@ -22,17 +19,10 @@ export function useAdminSession() {
         const currentProfile = await getCurrentAdminProfile();
 
         if (mounted) {
-          setProfile(
-            currentProfile?.is_active
-              ? currentProfile
-              : null
-          );
+          setProfile(currentProfile?.is_active ? currentProfile : null);
         }
       } catch (error) {
-        console.error(
-          "Errore caricamento profilo admin:",
-          error
-        );
+        console.error("Errore caricamento profilo admin:", error);
 
         if (mounted) {
           setProfile(null);

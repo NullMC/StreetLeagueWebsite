@@ -1,6 +1,6 @@
-import { supabase } from './supabase';
+import { supabase } from "./supabase";
 
-export type AdminRole = 'super_admin' | 'admin' | 'operator' | 'viewer';
+export type AdminRole = "super_admin" | "admin" | "operator" | "viewer";
 
 export type AdminProfile = {
   id: string;
@@ -12,7 +12,7 @@ export type AdminProfile = {
 };
 
 function sb() {
-  if (!supabase) throw new Error('Supabase non configurato.');
+  if (!supabase) throw new Error("Supabase non configurato.");
   return supabase;
 }
 
@@ -23,19 +23,16 @@ export async function getCurrentAdminProfile(): Promise<AdminProfile | null> {
   if (!auth.user) return null;
 
   const { data, error } = await client
-    .from('profiles')
-    .select('id, full_name, username, email, role, is_active')
-    .eq('id', auth.user.id)
+    .from("profiles")
+    .select("id, full_name, username, email, role, is_active")
+    .eq("id", auth.user.id)
     .maybeSingle();
 
   if (error) throw error;
   return data as AdminProfile | null;
 }
 
-export async function signInWithAccessCode(
-  username: string,
-  code: string
-) {
+export async function signInWithAccessCode(username: string, code: string) {
   const client = sb();
 
   const normalizedUsername = username.trim().toLowerCase();
@@ -44,22 +41,17 @@ export async function signInWithAccessCode(
   if (!normalizedUsername || !normalizedCode) {
     return {
       data: null,
-      error: new Error(
-        'Inserisci username e codice di accesso.'
-      ),
+      error: new Error("Inserisci username e codice di accesso."),
     };
   }
 
   try {
-    const { data, error } = await client.functions.invoke(
-      'auth-username',
-      {
-        body: {
-          username: normalizedUsername,
-          code: normalizedCode,
-        },
-      }
-    );
+    const { data, error } = await client.functions.invoke("auth-username", {
+      body: {
+        username: normalizedUsername,
+        code: normalizedCode,
+      },
+    });
 
     if (error) {
       return {
@@ -71,9 +63,7 @@ export async function signInWithAccessCode(
     if (!data || data.error) {
       return {
         data: null,
-        error: new Error(
-          data?.error ?? 'Autenticazione non completata.'
-        ),
+        error: new Error(data?.error ?? "Autenticazione non completata."),
       };
     }
 
@@ -81,14 +71,14 @@ export async function signInWithAccessCode(
       return {
         data: null,
         error: new Error(
-          'Il server non ha restituito un token di autenticazione.'
+          "Il server non ha restituito un token di autenticazione.",
         ),
       };
     }
 
     const sessionResult = await client.auth.verifyOtp({
       token_hash: data.token_hash,
-      type: 'email',
+      type: "email",
     });
 
     return sessionResult;
@@ -98,7 +88,7 @@ export async function signInWithAccessCode(
       error:
         error instanceof Error
           ? error
-          : new Error('Errore durante l autenticazione.'),
+          : new Error("Errore durante l autenticazione."),
     };
   }
 }
@@ -130,21 +120,21 @@ export async function getAuthenticatedAdmin(): Promise<AdminProfile | null> {
 
 export async function uploadMedia(file: File, folder: string) {
   const client = sb();
-  const extension = file.name.split('.').pop()?.toLowerCase() || 'bin';
+  const extension = file.name.split(".").pop()?.toLowerCase() || "bin";
   const safeName = `${crypto.randomUUID()}.${extension}`;
   const path = `${folder}/${safeName}`;
 
   const { error } = await client.storage
-    .from('street-league-media')
+    .from("street-league-media")
     .upload(path, file, {
       upsert: false,
-      cacheControl: '3600',
+      cacheControl: "3600",
     });
 
   if (error) throw error;
 
   const { data } = client.storage
-    .from('street-league-media')
+    .from("street-league-media")
     .getPublicUrl(path);
 
   return data.publicUrl;
@@ -152,7 +142,7 @@ export async function uploadMedia(file: File, folder: string) {
 
 export async function callAdminUsers(payload: Record<string, unknown>) {
   const client = sb();
-  const { data, error } = await client.functions.invoke('admin-users', {
+  const { data, error } = await client.functions.invoke("admin-users", {
     body: payload,
   });
 

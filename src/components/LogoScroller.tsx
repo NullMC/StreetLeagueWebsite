@@ -28,7 +28,11 @@ function PartnerItem({ partner }: { partner: Partner }) {
   );
 }
 
-export function LogoScroller({ partners, label, compact = false }: LogoScrollerProps) {
+export function LogoScroller({
+  partners,
+  label,
+  compact = false,
+}: LogoScrollerProps) {
   if (!partners.length) return null;
 
   return (
@@ -37,7 +41,11 @@ export function LogoScroller({ partners, label, compact = false }: LogoScrollerP
       <div className="logo-scroller__viewport">
         <div className="logo-scroller__track">
           {Array.from({ length: 6 }, (_, copy) => (
-            <div className="logo-scroller__set" key={copy} aria-hidden={copy > 0}>
+            <div
+              className="logo-scroller__set"
+              key={copy}
+              aria-hidden={copy > 0}
+            >
               {partners.map((partner) => (
                 <PartnerItem key={`${copy}-${partner.id}`} partner={partner} />
               ))}

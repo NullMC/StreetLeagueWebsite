@@ -23,16 +23,39 @@ export function SiteFooter() {
         </div>
         <div>
           <span>SOCIAL</span>
-          <a href="https://www.instagram.com/__streetleague__/" target="_blank" rel="noopener noreferrer">Instagram</a>
-          <a href="https://www.youtube.com/@streetleague2k25" target="_blank" rel="noopener noreferrer">YouTube</a>
-          <a href="https://www.tiktok.com/@_streetleague_?lang=en" target="_blank" rel="noopener noreferrer">TikTok</a>
+          <a
+            href="https://www.instagram.com/__streetleague__/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Instagram
+          </a>
+          <a
+            href="https://www.youtube.com/@streetleague2k25"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            YouTube
+          </a>
+          <a
+            href="https://www.tiktok.com/@_streetleague_?lang=en"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            TikTok
+          </a>
         </div>
       </div>
       <div className="footer-bottom">
         <span>© Street League</span>
         <span>
-          Made with <span aria-hidden="true">♥</span> by {" "}
-          <a href="https://franksitez.com/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--pink)" }}>
+          Made with <span aria-hidden="true">♥</span> by{" "}
+          <a
+            href="https://franksitez.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--pink)" }}
+          >
             Frank
           </a>
         </span>

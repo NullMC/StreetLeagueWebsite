@@ -22,7 +22,10 @@ async function getRows<T>(query: any): Promise<T[]> {
 export async function getCompetitions(): Promise<Competition[]> {
   if (!supabase) return [];
   return getRows<Competition>(
-    supabase.from("competitions").select("*").order("start_date", { ascending: false }),
+    supabase
+      .from("competitions")
+      .select("*")
+      .order("start_date", { ascending: false }),
   );
 }
 
@@ -48,14 +51,21 @@ export async function getTeams(competitionId?: string): Promise<Team[]> {
 
 export async function getPlayers(teamId?: string): Promise<Player[]> {
   if (!supabase) return [];
-  let query = supabase.from("players").select("*").order("last_name").order("first_name");
+  let query = supabase
+    .from("players")
+    .select("*")
+    .order("last_name")
+    .order("first_name");
   if (teamId) query = query.eq("team_id", teamId);
   return getRows<Player>(query);
 }
 
 export async function getMatches(competitionId?: string): Promise<Match[]> {
   if (!supabase) return [];
-  let query = supabase.from("matches").select("*").order("kickoff_at", { ascending: true });
+  let query = supabase
+    .from("matches")
+    .select("*")
+    .order("kickoff_at", { ascending: true });
   if (competitionId) query = query.eq("competition_id", competitionId);
   return getRows<Match>(query);
 }
@@ -63,11 +73,18 @@ export async function getMatches(competitionId?: string): Promise<Match[]> {
 export async function getPartners(): Promise<Partner[]> {
   if (!supabase) return [];
   return getRows<Partner>(
-    supabase.from("partners").select("*").order("tier").order("sort_order").order("name"),
+    supabase
+      .from("partners")
+      .select("*")
+      .order("tier")
+      .order("sort_order")
+      .order("name"),
   );
 }
 
-export async function getActiveCollaborations(): Promise<ActiveCollaboration[]> {
+export async function getActiveCollaborations(): Promise<
+  ActiveCollaboration[]
+> {
   if (!supabase) return [];
   return getRows<ActiveCollaboration>(
     supabase
@@ -91,7 +108,11 @@ export async function getSocialContent(): Promise<SocialContent[]> {
 
 export async function getMatch(id: string): Promise<Match | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase.from("matches").select("*").eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("matches")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw error;
   return data as Match | null;
 }
@@ -99,20 +120,33 @@ export async function getMatch(id: string): Promise<Match | null> {
 export async function getMatchEvents(matchId: string): Promise<MatchEvent[]> {
   if (!supabase) return [];
   return getRows<MatchEvent>(
-    supabase.from("match_events").select("*").eq("match_id", matchId).order("minute", { ascending: true }),
+    supabase
+      .from("match_events")
+      .select("*")
+      .eq("match_id", matchId)
+      .order("minute", { ascending: true }),
   );
 }
 
 export async function getMatchLineups(matchId: string): Promise<MatchLineup[]> {
   if (!supabase) return [];
   return getRows<MatchLineup>(
-    supabase.from("match_lineups").select("*").eq("match_id", matchId).order("team_id").order("starter", { ascending: false }),
+    supabase
+      .from("match_lineups")
+      .select("*")
+      .eq("match_id", matchId)
+      .order("team_id")
+      .order("starter", { ascending: false }),
   );
 }
 
 export async function getMatchMvp(matchId: string): Promise<MatchMvp | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase.from("match_mvp").select("*").eq("match_id", matchId).maybeSingle();
+  const { data, error } = await supabase
+    .from("match_mvp")
+    .select("*")
+    .eq("match_id", matchId)
+    .maybeSingle();
   if (error) throw error;
   return data as MatchMvp | null;
 }
@@ -146,13 +180,25 @@ export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
   );
   const playerMvpCount = mvps.filter((x) => x.player_id === playerId).length;
 
-  const goals = playerEvents.filter((x) => x.player_id === playerId && x.event_type === "goal").length;
-  const assists = playerEvents.filter((x) => x.player_id === playerId && x.event_type === "assist").length;
-  const yellowCards = playerEvents.filter((x) => x.player_id === playerId && x.event_type === "yellow_card").length;
-  const redCards = playerEvents.filter((x) => x.player_id === playerId && x.event_type === "red_card").length;
-  const fouls = playerEvents.filter((x) => x.player_id === playerId && x.event_type === "foul").length;
+  const goals = playerEvents.filter(
+    (x) => x.player_id === playerId && x.event_type === "goal",
+  ).length;
+  const assists = playerEvents.filter(
+    (x) => x.player_id === playerId && x.event_type === "assist",
+  ).length;
+  const yellowCards = playerEvents.filter(
+    (x) => x.player_id === playerId && x.event_type === "yellow_card",
+  ).length;
+  const redCards = playerEvents.filter(
+    (x) => x.player_id === playerId && x.event_type === "red_card",
+  ).length;
+  const fouls = playerEvents.filter(
+    (x) => x.player_id === playerId && x.event_type === "foul",
+  ).length;
 
-  const finishedMatches = new Map(matches.filter((m) => m.status === "finished").map((m) => [m.id, m]));
+  const finishedMatches = new Map(
+    matches.filter((m) => m.status === "finished").map((m) => [m.id, m]),
+  );
 
   let cleanSheets = 0;
   for (const lineup of playerLineups) {
@@ -176,7 +222,9 @@ export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
   };
 }
 
-export async function getAllPlayerStats(): Promise<Array<Player & { stats: PlayerStats }>> {
+export async function getAllPlayerStats(): Promise<
+  Array<Player & { stats: PlayerStats }>
+> {
   const [players, matches, events, lineups, mvps] = await Promise.all([
     getPlayers(),
     getMatches(),
@@ -185,7 +233,9 @@ export async function getAllPlayerStats(): Promise<Array<Player & { stats: Playe
     getAllMatchMvps(),
   ]);
 
-  const finishedMatches = new Map(matches.filter((m) => m.status === "finished").map((m) => [m.id, m]));
+  const finishedMatches = new Map(
+    matches.filter((m) => m.status === "finished").map((m) => [m.id, m]),
+  );
 
   return players.map((player) => {
     const playerLineups = lineups.filter((x) => x.player_id === player.id);
@@ -197,17 +247,29 @@ export async function getAllPlayerStats(): Promise<Array<Player & { stats: Playe
     for (const lineup of playerLineups) {
       const match = finishedMatches.get(lineup.match_id);
       if (!match) continue;
-      if (match.home_team_id === lineup.team_id && match.away_score === 0) cleanSheets++;
-      if (match.away_team_id === lineup.team_id && match.home_score === 0) cleanSheets++;
+      if (match.home_team_id === lineup.team_id && match.away_score === 0)
+        cleanSheets++;
+      if (match.away_team_id === lineup.team_id && match.home_score === 0)
+        cleanSheets++;
     }
 
     const stats: PlayerStats = {
-      goals: playerEvents.filter((x) => x.player_id === player.id && x.event_type === "goal").length,
+      goals: playerEvents.filter(
+        (x) => x.player_id === player.id && x.event_type === "goal",
+      ).length,
       appearances: playerLineups.length,
-      assists: playerEvents.filter((x) => x.player_id === player.id && x.event_type === "assist").length,
-      yellow_cards: playerEvents.filter((x) => x.player_id === player.id && x.event_type === "yellow_card").length,
-      red_cards: playerEvents.filter((x) => x.player_id === player.id && x.event_type === "red_card").length,
-      fouls: playerEvents.filter((x) => x.player_id === player.id && x.event_type === "foul").length,
+      assists: playerEvents.filter(
+        (x) => x.player_id === player.id && x.event_type === "assist",
+      ).length,
+      yellow_cards: playerEvents.filter(
+        (x) => x.player_id === player.id && x.event_type === "yellow_card",
+      ).length,
+      red_cards: playerEvents.filter(
+        (x) => x.player_id === player.id && x.event_type === "red_card",
+      ).length,
+      fouls: playerEvents.filter(
+        (x) => x.player_id === player.id && x.event_type === "foul",
+      ).length,
       clean_sheets: cleanSheets,
       mvps: mvps.filter((x) => x.player_id === player.id).length,
     };
@@ -217,11 +279,26 @@ export async function getAllPlayerStats(): Promise<Array<Player & { stats: Playe
 }
 
 export function calculateStandings(teams: Team[], matches: Match[]) {
-  const table = teams.map((team) => ({ team, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, points: 0 }));
+  const table = teams.map((team) => ({
+    team,
+    played: 0,
+    wins: 0,
+    draws: 0,
+    losses: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    points: 0,
+  }));
   const map = new Map(table.map((entry) => [entry.team.id, entry]));
 
   matches
-    .filter((match) => match.status === "finished" && match.home_score !== null && match.away_score !== null)
+    .filter(
+      (match) =>
+        match.status === "finished" &&
+        match.home_score !== null &&
+        match.away_score !== null,
+    )
     .forEach((match) => {
       const home = map.get(match.home_team_id);
       const away = map.get(match.away_team_id);
@@ -252,25 +329,65 @@ export function calculateStandings(teams: Team[], matches: Match[]) {
 
   return table
     .map((entry) => ({ ...entry, gd: entry.gf - entry.ga }))
-    .sort((a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || a.team.name.localeCompare(b.team.name, "it"));
+    .sort(
+      (a, b) =>
+        b.points - a.points ||
+        b.gd - a.gd ||
+        b.gf - a.gf ||
+        a.team.name.localeCompare(b.team.name, "it"),
+    );
 }
 
 export function subscribeToCompetition(onChange: () => void) {
   if (!supabase) return () => {};
   const client = supabase;
-  const existingChannel = client.getChannels().find((channel) => channel.topic === "realtime:street-league-live");
+  const existingChannel = client
+    .getChannels()
+    .find((channel) => channel.topic === "realtime:street-league-live");
   if (existingChannel) void client.removeChannel(existingChannel);
 
   const channel = client
     .channel("street-league-live")
-    .on("postgres_changes", { event: "*", schema: "public", table: "competitions" }, onChange)
-    .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, onChange)
-    .on("postgres_changes", { event: "*", schema: "public", table: "match_events" }, onChange)
-    .on("postgres_changes", { event: "*", schema: "public", table: "match_lineups" }, onChange)
-    .on("postgres_changes", { event: "*", schema: "public", table: "match_mvp" }, onChange)
-    .on("postgres_changes", { event: "*", schema: "public", table: "partners" }, onChange)
-    .on("postgres_changes", { event: "*", schema: "public", table: "social_contents" }, onChange)
-    .on("postgres_changes", { event: "*", schema: "public", table: "active_collaborations" }, onChange)
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "competitions" },
+      onChange,
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "matches" },
+      onChange,
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "match_events" },
+      onChange,
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "match_lineups" },
+      onChange,
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "match_mvp" },
+      onChange,
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "partners" },
+      onChange,
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "social_contents" },
+      onChange,
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "active_collaborations" },
+      onChange,
+    )
     .subscribe();
 
   return () => void client.removeChannel(channel);

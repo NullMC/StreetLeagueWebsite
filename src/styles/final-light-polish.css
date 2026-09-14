@@ -3,24 +3,39 @@
 /* Let more of the hero image come through while keeping the data panels readable. */
 .hero {
   background:
-    linear-gradient(120deg, rgba(249,249,249,.84) 0%, rgba(249,249,249,.68) 48%, rgba(245,211,221,.48) 100%),
+    linear-gradient(
+      120deg,
+      rgba(249, 249, 249, 0.84) 0%,
+      rgba(249, 249, 249, 0.68) 48%,
+      rgba(245, 211, 221, 0.48) 100%
+    ),
     var(--hero-image) center / cover no-repeat !important;
 }
 
 /* Partners: white hero, then one continuous pink sponsor canvas. */
 .partners-page--redesign .partners-page__hero {
-  background: linear-gradient(to top, #e42278 0%, #f5d3dd 34%, #ffffff 76%, #ffffff 100%) !important;
+  background: linear-gradient(
+    to top,
+    #e42278 0%,
+    #f5d3dd 34%,
+    #ffffff 76%,
+    #ffffff 100%
+  ) !important;
 }
 
 .partners-page--redesign .partners-page__hero-bg {
-  background: linear-gradient(to top, rgba(228,34,120,.12), rgba(255,255,255,.72) 72%) !important;
+  background: linear-gradient(
+    to top,
+    rgba(228, 34, 120, 0.12),
+    rgba(255, 255, 255, 0.72) 72%
+  ) !important;
 }
 
 .partners-page--redesign .partners-page__hero-content,
 .partners-page--redesign .partners-page__hero-copy,
 .partners-page--redesign .partners-page__hero-content h1,
 .partners-page--redesign .partners-page__hero-content p {
-  color: #010A08 !important;
+  color: #010a08 !important;
 }
 
 .partners-page--redesign .partners-page__hero-copy .eyebrow {
@@ -30,11 +45,11 @@
 .partners-page--redesign .partners-tier-section {
   background: #e42278 !important;
   color: #ffffff !important;
-  border-color: rgba(255,255,255,.24) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
 }
 
 .partners-page--redesign .partners-tier-section + .partners-tier-section {
-  border-top-color: rgba(255,255,255,.24) !important;
+  border-top-color: rgba(255, 255, 255, 0.24) !important;
 }
 
 .partners-page--redesign .partners-tier-heading,
@@ -81,7 +96,7 @@
 
 .partners-page--redesign .empty-state {
   background: transparent !important;
-  border-color: rgba(255,255,255,.28) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
   color: #ffffff !important;
   box-shadow: none !important;
 }
@@ -98,14 +113,14 @@
 
 /* Footer is part of the light theme. */
 .site-footer {
-  background: #F9F9F9 !important;
-  color: #010A08 !important;
-  border-top: 1px solid rgba(1,10,8,.08) !important;
+  background: #f9f9f9 !important;
+  color: #010a08 !important;
+  border-top: 1px solid rgba(1, 10, 8, 0.08) !important;
 }
 
 .site-footer,
 .site-footer * {
-  color: #010A08 !important;
+  color: #010a08 !important;
 }
 
 .site-footer .footer-bottom a {

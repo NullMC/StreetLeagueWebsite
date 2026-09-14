@@ -35,7 +35,9 @@ export default function Standings() {
       } catch (loadError) {
         if (mounted) {
           setError(
-            loadError instanceof Error ? loadError.message : "Errore classifica.",
+            loadError instanceof Error
+              ? loadError.message
+              : "Errore classifica.",
           );
         }
       } finally {

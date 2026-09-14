@@ -23,7 +23,7 @@
 .leader-stat-card .rank-row small {
   color: var(--muted);
   font-size: 9px;
-  letter-spacing: .05em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
@@ -91,7 +91,7 @@
 .partners-active-collabs {
   margin-top: 34px;
   padding-top: 26px;
-  border-top: 1px solid rgba(249,249,249,.09);
+  border-top: 1px solid rgba(249, 249, 249, 0.09);
 }
 
 /* Keep the collaborations heading aligned with the carousel content. */

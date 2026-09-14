@@ -21,7 +21,8 @@ export function ContentCarousel({ children }: ContentCarouselProps) {
   const handleScroll = () => {
     const viewport = viewportRef.current;
     if (!viewport) return;
-    const atEnd = viewport.scrollLeft + viewport.clientWidth >= viewport.scrollWidth - 8;
+    const atEnd =
+      viewport.scrollLeft + viewport.clientWidth >= viewport.scrollWidth - 8;
     if (!atEnd || children.length < 2) return;
 
     window.setTimeout(() => {
@@ -36,10 +37,18 @@ export function ContentCarousel({ children }: ContentCarouselProps) {
       <div className="content-carousel__toolbar">
         <span className="eyebrow">Scorri per esplorare</span>
         <div className="content-carousel__controls">
-          <button type="button" onClick={() => move(-1)} aria-label="Contenuto precedente">
+          <button
+            type="button"
+            onClick={() => move(-1)}
+            aria-label="Contenuto precedente"
+          >
             ←
           </button>
-          <button type="button" onClick={() => move(1)} aria-label="Contenuto successivo">
+          <button
+            type="button"
+            onClick={() => move(1)}
+            aria-label="Contenuto successivo"
+          >
             →
           </button>
         </div>

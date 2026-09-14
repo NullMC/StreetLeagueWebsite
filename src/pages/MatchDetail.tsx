@@ -11,7 +11,14 @@ import {
   getMatchMvp,
   getPlayers,
 } from "../lib/api";
-import type { Match, Team, MatchEvent, MatchLineup, MatchMvp, Player } from "../types";
+import type {
+  Match,
+  Team,
+  MatchEvent,
+  MatchLineup,
+  MatchMvp,
+  Player,
+} from "../types";
 
 export default function MatchDetail() {
   const { matchId = "" } = useParams();
@@ -45,8 +52,12 @@ export default function MatchDetail() {
 
         if (!mounted) return;
 
-        setHome(teams.find((team) => team.id === currentMatch.home_team_id) ?? null);
-        setAway(teams.find((team) => team.id === currentMatch.away_team_id) ?? null);
+        setHome(
+          teams.find((team) => team.id === currentMatch.home_team_id) ?? null,
+        );
+        setAway(
+          teams.find((team) => team.id === currentMatch.away_team_id) ?? null,
+        );
         setEvents(currentEvents);
         setLineups(currentLineups);
         setMvp(currentMvp);
@@ -93,7 +104,9 @@ export default function MatchDetail() {
               </h1>
 
               <div className="detail-meta">
-                <span>{new Date(match.kickoff_at).toLocaleString("it-IT")}</span>
+                <span>
+                  {new Date(match.kickoff_at).toLocaleString("it-IT")}
+                </span>
                 <span>{match.venue || "Venue —"}</span>
               </div>
             </div>

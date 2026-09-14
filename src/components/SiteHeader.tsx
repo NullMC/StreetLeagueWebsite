@@ -126,10 +126,17 @@ export function SiteHeader() {
         </nav>
 
         <div className="mobile-menu__footer">
-          <a className="mobile-menu__contact" href="mailto:streetleaguebari@gmail.com" onClick={() => setOpen(false)}>
+          <a
+            className="mobile-menu__contact"
+            href="mailto:streetleaguebari@gmail.com"
+            onClick={() => setOpen(false)}
+          >
             Contact
           </a>
-          <div className="mobile-menu__socials" aria-label="Social Street League">
+          <div
+            className="mobile-menu__socials"
+            aria-label="Social Street League"
+          >
             {socialLinks.map(({ label, href, icon }) => (
               <a
                 className="social-link"

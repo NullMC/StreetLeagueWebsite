@@ -35,7 +35,9 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = await req.json();
-    const username = String(body.username ?? "").trim().toLowerCase();
+    const username = String(body.username ?? "")
+      .trim()
+      .toLowerCase();
     const code = String(body.code ?? "").trim();
 
     if (!username || !code) {
@@ -105,8 +107,7 @@ Deno.serve(async (req: Request) => {
     console.error("auth-username error:", error);
     return response(
       {
-        error:
-          error instanceof Error ? error.message : "Errore interno.",
+        error: error instanceof Error ? error.message : "Errore interno.",
       },
       500,
     );
