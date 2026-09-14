@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./styles/global.css";
+import "./styles/street.css";
 import Home from "./pages/Home";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
@@ -16,15 +17,14 @@ import MatchDetail from "./pages/MatchDetail";
 import Partners from "./pages/Partners";
 import Collaborate from "./pages/Collaborate";
 import Admin from "./pages/Admin";
+import NotFound from "./pages/NotFound";
+
 function App() {
   return (
     <Routes>
-      <Route path="*" element={<Home />} />
+      <Route path="/" element={<Home />} />
       <Route path="/competizioni" element={<Competitions />} />
-      <Route
-        path="/competizioni/:competitionId"
-        element={<CompetitionDetail />}
-      />
+      <Route path="/competizioni/:competitionId" element={<CompetitionDetail />} />
       <Route path="/classifica" element={<Standings />} />
       <Route path="/squadre" element={<Teams />} />
       <Route path="/squadre/:teamId" element={<TeamDetail />} />
@@ -36,9 +36,11 @@ function App() {
       <Route path="/partner" element={<Partners />} />
       <Route path="/collabora" element={<Collaborate />} />
       <Route path="/admin" element={<Admin />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
