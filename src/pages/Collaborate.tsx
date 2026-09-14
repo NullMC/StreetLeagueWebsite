@@ -72,32 +72,12 @@ export default function Collaborate() {
   return (
     <PageShell>
       <div className="collaborate-page collaborate-page--redesign">
-        <section className="collaborate-hero" aria-labelledby="collaborate-title">
-          <div className="collaborate-abstract" aria-hidden="true">
-            <span className="collaborate-abstract__orb collaborate-abstract__orb--one" />
-            <span className="collaborate-abstract__orb collaborate-abstract__orb--two" />
-            <span className="collaborate-abstract__band collaborate-abstract__band--one" />
-            <span className="collaborate-abstract__band collaborate-abstract__band--two" />
-            <span className="collaborate-abstract__line collaborate-abstract__line--one" />
-            <span className="collaborate-abstract__line collaborate-abstract__line--two" />
-          </div>
-          <div className="collaborate-hero__content">
-            <span className="eyebrow">Street League / Partnership</span>
-            <h1 id="collaborate-title" className="collaborate-hero__title">
-              PORTA IL TUO
-              <br />
-              BRAND IN CAMPO
-            </h1>
-            <p className="collaborate-hero__intro">PROPOSTA UFFICIALE DI SPONSORIZZAZIONE</p>
-            <a className="btn btn--primary" href="mailto:streetleaguebari@gmail.com">Contatta il team</a>
-          </div>
-        </section>
 
         <section className="collaborate-section collaborate-section--intro">
           <div className="collaborate-container">
             <div className="collaborate-intro-layout">
               <div>
-                <span className="eyebrow">01 / Il progetto</span>
+                
                 <h2>Una presenza che resta dentro e fuori dal campo.</h2>
               </div>
               <div className="collaborate-intro-copy">
@@ -126,10 +106,9 @@ export default function Collaborate() {
           <div className="collaborate-container">
             <div className="collaborate-packages-heading">
               <div>
-                <span className="eyebrow">02 / Partnership</span>
+                
                 <h2>PACCHETTI DI<br />SPONSORIZZAZIONE</h2>
               </div>
-              <p>Validi per l’intera durata del singolo torneo e comprese tutte le attività di comunicazione.</p>
             </div>
 
             <div className="sponsorship-grid">
@@ -149,7 +128,6 @@ export default function Collaborate() {
                       </li>
                     ))}
                   </ul>
-                  <span className="sponsorship-card__footer">STREET LEAGUE PARTNERSHIP</span>
                 </article>
               ))}
             </div>
@@ -160,7 +138,7 @@ export default function Collaborate() {
           <div className="collaborate-container">
             <div className="collaborate-cta">
               <div>
-                <span className="eyebrow">03 / Next move</span>
+                
                 <h2>COSTRUIAMO INSIEME<br />LA PROSSIMA STAGIONE</h2>
                 <p>Scegli il livello di partnership più adatto alla tua attività e porta il tuo brand all’interno della Street League.</p>
               </div>

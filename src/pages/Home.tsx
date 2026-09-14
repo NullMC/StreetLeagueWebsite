@@ -266,8 +266,6 @@ export default function Home() {
           <SectionTitle eyebrow="Sponsors" title="Chi sostiene il gioco" />
           <div className="sponsor-tier sponsor-tier--gold">
             <div className="sponsor-tier__heading">
-              <span className="eyebrow">01 / Gold</span>
-              <p>Presenza premium e visibilità principale.</p>
             </div>
             {goldPartners.length ? (
               <div className="partners-grid partners-grid--gold">
@@ -279,8 +277,6 @@ export default function Home() {
           </div>
           <div className="sponsor-tier sponsor-tier--silver">
             <div className="sponsor-tier__heading">
-              <span className="eyebrow">02 / Silver</span>
-              <p>Brand in evidenza nel network Street League.</p>
             </div>
             {silverPartners.length ? (
               <ContentCarousel>
@@ -293,8 +289,6 @@ export default function Home() {
           <div className="sponsor-tier sponsor-tier--network">
             <div className="sponsor-tier__heading sponsor-tier__heading--row">
               <div>
-                <span className="eyebrow">03 / Network</span>
-                <p>Un flusso continuo di realtà che fanno parte del progetto.</p>
               </div>
               <a className="btn btn--ghost" href="/partners">Tutti i partner</a>
             </div>
@@ -305,7 +299,7 @@ export default function Home() {
             )}
           </div>
           <div className="sponsor-cta-row">
-            <p>Porta il tuo brand in campo con Street League.</p>
+            <h2>Porta il tuo brand in campo con noi</h2>
             <a className="btn btn--primary" href="/collabora">Collabora con noi</a>
           </div>
         </div>

@@ -42,7 +42,6 @@ export default function Partners() {
         <section className="partners-page__hero">
           <div className="partners-page__hero-bg" aria-hidden="true" />
           <div className="partners-page__hero-content">
-            <span className="eyebrow">Street League / Network</span>
             <h1>I nostri partner</h1>
             <p>Il network di brand e attività che sostiene il progetto dentro e fuori dal campo.</p>
             <a className="btn btn--primary" href="/collabora">Collabora con noi</a>
@@ -52,7 +51,7 @@ export default function Partners() {
         <section className="section--edge partners-tier-section partners-tier-section--gold">
           <div className="partners-tier-heading">
             <div>
-              <span className="eyebrow">01 / Gold</span>
+              
               <h2>Partner Gold</h2>
             </div>
             <p>La fascia di partnership con maggiore visibilità.</p>
@@ -69,10 +68,10 @@ export default function Partners() {
         <section className="section--edge partners-tier-section partners-tier-section--silver">
           <div className="partners-tier-heading">
             <div>
-              <span className="eyebrow">02 / Silver</span>
+              
               <h2>Partner Silver</h2>
             </div>
-            <p>Una vetrina dinamica per i brand del network.</p>
+            
           </div>
           {silver.length ? (
             <ContentCarousel>
@@ -86,10 +85,10 @@ export default function Partners() {
         <section className="section--edge partners-tier-section partners-tier-section--bronze">
           <div className="partners-tier-heading">
             <div>
-              <span className="eyebrow">03 / Bronze</span>
-              <h2>Street League network</h2>
+              
+              <h2>Partner Bronze</h2>
             </div>
-            <p>Presenza continua in una barra scorrevole pensata per il network.</p>
+          
           </div>
           {bronze.length ? (
             <LogoScroller partners={bronze} label="Bronze partners" />

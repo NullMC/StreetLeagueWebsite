@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   gap: clamp(14px, 2vw, 26px);
-  background: #ffffff;
+  background: var(--pink);
   border-top: 1px solid rgba(1,10,8,.10);
   box-shadow: 0 -8px 20px rgba(1,10,8,.12);
 }
@@ -65,13 +65,11 @@
 }
 
 .hero-sponsor-line .logo-scroller__item {
-  width: 126px;
+  width: fit-content;
   height: 36px;
   padding: 5px 10px;
   border-radius: 5px;
-  border-color: rgba(249,249,249,.22);
-  background: #010A08;
-  box-shadow: inset 0 0 0 1px rgba(249,249,249,.05);
+  background: var(--pink);
 }
 
 .hero-sponsor-line .logo-scroller__item img {
