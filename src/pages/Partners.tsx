@@ -13,12 +13,24 @@ function SponsorCard({ partner }: { partner: Partner }) {
   return (
     <article className={`partner-card partner-card--${partner.tier}`}>
       <div className="partner-card__logo">{body}</div>
-      <span>{partner.name}</span>
-      {isPrimary ? (
-        <a className={`btn btn--small btn--primary sponsor-link-btn ${hasLink ? "" : "sponsor-link-btn--disabled"}`} href={hasLink ? partner.website_url! : "#"} target={hasLink ? "_blank" : undefined} rel={hasLink ? "noopener noreferrer" : undefined} aria-disabled={!hasLink} onClick={(event) => { if (!hasLink) event.preventDefault(); }}>
-          {hasLink ? "Visita piattaforma ↗" : "Piattaforma non disponibile"}
-        </a>
-      ) : null}
+      <div className="partner-card__meta">
+        <span className="partner-card__name">{partner.name}</span>
+        {isPrimary ? (
+          <a
+            className={`sponsor-link-btn ${hasLink ? "" : "sponsor-link-btn--disabled"}`}
+            href={hasLink ? partner.website_url! : "#"}
+            target={hasLink ? "_blank" : undefined}
+            rel={hasLink ? "noopener noreferrer" : undefined}
+            aria-disabled={!hasLink}
+            onClick={(event) => {
+              if (!hasLink) event.preventDefault();
+            }}
+          >
+            <span>Info</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        ) : null}
+      </div>
     </article>
   );
 }
