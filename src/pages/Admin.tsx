@@ -26,6 +26,7 @@ type Resource =
   | "lineups"
   | "mvp"
   | "partners"
+  | "active_collaborations"
   | "social_contents";
 
 type Row = Record<string, unknown>;
@@ -46,6 +47,7 @@ const resourceLabels: Record<Resource, string> = {
   lineups: "Formazioni",
   mvp: "MVP",
   partners: "Sponsor",
+  active_collaborations: "Collab attive",
   social_contents: "Social / Video",
 };
 
@@ -58,6 +60,7 @@ const resourceTables: Record<Resource, string> = {
   lineups: "match_lineups",
   mvp: "match_mvp",
   partners: "partners",
+  active_collaborations: "active_collaborations",
   social_contents: "social_contents",
 };
 
@@ -70,6 +73,7 @@ const resourcePrimaryKeys: Record<Resource, string> = {
   lineups: "id",
   mvp: "match_id",
   partners: "id",
+  active_collaborations: "id",
   social_contents: "id",
 };
 
@@ -129,6 +133,7 @@ const resourceFields: Record<Resource, string[]> = {
   ],
   mvp: ["match_id", "player_id"],
   partners: ["name", "tier", "logo_url", "website_url", "sort_order"],
+  active_collaborations: ["flyer_url", "sort_order"],
   social_contents: [
     "platform",
     "title",
@@ -195,6 +200,7 @@ const fieldLabels: Record<string, string> = {
   thumbnail_url: "Anteprima",
   content_url: "URL contenuto",
   published_at: "Pubblicato",
+  flyer_url: "Volantino",
   starter: "Titolare",
 };
 
@@ -213,6 +219,7 @@ const requiredFields: Record<Resource, string[]> = {
   lineups: ["match_id", "team_id", "player_id"],
   mvp: ["match_id", "player_id"],
   partners: ["name", "tier"],
+  active_collaborations: ["flyer_url"],
   social_contents: ["platform", "title", "content_url"],
 };
 
@@ -618,9 +625,11 @@ function CrudPanel({
 
   async function uploadFor(field: string, file: File) {
     try {
-      const folder = field.includes("logo")
-        ? "logos"
-        : field.includes("bg_less")
+      const folder = field.includes("flyer")
+        ? "collaborations"
+        : field.includes("logo")
+          ? "logos"
+          : field.includes("bg_less")
           ? "players/bg-less"
           : field.includes("profile")
             ? "players/profile"
@@ -746,7 +755,8 @@ function CrudPanel({
     const acceptsImage =
       field.includes("logo") ||
       field.includes("image") ||
-      field.includes("thumbnail");
+      field.includes("thumbnail") ||
+      field === "flyer_url";
 
     return (
       <div className="admin-input-row">
@@ -1246,6 +1256,7 @@ export default function Admin() {
             "lineups",
             "mvp",
             "partners",
+            "active_collaborations",
             "social_contents",
           ]) as Resource[],
     [profile],

@@ -18,7 +18,6 @@ import MatchDetail from "./pages/MatchDetail";
 import Partners from "./pages/Partners";
 import Collaborate from "./pages/Collaborate";
 import Admin from "./pages/Admin";
-import AdminCollaborations from "./pages/AdminCollaborations";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -38,7 +37,6 @@ function App() {
       <Route path="/partner" element={<Partners />} />
       <Route path="/collabora" element={<Collaborate />} />
       <Route path="/admin" element={<Admin />} />
-      <Route path="/admin/collab" element={<AdminCollaborations />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
