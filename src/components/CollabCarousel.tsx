@@ -1,3 +1,4 @@
+import "../styles/collab-carousel.css";
 import { useMemo, useRef, useState } from "react";
 import type { ActiveCollaboration } from "../types";
 
@@ -60,9 +61,7 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
       </div>
       {ordered.length > 1 && (
         <div className="collab-carousel__dots" aria-hidden="true">
-          {ordered.map((item, index) => (
-            <span key={item.id} className={index === active ? "is-active" : ""} />
-          ))}
+          {ordered.map((item, index) => <span key={item.id} className={index === active ? "is-active" : ""} />)}
         </div>
       )}
     </div>
