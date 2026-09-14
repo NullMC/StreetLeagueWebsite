@@ -23,7 +23,7 @@
 .sponsor-tier--gold .partner-card,
 .sponsor-tier--silver .partner-card {
   background: transparent !important;
-  border-color: rgba(255,255,255,.30) !important;
+  border-color: transparent !important;
   box-shadow: none !important;
 }
 
@@ -271,6 +271,66 @@
 
 .second-site-header {
   z-index: 51;
+}
+
+/* Full-bleed sponsors on the Partners page. The sponsor canvas must touch both viewport edges. */
+.partners-page .partners-tier-section {
+  width: 100vw !important;
+  max-width: none !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  background: linear-gradient(120deg, #b10f59 0%, #e42278 48%, #ed7bab 100%) !important;
+  color: #fff !important;
+}
+
+.partners-page .partners-tier-section--gold,
+.partners-page .partners-tier-section--silver,
+.partners-page .partners-tier-section--bronze {
+  background: linear-gradient(120deg, #b10f59 0%, #e42278 48%, #ed7bab 100%) !important;
+}
+
+.partners-page .partners-tier-section .partners-tier-heading,
+.partners-page .partners-tier-section .partners-tier-heading h2,
+.partners-page .partners-tier-section .partners-tier-heading p,
+.partners-page .partners-tier-section .eyebrow,
+.partners-page .partners-tier-section .partner-card,
+.partners-page .partners-tier-section .partner-card__name {
+  color: #fff !important;
+}
+
+.partners-page .partners-tier-section .partner-card {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.partners-page .partners-tier-section .content-carousel,
+.partners-page .partners-tier-section .content-carousel__viewport,
+.partners-page .partners-tier-section .content-carousel__item {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.partners-page .partners-tier-section .empty-state {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #fff !important;
+}
+
+.partners-page .partners-tier-section .empty-state h3,
+.partners-page .partners-tier-section .empty-state p {
+  color: #fff !important;
+}
+
+/* Partners hero is the white/light transition: white at the top, pink at the bottom. */
+.partners-page .partners-page__hero {
+  background: linear-gradient(to top, #e42278 0%, #f5d3dd 38%, #f9f9f9 76%, #fff 100%) !important;
+}
+
+.partners-page .partners-page__hero-bg {
+  background: linear-gradient(to top, rgba(228,34,120,.24) 0%, rgba(245,211,221,.22) 38%, rgba(255,255,255,.82) 100%) !important;
 }
 
 @media (max-width: 700px) {
