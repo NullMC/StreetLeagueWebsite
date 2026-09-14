@@ -1,0 +1,197 @@
+/* Final browser/layout polish after moving the global chrome into AppLayout. */
+
+/* Skip links stay visually out of the page until keyboard focus. */
+.skip-link {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-180%);
+}
+
+.skip-link:focus {
+  transform: translateY(-180%);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.skip-link:focus-visible {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  outline: 3px solid var(--white);
+  outline-offset: 3px;
+}
+
+#main-content {
+  scroll-margin-top: calc(var(--site-header-total-height) + 16px);
+  min-width: 0;
+}
+
+.site-header {
+  min-width: 0;
+  min-height: var(--site-header-height);
+}
+
+.site-header > .brand,
+.site-header .header-right,
+.site-header .header-admin {
+  min-width: 0;
+}
+
+.header-admin__name,
+.admin-user,
+.admin-resource__head,
+.admin-resource__head > div,
+.hero-match__team span,
+.hero-standing__team span {
+  overflow-wrap: anywhere;
+}
+
+/* Avoid the data hero becoming vertically cramped on tablet widths. */
+@media (max-width: 980px) {
+  .hero--data-only .hero-inner {
+    min-height: calc(100svh - var(--site-header-total-height));
+    justify-content: flex-start;
+    padding-top: clamp(72px, 10vh, 104px);
+    padding-bottom: 62px;
+  }
+
+  .hero--data-only .hero-data-panels--full {
+    grid-template-columns: 1fr;
+  }
+
+  .hero--data-only .hero-calendar {
+    border-right: 0;
+    border-bottom: 1px solid rgba(249, 249, 249, 0.1);
+  }
+
+  .admin-resource__head {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .site-header {
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .second-site-header {
+    min-height: 28px;
+    height: 28px;
+  }
+
+  .header-admin {
+    max-width: min(34vw, 140px);
+    overflow: hidden;
+  }
+
+  .header-admin__name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hero--data-only .hero-inner {
+    width: calc(100% - 20px);
+    min-height: calc(100svh - var(--site-header-total-height));
+    padding-top: 62px;
+    padding-bottom: 52px;
+    gap: 18px;
+  }
+
+  .hero--data-only .hero-calendar,
+  .hero--data-only .hero-standings {
+    padding: 16px 14px;
+  }
+
+  .hero-match__teams {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .hero-match__team {
+    gap: 7px;
+  }
+
+  .hero-standing {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+  }
+
+  .content-carousel__item {
+    width: min(88vw, 370px);
+    flex-basis: min(88vw, 370px);
+  }
+
+  .sponsor-cta-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sponsor-cta-row .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .site-header {
+    padding-inline: 10px;
+    gap: 8px;
+  }
+
+  .brand {
+    width: 118px;
+  }
+
+  .header-admin {
+    max-width: 31vw;
+    font-size: 11px;
+  }
+
+  .second-site-header__right {
+    gap: 11px;
+    margin-right: 0;
+  }
+
+  .hero--data-only .hero-inner {
+    width: calc(100% - 12px);
+    padding-top: 54px;
+  }
+
+  .hero-calendar__header h2,
+  .hero-standings__header h2 {
+    font-size: 2rem;
+  }
+
+  .hero-match {
+    padding: 12px 0;
+  }
+
+  .hero-match__meta,
+  .hero-match__footer {
+    font-size: 8px;
+  }
+
+  .hero-match__team {
+    font-size: 9px;
+  }
+
+  .hero-match__team img,
+  .hero-match__logo-placeholder {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+  }
+
+  .hero-standing {
+    min-height: 54px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}
