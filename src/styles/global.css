@@ -12,6 +12,9 @@
   --admin-sidebar-width: 250px;
   --admin-padding: 36px;
   --admin-gap: 28px;
+  --site-header-height: 52px;
+  --second-site-header-height: 32px;
+  --site-header-total-height: 84px;
 }
 * {
   box-sizing: border-box;
@@ -36,28 +39,33 @@ main {
   min-height: 60vh;
 }
 .site-header {
-  height: 84px;
+  height: fit-content;
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 36px;
   padding: 0 28px;
   border-bottom: 1px solid var(--line);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   z-index: 20;
   background: rgba(1, 10, 8, 0.78);
   backdrop-filter: blur(18px);
 }
 .second-site-header {
   height: fit-content;
+  width: 100vw;
   display: flex;
   align-items: center;
   gap: 36px;
   padding: 5px;
   border-bottom: 1px solid var(--line);
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 21;
   background: rgba(1, 10, 8, 0.78);
   backdrop-filter: blur(18px);
 }
@@ -129,11 +137,12 @@ main {
 }
 .app {
   overflow: hidden;
+  padding-top: var(--site-header-total-height);
 }
 
 .hero {
   position: relative;
-  min-height: calc(100vh - 84px);
+  min-height: calc(100vh - var(--site-header-total-height));
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -168,7 +177,7 @@ main {
   position: relative;
   z-index: 2;
   width: min(1540px, calc(100% - 56px));
-  min-height: calc(100vh - 84px);
+  min-height: calc(100vh - var(--site-header-total-height));
   margin: 0 auto;
   padding: 72px 0 64px;
   display: grid;
@@ -1641,7 +1650,7 @@ section,
   .mobile-menu {
     display: flex;
     position: fixed;
-    top: 84px;
+    top: var(--site-header-total-height);
     left: 0;
     right: 0;
     z-index: 19;
@@ -1687,15 +1696,21 @@ section,
 }
 
 @media (max-width: 640px) {
+  :root {
+    --site-header-height: 44px;
+    --second-site-header-height: 28px;
+    --site-header-total-height: 72px;
+  }
+
   .site-header {
-    height: 72px;
+    height: fit-content;
     padding: 0 16px;
   }
   .brand {
     width: 154px;
   }
   .mobile-menu {
-    top: 72px;
+    top: var(--site-header-total-height);
     padding: 18px 16px;
   }
   .page,
@@ -1754,7 +1769,7 @@ section,
 .admin-layout {
   max-width: 1440px;
   margin: 0 auto;
-  min-height: calc(100vh - 84px);
+  min-height: calc(100vh - var(--site-header-total-height));
   display: grid;
   grid-template-columns: var(--admin-sidebar-width) 1fr;
   background: var(--ink);
@@ -1766,8 +1781,8 @@ section,
   flex-direction: column;
   gap: var(--admin-gap);
   position: sticky;
-  top: 84px;
-  height: calc(100vh - 84px);
+  top: var(--site-header-total-height);
+  height: calc(100vh - var(--site-header-total-height));
 }
 .admin-sidebar h2 {
   font-family: "Barlow Condensed";

@@ -3,7 +3,6 @@ import { PageShell } from "../components/PageShell";
 import { supabase, supabaseConfigured } from "../lib/supabase";
 import {
   callAdminUsers,
-  getCurrentAdminProfile,
   getAuthenticatedAdmin,
   signInWithAccessCode,
   uploadMedia,
@@ -15,9 +14,8 @@ import {
   getTeams,
   getPlayers,
   getMatches,
-  getPartners,
 } from "../lib/api";
-import type { Competition, Team, Player, Match, Partner } from "../types";
+import type { Competition, Team, Player, Match } from "../types";
 
 type Resource =
   | "competitions"
@@ -29,7 +27,15 @@ type Resource =
   | "mvp"
   | "partners"
   | "social_contents";
+
 type Row = Record<string, unknown>;
+
+type LookupState = {
+  competitions: Competition[];
+  teams: Team[];
+  players: Player[];
+  matches: Match[];
+};
 
 const resourceLabels: Record<Resource, string> = {
   competitions: "Competizioni",
@@ -43,6 +49,30 @@ const resourceLabels: Record<Resource, string> = {
   social_contents: "Social / Video",
 };
 
+const resourceTables: Record<Resource, string> = {
+  competitions: "competitions",
+  teams: "teams",
+  players: "players",
+  matches: "matches",
+  events: "match_events",
+  lineups: "match_lineups",
+  mvp: "match_mvp",
+  partners: "partners",
+  social_contents: "social_contents",
+};
+
+const resourcePrimaryKeys: Record<Resource, string> = {
+  competitions: "id",
+  teams: "id",
+  players: "id",
+  matches: "id",
+  events: "id",
+  lineups: "id",
+  mvp: "match_id",
+  partners: "id",
+  social_contents: "id",
+};
+
 const resourceFields: Record<Resource, string[]> = {
   competitions: [
     "name",
@@ -53,13 +83,22 @@ const resourceFields: Record<Resource, string[]> = {
     "end_date",
     "hero_image_url",
   ],
-  teams: ["competition_id", "name", "slug", "accent_hex", "logo_url"],
+  teams: [
+    "competition_id",
+    "name",
+    "slug",
+    "short_name",
+    "city",
+    "accent_hex",
+    "logo_url",
+  ],
   players: [
     "team_id",
     "first_name",
     "last_name",
     "shirt_number",
     "position",
+    "profile_image_url",
     "bg_less_image_url",
   ],
   matches: [
@@ -81,7 +120,13 @@ const resourceFields: Record<Resource, string[]> = {
     "minute",
     "note",
   ],
-  lineups: ["match_id", "team_id", "player_id", "starter", "shirt_number"],
+  lineups: [
+    "match_id",
+    "team_id",
+    "player_id",
+    "starter",
+    "shirt_number",
+  ],
   mvp: ["match_id", "player_id"],
   partners: ["name", "tier", "logo_url", "website_url", "sort_order"],
   social_contents: [
@@ -104,31 +149,31 @@ const selectOptions: Record<string, string[]> = {
     "yellow_card",
     "red_card",
     "substitution",
+    "foul",
     "other",
   ],
 };
 
 const fieldLabels: Record<string, string> = {
-  // competitions
   name: "Nome",
   slug: "Slug",
   status: "Stato",
   season_label: "Stagione",
   start_date: "Data inizio",
   end_date: "Data fine",
-  hero_image_url: "Immagine (hero)",
-  // teams
+  hero_image_url: "Immagine hero",
   competition_id: "Competizione",
+  short_name: "Nome breve",
+  city: "Città",
   accent_hex: "Colore accent",
   logo_url: "Logo",
-  // players
   team_id: "Squadra",
   first_name: "Nome",
   last_name: "Cognome",
   shirt_number: "Numero",
   position: "Ruolo",
+  profile_image_url: "Immagine profilo",
   bg_less_image_url: "Immagine sfondo",
-  // matches
   home_team_id: "Squadra casa",
   away_team_id: "Squadra ospite",
   matchday: "Giornata",
@@ -136,14 +181,12 @@ const fieldLabels: Record<string, string> = {
   home_score: "Gol casa",
   away_score: "Gol ospite",
   venue: "Stadio",
-  // events
   match_id: "Partita",
   player_id: "Giocatore",
   related_player_id: "Giocatore correlato",
   event_type: "Tipo evento",
   minute: "Minuto",
   note: "Nota",
-  // partners / social
   tier: "Livello",
   website_url: "Sito web",
   sort_order: "Ordine",
@@ -152,72 +195,278 @@ const fieldLabels: Record<string, string> = {
   thumbnail_url: "Anteprima",
   content_url: "URL contenuto",
   published_at: "Pubblicato",
+  starter: "Titolare",
+};
+
+const requiredFields: Record<Resource, string[]> = {
+  competitions: ["name", "slug", "status"],
+  teams: ["competition_id", "name", "slug"],
+  players: ["team_id", "first_name", "last_name"],
+  matches: [
+    "competition_id",
+    "home_team_id",
+    "away_team_id",
+    "kickoff_at",
+    "status",
+  ],
+  events: ["match_id", "event_type"],
+  lineups: ["match_id", "team_id", "player_id"],
+  mvp: ["match_id", "player_id"],
+  partners: ["name", "tier"],
+  social_contents: ["platform", "title", "content_url"],
 };
 
 function labelize(value: string) {
-  if (fieldLabels[value]) return fieldLabels[value];
-  return value.replaceAll("_", " ").replace(/\b\w/g, (x) => x.toUpperCase());
+  return (
+    fieldLabels[value] ??
+    value.replaceAll("_", " ").replace(/\b\w/g, (x) => x.toUpperCase())
+  );
 }
 
 function defaultsFor(resource: Resource): Row {
   const row: Row = {};
-  for (const field of resourceFields[resource])
+  for (const field of resourceFields[resource]) {
     row[field] =
       field === "sort_order"
         ? 0
-        : field === "status"
-          ? resource === "competitions"
-            ? "upcoming"
-            : "scheduled"
-          : field === "starter"
-            ? true
+        : field === "starter"
+          ? true
+          : field === "status"
+            ? resource === "competitions"
+              ? "upcoming"
+              : "scheduled"
             : "";
+  }
   return row;
+}
+
+function tableLabel(resource: Resource, row: Row, lookups: LookupState) {
+  if (resource === "competitions") return String(row.name ?? "Competizione");
+  if (resource === "teams") return String(row.name ?? "Squadra");
+  if (resource === "players")
+    return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim();
+  if (resource === "matches") {
+    const home = lookups.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa";
+    const away = lookups.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite";
+    return `${home} - ${away}`;
+  }
+  if (resource === "events") return `${row.event_type ?? "Evento"} / ${row.minute ?? "—"}'`;
+  if (resource === "lineups") {
+    const player = lookups.players.find((x) => x.id === row.player_id);
+    return player ? `${player.first_name} ${player.last_name}` : "Formazione";
+  }
+  if (resource === "mvp") {
+    const player = lookups.players.find((x) => x.id === row.player_id);
+    return player ? `${player.first_name} ${player.last_name}` : "MVP";
+  }
+  return String(row.name ?? row.title ?? "Record");
 }
 
 async function fetchResource(resource: Resource): Promise<Row[]> {
   if (!supabase) return [];
-  if (resource === "competitions")
-    return (await getCompetitions()) as unknown as Row[];
-  if (resource === "teams") return (await getTeams()) as unknown as Row[];
-  if (resource === "players") return (await getPlayers()) as unknown as Row[];
-  if (resource === "matches") return (await getMatches()) as unknown as Row[];
+  const table = resourceTables[resource];
   const { data, error } = await supabase
-    .from(resource === "events" ? "match_events" : resource)
+    .from(table)
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Row[];
 }
 
-function sanitizePayload(resource: Resource, source: Row) {
+function normalizeDateTimeLocal(value: unknown) {
+  if (!value) return "";
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return "";
+  const offset = date.getTimezoneOffset();
+  return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 16);
+}
+
+function localDateTimeToIso(value: string) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error("Data/ora non valida.");
+  }
+  return date.toISOString();
+}
+
+function sanitizePayload(resource: Resource, source: Row): Row {
   const payload: Row = {};
+
   for (const field of resourceFields[resource]) {
     let value = source[field];
-    if (value === "") value = null;
+
+    if (field === "kickoff_at" || field === "published_at") {
+      value = value === "" || value == null ? null : localDateTimeToIso(String(value));
+    } else if (value === "") {
+      value = null;
+    }
+
     if (
-      [
-        "shirt_number",
-        "home_score",
-        "away_score",
-        "minute",
-        "sort_order",
-      ].includes(field) &&
-      value !== null
-    )
-      value = Number(value);
+      ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(
+        field,
+      ) &&
+      value !== null &&
+      value !== undefined
+    ) {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric)) {
+        throw new Error(`${labelize(field)} non è valido.`);
+      }
+      value = numeric;
+    }
+
     if (field === "starter") value = Boolean(value);
+
     payload[field] = value;
   }
+
   return payload;
 }
 
-function formatCell(value: unknown) {
-  if (value === null || value === undefined || value === "") return "—";
-  if (typeof value === "boolean") return value ? "Sì" : "No";
-  if (typeof value === "string" && value.length > 35)
-    return `${value.slice(0, 35)}…`;
-  return String(value);
+function isId(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
+}
+
+function validateRow(
+  resource: Resource,
+  payload: Row,
+  lookups: LookupState,
+) {
+  for (const field of requiredFields[resource]) {
+    if (payload[field] === null || payload[field] === undefined || payload[field] === "") {
+      throw new Error(`${labelize(field)} è obbligatorio.`);
+    }
+  }
+
+  if (
+    ["shirt_number", "home_score", "away_score", "minute", "sort_order"].some(
+      (field) =>
+        payload[field] !== null &&
+        payload[field] !== undefined &&
+        Number(payload[field]) < 0,
+    )
+  ) {
+    throw new Error("I valori numerici non possono essere negativi.");
+  }
+
+  if (resource === "competitions") {
+    if (payload.start_date && payload.end_date && String(payload.end_date) < String(payload.start_date)) {
+      throw new Error("La data fine non può precedere la data inizio.");
+    }
+  }
+
+  if (resource === "matches") {
+    const competition = lookups.competitions.find((x) => x.id === payload.competition_id);
+    const home = lookups.teams.find((x) => x.id === payload.home_team_id);
+    const away = lookups.teams.find((x) => x.id === payload.away_team_id);
+
+    if (!competition || !home || !away) {
+      throw new Error("Competizione o squadre non valide.");
+    }
+    if (home.competition_id !== competition.id || away.competition_id !== competition.id) {
+      throw new Error("Casa e ospite devono appartenere alla competizione selezionata.");
+    }
+    if (home.id === away.id) {
+      throw new Error("La squadra casa e la squadra ospite devono essere diverse.");
+    }
+  }
+
+  if (resource === "players") {
+    const team = lookups.teams.find((x) => x.id === payload.team_id);
+    if (!team) throw new Error("La squadra selezionata non esiste.");
+  }
+
+  if (resource === "events" || resource === "lineups" || resource === "mvp") {
+    const match = lookups.matches.find((x) => x.id === payload.match_id);
+    if (!match) throw new Error("La partita selezionata non esiste.");
+
+    const allowedTeamIds = [match.home_team_id, match.away_team_id];
+
+    if (resource === "lineups") {
+      if (!allowedTeamIds.includes(String(payload.team_id))) {
+        throw new Error("La squadra della formazione deve appartenere alla partita.");
+      }
+      const player = lookups.players.find((x) => x.id === payload.player_id);
+      if (!player || player.team_id !== payload.team_id) {
+        throw new Error("Il giocatore non appartiene alla squadra selezionata.");
+      }
+    }
+
+    if (resource === "events" || resource === "mvp") {
+      const playerIds = [payload.player_id, payload.related_player_id].filter(isId);
+      for (const playerId of playerIds) {
+        const player = lookups.players.find((x) => x.id === playerId);
+        if (!player || !allowedTeamIds.includes(player.team_id)) {
+          throw new Error("Il giocatore deve appartenere a una delle due squadre della partita.");
+        }
+      }
+    }
+  }
+}
+
+function relationOptions(
+  field: string,
+  resource: Resource,
+  form: Row,
+  lookups: LookupState,
+) {
+  if (field === "competition_id") {
+    return lookups.competitions.map((x) => ({ id: x.id, label: x.name }));
+  }
+
+  if (field === "team_id") {
+    if (resource === "players") {
+      return lookups.teams.map((x) => ({ id: x.id, label: x.name }));
+    }
+
+    if (resource === "lineups") {
+      const match = lookups.matches.find((x) => x.id === form.match_id);
+      if (!match) return [];
+      return lookups.teams
+        .filter((x) => x.id === match.home_team_id || x.id === match.away_team_id)
+        .map((x) => ({ id: x.id, label: x.name }));
+    }
+  }
+
+  if (field === "home_team_id" || field === "away_team_id") {
+    const teams = form.competition_id
+      ? lookups.teams.filter((x) => x.competition_id === form.competition_id)
+      : [];
+    return teams.map((x) => ({ id: x.id, label: x.name }));
+  }
+
+  if (field === "match_id") {
+    return lookups.matches.map((x) => {
+      const home = lookups.teams.find((team) => team.id === x.home_team_id)?.name ?? "Casa";
+      const away = lookups.teams.find((team) => team.id === x.away_team_id)?.name ?? "Ospite";
+      return {
+        id: x.id,
+        label: `${home} - ${away} / ${x.matchday ?? "—"} / ${new Date(x.kickoff_at).toLocaleDateString("it-IT")}`,
+      };
+    });
+  }
+
+  if (field === "player_id" || field === "related_player_id") {
+    let players = lookups.players;
+
+    if (resource === "lineups") {
+      players = form.team_id
+        ? players.filter((x) => x.team_id === form.team_id)
+        : [];
+    } else if (resource === "events" || resource === "mvp") {
+      const match = lookups.matches.find((x) => x.id === form.match_id);
+      const teamIds = match ? [match.home_team_id, match.away_team_id] : [];
+      players = players.filter((x) => teamIds.includes(x.team_id));
+    }
+
+    return players.map((x) => ({
+      id: x.id,
+      label: `#${x.shirt_number ?? "—"} ${x.first_name} ${x.last_name}`,
+    }));
+  }
+
+  return [];
 }
 
 function CrudPanel({
@@ -229,13 +478,13 @@ function CrudPanel({
 }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [form, setForm] = useState<Row>(() => defaultsFor(resource));
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [lookups, setLookups] = useState<{
-    competitions: Competition[];
-    teams: Team[];
-    players: Player[];
-    matches: Match[];
-  }>({ competitions: [], teams: [], players: [], matches: [] });
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [lookups, setLookups] = useState<LookupState>({
+    competitions: [],
+    teams: [],
+    players: [],
+    matches: [],
+  });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -250,9 +499,7 @@ function CrudPanel({
     try {
       setRows(await fetchResource(resource));
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Errore di caricamento.",
-      );
+      setMessage(error instanceof Error ? error.message : "Errore di caricamento.");
     } finally {
       setLoading(false);
     }
@@ -260,7 +507,7 @@ function CrudPanel({
 
   useEffect(() => {
     setForm(defaultsFor(resource));
-    setEditingId(null);
+    setEditingKey(null);
     setMessage("");
     void refresh();
   }, [resource]);
@@ -275,57 +522,95 @@ function CrudPanel({
           getMatches(),
         ]);
         setLookups({ competitions, teams, players, matches });
-      } catch {
-        /* lookups remain empty until DB is populated */
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Errore nei dati di relazione.");
       }
     }
     void loadLookups();
   }, [resource]);
 
-  const fields = resourceFields[resource];
-  const visibleColumns = fields.slice(0, 5);
+  function setField(field: string, value: unknown) {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === "competition_id"
+        ? { home_team_id: "", away_team_id: "" }
+        : {}),
+      ...(field === "match_id"
+        ? { team_id: "", player_id: "", related_player_id: "" }
+        : {}),
+      ...(field === "team_id" && resource === "lineups"
+        ? { player_id: "" }
+        : {}),
+    }));
+  }
 
   function startEdit(row: Row) {
-    setEditingId(String(row.id));
-    setForm({ ...row });
+    const next = { ...row };
+    if (resource === "mvp") {
+      setEditingKey(String(row.match_id));
+    } else {
+      setEditingKey(String(row[resourcePrimaryKeys[resource]]));
+    }
+    if (next.kickoff_at) next.kickoff_at = normalizeDateTimeLocal(next.kickoff_at);
+    if (next.published_at) next.published_at = normalizeDateTimeLocal(next.published_at);
+    setForm(next);
     window.scrollTo({ top: 140, behavior: "smooth" });
+  }
+
+  function cancelEdit() {
+    setEditingKey(null);
+    setForm(defaultsFor(resource));
   }
 
   async function save(e: FormEvent) {
     e.preventDefault();
     if (!supabase || !canWrite) return;
+
     setMessage("");
+
     try {
       const payload = sanitizePayload(resource, form);
-      const table = resource === "events" ? "match_events" : resource;
-      const query = editingId
-        ? supabase.from(table).update(payload).eq("id", editingId)
-        : supabase.from(table).insert(payload);
-      const { error } = await query;
-      if (error) throw error;
-      setMessage(editingId ? "Record aggiornato." : "Record creato.");
-      setForm(defaultsFor(resource));
-      setEditingId(null);
+      validateRow(resource, payload, lookups);
+
+      const table = resourceTables[resource];
+      const pk = resourcePrimaryKeys[resource];
+
+      if (editingKey) {
+        const { error } = await supabase.from(table).update(payload).eq(pk, editingKey);
+        if (error) throw error;
+      } else if (resource === "mvp") {
+        const { error } = await supabase.from(table).upsert(payload, { onConflict: "match_id" });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from(table).insert(payload);
+        if (error) throw error;
+      }
+
+      setMessage(editingKey ? "Record aggiornato." : "Record creato.");
+      cancelEdit();
       await refresh();
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Operazione non riuscita.",
-      );
+      setMessage(error instanceof Error ? error.message : "Operazione non riuscita.");
     }
   }
 
   async function remove(row: Row) {
-    if (
-      !supabase ||
-      !canWrite ||
-      !row.id ||
-      !confirm("Eliminare questo record?")
-    )
-      return;
-    const table = resource === "events" ? "match_events" : resource;
-    const { error } = await supabase.from(table).delete().eq("id", row.id);
-    if (error) setMessage(error.message);
-    else {
+    if (!supabase || !canWrite) return;
+
+    const key = resource === "mvp" ? row.match_id : row[resourcePrimaryKeys[resource]];
+    if (!key) return;
+
+    if (!confirm(`Eliminare ${tableLabel(resource, row, lookups)}?`)) return;
+
+    const { error } = await supabase
+      .from(resourceTables[resource])
+      .delete()
+      .eq(resourcePrimaryKeys[resource], key);
+
+    if (error) {
+      setMessage(error.message);
+    } else {
       setMessage("Record eliminato.");
       await refresh();
     }
@@ -342,74 +627,17 @@ function CrudPanel({
             : field.includes("thumbnail")
               ? "social"
               : "media";
+
       const url = await uploadMedia(file, folder);
       setForm((prev) => ({ ...prev, [field]: url }));
-      setMessage(
-        "File caricato. Salva il record per applicare l" + "'" + "URL.",
-      );
+      setMessage("File caricato. Salva il record per applicare l'URL.");
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Upload non riuscito.",
-      );
+      setMessage(error instanceof Error ? error.message : "Upload non riuscito.");
     }
-  }
-
-  function setField(field: string, value: unknown) {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function toDateTimeLocal(value: unknown) {
-    if (!value) return "";
-    const date = new Date(String(value));
-    if (Number.isNaN(date.getTime())) return String(value);
-    const offset = date.getTimezoneOffset();
-    return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 16);
   }
 
   function renderField(field: string) {
     const value = form[field];
-    const relation = [
-      "competition_id",
-      "team_id",
-      "home_team_id",
-      "away_team_id",
-      "match_id",
-      "player_id",
-      "related_player_id",
-    ].includes(field);
-    const relationOptions =
-      field === "competition_id"
-        ? lookups.competitions.map((x) => ({ id: x.id, label: x.name }))
-        : field.includes("team_id")
-          ? lookups.teams.map((x) => ({ id: x.id, label: x.name }))
-          : field.includes("player_id")
-            ? lookups.players.map((x) => ({
-                id: x.id,
-                label: `${x.first_name} ${x.last_name}`,
-              }))
-            : field === "match_id"
-              ? lookups.matches.map((x) => ({
-                  id: x.id,
-                  label: `${x.id.slice(0, 8)} — ${x.matchday ?? ""}`,
-                }))
-              : [];
-
-    if (relation) {
-      return (
-        <select
-          value={String(value ?? "")}
-          onChange={(e) => setField(field, e.target.value)}
-          required
-        >
-          <option value="">Seleziona</option>
-          {relationOptions.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      );
-    }
 
     if (field === "starter") {
       return (
@@ -418,9 +646,37 @@ function CrudPanel({
             type="checkbox"
             checked={Boolean(value)}
             onChange={(e) => setField(field, e.target.checked)}
-          />{" "}
-          Titolare
+          />
+          {" "}Titolare
         </label>
+      );
+    }
+
+    const relationFields = [
+      "competition_id",
+      "team_id",
+      "home_team_id",
+      "away_team_id",
+      "match_id",
+      "player_id",
+      "related_player_id",
+    ];
+
+    if (relationFields.includes(field)) {
+      const options = relationOptions(field, resource, form, lookups);
+      return (
+        <select
+          value={String(value ?? "")}
+          onChange={(e) => setField(field, e.target.value)}
+          required={requiredFields[resource].includes(field)}
+        >
+          <option value="">Seleziona</option>
+          {options.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       );
     }
 
@@ -429,15 +685,17 @@ function CrudPanel({
         resource === "competitions"
           ? selectOptions.competitionStatus
           : selectOptions.matchStatus;
+
       return (
         <select
           value={String(value ?? "")}
           onChange={(e) => setField(field, e.target.value)}
+          required={requiredFields[resource].includes(field)}
         >
           <option value="">Seleziona</option>
-          {options.map((x) => (
-            <option key={x} value={x}>
-              {x}
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
             </option>
           ))}
         </select>
@@ -449,11 +707,12 @@ function CrudPanel({
         <select
           value={String(value ?? "")}
           onChange={(e) => setField(field, e.target.value)}
+          required={requiredFields[resource].includes(field)}
         >
           <option value="">Seleziona</option>
-          {selectOptions[field].map((x) => (
-            <option key={x} value={x}>
-              {x}
+          {selectOptions[field].map((option) => (
+            <option key={option} value={option}>
+              {option}
             </option>
           ))}
         </select>
@@ -469,6 +728,7 @@ function CrudPanel({
       "minute",
       "sort_order",
     ].includes(field);
+
     const type = isDateTime
       ? "datetime-local"
       : isDate
@@ -476,16 +736,17 @@ function CrudPanel({
         : isNumber
           ? "number"
           : "text";
+
     const inputValue = isDateTime
-      ? toDateTimeLocal(value)
+      ? normalizeDateTimeLocal(value)
       : value === null || value === undefined
         ? ""
         : String(value);
+
     const acceptsImage =
       field.includes("logo") ||
       field.includes("image") ||
-      field.includes("thumbnail") ||
-      field.includes("hero_image");
+      field.includes("thumbnail");
 
     return (
       <div className="admin-input-row">
@@ -493,55 +754,58 @@ function CrudPanel({
           type={type}
           value={inputValue}
           onChange={(e) => setField(field, e.target.value)}
+          required={requiredFields[resource].includes(field)}
+          min={isNumber ? 0 : undefined}
         />
         {acceptsImage && (
           <input
             className="file-input"
             type="file"
             accept="image/*"
-            onChange={(e) =>
-              e.target.files?.[0] && void uploadFor(field, e.target.files[0])
-            }
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void uploadFor(field, file);
+            }}
           />
         )}
       </div>
     );
   }
 
+  const visibleColumns = resourceFields[resource].slice(0, 5);
+
   return (
     <div className="admin-resource">
       <div className="admin-resource__head">
         <div>
           <span className="eyebrow">CRUD / {resourceLabels[resource]}</span>
-          <h2>{editingId ? "Modifica record" : "Nuovo record"}</h2>
+          <h2>{editingKey ? "Modifica record" : "Nuovo record"}</h2>
         </div>
-        <button
-          className="btn btn--ghost"
-          onClick={() => {
-            setForm(defaultsFor(resource));
-            setEditingId(null);
-          }}
-        >
-          Nuovo
-        </button>
+        {editingKey && (
+          <button className="btn btn--ghost" onClick={cancelEdit} type="button">
+            Annulla
+          </button>
+        )}
       </div>
-      {canWrite && (
+
+      {canWrite ? (
         <form className="admin-form" onSubmit={save}>
           <div className="admin-form__grid">
-            {fields.map((field) => (
+            {resourceFields[resource].map((field) => (
               <label key={field}>
                 {labelize(field)}
                 {renderField(field)}
               </label>
             ))}
           </div>
+
           {message && <p className="admin-message">{message}</p>}
+
           <button className="btn btn--primary" type="submit">
-            {editingId ? "Salva modifiche" : "Crea record"}
+            {editingKey ? "Salva modifiche" : "Crea record"}
           </button>
         </form>
-      )}
-      {!canWrite && (
+      ) : (
         <div className="empty-state">
           <div className="empty-state__mark">R</div>
           <div>
@@ -550,6 +814,7 @@ function CrudPanel({
           </div>
         </div>
       )}
+
       <div className="admin-table-wrap">
         {loading ? (
           <p className="admin-message">Caricamento…</p>
@@ -559,34 +824,59 @@ function CrudPanel({
           <table className="admin-table">
             <thead>
               <tr>
-                {visibleColumns.map((x) => (
-                  <th key={x}>{labelize(x)}</th>
+                {visibleColumns.map((field) => (
+                  <th key={field}>{labelize(field)}</th>
                 ))}
                 <th>Azioni</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={String(row.id)}>
-                  {visibleColumns.map((x) => (
-                    <td key={x}>{formatCell(row[x])}</td>
+                <tr
+                  key={String(
+                    resource === "mvp"
+                      ? row.match_id
+                      : row[resourcePrimaryKeys[resource]],
+                  )}
+                >
+                  {visibleColumns.map((field) => (
+                    <td key={field}>
+                      {field === "team_id"
+                        ? lookups.teams.find((x) => x.id === row[field])?.name ?? "—"
+                        : field === "player_id"
+                          ? (() => {
+                              const p = lookups.players.find((x) => x.id === row[field]);
+                              return p ? `${p.first_name} ${p.last_name}` : "—";
+                            })()
+                          : field === "competition_id"
+                            ? lookups.competitions.find((x) => x.id === row[field])?.name ?? "—"
+                            : field === "home_team_id" || field === "away_team_id"
+                              ? lookups.teams.find((x) => x.id === row[field])?.name ?? "—"
+                              : row[field] == null || row[field] === ""
+                                ? "—"
+                                : typeof row[field] === "boolean"
+                                  ? row[field] ? "Sì" : "No"
+                                  : String(row[field])}
+                    </td>
                   ))}
                   <td className="admin-actions">
                     {canWrite && (
-                      <button
-                        className="btn btn--small btn--ghost"
-                        onClick={() => startEdit(row)}
-                      >
-                        Modifica
-                      </button>
-                    )}
-                    {canWrite && (
-                      <button
-                        className="btn btn--small btn--danger"
-                        onClick={() => void remove(row)}
-                      >
-                        Elimina
-                      </button>
+                      <>
+                        <button
+                          className="btn btn--small btn--ghost"
+                          onClick={() => startEdit(row)}
+                          type="button"
+                        >
+                          Modifica
+                        </button>
+                        <button
+                          className="btn btn--small btn--danger"
+                          onClick={() => void remove(row)}
+                          type="button"
+                        >
+                          Elimina
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>
@@ -652,7 +942,7 @@ function UsersPanel() {
               username: form.username,
               email: form.email,
               full_name: form.full_name,
-              code: form.code,
+              code: form.code || undefined,
               role: form.role,
             }
           : {
@@ -671,9 +961,7 @@ function UsersPanel() {
       resetForm();
       await load();
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Operazione non riuscita.",
-      );
+      setMessage(error instanceof Error ? error.message : "Operazione non riuscita.");
     }
   }
 
@@ -685,24 +973,19 @@ function UsersPanel() {
       });
       await load();
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Operazione non riuscita.",
-      );
+      setMessage(error instanceof Error ? error.message : "Operazione non riuscita.");
     }
   }
 
   async function remove(user: AdminProfile) {
-    if (!confirm(`Eliminare ${user.username ?? user.full_name ?? "utente"}?`))
-      return;
+    if (!confirm(`Eliminare ${user.username ?? user.full_name ?? "utente"}?`)) return;
 
     try {
       await callAdminUsers({ action: "delete", user_id: user.id });
       if (editing?.id === user.id) resetForm();
       await load();
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Operazione non riuscita.",
-      );
+      setMessage(error instanceof Error ? error.message : "Operazione non riuscita.");
     }
   }
 
@@ -711,9 +994,7 @@ function UsersPanel() {
       <div className="admin-resource__head">
         <div>
           <span className="eyebrow">Super Admin / Utenti</span>
-          <h2>
-            {editing ? "Modifica amministratore" : "Nuovo amministratore"}
-          </h2>
+          <h2>{editing ? "Modifica amministratore" : "Nuovo amministratore"}</h2>
         </div>
         <button className="btn btn--ghost" onClick={resetForm} type="button">
           Nuovo
@@ -755,7 +1036,7 @@ function UsersPanel() {
             Codice di accesso
             <input
               type="text"
-              minLength={8}
+              minLength={editing && !form.code ? undefined : 8}
               required={!editing}
               placeholder={
                 editing
@@ -802,24 +1083,24 @@ function UsersPanel() {
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
-              <tr key={u.id}>
-                <td>{u.username ?? "—"}</td>
-                <td>{u.email ?? "—"}</td>
-                <td>{u.full_name ?? "—"}</td>
-                <td>{u.role}</td>
-                <td>{u.is_active ? "Attivo" : "Disabilitato"}</td>
+            {users.map((user) => (
+              <tr key={user.id}>
+                <td>{user.username ?? "—"}</td>
+                <td>{user.email ?? "—"}</td>
+                <td>{user.full_name ?? "—"}</td>
+                <td>{user.role}</td>
+                <td>{user.is_active ? "Attivo" : "Disabilitato"}</td>
                 <td className="admin-actions">
                   <button
                     className="btn btn--small btn--ghost"
                     onClick={() => {
-                      setEditing(u);
+                      setEditing(user);
                       setForm({
-                        username: u.username ?? "",
-                        email: u.email ?? "",
-                        full_name: u.full_name ?? "",
+                        username: user.username ?? "",
+                        email: user.email ?? "",
+                        full_name: user.full_name ?? "",
                         code: "",
-                        role: u.role,
+                        role: user.role,
                       });
                     }}
                     type="button"
@@ -828,14 +1109,14 @@ function UsersPanel() {
                   </button>
                   <button
                     className="btn btn--small btn--ghost"
-                    onClick={() => void toggle(u)}
+                    onClick={() => void toggle(user)}
                     type="button"
                   >
-                    {u.is_active ? "Disattiva" : "Attiva"}
+                    {user.is_active ? "Disattiva" : "Attiva"}
                   </button>
                   <button
                     className="btn btn--small btn--danger"
-                    onClick={() => void remove(u)}
+                    onClick={() => void remove(user)}
                     type="button"
                   >
                     Elimina
@@ -856,30 +1137,22 @@ export default function Admin() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [section, setSection] = useState<"dashboard" | Resource | "users">(
-    "dashboard",
-  );
+  const [section, setSection] = useState<"dashboard" | Resource | "users">("dashboard");
 
   useEffect(() => {
     if (!supabase) return;
 
     let mounted = true;
 
-    const init = async () => {
+    async function init() {
       try {
         const admin = await getAuthenticatedAdmin();
-
-        if (mounted) {
-          setProfile(admin);
-        }
-      } catch (error) {
-        console.error("Session initialization error:", error);
-
-        if (mounted) {
-          setProfile(null);
-        }
+        if (mounted) setProfile(admin);
+      } catch (initError) {
+        console.error("Session initialization error:", initError);
+        if (mounted) setProfile(null);
       }
-    };
+    }
 
     void init();
 
@@ -901,16 +1174,10 @@ export default function Admin() {
       ) {
         try {
           const admin = await getAuthenticatedAdmin();
-
-          if (mounted) {
-            setProfile(admin);
-          }
-        } catch (error) {
-          console.error("Auth state validation error:", error);
-
-          if (mounted) {
-            setProfile(null);
-          }
+          if (mounted) setProfile(admin);
+        } catch (authError) {
+          console.error("Auth state validation error:", authError);
+          if (mounted) setProfile(null);
         }
       }
     });
@@ -939,23 +1206,21 @@ export default function Admin() {
         return;
       }
 
-      const p = await getCurrentAdminProfile();
+      const admin = await getAuthenticatedAdmin();
 
-      if (
-        !p ||
-        !p.is_active ||
-        !["super_admin", "admin", "operator"].includes(p.role)
-      ) {
+      if (!admin) {
         await supabase.auth.signOut();
         setError("Account non autorizzato o disattivato.");
         return;
       }
 
-      setProfile(p);
+      setProfile(admin);
       setCode("");
-    } catch (error) {
+    } catch (loginError) {
       setError(
-        error instanceof Error ? error.message : "Errore durante l’accesso.",
+        loginError instanceof Error
+          ? loginError.message
+          : "Errore durante l’accesso.",
       );
     } finally {
       setLoading(false);
@@ -1027,6 +1292,7 @@ export default function Admin() {
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="Codice di accesso"
                 autoComplete="one-time-code"
+                minLength={8}
                 required
               />
               <button
@@ -1064,16 +1330,18 @@ export default function Admin() {
             >
               Dashboard
             </button>
-            {resources.map((r) => (
+
+            {resources.map((resource) => (
               <button
-                key={r}
-                className={section === r ? "active" : ""}
-                onClick={() => setSection(r)}
+                key={resource}
+                className={section === resource ? "active" : ""}
+                onClick={() => setSection(resource)}
                 type="button"
               >
-                {resourceLabels[r]}
+                {resourceLabels[resource]}
               </button>
             ))}
+
             {profile.role === "super_admin" && (
               <button
                 className={section === "users" ? "active" : ""}
@@ -1085,26 +1353,23 @@ export default function Admin() {
             )}
           </nav>
 
-          <button
-            className="btn btn--ghost"
-            onClick={() => void logout()}
-            type="button"
-          >
+          <button className="btn btn--ghost" onClick={() => void logout()} type="button">
             Esci
           </button>
         </aside>
 
         <main className="admin-main">
           {section === "dashboard" ? (
-            <>
-              <div className="admin-hero">
-                <div>
-                  <span className="eyebrow">{profile.role}</span>
-                  <h1>Dashboard</h1>
-                  <p>Gestisci tutti i contenuti Street League.</p>
-                </div>
+            <div className="admin-hero">
+              <div>
+                <span className="eyebrow">{profile.role}</span>
+                <h1>Dashboard</h1>
+                <p>
+                  Gestisci competizioni, squadre, giocatori, partite e contenuti
+                  Street League.
+                </p>
               </div>
-            </>
+            </div>
           ) : section === "users" ? (
             <UsersPanel />
           ) : (

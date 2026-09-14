@@ -2,7 +2,14 @@ export type CompetitionStatus = "upcoming" | "active" | "finished";
 export type PartnerTier = "gold" | "silver" | "bronze";
 export type MatchStatus = "scheduled" | "live" | "finished" | "postponed";
 export type EventType =
-  "goal" | "assist" | "yellow_card" | "red_card" | "substitution" | "other";
+  | "goal"
+  | "assist"
+  | "yellow_card"
+  | "red_card"
+  | "substitution"
+  | "foul"
+  | "other";
+
 export interface Competition {
   id: string;
   name: string;
@@ -13,14 +20,18 @@ export interface Competition {
   end_date: string | null;
   hero_image_url: string | null;
 }
+
 export interface Team {
   id: string;
   competition_id: string;
   name: string;
   slug: string;
+  short_name: string | null;
+  city: string | null;
   logo_url: string | null;
   accent_hex: string | null;
 }
+
 export interface Player {
   id: string;
   team_id: string;
@@ -28,8 +39,10 @@ export interface Player {
   last_name: string;
   shirt_number: number | null;
   position: string | null;
+  profile_image_url: string | null;
   bg_less_image_url: string | null;
 }
+
 export interface Match {
   id: string;
   competition_id: string;
@@ -42,6 +55,21 @@ export interface Match {
   away_score: number | null;
   venue: string | null;
 }
+
+export interface MatchLineup {
+  id: string;
+  match_id: string;
+  team_id: string;
+  player_id: string;
+  starter: boolean;
+  shirt_number: number | null;
+}
+
+export interface MatchMvp {
+  match_id: string;
+  player_id: string;
+}
+
 export interface Partner {
   id: string;
   name: string;
@@ -50,6 +78,7 @@ export interface Partner {
   website_url: string | null;
   sort_order: number;
 }
+
 export interface SocialContent {
   id: string;
   platform: "youtube" | "instagram" | "tiktok";
@@ -58,6 +87,7 @@ export interface SocialContent {
   content_url: string;
   published_at: string | null;
 }
+
 export interface MatchEvent {
   id: string;
   match_id: string;
@@ -66,4 +96,15 @@ export interface MatchEvent {
   event_type: EventType;
   minute: number | null;
   note: string | null;
+}
+
+export interface PlayerStats {
+  goals: number;
+  appearances: number;
+  assists: number;
+  yellow_cards: number;
+  red_cards: number;
+  fouls: number;
+  clean_sheets: number;
+  mvps: number;
 }

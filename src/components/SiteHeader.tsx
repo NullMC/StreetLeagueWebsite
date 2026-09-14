@@ -60,8 +60,7 @@ export function SiteHeader() {
             <span />
           </button>
         </div>
-      </header>
-      <div className="second-site-header">
+        <div className="second-site-header">
         <div className="second-site-header__right"> 
           <a className="contact-link" href="https://www.instagram.com/__streetleague__/">
             <FontAwesomeIcon icon={faInstagram} />
@@ -74,6 +73,7 @@ export function SiteHeader() {
           </a>
         </div>
       </div>
+      </header>
       {open && (
         <div className="mobile-menu">
           <nav>
