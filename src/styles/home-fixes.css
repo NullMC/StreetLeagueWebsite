@@ -1,0 +1,47 @@
+.leader-stat-card {
+  min-height: 255px;
+}
+
+.leader-stat-card h3 {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leader-stat-card .rank-row {
+  min-height: 40px;
+}
+
+.leader-stat-card .rank-row span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leader-stat-card .rank-row small {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.logo-scroller__viewport {
+  contain: layout paint;
+  transform: translateZ(0);
+}
+
+.logo-scroller__track {
+  animation-duration: 42s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.logo-scroller__set {
+  flex: 0 0 auto;
+}
