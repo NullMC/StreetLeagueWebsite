@@ -24,18 +24,8 @@ import MatchDetail from "./pages/MatchDetail";
 import Partners from "./pages/Partners";
 import Collaborate from "./pages/Collaborate";
 import Admin from "./pages/Admin";
-import AdminCollaborationCtaV2 from "./pages/AdminCollaborationCtaV2";
 import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/AppLayout";
-
-function AdminPage() {
-  return (
-    <>
-      <Admin />
-      <AdminCollaborationCtaV2 />
-    </>
-  );
-}
 
 function App() {
   return (
@@ -54,7 +44,7 @@ function App() {
         <Route path="/partite/:matchId" element={<MatchDetail />} />
         <Route path="/partner" element={<Partners />} />
         <Route path="/collabora" element={<Collaborate />} />
-        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
