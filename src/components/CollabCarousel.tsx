@@ -73,12 +73,15 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
       >
         {ordered.map((item, index) => {
           const hasCta = Boolean(item.cta_url);
+          const hasFlyer = Boolean(item.flyer_url);
           return (
             <article
               className={`collab-carousel__item ${index === active ? "is-active" : ""}`}
               key={item.id}
             >
-              <div className="collab-carousel__ad">
+              <div
+                className={`collab-carousel__ad ${hasFlyer ? "has-poster" : "is-copy-only"}`}
+              >
                 <div className="collab-carousel__copy">
                   <span className="eyebrow">In evidenza</span>
                   <h3>{item.title}</h3>
@@ -97,15 +100,10 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
                     <span aria-hidden="true">↗</span>
                   </a>
                 </div>
-                {item.flyer_url ? (
+                {hasFlyer && (
                   <div className="collab-carousel__poster">
-                    <img src={item.flyer_url} alt="" />
+                    <img src={item.flyer_url!} alt="" />
                   </div>
-                ) : (
-                  <div
-                    className="collab-carousel__poster collab-carousel__poster--empty"
-                    aria-hidden="true"
-                  />
                 )}
               </div>
             </article>
