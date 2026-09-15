@@ -1,4 +1,4 @@
-const allowedTags = new Set(["B", "STRONG", "I", "EM", "U", "S", "BR", "P", "UL", "OL", "LI", "A"]);
+const allowedTags = new Set(["B", "STRONG", "I", "EM", "U", "S", "BR", "P", "DIV", "UL", "OL", "LI", "A"]);
 
 export function sanitizeRichTextHtml(html: string) {
   if (typeof document === "undefined") return html;
