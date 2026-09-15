@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { PageShell } from "../components/PageShell";
+import { RichTextEditor } from "../components/RichTextEditor";
 import { supabase, supabaseConfigured } from "../lib/supabase";
 import {
   callAdminUsers,
@@ -664,7 +665,14 @@ function CrudPanel({
       field.includes("image") ||
       field.includes("thumbnail") ||
       field === "flyer_url";
-    if (field === "description" || field === "note")
+    if (field === "description")
+      return (
+        <RichTextEditor
+          value={inputValue}
+          onChange={(nextValue) => setField(field, nextValue)}
+        />
+      );
+    if (field === "note")
       return (
         <textarea
           value={inputValue}
