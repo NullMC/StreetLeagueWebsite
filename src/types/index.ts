@@ -84,6 +84,7 @@ export interface ActiveCollaboration {
   title: string;
   description: string;
   flyer_url: string | null;
+  cta_url?: string | null;
   sort_order: number;
   created_at: string;
 }
