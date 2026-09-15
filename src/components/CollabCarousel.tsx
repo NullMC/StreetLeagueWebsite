@@ -76,9 +76,7 @@ export function CollabCarousel({
               <div className={`collab-carousel__ad ${hasFlyer ? "has-poster" : "is-copy-only"}`}>
                 <div className="collab-carousel__copy">
                   <span className="eyebrow">In evidenza</span>
-                  <h3 style={variant === "home" ? { color: "#010a08" } : undefined}>
-                    {item.title}
-                  </h3>
+                  <h3>{item.title}</h3>
                   {item.description && (
                     <div
                       className="collab-carousel__description"
