@@ -61,8 +61,13 @@
 .admin-table-wrap,
 .admin-help { border: 1px solid rgba(1,10,8,.10); border-radius: 5px; background: #fff; }
 .admin-form { padding: 22px; margin-bottom: 28px; }
-.admin-form__grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
-.admin-form label { display: grid; gap: 7px; color: rgba(1,10,8,.70); font-size: 10px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; }
+.admin-form__grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; align-items: start; }
+.admin-form__grid > * { min-width: 0; align-self: start; margin: 0 !important; }
+.admin-form label { display: grid; gap: 7px; align-content: start; color: rgba(1,10,8,.70); font-size: 10px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; }
+.admin-form label > input,
+.admin-form label > select,
+.admin-form label > textarea,
+.admin-form label > .admin-input-row { margin-top: 0 !important; }
 
 .admin-login { max-width: 540px; padding: 52px 0; }
 .admin-login h1 { margin: 12px 0; font-size: 78px; line-height: .86; color: #010a08; }
@@ -71,13 +76,13 @@
 .admin-form input,
 .admin-form select,
 .admin-form textarea {
-  width: 100%; min-height: 46px; border: 1px solid rgba(1,10,8,.14); border-radius: 5px; background: #fff; color: #010a08; padding: 0 12px; outline: none; font: inherit;
+  width: 100%; min-height: 46px; border: 1px solid rgba(1,10,8,.14); border-radius: 5px; background: #fff; color: #010a08; padding: 0 12px; outline: none; font: inherit; box-sizing: border-box;
 }
 .admin-form textarea { min-height: 120px; padding: 12px; resize: vertical; }
 .admin-login input::placeholder, .admin-form input::placeholder, .admin-form textarea::placeholder { color: rgba(1,10,8,.42); }
 .admin-login input:focus, .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus { border-color: rgba(228,34,120,.62); box-shadow: 0 0 0 3px rgba(228,34,120,.08); }
 
-.admin-input-row { display: grid; gap: 6px; }
+.admin-input-row { display: grid; gap: 6px; align-content: start; }
 .admin-input-row .file-input { min-height: auto; padding: 8px; font-size: 10px; background: #fff; }
 .check-field { display: flex !important; align-items: center; gap: 8px; }
 .check-field input { width: 16px !important; min-height: 16px !important; accent-color: var(--pink); }
@@ -110,61 +115,15 @@
   padding: 28px var(--admin-padding) 48px;
 }
 
-.admin-cta-manager__head {
-  margin-bottom: 20px;
-}
-
-.admin-cta-manager__head h2 {
-  margin: 8px 0 8px;
-  font-family: var(--display);
-  font-size: 44px;
-  line-height: .92;
-  text-transform: uppercase;
-}
-
-.admin-cta-manager__head p {
-  margin: 0;
-  color: rgba(1,10,8,.62);
-  line-height: 1.6;
-}
-
-.admin-cta-manager__list {
-  display: grid;
-  gap: 12px;
-}
-
-.admin-cta-manager__row {
-  display: grid;
-  grid-template-columns: minmax(220px, .8fr) minmax(320px, 1.4fr) auto;
-  gap: 14px;
-  align-items: end;
-  padding: 16px;
-  border: 1px solid rgba(1,10,8,.10);
-  border-radius: 5px;
-  background: #fff;
-}
-
-.admin-cta-manager__title strong {
-  display: block;
-  font-family: var(--display);
-  font-size: 25px;
-  line-height: .95;
-  text-transform: uppercase;
-}
-
-.admin-cta-manager__row label {
-  display: grid;
-  gap: 7px;
-  color: rgba(1,10,8,.70);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .10em;
-  text-transform: uppercase;
-}
-
-.admin-cta-manager__row button {
-  margin: 0;
-}
+.admin-cta-manager__head { margin-bottom: 20px; }
+.admin-cta-manager__head h2 { margin: 8px 0 8px; font-family: var(--display); font-size: 44px; line-height: .92; text-transform: uppercase; }
+.admin-cta-manager__head p { margin: 0; color: rgba(1,10,8,.62); line-height: 1.6; }
+.admin-cta-manager__list { display: grid; gap: 12px; }
+.admin-cta-manager__row { display: grid; grid-template-columns: minmax(220px,.8fr) minmax(320px,1.4fr) auto; gap: 14px; align-items: end; padding: 16px; border: 1px solid rgba(1,10,8,.10); border-radius: 5px; background: #fff; }
+.admin-cta-manager__title strong { display: block; font-family: var(--display); font-size: 25px; line-height: .95; text-transform: uppercase; }
+.admin-cta-manager__row label { display: grid; gap: 7px; color: rgba(1,10,8,.70); font-size: 10px; font-weight: 800; letter-spacing: .10em; text-transform: uppercase; }
+.admin-cta-manager__row input { margin: 0 !important; }
+.admin-cta-manager__row button { margin: 0; }
 
 @media (max-width:900px) {
   .admin-layout { grid-template-columns: 1fr; }
