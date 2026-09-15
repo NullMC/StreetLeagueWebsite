@@ -22,14 +22,36 @@
   box-shadow: 0 26px 60px rgba(1,10,8,.28), 0 0 0 1px rgba(249,249,249,.28) !important;
 }
 
-/* The Partners sponsor field is full-bleed: no white side strips. */
+/* Partners sponsor area uses one continuous pink canvas.
+   The tier sections remain structurally separate, but their background is transparent
+   so the gradient does not restart at each section boundary. */
 .partners-page .partners-tier-section {
   width: 100vw !important;
   max-width: none !important;
   margin-left: calc(50% - 50vw) !important;
   margin-right: calc(50% - 50vw) !important;
-  background: linear-gradient(120deg,#b10f59 0%,#e42278 48%,#ed7bab 100%) !important;
+  background: transparent !important;
   color: #fff !important;
+}
+
+.partners-page .partners-page__hero + .partners-tier-section {
+  background: linear-gradient(120deg,#b10f59 0%,#e42278 48%,#ed7bab 100%) !important;
+}
+
+.partners-page .partners-page__hero + .partners-tier-section,
+.partners-page .partners-page__hero + .partners-tier-section ~ .partners-tier-section {
+  position: relative;
+}
+
+.partners-page {
+  background: linear-gradient(120deg,#b10f59 0%,#e42278 48%,#ed7bab 100%);
+}
+
+/* Remove the per-section fill created by the rule above after the first sponsor tier.
+   The parent canvas is responsible for the complete sponsor-area background. */
+.partners-page .partners-page__hero + .partners-tier-section,
+.partners-page .partners-page__hero + .partners-tier-section ~ .partners-tier-section {
+  background: transparent !important;
 }
 
 .partners-page .partners-tier-section .partners-tier-heading,
