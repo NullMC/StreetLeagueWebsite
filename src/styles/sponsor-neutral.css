@@ -162,3 +162,9 @@
   .partners-tier-heading__collabs .collab-carousel__item { flex-basis: 125px; height: 175px; }
   .partners-tier-heading__collabs .collab-carousel__item.is-active { flex-basis: min(200px,64vw); height: min(280px,88vw); }
 }
+
+/* Final specificity guard: the homepage collaboration title must stay dark.
+   This comes after the generic sponsor-tier heading rule and therefore wins on Home only. */
+.sponsor-band--redesign .sponsor-tier--collab .collab-carousel__copy h3 {
+  color: #010a08 !important;
+}
