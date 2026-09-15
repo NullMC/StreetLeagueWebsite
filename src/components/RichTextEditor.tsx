@@ -8,11 +8,9 @@ function exec(command: string, value?: string) {
 export function RichTextEditor({
   value,
   onChange,
-  required = false,
 }: {
   value: string;
   onChange: (value: string) => void;
-  required?: boolean;
 }) {
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +54,6 @@ export function RichTextEditor({
         onInput={handleInput}
         suppressContentEditableWarning
       />
-      {required && <input className="rich-text-editor__required" tabIndex={-1} required value={value.replace(/<[^>]*>/g, "").trim()} onChange={() => undefined} aria-hidden="true" />}
     </div>
   );
 }
