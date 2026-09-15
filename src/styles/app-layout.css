@@ -28,7 +28,6 @@
   text-transform: uppercase;
   transition: transform 150ms ease;
 }
-
 .skip-link:focus { transform: translateY(0); }
 .skip-link--nav { left: 175px; }
 .skip-link--footer { left: auto; right: 16px; }
@@ -39,7 +38,7 @@
 .site-header {
   justify-content: flex-start;
   z-index: 50;
-  box-shadow: 0 8px 24px rgba(1, 10, 8, .10);
+  box-shadow: 0 10px 24px rgba(1,10,8,.12);
 }
 
 .site-header > .brand { flex: 0 0 auto; }
