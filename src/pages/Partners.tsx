@@ -89,7 +89,13 @@ export default function Partners() {
           ) : null}
         </div>
       </section>
-      <section className="section--edge partners-tier-section partners-tier-section--gold">
+      <section
+        className="section--edge partners-tier-section partners-tier-section--gold"
+        style={{
+          paddingLeft: "10vw",
+          paddingRight: "10vw",
+        }}
+      >
         <div className="partners-tier-heading">
           <div>
             <span className="eyebrow">Main partners</span>
@@ -110,7 +116,12 @@ export default function Partners() {
           />
         )}
       </section>
-      <section className="section--edge partners-tier-section partners-tier-section--silver">
+      <section className="section--edge partners-tier-section partners-tier-section--silver"
+        style={{
+          paddingLeft: "10vw",
+          paddingRight: "10vw",
+        }}
+      >
         <div className="partners-tier-heading">
           <div>
             <h2>Partner Silver</h2>
@@ -130,7 +141,12 @@ export default function Partners() {
           />
         )}
       </section>
-      <section className="section--edge partners-tier-section partners-tier-section--bronze">
+      <section className="section--edge partners-tier-section partners-tier-section--bronze"
+        style={{
+          paddingLeft: "10vw",
+          paddingRight: "10vw",
+        }}
+      >
         <div className="partners-tier-heading">
           <div>
             <h2>Partner Bronze</h2>
