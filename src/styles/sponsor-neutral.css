@@ -1,22 +1,12 @@
 .sponsor-band--redesign {
   background:
-    radial-gradient(
-      circle at 14% 20%,
-      rgba(228, 34, 120, 0.34),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 86% 78%,
-      rgba(237, 123, 171, 0.22),
-      transparent 28%
-    ),
+    radial-gradient(circle at 14% 20%, rgba(228, 34, 120, 0.34), transparent 30%),
+    radial-gradient(circle at 86% 78%, rgba(237, 123, 171, 0.22), transparent 28%),
     linear-gradient(135deg, #250817 0%, #e42278 48%, #8f124b 100%) !important;
 }
 
 .sponsor-band--redesign::before,
-.sponsor-band--redesign::after {
-  display: block !important;
-}
+.sponsor-band--redesign::after { display: block !important; }
 
 .sponsor-band--redesign > .sponsor-band__inner > .section-head {
   justify-content: flex-start !important;
@@ -24,159 +14,146 @@
   text-align: left !important;
 }
 
-.sponsor-band--redesign > .sponsor-band__inner > .section-head > div {
-  text-align: left !important;
-}
+.sponsor-band--redesign > .sponsor-band__inner > .section-head > div { text-align: left !important; }
 
-/* Sponsor cards: keep tier identity in the section, not as a colored card border. */
+/* Sponsor card: no border or shadow, centered logo, name + Info underneath. */
 .sponsor-band--redesign .partner-card,
 .partners-page--redesign .partner-card,
 .partner-card--gold,
 .partner-card--silver,
 .partner-card--bronze {
+  min-height: 170px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: transparent !important;
+  border: 0 !important;
   box-shadow: none !important;
 }
 
-/* Cleaner flyer shadows: depth without a pink outline competing with the artwork. */
+.partner-card__logo {
+  width: 100%;
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  background: transparent !important;
+}
+
+.partner-card__logo img {
+  max-width: min(100%, 220px);
+  max-height: 92px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.partner-card__logo strong {
+  color: #fff;
+  font-size: 20px;
+  text-align: center;
+}
+
+.partner-card__name {
+  display: block;
+  min-width: 0;
+  color: #fff !important;
+  line-height: 1.15;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.sponsor-link-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: fit-content !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 9px 14px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: var(--pink) !important;
+  box-shadow: 0 8px 20px rgba(1, 10, 8, .12) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .08em !important;
+  line-height: 1 !important;
+  text-transform: uppercase;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.sponsor-link-btn:hover { background: #fff !important; color: #b10f59 !important; transform: translateY(-1px); }
+.sponsor-link-btn--disabled { opacity: .58; cursor: default; }
+
+/* Flyer depth on the public sponsor canvas. */
 .collab-carousel__poster {
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34) !important;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .34) !important;
 }
 
 .collab-carousel__item.is-active .collab-carousel__poster {
-  border-color: rgba(249, 249, 249, 0.16) !important;
-  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.48) !important;
+  border-color: rgba(249,249,249,.16) !important;
+  box-shadow: 0 24px 54px rgba(0,0,0,.48) !important;
 }
 
-/* Partners hero: clean, optically centered title block. */
+/* Partners hero base geometry. */
 .partners-page__hero-bg::before,
-.partners-page__hero-bg::after {
-  display: none !important;
-}
+.partners-page__hero-bg::after { display: none !important; }
 
-.partners-page__hero-bg {
-  background: var(--ink) !important;
-  filter: none !important;
-}
+.partners-page__hero-bg { background: var(--ink) !important; filter: none !important; }
 
 .partners-page__hero {
   align-items: center !important;
   min-height: calc(100vh - var(--site-header-total-height)) !important;
-  padding: clamp(88px, 12vh, 140px) 28px clamp(56px, 8vh, 96px) !important;
+  padding: clamp(88px,12vh,140px) 28px clamp(56px,8vh,96px) !important;
 }
 
 .partners-page__hero-content {
-  width: min(var(--max), 100%) !important;
+  width: min(var(--max),100%) !important;
   margin: 0 auto !important;
   transform: none !important;
 }
 
-.partners-page__hero-content h1 {
-  margin: 0 0 12px !important;
-  max-width: 760px;
-  text-align: left !important;
-  line-height: 0.82 !important;
-}
+.partners-page__hero-content h1 { margin: 0 0 12px !important; max-width: 760px; text-align: left !important; line-height: .82 !important; }
+.partners-page__hero-content p { margin: 0 !important; max-width: 620px; text-align: left !important; }
+.partners-page__hero-content .btn { margin-top: 24px; }
 
-.partners-page__hero-content p {
-  margin: 0 !important;
-  max-width: 620px;
-  text-align: left !important;
-}
-
-.partners-page__hero-content .btn {
-  margin-top: 24px;
-}
-
-/* Active collaborations beside the main Gold heading. */
+/* Active collaboration layout variants used by the Partners page. */
 .partners-tier-heading--with-collabs {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 460px) !important;
   align-items: center !important;
-  gap: clamp(28px, 5vw, 72px) !important;
+  gap: clamp(28px,5vw,72px) !important;
   margin-bottom: 34px !important;
 }
 
-.partners-tier-heading__copy {
-  min-width: 0;
-  align-self: center;
-}
-
-.partners-tier-heading__copy h2 {
-  margin: 7px 0 10px !important;
-  text-align: left !important;
-}
-
-.partners-tier-heading__copy p {
-  max-width: 420px;
-  margin: 0 !important;
-  text-align: left !important;
-}
-
-.partners-tier-heading__collabs {
-  min-width: 0;
-  max-width: 460px;
-  overflow: hidden;
-}
-
-.partners-tier-heading__collabs .collab-carousel__toolbar {
-  margin-bottom: 10px;
-}
-
-.partners-tier-heading__collabs .collab-carousel__toolbar p {
-  font-size: 10px;
-}
-
-.partners-tier-heading__collabs .collab-carousel__viewport {
-  gap: 10px;
-  padding: 10px 6px 20px;
-}
-
-.partners-tier-heading__collabs .collab-carousel__item {
-  flex-basis: 150px;
-  height: 205px;
-}
-
-.partners-tier-heading__collabs .collab-carousel__item.is-active {
-  flex-basis: 220px;
-  height: 300px;
-}
-
-.partners-tier-heading__collabs .collab-carousel__dots {
-  margin-top: -2px;
-}
+.partners-tier-heading__copy { min-width: 0; align-self: center; }
+.partners-tier-heading__copy h2 { margin: 7px 0 10px !important; text-align: left !important; }
+.partners-tier-heading__copy p { max-width: 420px; margin: 0 !important; text-align: left !important; }
+.partners-tier-heading__collabs { min-width: 0; max-width: 460px; overflow: hidden; }
+.partners-tier-heading__collabs .collab-carousel__toolbar { margin-bottom: 10px; }
+.partners-tier-heading__collabs .collab-carousel__toolbar p { font-size: 10px; }
+.partners-tier-heading__collabs .collab-carousel__viewport { gap: 10px; padding: 10px 6px 20px; }
+.partners-tier-heading__collabs .collab-carousel__item { flex-basis: 150px; height: 205px; }
+.partners-tier-heading__collabs .collab-carousel__item.is-active { flex-basis: 220px; height: 300px; }
+.partners-tier-heading__collabs .collab-carousel__dots { margin-top: -2px; }
 
 @media (max-width: 900px) {
-  .partners-tier-heading--with-collabs {
-    grid-template-columns: 1fr !important;
-    gap: 24px !important;
-  }
-
-  .partners-tier-heading__collabs {
-    max-width: 100%;
-  }
+  .partners-tier-heading--with-collabs { grid-template-columns: 1fr !important; gap: 24px !important; }
+  .partners-tier-heading__collabs { max-width: 100%; }
 }
 
 @media (max-width: 700px) {
-  .partners-page__hero {
-    min-height: calc(100svh - var(--site-header-total-height)) !important;
-    padding: 84px 14px 54px !important;
-  }
-
-  .partners-page__hero-content h1 {
-    font-size: clamp(3.6rem, 17vw, 6rem) !important;
-  }
-
-  .partners-tier-heading--with-collabs {
-    gap: 18px !important;
-  }
-
-  .partners-tier-heading__collabs .collab-carousel__item {
-    flex-basis: 125px;
-    height: 175px;
-  }
-
-  .partners-tier-heading__collabs .collab-carousel__item.is-active {
-    flex-basis: min(200px, 64vw);
-    height: min(280px, 88vw);
-  }
+  .partners-page__hero { min-height: calc(100svh - var(--site-header-total-height)) !important; padding: 84px 14px 54px !important; }
+  .partners-page__hero-content h1 { font-size: clamp(3.6rem,17vw,6rem) !important; }
+  .partners-tier-heading--with-collabs { gap: 18px !important; }
+  .partners-tier-heading__collabs .collab-carousel__item { flex-basis: 125px; height: 175px; }
+  .partners-tier-heading__collabs .collab-carousel__item.is-active { flex-basis: min(200px,64vw); height: min(280px,88vw); }
 }
