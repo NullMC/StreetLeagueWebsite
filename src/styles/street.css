@@ -736,7 +736,7 @@ main:focus {
       rgba(1, 10, 8, 0.48) 100%
     ),
     linear-gradient(180deg, rgba(1, 10, 8, 0.02) 0%, rgba(1, 10, 8, 0.72) 100%),
-    url(../../public/assets/nebula-vertical.png) center / cover no-repeat;
+    url(../../public/assets/nebula-vertical.webp) center / cover no-repeat;
   filter: saturate(1.05);
 }
 .partners-page__hero-content {

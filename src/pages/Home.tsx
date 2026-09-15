@@ -187,7 +187,7 @@ export default function Home() {
     [teams, matches],
   );
   const heroBackground =
-    competition?.hero_image_url || "/assets/nebula-vertical.png";
+    competition?.hero_image_url || "/assets/nebula-vertical.webp";
   const goldPartners = useMemo(
     () => partners.filter((partner) => partner.tier === "gold"),
     [partners],

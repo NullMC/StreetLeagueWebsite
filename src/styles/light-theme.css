@@ -315,8 +315,9 @@ body {
   background: transparent !important;
 }
 
+
 /* Silver tier uses the same pink/rose section canvas with light text; never fall back to a white card block. */
-.sponsor-tier--silver {
+.sponsor-tier--silver, .sponsor-tier--silver .empty-state{
   background: transparent !important;
   color: #fff !important;
 }
@@ -562,7 +563,7 @@ body {
   background: #f7f7f7 !important;
 }
 .admin-sidebar {
-  background: #010a08 !important;
+  background: #f9f9f9 !important;
   color: #f9f9f9;
 }
 .admin-resource,

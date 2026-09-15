@@ -802,7 +802,7 @@ section,
   animation: pulse 1.5s infinite;
 }
 .empty-state {
-  border: 1px dashed rgba(249, 249, 249, 0.2);
+  border: 2px dashed rgba(249, 249, 249, 0.2);
   min-height: 180px;
   padding: 28px;
   display: flex;
@@ -846,7 +846,7 @@ section,
   place-items: center;
   background:
     linear-gradient(155deg, rgba(228, 34, 120, 0.14), transparent),
-    url("/assets/nebula-portrait.jpg") center/cover;
+    url("/assets/nebula-portrait.webp") center/cover;
   position: relative;
   overflow: hidden;
 }
@@ -1004,7 +1004,7 @@ section,
   height: 190px;
   background:
     linear-gradient(140deg, rgba(228, 34, 120, 0.25), rgba(1, 10, 8, 0.55)),
-    url("/assets/nebula-landscape.jpg") center/cover;
+    url("/assets/nebula-landscape.webp") center/cover;
   display: grid;
   place-items: center;
 }
