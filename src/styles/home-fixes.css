@@ -42,11 +42,21 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: -96px;
-  height: 110px;
-  background: linear-gradient(to bottom, rgba(249,249,249,0), #f9f9f9 82%, #f9f9f9 100%);
+  top: -120px;
+  height: 120px;
+  background: linear-gradient(to bottom, rgba(249,249,249,0), #f9f9f9 100%);
   pointer-events: none;
-  z-index: -1;
+  z-index: 0;
+}
+.leaders-section > * { position: relative; z-index: 1; }
+
+/* Home hero: no pseudo-element overlays. Use one light white veil directly in the background. */
+.hero--data-only::before,
+.hero--data-only::after { display: none !important; }
+.hero--data-only {
+  background:
+    linear-gradient(rgba(249,249,249,.20), rgba(249,249,249,.20)),
+    var(--hero-image) center / cover no-repeat !important;
 }
 
 /* Latest-content frame has no shadow; only cards and controls create depth. */
