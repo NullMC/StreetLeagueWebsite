@@ -94,6 +94,8 @@ export interface SocialContent {
   platform: "youtube" | "instagram" | "tiktok";
   title: string;
   thumbnail_url: string | null;
+  image_url?: string | null;
+  description?: string | null;
   content_url: string;
   published_at: string | null;
 }
