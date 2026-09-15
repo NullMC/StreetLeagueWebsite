@@ -1,4 +1,4 @@
-.sponsor-band--redesign {
+ .sponsor-band--redesign {
   background:
     radial-gradient(circle at 14% 20%, rgba(228, 34, 120, 0.34), transparent 30%),
     radial-gradient(circle at 86% 78%, rgba(237, 123, 171, 0.22), transparent 28%),
@@ -92,6 +92,11 @@
 
 .sponsor-link-btn:hover { background: #fff !important; color: #b10f59 !important; transform: translateY(-1px); }
 .sponsor-link-btn--disabled { opacity: .58; cursor: default; }
+
+/* Home collaboration card: keep the sponsor copy heading dark on the white card. */
+.sponsor-band--redesign .collab-carousel__copy h3 {
+  color: #010a08 !important;
+}
 
 /* Flyer depth on the public sponsor canvas. */
 .collab-carousel__poster {
