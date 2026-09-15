@@ -9,8 +9,7 @@ import "./styles/chrome-responsive.css";
 import "./styles/sponsor-neutral.css";
 import "./styles/partner-tweaks.css";
 import "./styles/light-theme.css";
-import "./styles/light-ui-polish.css";
-import "./styles/final-light-polish.css";
+import "./styles/admin.css";
 import Home from "./pages/Home";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
@@ -34,10 +33,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/competizioni" element={<Competitions />} />
-        <Route
-          path="/competizioni/:competitionId"
-          element={<CompetitionDetail />}
-        />
+        <Route path="/competizioni/:competitionId" element={<CompetitionDetail />} />
         <Route path="/classifica" element={<Standings />} />
         <Route path="/squadre" element={<Teams />} />
         <Route path="/squadre/:teamId" element={<TeamDetail />} />
