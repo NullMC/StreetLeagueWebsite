@@ -1,6 +1,7 @@
 import "../styles/collab-carousel.css";
 import { useMemo, useRef, useState } from "react";
 import type { ActiveCollaboration } from "../types";
+import { sanitizeRichTextHtml } from "../lib/richText";
 
 export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -49,28 +50,12 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
         </div>
         {ordered.length > 1 && (
           <div className="collab-carousel__controls">
-            <button
-              type="button"
-              onClick={() => move(-1)}
-              aria-label="Collaborazione precedente"
-            >
-              ←
-            </button>
-            <button
-              type="button"
-              onClick={() => move(1)}
-              aria-label="Collaborazione successiva"
-            >
-              →
-            </button>
+            <button type="button" onClick={() => move(-1)} aria-label="Collaborazione precedente">←</button>
+            <button type="button" onClick={() => move(1)} aria-label="Collaborazione successiva">→</button>
           </div>
         )}
       </div>
-      <div
-        className="collab-carousel__viewport"
-        ref={viewportRef}
-        onScroll={updateActive}
-      >
+      <div className="collab-carousel__viewport" ref={viewportRef} onScroll={updateActive}>
         {ordered.map((item, index) => {
           const hasCta = Boolean(item.cta_url);
           const hasFlyer = Boolean(item.flyer_url);
@@ -79,13 +64,16 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
               className={`collab-carousel__item ${index === active ? "is-active" : ""}`}
               key={item.id}
             >
-              <div
-                className={`collab-carousel__ad ${hasFlyer ? "has-poster" : "is-copy-only"}`}
-              >
+              <div className={`collab-carousel__ad ${hasFlyer ? "has-poster" : "is-copy-only"}`}>
                 <div className="collab-carousel__copy">
                   <span className="eyebrow">In evidenza</span>
                   <h3>{item.title}</h3>
-                  {item.description && <p>{item.description}</p>}
+                  {item.description && (
+                    <div
+                      className="collab-carousel__description"
+                      dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(item.description) }}
+                    />
+                  )}
                   <a
                     className={`collab-carousel__cta ${hasCta ? "" : "is-disabled"}`}
                     href={hasCta ? item.cta_url! : "#"}
@@ -113,10 +101,7 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
       {ordered.length > 1 && (
         <div className="collab-carousel__dots" aria-hidden="true">
           {ordered.map((item, index) => (
-            <span
-              key={item.id}
-              className={index === active ? "is-active" : ""}
-            />
+            <span key={item.id} className={index === active ? "is-active" : ""} />
           ))}
         </div>
       )}
