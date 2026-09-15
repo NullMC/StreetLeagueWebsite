@@ -1,4 +1,4 @@
-/* Homepage-only fixes: carousel sizing and section transitions. */
+/* Homepage-only layout and visual rules. */
 
 .leader-stat-card {
   min-height: 255px;
@@ -35,28 +35,53 @@
 .sponsor-tier--collab .collab-carousel__toolbar .eyebrow,
 .partners-active-collabs .collab-carousel__toolbar .eyebrow { display: block; text-align: left; }
 
-/* First light section fades into the hero instead of creating a hard edge. */
-.leaders-section { position: relative; isolation: isolate; overflow: visible; }
+/* Home hero → Top Performers: paint the fade over the hero edge so it is visible. */
+.leaders-section {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  z-index: 3;
+}
+
 .leaders-section::before {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  top: -126px;
-  height: 126px;
-  background: linear-gradient(to bottom, rgba(249,249,249,0), #f9f9f9 100%);
+  top: -155px;
+  height: 155px;
+  background: linear-gradient(
+    to bottom,
+    rgba(249,249,249,0) 0%,
+    rgba(249,249,249,.12) 18%,
+    rgba(249,249,249,.34) 42%,
+    rgba(249,249,249,.68) 70%,
+    #f9f9f9 100%
+  );
   pointer-events: none;
-  z-index: 0;
+  z-index: 6;
 }
-.leaders-section > * { position: relative; z-index: 1; }
 
-/* Home hero: no pseudo-element overlays. Use one slightly stronger white veil directly in the background. */
-.hero--data-only::before,
-.hero--data-only::after { display: none !important; }
+.leaders-section > * {
+  position: relative;
+  z-index: 7;
+}
+
+/* Home hero: no pseudo-element overlays. One white translucent veil remains directly in the background. */
 .hero--data-only {
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  margin-top: calc(-1 * var(--site-header-total-height));
+  padding-top: var(--site-header-total-height);
   background:
-    linear-gradient(rgba(249,249,249,.26), rgba(249,249,249,.26)),
+    linear-gradient(rgba(249,249,249,.30), rgba(249,249,249,.30)),
     var(--hero-image) center / cover no-repeat !important;
+}
+
+.hero--data-only::before,
+.hero--data-only::after {
+  display: none !important;
 }
 
 /* Latest-content frame has no shadow; only cards and controls create depth. */
@@ -69,4 +94,9 @@
 @media (max-width: 700px) {
   .content-carousel__item { height: 380px; min-height: 380px; }
   .content-carousel .video-thumb { flex-basis: 195px; height: 195px; min-height: 195px; }
+
+  .leaders-section::before {
+    top: -115px;
+    height: 115px;
+  }
 }
