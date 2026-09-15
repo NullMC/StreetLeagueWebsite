@@ -117,7 +117,13 @@ const resourceFields: Record<Resource, string[]> = {
   lineups: ["match_id", "team_id", "player_id", "starter", "shirt_number"],
   mvp: ["match_id", "player_id"],
   partners: ["name", "tier", "logo_url", "website_url", "sort_order"],
-  active_collaborations: ["title", "description", "flyer_url", "sort_order"],
+  active_collaborations: [
+    "title",
+    "description",
+    "flyer_url",
+    "cta_url",
+    "sort_order",
+  ],
   social_contents: [
     "platform",
     "title",
@@ -184,6 +190,7 @@ const fieldLabels: Record<string, string> = {
   content_url: "URL contenuto",
   published_at: "Pubblicato",
   flyer_url: "Volantino",
+  cta_url: "URL CTA",
   starter: "Titolare",
 };
 const requiredFields: Record<Resource, string[]> = {
@@ -341,6 +348,14 @@ function validateRow(resource: Resource, payload: Row, lookups: LookupState) {
     )
   )
     throw new Error("I valori numerici non possono essere negativi.");
+  if (resource === "active_collaborations" && payload.cta_url) {
+    try {
+      const parsed = new URL(String(payload.cta_url));
+      if (!/^https?:$/.test(parsed.protocol)) throw new Error();
+    } catch {
+      throw new Error("URL CTA non valido: usa un link http:// o https://.");
+    }
+  }
   if (resource === "matches") {
     const competition = lookups.competitions.find(
       (x) => x.id === payload.competition_id,
@@ -638,6 +653,7 @@ function CrudPanel({
       "minute",
       "sort_order",
     ].includes(field);
+    const isUrl = field === "cta_url" || field === "website_url" || field === "content_url";
     const inputValue = isDateTime
       ? normalizeDateTimeLocal(value)
       : value == null
@@ -667,12 +683,15 @@ function CrudPanel({
                 ? "date"
                 : isNumber
                   ? "number"
-                  : "text"
+                  : isUrl
+                    ? "url"
+                    : "text"
           }
           value={inputValue}
           onChange={(e) => setField(field, e.target.value)}
           required={requiredFields[resource].includes(field)}
           min={isNumber ? 0 : undefined}
+          placeholder={field === "cta_url" ? "https://..." : undefined}
         />
         {acceptsImage && (
           <input
@@ -734,7 +753,7 @@ function CrudPanel({
           <table className="admin-table">
             <thead>
               <tr>
-                {resourceFields[resource].slice(0, 5).map((field) => (
+                {resourceFields[resource].slice(0, 6).map((field) => (
                   <th key={field}>{labelize(field)}</th>
                 ))}
                 <th>Azioni</th>
@@ -749,7 +768,7 @@ function CrudPanel({
                       : row[resourcePrimaryKeys[resource]],
                   )}
                 >
-                  {resourceFields[resource].slice(0, 5).map((field) => (
+                  {resourceFields[resource].slice(0, 6).map((field) => (
                     <td key={field}>
                       {field === "team_id"
                         ? (lookups.teams.find((x) => x.id === row[field])
@@ -759,29 +778,29 @@ function CrudPanel({
                               const p = lookups.players.find(
                                 (x) => x.id === row[field],
                               );
-                              return p ? `${p.first_name} ${p.last_name}` : "—";
+                              return p
+                                ? `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}`
+                                : "—";
                             })()
-                          : row[field] == null || row[field] === ""
-                            ? "—"
-                            : typeof row[field] === "boolean"
-                              ? row[field]
-                                ? "Sì"
-                                : "No"
-                              : String(row[field])}
+                          : field === "competition_id"
+                            ? (lookups.competitions.find(
+                                (x) => x.id === row[field],
+                              )?.name ?? "—")
+                            : String(row[field] ?? "—")}
                     </td>
                   ))}
                   <td className="admin-actions">
                     {canWrite && (
                       <>
                         <button
-                          className="btn btn--small btn--ghost"
+                          className="btn btn--ghost btn--small"
                           onClick={() => startEdit(row)}
                           type="button"
                         >
                           Modifica
-                        </button>
+                        </button>{" "}
                         <button
-                          className="btn btn--small btn--danger"
+                          className="btn btn--danger btn--small"
                           onClick={() => void remove(row)}
                           type="button"
                         >
@@ -800,445 +819,135 @@ function CrudPanel({
   );
 }
 
-function UsersPanel() {
-  const [users, setUsers] = useState<AdminProfile[]>([]);
-  const [editing, setEditing] = useState<AdminProfile | null>(null);
-  const [message, setMessage] = useState("");
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    full_name: "",
-    code: "",
-    role: "admin" as AdminRole,
-  });
-  const load = async () => {
-    try {
-      const result = await callAdminUsers({ action: "list" });
-      setUsers(result.users ?? []);
-    } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Impossibile caricare gli amministratori.",
-      );
-    }
-  };
-  useEffect(() => {
-    void load();
-  }, []);
-  const resetForm = () => {
-    setEditing(null);
-    setForm({
-      username: "",
-      email: "",
-      full_name: "",
-      code: "",
-      role: "admin",
-    });
-  };
-  const save = async (e: FormEvent) => {
-    e.preventDefault();
-    try {
-      await callAdminUsers(
-        editing
-          ? {
-              action: "update",
-              user_id: editing.id,
-              username: form.username,
-              email: form.email,
-              full_name: form.full_name,
-              code: form.code || undefined,
-              role: form.role,
-            }
-          : {
-              action: "create",
-              username: form.username,
-              email: form.email,
-              full_name: form.full_name,
-              code: form.code,
-              role: form.role,
-            },
-      );
-      setMessage(
-        editing ? "Amministratore aggiornato." : "Amministratore creato.",
-      );
-      resetForm();
-      await load();
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Operazione non riuscita.",
-      );
-    }
-  };
-  const toggle = async (user: AdminProfile) => {
-    try {
-      await callAdminUsers({
-        action: user.is_active ? "deactivate" : "activate",
-        user_id: user.id,
-      });
-      await load();
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Operazione non riuscita.",
-      );
-    }
-  };
-  const remove = async (user: AdminProfile) => {
-    if (!confirm(`Eliminare ${user.username ?? user.full_name ?? "utente"}?`))
-      return;
-    try {
-      await callAdminUsers({ action: "delete", user_id: user.id });
-      await load();
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Operazione non riuscita.",
-      );
-    }
-  };
-  return (
-    <div className="admin-resource">
-      <div className="admin-resource__head">
-        <div>
-          <span className="eyebrow">Super Admin / Utenti</span>
-          <h2>
-            {editing ? "Modifica amministratore" : "Nuovo amministratore"}
-          </h2>
-        </div>
-        <button className="btn btn--ghost" onClick={resetForm} type="button">
-          Nuovo
-        </button>
-      </div>
-      <form className="admin-form" onSubmit={save}>
-        <div className="admin-form__grid">
-          <label>
-            Username
-            <input
-              required
-              minLength={3}
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-            />
-          </label>
-          <label>
-            Email
-            <input
-              required
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
-          </label>
-          <label>
-            Nome completo
-            <input
-              value={form.full_name}
-              onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-            />
-          </label>
-          <label>
-            Codice di accesso
-            <input
-              type="text"
-              minLength={editing && !form.code ? undefined : 8}
-              required={!editing}
-              value={form.code}
-              onChange={(e) => setForm({ ...form, code: e.target.value })}
-            />
-          </label>
-          <label>
-            Ruolo
-            <select
-              value={form.role}
-              onChange={(e) =>
-                setForm({ ...form, role: e.target.value as AdminRole })
-              }
-            >
-              <option value="admin">Admin</option>
-              <option value="operator">Operatore</option>
-              <option value="viewer">Viewer</option>
-            </select>
-          </label>
-        </div>
-        {message && <p className="admin-message">{message}</p>}
-        <button className="btn btn--primary" type="submit">
-          {editing ? "Salva" : "Crea account"}
-        </button>
-      </form>
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Nome</th>
-              <th>Ruolo</th>
-              <th>Stato</th>
-              <th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.username ?? "—"}</td>
-                <td>{user.email ?? "—"}</td>
-                <td>{user.full_name ?? "—"}</td>
-                <td>{user.role}</td>
-                <td>{user.is_active ? "Attivo" : "Disabilitato"}</td>
-                <td className="admin-actions">
-                  <button
-                    className="btn btn--small btn--ghost"
-                    onClick={() => {
-                      setEditing(user);
-                      setForm({
-                        username: user.username ?? "",
-                        email: user.email ?? "",
-                        full_name: user.full_name ?? "",
-                        code: "",
-                        role: user.role,
-                      });
-                    }}
-                    type="button"
-                  >
-                    Modifica
-                  </button>
-                  <button
-                    className="btn btn--small btn--ghost"
-                    onClick={() => void toggle(user)}
-                    type="button"
-                  >
-                    {user.is_active ? "Disattiva" : "Attiva"}
-                  </button>
-                  <button
-                    className="btn btn--small btn--danger"
-                    onClick={() => void remove(user)}
-                    type="button"
-                  >
-                    Elimina
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-export default function Admin() {
-  const [profile, setProfile] = useState<AdminProfile | null>(null);
+function AdminLogin({ onLogin }: { onLogin: (profile: AdminProfile) => void }) {
   const [username, setUsername] = useState("");
   const [code, setCode] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [section, setSection] = useState<"dashboard" | Resource | "users">(
-    "dashboard",
-  );
-  useEffect(() => {
-    if (!supabase) return;
-    let mounted = true;
-    void getAuthenticatedAdmin()
-      .then((admin) => {
-        if (mounted) setProfile(admin);
-      })
-      .catch(() => {
-        if (mounted) setProfile(null);
-      });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
-      if (event === "SIGNED_OUT" || !session) {
-        setProfile(null);
-        setSection("dashboard");
-        return;
-      }
-      if (["SIGNED_IN", "TOKEN_REFRESHED", "USER_UPDATED"].includes(event)) {
-        try {
-          const admin = await getAuthenticatedAdmin();
-          if (mounted) setProfile(admin);
-        } catch {
-          if (mounted) setProfile(null);
-        }
-      }
-    });
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-  const login = async (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setMessage("");
     try {
-      if (!supabase) {
-        setError("Configura Supabase prima di accedere.");
-        return;
-      }
-      const { error: loginError } = await signInWithAccessCode(username, code);
-      if (loginError) {
-        setError("Username o codice di accesso non validi.");
-        return;
-      }
-      const admin = await getAuthenticatedAdmin();
-      if (!admin) {
-        await supabase.auth.signOut();
-        setError("Account non autorizzato o disattivato.");
-        return;
-      }
-      setProfile(admin);
-      setCode("");
-    } catch (loginError) {
-      setError(
-        loginError instanceof Error
-          ? loginError.message
-          : "Errore durante l’accesso.",
-      );
+      const result = await signInWithAccessCode(username, code);
+      if (result.error) throw result.error;
+      const profile = await getAuthenticatedAdmin();
+      if (!profile) throw new Error("Profilo amministratore non valido.");
+      onLogin(profile);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Accesso non riuscito.");
     } finally {
       setLoading(false);
     }
   };
+  return (
+    <div className="admin-login">
+      <span className="eyebrow">Street League / Admin</span>
+      <h1>Back office</h1>
+      <p>Accedi con username e codice permanente per gestire la piattaforma.</p>
+      {message && <p className="admin-error">{message}</p>}
+      <form onSubmit={submit}>
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username"
+          autoComplete="username"
+        />
+        <input
+          type="password"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder="Codice di accesso"
+          autoComplete="current-password"
+        />
+        <button className="btn btn--primary" type="submit" disabled={loading}>
+          {loading ? "Accesso…" : "Accedi"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+const navGroups: Array<{ key?: Resource; label: string }> = [
+  { label: "Dashboard" },
+  { key: "competitions", label: "Competizioni" },
+  { key: "teams", label: "Squadre" },
+  { key: "players", label: "Giocatori" },
+  { key: "matches", label: "Partite" },
+  { key: "events", label: "Eventi" },
+  { key: "lineups", label: "Formazioni" },
+  { key: "mvp", label: "MVP" },
+  { key: "partners", label: "Sponsor" },
+  { key: "active_collaborations", label: "Collab attive" },
+  { key: "social_contents", label: "Social / Video" },
+];
+
+export default function Admin() {
+  const [profile, setProfile] = useState<AdminProfile | null>(null);
+  const [resource, setResource] = useState<Resource | null>(null);
+  const [booting, setBooting] = useState(true);
+  useEffect(() => {
+    void getAuthenticatedAdmin()
+      .then(setProfile)
+      .catch(() => setProfile(null))
+      .finally(() => setBooting(false));
+  }, []);
   const logout = async () => {
     await supabase?.auth.signOut();
     setProfile(null);
-    setSection("dashboard");
+    setResource(null);
   };
-  const resources = useMemo(
-    () =>
-      (profile?.role === "operator"
-        ? ["matches", "events", "lineups", "mvp"]
-        : [
-            "competitions",
-            "teams",
-            "players",
-            "matches",
-            "events",
-            "lineups",
-            "mvp",
-            "partners",
-            "active_collaborations",
-            "social_contents",
-          ]) as Resource[],
-    [profile],
-  );
-  if (!supabaseConfigured)
+  if (!supabaseConfigured || booting) {
     return (
-      <PageShell>
-        <div className="page">
-          <div className="empty-state">
-            <div className="empty-state__mark">DB</div>
-            <div>
-              <h3>Supabase non configurato</h3>
-              <p>
-                Configura VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY in
-                .env.local.
-              </p>
-            </div>
-          </div>
+      <PageShell title="Admin" eyebrow="Street League">
+        <div className="admin-help">
+          <h3>Configurazione</h3>
+          <p>Verifica le variabili Supabase prima di accedere al back office.</p>
         </div>
       </PageShell>
     );
-  if (!profile)
+  }
+  if (!profile) {
     return (
-      <PageShell>
-        <div className="page">
-          <div className="admin-login">
-            <span className="eyebrow">Restricted area</span>
-            <h1>Street League Admin</h1>
-            <p>Accedi con lo username e il codice assegnati dal Super Admin.</p>
-            <form onSubmit={login}>
-              <input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
-                autoComplete="username"
-                required
-              />
-              <input
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Codice di accesso"
-                autoComplete="one-time-code"
-                minLength={8}
-                required
-              />
-              <button
-                className="btn btn--primary"
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? "Accesso…" : "Accedi"}
-              </button>
-              {error && <p className="admin-error">{error}</p>}
-            </form>
-          </div>
-        </div>
+      <PageShell title="Admin" eyebrow="Street League">
+        <AdminLogin onLogin={setProfile} />
       </PageShell>
     );
+  }
   return (
-    <PageShell>
+    <PageShell title="Back office" eyebrow={profile.role}>
       <div className="admin-layout">
         <aside className="admin-sidebar">
-          <div>
-            <span className="eyebrow">Street League</span>
-            <h2>Back Office</h2>
-            <p className="admin-user">
-              {profile.username ?? profile.full_name}
-            </p>
-          </div>
+          <span className="eyebrow">Street League</span>
+          <h2>Back office</h2>
+          <p className="admin-user">{profile.full_name ?? profile.username ?? profile.email}</p>
           <nav>
-            <button
-              className={section === "dashboard" ? "active" : ""}
-              onClick={() => setSection("dashboard")}
-              type="button"
-            >
-              Dashboard
-            </button>
-            {resources.map((resource) => (
+            {navGroups.map((item) => (
               <button
-                key={resource}
-                className={section === resource ? "active" : ""}
-                onClick={() => setSection(resource)}
+                className={!item.key ? !resource ? "active" : "" : resource === item.key ? "active" : ""}
+                key={item.label}
                 type="button"
+                onClick={() => setResource(item.key ?? null)}
               >
-                {resourceLabels[resource]}
+                {item.label}
               </button>
             ))}
-            {profile.role === "super_admin" && (
-              <button
-                className={section === "users" ? "active" : ""}
-                onClick={() => setSection("users")}
-                type="button"
-              >
-                Amministratori
-              </button>
-            )}
           </nav>
-          <button
-            className="btn btn--ghost"
-            onClick={() => void logout()}
-            type="button"
-          >
+          <button className="btn btn--ghost" type="button" onClick={() => void logout()}>
             Esci
           </button>
         </aside>
         <main className="admin-main">
-          {section === "dashboard" ? (
+          {!resource ? (
             <div className="admin-hero">
               <div>
                 <span className="eyebrow">{profile.role}</span>
                 <h1>Dashboard</h1>
-                <p>
-                  Gestisci competizioni, squadre, giocatori, partite e contenuti
-                  Street League.
-                </p>
+                <p>Gestisci competizioni, squadre, giocatori, partite e contenuti Street League.</p>
               </div>
             </div>
-          ) : section === "users" ? (
-            <UsersPanel />
           ) : (
-            <CrudPanel resource={section} profile={profile} />
+            <CrudPanel resource={resource} profile={profile} />
           )}
         </main>
       </div>
