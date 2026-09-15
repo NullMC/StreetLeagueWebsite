@@ -407,22 +407,18 @@ export default function Home() {
                 ))}
               </div>
             ) : (
-              <EmptyState
-                title="Gold sponsor in attesa"
-
-              />
+              <EmptyState title="Gold sponsor in attesa" />
             )}
           </div>
           {collaborations.length ? (
             <div className="sponsor-tier sponsor-tier--collab">
-              <CollabCarousel items={collaborations} />
+              <CollabCarousel items={collaborations} variant="home" />
             </div>
           ) : null}
           <div className="sponsor-tier sponsor-tier--silver">
             <div className="sponsor-tier__heading">
               <div>
                 <h3>Sponsor Silver</h3>
-                
               </div>
             </div>
             {silverPartners.length ? (
@@ -442,7 +438,6 @@ export default function Home() {
             <div className="sponsor-tier__heading sponsor-tier__heading--row">
               <div>
                 <h3>Sponsor Bronze</h3>
-                
               </div>
               <a className="btn btn--ghost" href="/partner">
                 Tutti i partner
@@ -470,31 +465,22 @@ export default function Home() {
         {social.length ? (
           <ContentCarousel>
             {social.map((item) => (
-              <a
-                className="video-card"
-                key={item.id}
-                href={item.content_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <div key={item.id} className="video-card">
                 <div className="video-thumb">
-                  {item.thumbnail_url ? (
-                    <img src={item.thumbnail_url} alt="" />
-                  ) : (
-                    <div className="video-play">↗</div>
-                  )}
+                  {item.image_url ? <img src={item.image_url} alt="" /> : null}
                 </div>
                 <div className="video-card__body">
                   <span className="eyebrow">{item.platform}</span>
                   <h3>{item.title}</h3>
+                  {item.description ? <p>{item.description}</p> : null}
                 </div>
-              </a>
+              </div>
             ))}
           </ContentCarousel>
         ) : (
           <EmptyState
             title="Nessun contenuto"
-            text="YouTube, Instagram e TikTok verranno alimentati dal pannello amministrativo."
+            text="I contenuti verranno mostrati qui quando saranno pubblicati."
           />
         )}
       </section>
