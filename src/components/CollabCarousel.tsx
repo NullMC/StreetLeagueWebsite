@@ -3,7 +3,13 @@ import { useMemo, useRef, useState } from "react";
 import type { ActiveCollaboration } from "../types";
 import { sanitizeRichTextHtml } from "../lib/richText";
 
-export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
+export function CollabCarousel({
+  items,
+  variant = "default",
+}: {
+  items: ActiveCollaboration[];
+  variant?: "default" | "home";
+}) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const ordered = useMemo(
@@ -42,7 +48,10 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
   };
 
   return (
-    <div className="collab-carousel" aria-label="Collaborazioni attive">
+    <div
+      className={`collab-carousel ${variant === "home" ? "collab-carousel--home" : ""}`}
+      aria-label="Collaborazioni attive"
+    >
       <div className="collab-carousel__toolbar">
         <div>
           <span className="eyebrow">Collaborazioni attive</span>
@@ -67,7 +76,7 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
               <div className={`collab-carousel__ad ${hasFlyer ? "has-poster" : "is-copy-only"}`}>
                 <div className="collab-carousel__copy">
                   <span className="eyebrow">In evidenza</span>
-                  <h3 style={{ color: "#000 !important" }}>{item.title}</h3>
+                  <h3>{item.title}</h3>
                   {item.description && (
                     <div
                       className="collab-carousel__description"
