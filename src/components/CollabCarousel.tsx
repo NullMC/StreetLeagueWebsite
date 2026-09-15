@@ -71,30 +71,46 @@ export function CollabCarousel({ items }: { items: ActiveCollaboration[] }) {
         ref={viewportRef}
         onScroll={updateActive}
       >
-        {ordered.map((item, index) => (
-          <article
-            className={`collab-carousel__item ${index === active ? "is-active" : ""}`}
-            key={item.id}
-          >
-            <div className="collab-carousel__ad">
-              <div className="collab-carousel__copy">
-                <span className="eyebrow">In evidenza</span>
-                <h3>{item.title}</h3>
-                {item.description && <p>{item.description}</p>}
-              </div>
-              {item.flyer_url ? (
-                <div className="collab-carousel__poster">
-                  <img src={item.flyer_url} alt="" />
+        {ordered.map((item, index) => {
+          const hasCta = Boolean(item.cta_url);
+          return (
+            <article
+              className={`collab-carousel__item ${index === active ? "is-active" : ""}`}
+              key={item.id}
+            >
+              <div className="collab-carousel__ad">
+                <div className="collab-carousel__copy">
+                  <span className="eyebrow">In evidenza</span>
+                  <h3>{item.title}</h3>
+                  {item.description && <p>{item.description}</p>}
+                  <a
+                    className={`collab-carousel__cta ${hasCta ? "" : "is-disabled"}`}
+                    href={hasCta ? item.cta_url! : "#"}
+                    target={hasCta ? "_blank" : undefined}
+                    rel={hasCta ? "noopener noreferrer" : undefined}
+                    aria-disabled={!hasCta}
+                    onClick={(event) => {
+                      if (!hasCta) event.preventDefault();
+                    }}
+                  >
+                    <span>Info</span>
+                    <span aria-hidden="true">↗</span>
+                  </a>
                 </div>
-              ) : (
-                <div
-                  className="collab-carousel__poster collab-carousel__poster--empty"
-                  aria-hidden="true"
-                />
-              )}
-            </div>
-          </article>
-        ))}
+                {item.flyer_url ? (
+                  <div className="collab-carousel__poster">
+                    <img src={item.flyer_url} alt="" />
+                  </div>
+                ) : (
+                  <div
+                    className="collab-carousel__poster collab-carousel__poster--empty"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+            </article>
+          );
+        })}
       </div>
       {ordered.length > 1 && (
         <div className="collab-carousel__dots" aria-hidden="true">
