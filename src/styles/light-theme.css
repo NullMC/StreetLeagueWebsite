@@ -19,9 +19,10 @@ body {
   color: var(--white);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 24px rgba(1, 10, 8, 0.06);
 }
 .site-header::before {
-  opacity: 0.42;
+  opacity: 0.52;
   background-image:
     linear-gradient(90deg, transparent 0 95%, rgba(228, 34, 120, 0.08) 95%),
     linear-gradient(0deg, transparent 0 95%, rgba(1, 10, 8, 0.035) 95%);
@@ -65,24 +66,26 @@ body {
   background:
     linear-gradient(
       120deg,
-      rgba(249, 249, 249, 0.94) 0%,
-      rgba(249, 249, 249, 0.82) 48%,
-      rgba(245, 211, 221, 0.64) 100%
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(255, 255, 255, 0.86) 42%,
+      rgba(255, 255, 255, 0.7) 58%,
+      rgba(245, 211, 221, 0.72) 100%
     ),
     var(--hero-image) center / cover no-repeat !important;
 }
 .hero::before {
   background: radial-gradient(
     circle at 78% 42%,
-    rgba(228, 34, 120, 0.18),
-    transparent 34%
+    rgba(255, 255, 255, 0.72),
+    rgba(255, 255, 255, 0.22) 26%,
+    transparent 46%
   ) !important;
 }
 .hero::after {
   background: linear-gradient(
     to top,
-    rgba(249, 249, 249, 0.52),
-    transparent
+    rgba(1, 10, 8, 0.3),
+    transparent 72%
   ) !important;
 }
 .hero-eyebrow,

@@ -2,7 +2,7 @@
   background:
     radial-gradient(circle at 14% 20%, rgba(228, 34, 120, 0.34), transparent 30%),
     radial-gradient(circle at 86% 78%, rgba(237, 123, 171, 0.22), transparent 28%),
-    linear-gradient(135deg, #250817 0%, #e42278 48%, #8f124b 100%) !important;
+    linear-gradient(135deg, #250817 0%, var(--pink) 48%, #8f124b 100%) !important;
 }
 
 .sponsor-band--redesign::before,

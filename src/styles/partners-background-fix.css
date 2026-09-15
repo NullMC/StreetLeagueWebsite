@@ -1,6 +1,6 @@
 /* Partners sponsor canvas: keep one continuous pink background behind all tiers. */
 .partners-page.partners-page--redesign {
-  background: linear-gradient(120deg, #b10f59 0%, #e42278 48%, #ed7bab 100%) !important;
+  background: var(--pink) !important;
 }
 
 .partners-page.partners-page--redesign .partners-tier-section {

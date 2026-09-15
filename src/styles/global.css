@@ -142,7 +142,7 @@ main {
 
 .hero {
   position: relative;
-  min-height: calc(100vh - var(--site-header-total-height));
+  min-height: 100vh;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -176,8 +176,8 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 28%;
-  background: linear-gradient(to top, #fff, transparent);
+  height: 22%;
+  background: linear-gradient(to top, rgba(1, 10, 8, 0.48), transparent 76%);
   pointer-events: none;
   z-index: 1;
 }
