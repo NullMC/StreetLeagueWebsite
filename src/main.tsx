@@ -24,7 +24,7 @@ import MatchDetail from "./pages/MatchDetail";
 import Partners from "./pages/Partners";
 import Collaborate from "./pages/Collaborate";
 import Admin from "./pages/Admin";
-import AdminCollaborationCta from "./pages/AdminCollaborationCta";
+import AdminCollaborationCtaV2 from "./pages/AdminCollaborationCtaV2";
 import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/AppLayout";
 
@@ -32,7 +32,7 @@ function AdminPage() {
   return (
     <>
       <Admin />
-      <AdminCollaborationCta />
+      <AdminCollaborationCtaV2 />
     </>
   );
 }
