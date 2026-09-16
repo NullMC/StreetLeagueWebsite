@@ -34,9 +34,6 @@
   content: none;
 }
 
-/* The React backdrop remains the single source for the hero image/gradient.
-   The !important rule also protects it from the inline declaration becoming invalid
-   because of a malformed/duplicated layer separator. */
 .home-hero > div[aria-hidden="true"] {
   z-index: 0 !important;
   background-image:
@@ -211,7 +208,7 @@
 }
 .home-hero__empty p { margin: 0; color: rgba(1,10,8,.66); }
 
-/* Numbered editorial section headers are intentionally unnumbered. */
+/* Section headers use one clean separator only. */
 .home-section-head {
   display: grid;
   grid-template-columns: minmax(0,1fr) auto;
@@ -266,10 +263,12 @@
 .home-match-row__date strong { font-family: var(--display); font-size: 29px; line-height: .9; }
 .home-match-row__date span,
 .home-match-row__meta { color: var(--home-muted); font-size: 9px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
-.home-match-row__teams { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; font-weight: 800; text-transform: uppercase; font-size: 12px; }
+.home-match-row__teams { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 12px; align-items: center; font-weight: 800; text-transform: uppercase; font-size: 12px; min-width: 0; }
+.home-match-row__teams span { min-width: 0; overflow-wrap: anywhere; }
 .home-match-row__teams span:last-child { text-align: right; }
 .home-match-row__teams b { color: var(--home-pink); font-size: 9px; }
-.home-match-row__meta { display: flex; justify-content: space-between; gap: 12px; }
+.home-match-row__meta { display: flex; justify-content: space-between; gap: 12px; min-width: 0; }
+.home-match-row__meta span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .home-match-row__meta span:last-child { color: var(--home-ink); font-size: 19px; }
 .home-schedule__ranking { border-left: 1px solid var(--home-line); padding-left: 28px; }
 .home-mini-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; border-bottom: 2px solid var(--home-ink); }
@@ -307,11 +306,11 @@
 .home-teams .team-carousel__logo { border-radius: 50%; box-shadow: none; border: 1px solid var(--home-line); }
 .home-teams .team-carousel__name { font-size: 12px; }
 
-/* Sponsors retain the dedicated pink band but lose the decorative excess. */
+/* Sponsors retain the dedicated pink band and one section separator. */
 .home-redesign .sponsor-band--redesign { padding-top: 60px; }
 .home-redesign .sponsor-band--redesign .section-head h2 { color: #fff !important; }
 .home-redesign .sponsor-tier { margin-top: 34px; }
-.home-redesign .sponsor-tier__heading { padding-top: 18px; border-top: 1px solid rgba(255,255,255,.32); }
+.home-redesign .sponsor-tier__heading { padding-top: 18px; border-top: 0; }
 .home-redesign .sponsor-tier__heading h3 { color: #fff !important; }
 
 @media (max-width: 980px) {
@@ -334,6 +333,60 @@
   .home-highlight--feature { min-height: 58svh; }
   .home-highlight__content { padding: 18px; }
   .home-highlight--feature h2 { font-size: clamp(34px, 10vw, 56px); }
-  .home-section-head { grid-template-columns: 1fr; align-items: start; }
-  .home-section-head__link { justify-self: start; }
+
+  /* Every section title is centered against the full section header width. */
+  .home-section-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center !important;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .home-section-head .section-head {
+    width: 100%;
+    align-items: center !important;
+    justify-content: center;
+    text-align: center !important;
+  }
+  .home-section-head .section-head > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .home-section-head .section-head h2 { text-align: center !important; }
+  .home-section-head__link { align-self: center; justify-self: auto; }
+
+  /* Schedule rows keep team names and matchday metadata in separate columns. */
+  .home-match-row {
+    grid-template-columns: 64px minmax(0,1fr) 54px;
+    gap: 10px;
+    min-height: 92px;
+    padding: 10px 0;
+  }
+  .home-match-row__date { min-width: 0; }
+  .home-match-row__date strong { font-size: 25px; }
+  .home-match-row__teams {
+    grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+    gap: 7px;
+    font-size: 10px;
+    line-height: 1.08;
+    min-width: 0;
+  }
+  .home-match-row__teams span { min-width: 0; overflow-wrap: anywhere; }
+  .home-match-row__teams span:last-child { text-align: right; }
+  .home-match-row__meta {
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    text-align: right;
+  }
+  .home-match-row__meta span:first-child { max-width: 100%; line-height: 1.1; }
+  .home-match-row__meta span:last-child { font-size: 18px; }
+
+  /* Sponsor section: keep only the main section divider; tier headers have no lines. */
+  .home-redesign .sponsor-tier__heading { border-top: 0 !important; }
 }
