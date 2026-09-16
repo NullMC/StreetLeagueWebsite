@@ -31,3 +31,23 @@ export async function getPlayerOfMonth(): Promise<PlayerOfMonth | null> {
   if (error) throw error;
   return (data as PlayerOfMonth | null) ?? null;
 }
+
+export function subscribeToPlayerOfMonth(onChange: () => void) {
+  if (!supabase) return () => {};
+  const client = supabase;
+  const existing = client
+    .getChannels()
+    .find((channel) => channel.topic === "realtime:street-league-potm");
+  if (existing) void client.removeChannel(existing);
+
+  const channel = client
+    .channel("street-league-potm")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "player_of_month" },
+      onChange,
+    )
+    .subscribe();
+
+  return () => void client.removeChannel(channel);
+}
