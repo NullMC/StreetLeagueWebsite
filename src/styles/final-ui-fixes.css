@@ -4,7 +4,11 @@
 .sponsor-band--redesign .partner-card,
 .partners-page--redesign .partner-card {
   align-items: center !important;
+  justify-content: center !important;
   text-align: center !important;
+  transform: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 
 .sponsor-band--redesign .partner-card__logo,
@@ -116,6 +120,51 @@
 }
 
 @media (max-width: 700px) {
+  /* Gold sponsors: two-column mobile grid, without card decoration. */
+  .sponsor-tier--gold .partners-grid--gold {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card {
+    min-height: 190px !important;
+    padding: 14px 8px !important;
+    gap: 12px !important;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card__logo {
+    width: 100% !important;
+    min-height: 86px !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card__logo img {
+    max-width: 92% !important;
+    max-height: 76px !important;
+    margin-inline: auto !important;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card__meta {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card__name {
+    width: 100% !important;
+    text-align: center !important;
+    line-height: 1.15 !important;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .sponsor-link-btn {
+    margin-inline: auto !important;
+  }
+
   /* Mobile header: hamburger on the left, logo centered. */
   .site-header {
     position: fixed;
