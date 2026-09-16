@@ -4,7 +4,6 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./styles/global.css";
 import "./styles/street.css";
-import "./styles/hero-scroller.css";
 import "./styles/app-layout.css";
 import "./styles/chrome-responsive.css";
 import "./styles/sponsor-neutral.css";
