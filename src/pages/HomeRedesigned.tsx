@@ -1,3 +1,4 @@
+import "../styles/collab-carousel.css";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { SectionTitle } from "../components/SectionTitle";
@@ -121,7 +122,7 @@ export default function HomeRedesigned() {
   useEffect(() => { void load(); return subscribeToCompetition(() => void load()); }, []);
 
   const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
-  const heroBackground = competition?.hero_image_url || "/assets/nebula-landscape.webp";
+  const heroBackground = competition?.hero_image_url || "/assets/nebula-vertical.webp";
   const goldPartners = useMemo(() => partners.filter((p) => p.tier === "gold"), [partners]);
   const silverPartners = useMemo(() => partners.filter((p) => p.tier === "silver"), [partners]);
   const bronzePartners = useMemo(() => partners.filter((p) => p.tier === "bronze"), [partners]);
@@ -131,7 +132,7 @@ export default function HomeRedesigned() {
       <section className="home-hero" style={{ "--hero-image": `url("${heroBackground}")` } as CSSProperties} aria-labelledby="home-hero-title">
         <div className="home-hero__inner">
           <div className="home-hero__mast">
-            <div><span className="home-hero__kicker">01 / Highlights</span><h1 id="home-hero-title">Street League</h1></div>
+            <div><span className="home-hero__kicker">Highlights</span><h1 id="home-hero-title">Street League</h1></div>
             <span className="home-hero__competition">{competition?.name ?? "Street League"}</span>
           </div>
           {social.length ? (
@@ -152,14 +153,14 @@ export default function HomeRedesigned() {
               </div>
             </div>
           ) : (
-            <div className="home-hero__empty"><span className="home-hero__kicker">01 / Highlights</span><h2>Nessun highlight ancora.</h2><p>I contenuti pubblicati appariranno qui.</p></div>
+            <div className="home-hero__empty"><span className="home-hero__kicker">Highlights</span><h2>Nessun highlight ancora.</h2><p>I contenuti pubblicati appariranno qui.</p></div>
           )}
           <div className="home-hero__foot"><span>Live feed / Street League</span><span>Scorri per continuare ↓</span></div>
         </div>
       </section>
 
       <section className="section--edge home-schedule" id="home-matches">
-        <div className="home-section-head"><span className="home-section-head__number">02</span><SectionTitle eyebrow="Competition" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
+        <div className="home-section-head"><SectionTitle eyebrow="Competition" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
         <div className="home-schedule__grid">
           <div><MatchList matches={matches} teams={teams} /></div>
           <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifica</span><a href="/classifica">Completa ↗</a></div><StandingsList standings={standings} /></div>
@@ -167,23 +168,23 @@ export default function HomeRedesigned() {
       </section>
 
       <section className="section--edge home-performers" id="home-stats">
-        <div className="home-section-head"><span className="home-section-head__number">03</span><SectionTitle eyebrow="Live data" title="Top performers" /></div>
+        <div className="home-section-head"><SectionTitle eyebrow="Live data" title="Top performers" /></div>
         <div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStats} />)}</div>
       </section>
 
       <section className="section--edge potm-section" id="home-potm">
-        <div className="home-section-head"><span className="home-section-head__number">04</span><SectionTitle eyebrow="Monthly award" title="POTM" /></div>
+        <div className="home-section-head"><SectionTitle eyebrow="Monthly award" title="POTM" /></div>
         <PlayerOfMonthCard item={potm} teams={teams} />
       </section>
 
       <section className="section--edge home-teams" id="home-teams">
-        <div className="home-section-head"><span className="home-section-head__number">05</span><SectionTitle title="Squadre" /><a className="home-section-head__link" href="/squadre">Tutte le squadre ↗</a></div>
+        <div className="home-section-head"><SectionTitle title="Squadre" /><a className="home-section-head__link" href="/squadre">Tutte le squadre ↗</a></div>
         {teams.length ? <TeamCarousel teams={teams} /> : <EmptyState title="Nessuna squadra" text="Le squadre compariranno qui quando saranno registrate nel database." />}
       </section>
 
       <section className="sponsor-band sponsor-band--redesign" id="home-partners">
         <div className="section--edge sponsor-band__inner">
-          <div className="home-section-head home-section-head--on-pink"><span className="home-section-head__number">06</span><SectionTitle eyebrow="Partners" title="Chi sostiene la Street League" /></div>
+          <div className="home-section-head home-section-head--on-pink"><SectionTitle eyebrow="Partners" title="Chi sostiene la Street League" /></div>
           <div className="sponsor-tier sponsor-tier--gold"><div className="sponsor-tier__heading"><div><h3>Sponsor Gold</h3></div></div>{goldPartners.length ? <div className="partners-grid partners-grid--gold">{goldPartners.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}</div> : <EmptyState title="Gold sponsor in attesa" />}</div>
           {collaborations.length ? <div className="sponsor-tier sponsor-tier--collab"><CollabCarousel items={collaborations} variant="home" /></div> : null}
           <div className="sponsor-tier sponsor-tier--silver"><div className="sponsor-tier__heading"><div><h3>Sponsor Silver</h3></div></div>{silverPartners.length ? <ContentCarousel>{silverPartners.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}</ContentCarousel> : <EmptyState title="Silver sponsor in attesa" text="I partner Silver verranno mostrati qui dal database." />}</div>
