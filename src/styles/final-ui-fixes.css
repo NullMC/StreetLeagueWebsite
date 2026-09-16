@@ -1,0 +1,80 @@
+/* Final responsive/header/sponsor alignment fixes. */
+
+/* Keep every sponsor logo, name and CTA centered on the same card axis. */
+.sponsor-band--redesign .partner-card,
+.partners-page--redesign .partner-card {
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.sponsor-band--redesign .partner-card__logo,
+.partners-page--redesign .partner-card__logo {
+  width: min(100%, 260px) !important;
+  margin-inline: auto !important;
+  justify-self: center !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+.sponsor-band--redesign .partner-card__logo img,
+.partners-page--redesign .partner-card__logo img {
+  margin-inline: auto !important;
+}
+
+.sponsor-band--redesign .partner-card__meta,
+.partners-page--redesign .partner-card__meta {
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin-inline: auto !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Remove the decorative grid from the first/global header. */
+.site-header::before {
+  background-image: none !important;
+  opacity: 0 !important;
+}
+
+@media (max-width: 700px) {
+  /* Mobile header: hamburger on the left, logo centered. */
+  .site-header {
+    position: fixed;
+    left: 0;
+    right: 0;
+    justify-content: center !important;
+    padding-inline: 10px !important;
+  }
+
+  .site-header > .brand {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 118px;
+    margin: 0 !important;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+  }
+
+  .site-header > .header-admin {
+    display: none !important;
+  }
+
+  .site-header > .header-right {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    margin: 0 !important;
+    transform: translateY(-50%);
+    z-index: 4;
+  }
+
+  .site-header > .header-right .contact-link {
+    display: none !important;
+  }
+
+  .site-header > .header-right .menu-btn {
+    display: block !important;
+    margin: 0 !important;
+  }
+}
