@@ -60,9 +60,7 @@ function labelize(v: string) { return fieldLabels[v] ?? v.replaceAll("_", " ").r
 function defaults(resource: Resource): Row {
   return Object.fromEntries(fields[resource].map((f) => [f, f === "sort_order" ? 0 : f === "starter" ? true : f === "status" ? (resource === "competitions" ? "upcoming" : "scheduled") : ""]));
 }
-function localDate(value: unknown) {
-  if (!value) return ""; const d = new Date(String(value)); if (Number.isNaN(d.getTime())) return ""; const off = d.getTimezoneOffset(); return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16);
-}
+function localDate(value: unknown) { if (!value) return ""; const d = new Date(String(value)); if (Number.isNaN(d.getTime())) return ""; const off = d.getTimezoneOffset(); return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16); }
 function toIso(value: string) { if (!value) return null; const d = new Date(value); if (Number.isNaN(d.getTime())) throw new Error("Data/ora non valida."); return d.toISOString(); }
 async function readRows(resource: Resource) { if (!supabase) return []; const { data, error } = await supabase.from(tables[resource]).select("*").order("created_at", { ascending: false }); if (error) throw error; return (data ?? []) as Row[]; }
 function relationOptions(field: string, resource: Resource, form: Row, l: Lookups) {
@@ -70,40 +68,20 @@ function relationOptions(field: string, resource: Resource, form: Row, l: Lookup
   if (field === "team_id") return l.teams.map((x) => ({ id: x.id, label: x.name }));
   if (field === "home_team_id" || field === "away_team_id") return l.teams.filter((x) => !form.competition_id || x.competition_id === form.competition_id).map((x) => ({ id: x.id, label: x.name }));
   if (field === "match_id") return l.matches.map((x) => ({ id: x.id, label: `${l.teams.find((t) => t.id === x.home_team_id)?.name ?? "Casa"} - ${l.teams.find((t) => t.id === x.away_team_id)?.name ?? "Ospite"} / ${x.matchday ?? "—"}` }));
-  if (field === "player_id" || field === "related_player_id") {
-    let ps = l.players;
-    if (resource === "lineups" && form.team_id) ps = ps.filter((p) => p.team_id === form.team_id);
-    if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); }
-    return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` }));
-  }
+  if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (resource === "lineups" && form.team_id) ps = ps.filter((p) => p.team_id === form.team_id); if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
   return [];
 }
-function sanitize(resource: Resource, source: Row) {
-  const out: Row = {};
-  for (const f of fields[resource]) { let v = source[f]; if (f === "kickoff_at" || f === "published_at") v = v === "" || v == null ? null : toIso(String(v)); else if (v === "") v = null; if (["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f) && v != null) v = Number(v); out[f] = f === "starter" ? Boolean(v) : v; }
-  return out;
-}
+function sanitize(resource: Resource, source: Row) { const out: Row = {}; for (const f of fields[resource]) { let v = source[f]; if (f === "kickoff_at" || f === "published_at") v = v === "" || v == null ? null : toIso(String(v)); else if (v === "") v = null; if (["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f) && v != null) v = Number(v); out[f] = f === "starter" ? Boolean(v) : v; } return out; }
 function validate(resource: Resource, payload: Row, l: Lookups) {
   for (const f of required[resource]) if (payload[f] == null || payload[f] === "") throw new Error(`${labelize(f)} è obbligatorio.`);
   if (["shirt_number", "home_score", "away_score", "minute", "sort_order"].some((f) => payload[f] != null && Number(payload[f]) < 0)) throw new Error("I valori numerici non possono essere negativi.");
-  if (resource === "matches") {
-    const c = l.competitions.find((x) => x.id === payload.competition_id); const h = l.teams.find((x) => x.id === payload.home_team_id); const a = l.teams.find((x) => x.id === payload.away_team_id);
-    if (!c || !h || !a) throw new Error("Competizione o squadre non valide."); if (h.competition_id !== c.id || a.competition_id !== c.id) throw new Error("Casa e ospite devono appartenere alla competizione selezionata."); if (h.id === a.id) throw new Error("Le squadre devono essere diverse.");
-  }
+  if (resource === "matches") { const c = l.competitions.find((x) => x.id === payload.competition_id); const h = l.teams.find((x) => x.id === payload.home_team_id); const a = l.teams.find((x) => x.id === payload.away_team_id); if (!c || !h || !a) throw new Error("Competizione o squadre non valide."); if (h.competition_id !== c.id || a.competition_id !== c.id) throw new Error("Casa e ospite devono appartenere alla competizione selezionata."); if (h.id === a.id) throw new Error("Le squadre devono essere diverse."); }
   if (resource === "player_of_month" && !l.players.some((p) => p.id === payload.player_id)) throw new Error("Il giocatore selezionato non esiste.");
 }
-function rowLabel(resource: Resource, row: Row, l: Lookups) {
-  if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource);
-  if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim();
-  if (resource === "player_of_month") { const p = l.players.find((x) => x.id === row.player_id); return `${row.month_label ?? "POTM"} / ${p ? `${p.first_name} ${p.last_name}` : "Giocatore"}`; }
-  if (resource === "matches") return `${l.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa"} - ${l.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite"}`;
-  if (resource === "active_collaborations") return String(row.title ?? "Collaborazione");
-  return String(row.title ?? row.name ?? resource);
-}
+function rowLabel(resource: Resource, row: Row, l: Lookups) { if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource); if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim(); if (resource === "player_of_month") { const p = l.players.find((x) => x.id === row.player_id); return `${row.month_label ?? "POTM"} / ${p ? `${p.first_name} ${p.last_name}` : "Giocatore"}`; } if (resource === "matches") return `${l.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa"} - ${l.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite"}`; if (resource === "active_collaborations") return String(row.title ?? "Collaborazione"); return String(row.title ?? row.name ?? resource); }
 
 function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile }) {
-  const [rows, setRows] = useState<Row[]>([]); const [form, setForm] = useState<Row>(() => defaults(resource)); const [editing, setEditing] = useState<string | null>(null); const [loading, setLoading] = useState(true); const [message, setMessage] = useState("");
-  const [lookups, setLookups] = useState<Lookups>({ competitions: [], teams: [], players: [], matches: [] });
+  const [rows, setRows] = useState<Row[]>([]); const [form, setForm] = useState<Row>(() => defaults(resource)); const [editing, setEditing] = useState<string | null>(null); const [loading, setLoading] = useState(true); const [message, setMessage] = useState(""); const [lookups, setLookups] = useState<Lookups>({ competitions: [], teams: [], players: [], matches: [] });
   const canWrite = profile.role === "super_admin" || profile.role === "admin" || (profile.role === "operator" && ["matches", "events", "lineups", "mvp"].includes(resource));
   const refresh = async () => { setLoading(true); try { setRows(await readRows(resource)); } catch (e) { setMessage(e instanceof Error ? e.message : "Errore di caricamento."); } finally { setLoading(false); } };
   useEffect(() => { setForm(defaults(resource)); setEditing(null); void refresh(); }, [resource]);
@@ -118,15 +96,15 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
 
 function Login({ onLogin }: { onLogin: (p: AdminProfile) => void }) { const [u, setU] = useState(""); const [c, setC] = useState(""); const [m, setM] = useState(""); const [busy, setBusy] = useState(false); const submit = async (e: FormEvent) => { e.preventDefault(); setBusy(true); setM(""); try { const r = await signInWithAccessCode(u, c); if (r.error) throw r.error; const p = await getAuthenticatedAdmin(); if (!p) throw new Error("Profilo amministratore non valido."); onLogin(p); } catch (e) { setM(e instanceof Error ? e.message : "Accesso non riuscito."); } finally { setBusy(false); } }; return <div className="admin-login"><span className="eyebrow">Street League / Admin</span><h1>Back office</h1><p>Accedi con username e codice permanente per gestire la piattaforma.</p>{m && <p className="admin-error">{m}</p>}<form onSubmit={submit}><input value={u} onChange={(e) => setU(e.target.value)} placeholder="Username" /><input type="password" value={c} onChange={(e) => setC(e.target.value)} placeholder="Codice di accesso" /><button className="btn btn--primary" disabled={busy}>{busy ? "Accesso…" : "Accedi"}</button></form></div>; }
 
-const nav: Array<{ key?: Resource; label: string }> = [
-  { label: "Dashboard" }, { key: "competitions", label: "Competizioni" }, { key: "teams", label: "Squadre" }, { key: "players", label: "Giocatori" }, { key: "matches", label: "Partite" }, { key: "events", label: "Eventi" }, { key: "lineups", label: "Formazioni" }, { key: "mvp", label: "MVP" }, { key: "player_of_month", label: "POTM" }, { key: "partners", label: "Sponsor" }, { key: "active_collaborations", label: "Collab attive" }, { key: "social_contents", label: "Social / Video" },
+const nav: Array<{ key: Resource; label: string }> = [
+  { key: "competitions", label: "Competizioni" }, { key: "teams", label: "Squadre" }, { key: "players", label: "Giocatori" }, { key: "matches", label: "Partite" }, { key: "events", label: "Eventi" }, { key: "lineups", label: "Formazioni" }, { key: "mvp", label: "MVP" }, { key: "player_of_month", label: "POTM" }, { key: "partners", label: "Sponsor" }, { key: "active_collaborations", label: "Collab attive" }, { key: "social_contents", label: "Social / Video" },
 ];
 
 export default function AdminDashboard() {
-  const [profile, setProfile] = useState<AdminProfile | null>(null); const [resource, setResource] = useState<Resource | null>(null); const [booting, setBooting] = useState(true);
+  const [profile, setProfile] = useState<AdminProfile | null>(null); const [resource, setResource] = useState<Resource>("competitions"); const [booting, setBooting] = useState(true);
   useEffect(() => { void getAuthenticatedAdmin().then(setProfile).catch(() => setProfile(null)).finally(() => setBooting(false)); }, []);
-  const logout = async () => { await supabase?.auth.signOut(); setProfile(null); setResource(null); };
+  const logout = async () => { await supabase?.auth.signOut(); setProfile(null); setResource("competitions"); };
   if (!supabaseConfigured || booting) return <PageShell title="Admin" eyebrow="Street League"><div className="admin-help"><h3>Configurazione</h3><p>Verifica le variabili Supabase prima di accedere al back office.</p></div></PageShell>;
   if (!profile) return <PageShell title="Admin" eyebrow="Street League"><Login onLogin={setProfile} /></PageShell>;
-  return <PageShell title="Back office" eyebrow={profile.role}><div className="admin-layout"><aside className="admin-sidebar"><span className="eyebrow">Street League</span><h2>Back office</h2><p className="admin-user">{profile.full_name ?? profile.username ?? profile.email}</p><nav>{nav.map((item) => <button key={item.label} type="button" className={!item.key ? !resource ? "active" : "" : resource === item.key ? "active" : ""} onClick={() => setResource(item.key ?? null)}>{item.label}</button>)}</nav><button className="btn btn--ghost" type="button" onClick={() => void logout()}>Esci</button></aside><main className="admin-main">{resource ? <Crud resource={resource} profile={profile} /> : <div className="admin-hero"><span className="eyebrow">{profile.role}</span><h1>Dashboard</h1><p>Gestisci competizioni, squadre, giocatori, partite, POTM e contenuti Street League.</p></div>}</main></div></PageShell>;
+  return <PageShell title="Back office" eyebrow={profile.role}><div className="admin-layout"><aside className="admin-sidebar"><span className="eyebrow">Street League</span><h2>Back office</h2><p className="admin-user">{profile.full_name ?? profile.username ?? profile.email}</p><nav>{nav.map((item) => <button key={item.key} type="button" className={resource === item.key ? "active" : ""} onClick={() => setResource(item.key)}>{item.label}</button>)}</nav><button className="btn btn--ghost" type="button" onClick={() => void logout()}>Esci</button></aside><main className="admin-main"><Crud resource={resource} profile={profile} /></main></div></PageShell>;
 }
