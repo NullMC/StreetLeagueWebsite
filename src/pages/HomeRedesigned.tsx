@@ -129,7 +129,7 @@ export default function HomeRedesigned() {
     zIndex: 0,
     pointerEvents: "none",
     backgroundImage: [
-      "linear-gradient(to top, #fff 0%, rgba(255,255,255,0.72) 24%, rgba(255,255,255,0.12) 58%, rgba(255,255,255,0) 100%),"
+      "linear-gradient(to top, #fff 0%, rgba(255,255,255,0.72) 24%, rgba(255,255,255,0.12) 58%, rgba(255,255,255,0) 100%),",
 
       "linear-gradient(135deg, rgba(255,255,255,0.76) 0%, rgba(245,211,221,0.30) 54%, rgba(237,123,171,0.18) 100%)",
       `url("${heroBackground}")`,
@@ -148,22 +148,21 @@ export default function HomeRedesigned() {
         <div aria-hidden="true" style={heroBackdropStyle} />
         <div className="home-hero__inner" style={{ position: "relative", zIndex: 1 }}>
           <div className="home-hero__mast" style={{ color: "#010a08", borderBottomColor: "rgba(1,10,8,.16)" }}>
-            <div><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Highlights</span><h1 id="home-hero-title" style={{ color: "#010a08" }}>Street League</h1></div>
-            <span className="home-hero__competition" style={{ color: "rgba(1,10,8,.62)", opacity: 1 }}>{competition?.name ?? "Street League"}</span>
+            <div><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Street League</span><h1 id="home-hero-title" style={{ color: "#010a08" }}>Highlights</h1></div>
           </div>
           {social.length ? (
             <div className="home-hero__highlights">
               <a className="home-highlight home-highlight--feature" href={social[0].content_url} target="_blank" rel="noopener noreferrer">
                 <div className="home-highlight__media">{social[0].thumbnail_url ? <img src={social[0].thumbnail_url} alt="" /> : <div className="home-highlight__fallback" />}</div>
                 <div className="home-highlight__shade" />
-                <div className="home-highlight__content"><span className="home-highlight__index">01</span><span className="home-highlight__platform">{social[0].platform}</span><h2>{social[0].title}</h2><span className="home-highlight__cta">Apri contenuto ↗</span></div>
+                <div className="home-highlight__content"><h2>{social[0].title}</h2><span className="home-highlight__cta">Apri contenuto ↗</span></div>
               </a>
               <div className="home-hero__rail">
                 {social.slice(1, 5).map((item, index) => (
                   <a className="home-highlight home-highlight--rail" href={item.content_url} target="_blank" rel="noopener noreferrer" key={item.id}>
                     <div className="home-highlight__media">{item.thumbnail_url ? <img src={item.thumbnail_url} alt="" /> : <div className="home-highlight__fallback" />}</div>
                     <div className="home-highlight__shade" />
-                    <div className="home-highlight__content"><span className="home-highlight__index">{String(index + 2).padStart(2, "0")}</span><span className="home-highlight__platform">{item.platform}</span><h3>{item.title}</h3><span className="home-highlight__arrow">↗</span></div>
+                    <div className="home-highlight__content"><h3>{item.title}</h3><span className="home-highlight__arrow">↗</span></div>
                   </a>
                 ))}
               </div>
@@ -171,12 +170,12 @@ export default function HomeRedesigned() {
           ) : (
             <div className="home-hero__empty"><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Highlights</span><h2 style={{ color: "#010a08" }}>Nessun highlight ancora.</h2><p style={{ color: "rgba(1,10,8,.62)" }}>I contenuti pubblicati appariranno qui.</p></div>
           )}
-          <div className="home-hero__foot" style={{ color: "rgba(1,10,8,.52)", borderTopColor: "rgba(1,10,8,.14)" }}><span>Live feed / Street League</span><span>Scorri per continuare ↓</span></div>
         </div>
       </section>
 
       <section className="section--edge home-schedule" id="home-matches">
-        <div className="home-section-head"><SectionTitle eyebrow="Competition" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
+        <span className="home-hero__competition" style={{ color: "rgba(1,10,8,.62)", opacity: 1 }}>{competition?.name ?? "Street League"}</span>
+        <div className="home-section-head"><SectionTitle eyebrow="" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
         <div className="home-schedule__grid">
           <div><MatchList matches={matches} teams={teams} /></div>
           <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifica</span><a href="/classifica">Completa ↗</a></div><StandingsList standings={standings} /></div>
