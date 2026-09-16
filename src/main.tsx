@@ -13,6 +13,7 @@ import "./styles/light-theme.css";
 import "./styles/partners-background-fix.css";
 import "./styles/admin.css";
 import "./styles/final-ui-fixes.css";
+import "./styles/team-potm.css";
 import Home from "./pages/Home";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
@@ -27,6 +28,7 @@ import MatchDetail from "./pages/MatchDetail";
 import Partners from "./pages/Partners";
 import Collaborate from "./pages/Collaborate";
 import Admin from "./pages/Admin";
+import AdminPotm from "./pages/AdminPotm";
 import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/AppLayout";
 
@@ -48,6 +50,7 @@ function App() {
         <Route path="/partner" element={<Partners />} />
         <Route path="/collabora" element={<Collaborate />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/potm" element={<AdminPotm />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
