@@ -1,0 +1,321 @@
+/* ============================================================
+   ADMIN / BACK OFFICE — MOBILE RESPONSIVE OVERRIDES
+   Loaded after admin.css so these rules take precedence.
+   ============================================================ */
+
+.admin-layout,
+.admin-layout * {
+  box-sizing: border-box;
+}
+
+.admin-layout {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.admin-main,
+.admin-resource,
+.admin-form,
+.admin-table-wrap,
+.admin-login {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-main {
+  overflow-x: hidden;
+}
+
+@media (max-width: 900px) {
+  .admin-layout {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .admin-sidebar {
+    position: static !important;
+    top: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(1,10,8,.10) !important;
+    padding: 16px 18px !important;
+    gap: 11px !important;
+    overflow: hidden !important;
+  }
+
+  .admin-sidebar nav {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 1px 5px !important;
+    overscroll-behavior-x: contain;
+  }
+
+  .admin-sidebar nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-sidebar nav button {
+    flex: 0 0 auto !important;
+    min-height: 42px !important;
+    white-space: nowrap !important;
+    padding: 10px 13px !important;
+    touch-action: manipulation;
+  }
+
+  .admin-sidebar > .btn--ghost {
+    width: 100% !important;
+    margin-top: 0 !important;
+    min-height: 44px !important;
+  }
+
+  .admin-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 26px 18px 56px !important;
+  }
+
+  .admin-hero {
+    width: 100%;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .admin-hero h1 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: clamp(48px, 10vw, 68px) !important;
+  }
+
+  .admin-form__grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .admin-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .admin-table {
+    min-width: 720px;
+  }
+
+  .admin-login {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-sidebar {
+    padding: 12px 12px 10px !important;
+  }
+
+  .admin-sidebar h2 {
+    font-size: 30px !important;
+    line-height: .95 !important;
+  }
+
+  .admin-user {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    margin-top: 2px !important;
+    max-width: 100%;
+  }
+
+  .admin-sidebar nav {
+    gap: 5px !important;
+    margin-inline: -2px;
+  }
+
+  .admin-sidebar nav button {
+    min-height: 40px !important;
+    padding: 9px 11px !important;
+    font-size: 9px !important;
+    letter-spacing: .07em !important;
+  }
+
+  .admin-main {
+    padding: 20px 12px 46px !important;
+  }
+
+  .admin-hero {
+    margin-bottom: 18px !important;
+    gap: 9px !important;
+  }
+
+  .admin-hero h1 {
+    font-size: clamp(44px, 14vw, 58px) !important;
+    line-height: .88 !important;
+  }
+
+  .admin-hero p,
+  .admin-login p {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+  }
+
+  .admin-resource__head {
+    width: 100%;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .admin-resource__head h2 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: clamp(38px, 12vw, 48px) !important;
+    line-height: .9 !important;
+  }
+
+  .admin-resource__head .btn,
+  .admin-form > .btn,
+  .admin-form button[type="submit"] {
+    width: 100% !important;
+    min-height: 46px;
+  }
+
+  .admin-form,
+  .admin-help {
+    padding: 14px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .admin-form__grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .admin-form input,
+  .admin-form select,
+  .admin-form textarea {
+    width: 100% !important;
+    min-height: 48px !important;
+    font-size: 16px !important;
+  }
+
+  .admin-form textarea {
+    min-height: 120px !important;
+  }
+
+  .admin-input-row {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-input-row .file-input {
+    min-width: 0;
+    width: 100%;
+    padding: 8px !important;
+    font-size: 12px !important;
+  }
+
+  .admin-table-wrap {
+    border-radius: 5px !important;
+  }
+
+  .admin-table {
+    min-width: 620px !important;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 9px 8px !important;
+    font-size: 9.5px !important;
+  }
+
+  .admin-actions {
+    white-space: nowrap !important;
+  }
+
+  .admin-actions .btn {
+    min-height: 36px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* Login: full-width, touch-friendly and no oversized desktop typography. */
+  .admin-login {
+    padding: 26px 0 12px !important;
+  }
+
+  .admin-login h1 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: clamp(42px, 14vw, 58px) !important;
+    line-height: .9 !important;
+  }
+
+  .admin-login form {
+    width: 100%;
+    margin-top: 18px !important;
+    gap: 9px !important;
+  }
+
+  .admin-login input {
+    width: 100% !important;
+    min-height: 50px !important;
+    font-size: 16px !important;
+  }
+
+  .admin-login .btn {
+    width: 100% !important;
+    min-height: 50px !important;
+  }
+
+  .rich-text-editor__toolbar {
+    flex-wrap: wrap !important;
+  }
+
+  .rich-text-editor__content {
+    min-height: 130px !important;
+  }
+
+  .admin-cta-manager__inner {
+    padding: 20px 12px 34px !important;
+  }
+
+  .admin-cta-manager__row {
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-main {
+    padding-inline: 9px !important;
+  }
+
+  .admin-sidebar {
+    padding-inline: 9px !important;
+  }
+
+  .admin-sidebar nav button {
+    padding-inline: 9px !important;
+    font-size: 8.5px !important;
+  }
+
+  .admin-hero h1,
+  .admin-login h1 {
+    font-size: 42px !important;
+  }
+
+  .admin-resource__head h2 {
+    font-size: 36px !important;
+  }
+}
