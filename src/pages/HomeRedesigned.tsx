@@ -129,7 +129,7 @@ export default function HomeRedesigned() {
     zIndex: 0,
     pointerEvents: "none",
     backgroundImage: [
-      "linear-gradient(to top, #f9f9f9 0%, rgba(249,249,249,0.72) 24%, rgba(249,249,249,0.12) 58%, rgba(249,249,249,0) 100%)",
+      "linear-gradient(to top, #fff 0%, rgba(255,255,255,0.72) 24%, rgba(255,255,255,0.12) 58%, rgba(255,255,255,0) 100%)",
       "linear-gradient(135deg, rgba(255,255,255,0.76) 0%, rgba(245,211,221,0.30) 54%, rgba(237,123,171,0.18) 100%)",
       `url("${heroBackground}")`,
     ].join(","),
@@ -143,9 +143,9 @@ export default function HomeRedesigned() {
 
   return (
     <div className="home-redesign">
-      <section className="home-hero" style={{ background: "#f9f9f9", color: "#010a08" }} aria-labelledby="home-hero-title">
+      <section className="home-hero" style={{ background: "#fff", color: "#010a08" }} aria-labelledby="home-hero-title">
         <div aria-hidden="true" style={heroBackdropStyle} />
-        <div className="home-hero__inner">
+        <div className="home-hero__inner" style={{ position: "relative", zIndex: 1 }}>
           <div className="home-hero__mast" style={{ color: "#010a08", borderBottomColor: "rgba(1,10,8,.16)" }}>
             <div><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Highlights</span><h1 id="home-hero-title" style={{ color: "#010a08" }}>Street League</h1></div>
             <span className="home-hero__competition" style={{ color: "rgba(1,10,8,.62)", opacity: 1 }}>{competition?.name ?? "Street League"}</span>
