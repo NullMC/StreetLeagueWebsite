@@ -220,7 +220,14 @@
 }
 .home-section-head .section-head {
   margin: 0 !important;
-  align-items: flex-end !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  width: 100%;
+}
+.home-section-head .section-head > div {
+  align-items: flex-start !important;
+  text-align: left !important;
 }
 .home-section-head .section-head h2 {
   margin: 3px 0 0 !important;
@@ -306,7 +313,7 @@
 .home-teams .team-carousel__logo { border-radius: 50%; box-shadow: none; border: 1px solid var(--home-line); }
 .home-teams .team-carousel__name { font-size: 12px; }
 
-/* Sponsors retain the dedicated pink band and one section separator. */
+/* Sponsors retain the dedicated pink band but lose the decorative excess. */
 .home-redesign .sponsor-band--redesign { padding-top: 60px; }
 .home-redesign .sponsor-band--redesign .section-head h2 { color: #fff !important; }
 .home-redesign .sponsor-tier { margin-top: 34px; }
@@ -333,60 +340,35 @@
   .home-highlight--feature { min-height: 58svh; }
   .home-highlight__content { padding: 18px; }
   .home-highlight--feature h2 { font-size: clamp(34px, 10vw, 56px); }
-
-  /* Every section title is centered against the full section header width. */
-  .home-section-head {
-    display: flex;
-    flex-direction: column;
-    align-items: center !important;
-    justify-content: center;
-    gap: 12px;
-    text-align: center;
-  }
+  .home-section-head { grid-template-columns: 1fr; align-items: start; }
   .home-section-head .section-head {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
     width: 100%;
-    align-items: center !important;
-    justify-content: center;
-    text-align: center !important;
   }
   .home-section-head .section-head > div {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start !important;
+    text-align: left !important;
   }
-  .home-section-head .section-head h2 { text-align: center !important; }
-  .home-section-head__link { align-self: center; justify-self: auto; }
+  .home-section-head__link { justify-self: start; }
 
-  /* Schedule rows keep team names and matchday metadata in separate columns. */
   .home-match-row {
-    grid-template-columns: 64px minmax(0,1fr) 54px;
-    gap: 10px;
-    min-height: 92px;
-    padding: 10px 0;
+    grid-template-columns: 64px minmax(0,1fr);
+    gap: 10px 12px;
+    min-height: 78px;
+    padding: 12px 0;
   }
-  .home-match-row__date { min-width: 0; }
-  .home-match-row__date strong { font-size: 25px; }
-  .home-match-row__teams {
-    grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
-    gap: 7px;
-    font-size: 10px;
-    line-height: 1.08;
-    min-width: 0;
-  }
-  .home-match-row__teams span { min-width: 0; overflow-wrap: anywhere; }
-  .home-match-row__teams span:last-child { text-align: right; }
-  .home-match-row__meta {
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 3px;
-    text-align: right;
-  }
-  .home-match-row__meta span:first-child { max-width: 100%; line-height: 1.1; }
-  .home-match-row__meta span:last-child { font-size: 18px; }
+  .home-match-row__date { grid-column: 1; grid-row: 1 / span 2; align-self: center; }
+  .home-match-row__teams { grid-column: 2; grid-row: 1; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 8px; font-size: 11px; }
+  .home-match-row__meta { grid-column: 2; grid-row: 2; justify-content: flex-end; gap: 8px; font-size: 8px; }
+  .home-match-row__meta span:last-child { font-size: 15px; }
+}
 
-  /* Sponsor section: keep only the main section divider; tier headers have no lines. */
-  .home-redesign .sponsor-tier__heading { border-top: 0 !important; }
+@media (max-width: 430px) {
+  .home-hero__inner { width: calc(100% - 20px); }
+  .home-match-row { grid-template-columns: 56px minmax(0,1fr); column-gap: 9px; }
+  .home-match-row__teams { font-size: 10px; gap: 6px; }
+  .home-match-row__meta { font-size: 8px; }
+  .home-section-head .section-head h2 { font-size: clamp(38px, 11.5vw, 52px) !important; }
 }
