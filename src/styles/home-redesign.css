@@ -18,39 +18,36 @@
   border-radius: 0;
 }
 
-/* HERO — one visual story, not a dashboard. */
+/* HERO — light editorial background, no dark legacy overlay or decorative geometry. */
 .home-hero {
   position: relative;
   min-height: max(720px, calc(100svh - var(--site-header-total-height)));
   overflow: hidden;
   isolation: isolate;
-  background: #111;
-  color: #fff;
-  background-image: var(--hero-image);
-  background-position: center;
-  background-size: cover;
+  background: #fff;
+  color: #010a08;
 }
-.home-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background:
-    linear-gradient(90deg, rgba(7, 10, 9, .94) 0%, rgba(7, 10, 9, .55) 44%, rgba(7, 10, 9, .18) 100%),
-    linear-gradient(0deg, rgba(7, 10, 9, .72) 0%, transparent 28%);
-}
+
+.home-hero::before,
 .home-hero::after {
-  content: "";
-  position: absolute;
-  right: -7vw;
-  top: 22%;
-  width: min(42vw, 620px);
-  height: min(42vw, 620px);
-  border: 1px solid rgba(255,255,255,.18);
-  transform: rotate(18deg);
-  opacity: .34;
-  z-index: -1;
+  display: none !important;
+  content: none;
 }
+
+/* The React backdrop remains the single source for the hero image/gradient.
+   The !important rule also protects it from the inline declaration becoming invalid
+   because of a malformed/duplicated layer separator. */
+.home-hero > div[aria-hidden="true"] {
+  z-index: 0 !important;
+  background-image:
+    linear-gradient(to top, #fff 0%, rgba(255,255,255,.72) 24%, rgba(255,255,255,.12) 58%, rgba(255,255,255,0) 100%),
+    linear-gradient(135deg, rgba(255,255,255,.76) 0%, rgba(245,211,221,.30) 54%, rgba(237,123,171,.18) 100%),
+    url("/assets/nebula-vertical.webp") !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+}
+
 .home-hero__inner {
   width: min(1500px, calc(100% - 48px));
   min-height: inherit;
@@ -59,14 +56,17 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  position: relative;
+  z-index: 1;
 }
 .home-hero__mast {
   display: flex;
   align-items: end;
   justify-content: space-between;
   gap: 28px;
-  border-bottom: 1px solid rgba(255,255,255,.28);
+  border-bottom: 1px solid rgba(1,10,8,.16);
   padding-bottom: 14px;
+  color: #010a08;
 }
 .home-hero__mast h1 {
   margin: 5px 0 0;
@@ -76,6 +76,7 @@
   line-height: .82;
   letter-spacing: -.025em;
   text-transform: uppercase;
+  color: #010a08 !important;
 }
 .home-hero__kicker,
 .home-hero__competition,
@@ -86,13 +87,14 @@
   letter-spacing: .14em;
   text-transform: uppercase;
 }
-.home-hero__kicker { color: #fff; opacity: .74; }
-.home-hero__competition { color: #fff; opacity: .64; white-space: nowrap; }
+.home-hero__kicker { color: var(--home-pink) !important; opacity: 1; }
+.home-hero__competition { color: rgba(1,10,8,.62) !important; opacity: 1; white-space: nowrap; }
 .home-hero__highlights {
   display: grid;
   grid-template-columns: minmax(0, 1.7fr) minmax(300px, .82fr);
   gap: 16px;
   min-height: 470px;
+  margin-bottom: 34px;
 }
 .home-highlight {
   position: relative;
@@ -184,8 +186,8 @@
   justify-content: space-between;
   gap: 20px;
   padding-top: 15px;
-  border-top: 1px solid rgba(255,255,255,.18);
-  color: rgba(255,255,255,.62);
+  border-top: 1px solid rgba(1,10,8,.14);
+  color: rgba(1,10,8,.52);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .13em;
@@ -205,24 +207,19 @@
   font-size: clamp(48px, 6vw, 84px);
   line-height: .85;
   text-transform: uppercase;
+  color: #010a08 !important;
 }
-.home-hero__empty p { margin: 0; color: rgba(255,255,255,.66); }
+.home-hero__empty p { margin: 0; color: rgba(1,10,8,.66); }
 
-/* Numbered editorial section headers. */
+/* Numbered editorial section headers are intentionally unnumbered. */
 .home-section-head {
   display: grid;
-  grid-template-columns: auto minmax(0,1fr) auto;
+  grid-template-columns: minmax(0,1fr) auto;
   gap: 18px;
   align-items: end;
   margin-bottom: 28px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--home-line);
-}
-.home-section-head__number {
-  color: var(--home-pink);
-  font-family: var(--display);
-  font-size: 34px;
-  line-height: .8;
 }
 .home-section-head .section-head {
   margin: 0 !important;
@@ -246,7 +243,6 @@
   white-space: nowrap;
 }
 .home-section-head--on-pink { border-color: rgba(255,255,255,.3); color: #fff; }
-.home-section-head--on-pink .home-section-head__number,
 .home-section-head--on-pink .section-head .eyebrow,
 .home-section-head--on-pink .section-head h2,
 .home-section-head--on-pink .section-head { color: #fff !important; }
@@ -321,7 +317,7 @@
 @media (max-width: 980px) {
   .home-hero { min-height: auto; }
   .home-hero__inner { min-height: auto; }
-  .home-hero__highlights { grid-template-columns: 1fr; min-height: auto; }
+  .home-hero__highlights { grid-template-columns: 1fr; min-height: auto; margin-bottom: 24px; }
   .home-highlight--feature { min-height: 58svh; }
   .home-hero__rail { grid-template-columns: repeat(2, minmax(0,1fr)); grid-template-rows: repeat(2, 190px); }
   .home-schedule__grid { grid-template-columns: 1fr; }
@@ -331,34 +327,13 @@
 
 @media (max-width: 700px) {
   .home-redesign .section--edge { padding: 48px 18px 60px; }
-  .home-hero__inner { width: min(100% - 28px, 1500px); padding-top: 88px; }
-  .home-hero__mast { align-items: flex-start; flex-direction: column; gap: 10px; }
-  .home-hero__mast h1 { font-size: clamp(54px, 18vw, 82px); }
-  .home-hero__competition { white-space: normal; }
-  .home-highlight--feature { min-height: 54svh; }
-  .home-highlight--feature h2 { font-size: clamp(38px, 12vw, 60px); }
-  .home-hero__rail { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 4px; }
-  .home-hero__rail::-webkit-scrollbar { display: none; }
-  .home-highlight--rail { flex: 0 0 78%; min-height: 190px; scroll-snap-align: start; }
-  .home-hero__foot { font-size: 8px; }
-  .home-section-head { grid-template-columns: 28px minmax(0,1fr); gap: 12px; }
-  .home-section-head__link { grid-column: 2; justify-self: start; }
-  .home-match-row { grid-template-columns: 62px minmax(0,1fr); gap: 10px; padding: 12px 0; }
-  .home-match-row__teams { grid-template-columns: 1fr; gap: 3px; order: 2; }
-  .home-match-row__teams b { display: none; }
-  .home-match-row__meta { grid-column: 1 / -1; order: 3; }
-  .home-match-row__date { order: 1; }
-  .home-match-row__date strong { font-size: 24px; }
-  .home-ranking__row { grid-template-columns: 27px minmax(0,1fr) 42px 30px; gap: 7px; }
-  .home-ranking__team { font-size: 10px; }
-  .home-performers .leader-stat-card { padding: 20px; }
-  .home-redesign .sponsor-band--redesign { padding-top: 48px; }
-}
-
-@media (max-width: 430px) {
-  .home-hero__inner { width: calc(100% - 20px); }
-  .home-highlight--feature { min-height: 50svh; }
+  .home-hero__inner { width: min(100% - 28px, 1500px); padding-top: 86px; }
+  .home-hero__mast { align-items: flex-start; }
+  .home-hero__mast h1 { font-size: clamp(48px, 16vw, 86px); }
+  .home-hero__highlights { gap: 10px; }
+  .home-highlight--feature { min-height: 58svh; }
   .home-highlight__content { padding: 18px; }
-  .home-highlight--rail { flex-basis: 84%; }
-  .home-hero__foot span:last-child { display: none; }
+  .home-highlight--feature h2 { font-size: clamp(34px, 10vw, 56px); }
+  .home-section-head { grid-template-columns: 1fr; align-items: start; }
+  .home-section-head__link { justify-self: start; }
 }
