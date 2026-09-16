@@ -1,0 +1,80 @@
+/* Mobile calendar: reserve a dedicated date column so it can never overlap team names. */
+@media (max-width: 700px) {
+  .home-redesign .home-match-row {
+    grid-template-columns: minmax(74px, 82px) minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: 14px !important;
+  }
+
+  .home-redesign .home-match-row__date {
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-right: 4px !important;
+    align-self: center !important;
+  }
+
+  .home-redesign .home-match-row__date strong {
+    display: block !important;
+    width: 100% !important;
+    font-size: clamp(19px, 6vw, 24px) !important;
+    line-height: .9 !important;
+    white-space: nowrap !important;
+  }
+
+  .home-redesign .home-match-row__date span {
+    display: block !important;
+    margin-top: 3px !important;
+    white-space: nowrap !important;
+  }
+
+  .home-redesign .home-match-row__teams {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .home-redesign .home-match-row__teams span {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+  .home-redesign .home-match-row__teams span:first-child {
+    text-align: left !important;
+    padding-left: 2px !important;
+  }
+
+  .home-redesign .home-match-row__teams span:last-child {
+    text-align: right !important;
+  }
+
+  .home-redesign .home-match-row__meta {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-top: 2px !important;
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .home-redesign .home-match-row {
+    grid-template-columns: minmax(66px, 72px) minmax(0, 1fr) !important;
+    column-gap: 11px !important;
+  }
+
+  .home-redesign .home-match-row__date strong {
+    font-size: 20px !important;
+  }
+
+  .home-redesign .home-match-row__teams {
+    gap: 6px !important;
+  }
+}
