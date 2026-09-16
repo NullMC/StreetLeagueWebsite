@@ -1,4 +1,5 @@
- .sponsor-band--redesign {
+/* Sponsor visual system: transparent sponsor cards on the pink canvas. */
+.sponsor-band--redesign {
   background:
     radial-gradient(circle at 14% 20%, rgba(228, 34, 120, 0.34), transparent 30%),
     radial-gradient(circle at 86% 78%, rgba(237, 123, 171, 0.22), transparent 28%),
@@ -8,15 +9,15 @@
 .sponsor-band--redesign::before,
 .sponsor-band--redesign::after { display: block !important; }
 
-.sponsor-band--redesign > .sponsor-band__inner > .section-head {
-  justify-content: flex-start !important;
-  align-items: flex-start !important;
+.sponsor-band--redesign > .sponsor-band__inner > .section-head,
+.sponsor-band--redesign > .sponsor-band__inner > .home-section-head {
+  align-items: flex-end !important;
+  justify-content: space-between !important;
   text-align: left !important;
 }
 
 .sponsor-band--redesign > .sponsor-band__inner > .section-head > div { text-align: left !important; }
 
-/* Sponsor card: no border or shadow, centered logo, name + Info underneath. */
 .sponsor-band--redesign .partner-card,
 .partners-page--redesign .partner-card,
 .partner-card--gold,
@@ -34,32 +35,53 @@
   box-shadow: none !important;
 }
 
-.partner-card__logo {
-  width: 100%;
+.partner-card__logo,
+.sponsor-band--redesign .partner-card__logo,
+.partners-page--redesign .partner-card__logo {
+  width: min(100%, 260px);
   min-height: 92px;
+  margin-inline: auto;
   display: grid;
   place-items: center;
+  position: relative;
   background: transparent !important;
 }
 
-.partner-card__logo img {
+.partner-card__logo img,
+.sponsor-band--redesign .partner-card__logo img,
+.partners-page--redesign .partner-card__logo img {
+  position: static !important;
+  inset: auto !important;
   max-width: min(100%, 220px);
   max-height: 92px;
+  margin: 0 auto;
   width: auto;
   height: auto;
   object-fit: contain;
   display: block;
 }
 
-.partner-card__logo strong {
-  color: #fff;
-  font-size: 20px;
-  text-align: center;
+.partner-card__logo strong { color: #fff; font-size: 20px; text-align: center; }
+
+.partner-card__meta,
+.sponsor-band--redesign .partner-card__meta,
+.partners-page--redesign .partner-card__meta {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 
 .partner-card__name {
   display: block;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #fff !important;
   line-height: 1.15;
   font-size: 13px;
@@ -74,13 +96,14 @@
   justify-content: center;
   width: fit-content !important;
   min-width: 0 !important;
+  height: 34px;
   margin: 0 !important;
   padding: 9px 14px !important;
   border: 0 !important;
   border-radius: 999px !important;
   background: #fff !important;
   color: var(--pink) !important;
-  box-shadow: 0 8px 20px rgba(1, 10, 8, .12) !important;
+  box-shadow: 0 8px 20px rgba(1,10,8,.12) !important;
   font-size: 10px !important;
   font-weight: 800 !important;
   letter-spacing: .08em !important;
@@ -93,25 +116,62 @@
 .sponsor-link-btn:hover { background: #fff !important; color: #b10f59 !important; transform: translateY(-1px); }
 .sponsor-link-btn--disabled { opacity: .58; cursor: default; }
 
-/* Home collaboration card: keep the sponsor copy heading dark on the white card. */
-.sponsor-band--redesign .collab-carousel__copy h3 {
-  color: #010a08 !important;
-}
+.sponsor-band--redesign .collab-carousel__copy h3,
+.sponsor-band--redesign .sponsor-tier--collab .collab-carousel__copy h3 { color: #010a08 !important; }
 
-/* Flyer depth on the public sponsor canvas. */
 .collab-carousel__poster {
-  box-shadow: 0 16px 34px rgba(0, 0, 0, .34) !important;
+  border-color: rgba(1,10,8,.16) !important;
+  background: #f9f9f9;
+  box-shadow: 0 18px 44px rgba(1,10,8,.22) !important;
 }
-
+.sponsor-band--redesign .collab-carousel__item.is-active .collab-carousel__poster,
 .collab-carousel__item.is-active .collab-carousel__poster {
-  border-color: rgba(249,249,249,.16) !important;
-  box-shadow: 0 24px 54px rgba(0,0,0,.48) !important;
+  border-color: rgba(1,10,8,.22) !important;
+  box-shadow: 0 26px 60px rgba(1,10,8,.28), 0 0 0 1px rgba(249,249,249,.28) !important;
 }
 
-/* Partners hero base geometry. */
+@media (max-width: 700px) {
+  .sponsor-tier--gold .partners-grid--gold {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 10px;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card {
+    min-height: 190px;
+    padding: 14px 8px;
+    gap: 12px;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card__logo {
+    width: 100%;
+    min-height: 86px;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card__logo img {
+    max-width: 92%;
+    max-height: 76px;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card__meta {
+    width: 100%;
+    min-width: 0;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sponsor-tier--gold .partners-grid--gold .partner-card__name {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Partners sponsor canvas: one continuous pink background behind all tiers. */
+.partners-page.partners-page--redesign { background: var(--pink) !important; }
+.partners-page.partners-page--redesign .partners-tier-section { background: transparent !important; color: #fff !important; }
+
+/* Partners hero and active-collaboration geometry. */
 .partners-page__hero-bg::before,
 .partners-page__hero-bg::after { display: none !important; }
-
 .partners-page__hero-bg { background: var(--ink) !important; filter: none !important; }
 
 .partners-page__hero {
@@ -125,20 +185,17 @@
   margin: 0 auto !important;
   transform: none !important;
 }
-
 .partners-page__hero-content h1 { margin: 0 0 12px !important; max-width: 760px; text-align: left !important; line-height: .82 !important; }
 .partners-page__hero-content p { margin: 0 !important; max-width: 620px; text-align: left !important; }
 .partners-page__hero-content .btn { margin-top: 24px; }
 
-/* Active collaboration layout variants used by the Partners page. */
 .partners-tier-heading--with-collabs {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 460px) !important;
+  grid-template-columns: minmax(0,1fr) minmax(300px,460px) !important;
   align-items: center !important;
   gap: clamp(28px,5vw,72px) !important;
   margin-bottom: 34px !important;
 }
-
 .partners-tier-heading__copy { min-width: 0; align-self: center; }
 .partners-tier-heading__copy h2 { margin: 7px 0 10px !important; text-align: left !important; }
 .partners-tier-heading__copy p { max-width: 420px; margin: 0 !important; text-align: left !important; }
@@ -161,10 +218,4 @@
   .partners-tier-heading--with-collabs { gap: 18px !important; }
   .partners-tier-heading__collabs .collab-carousel__item { flex-basis: 125px; height: 175px; }
   .partners-tier-heading__collabs .collab-carousel__item.is-active { flex-basis: min(200px,64vw); height: min(280px,88vw); }
-}
-
-/* Final specificity guard: the homepage collaboration title must stay dark.
-   This comes after the generic sponsor-tier heading rule and therefore wins on Home only. */
-.sponsor-band--redesign .sponsor-tier--collab .collab-carousel__copy h3 {
-  color: #010a08 !important;
 }
