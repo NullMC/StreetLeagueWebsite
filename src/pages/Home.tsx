@@ -2,11 +2,12 @@ import "../styles/home-fixes.css";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { SectionTitle } from "../components/SectionTitle";
-import { TeamCard } from "../components/TeamCard";
 import { EmptyState } from "../components/EmptyState";
 import { ContentCarousel } from "../components/ContentCarousel";
 import { CollabCarousel } from "../components/CollabCarousel";
 import { LogoScroller } from "../components/LogoScroller";
+import { TeamCarousel } from "../components/TeamCarousel";
+import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
 import {
   calculateStandings,
   getActiveCollaborations,
@@ -18,6 +19,7 @@ import {
   getTeams,
   subscribeToCompetition,
 } from "../lib/api";
+import { getPlayerOfMonth } from "../lib/playerOfMonth";
 import type {
   ActiveCollaboration,
   Competition,
@@ -33,13 +35,14 @@ type PlayerWithStats = Player & { stats: PlayerStats };
 type LeaderConfig = {
   key: "goals" | "assists" | "clean_sheets";
   title: string;
-  eyebrow: string;
 };
+
 const leaderConfigs: LeaderConfig[] = [
-  { key: "goals", title: "Miglior marcatore", eyebrow: "Gol" },
-  { key: "assists", title: "Top uomo-assist", eyebrow: "Assist" },
-  { key: "clean_sheets", title: "Clean sheets", eyebrow: "Portieri" },
+  { key: "goals", title: "Miglior marcatore" },
+  { key: "assists", title: "Top uomo-assist" },
+  { key: "clean_sheets", title: "Clean sheets" },
 ];
+
 function LeaderPanel({
   config,
   players,
@@ -67,6 +70,7 @@ function LeaderPanel({
       : config.key === "assists"
         ? "assist"
         : "clean sheet";
+
   return (
     <article className="stat-card leader-stat-card">
       <span className="eyebrow">{config.title}</span>
@@ -85,13 +89,12 @@ function LeaderPanel({
               <span>{String(index + 1).padStart(2, "0")}</span>
               <span>
                 {player ? `${player.first_name} ${player.last_name}` : "—"}
-                {player && (
+                {player ? (
                   <small>
-                    {" "}
-                    · {player.stats[config.key]}
+                    {" "}· {player.stats[config.key]}
                     {index === 0 ? ` ${statLabel}` : ""}
                   </small>
-                )}
+                ) : null}
               </span>
             </div>
           );
@@ -100,6 +103,7 @@ function LeaderPanel({
     </article>
   );
 }
+
 function SponsorCard({ partner }: { partner: Partner }) {
   const body = partner.logo_url ? (
     <img src={partner.logo_url} alt={partner.name} />
@@ -107,6 +111,7 @@ function SponsorCard({ partner }: { partner: Partner }) {
     <strong>{partner.name}</strong>
   );
   const hasLink = Boolean(partner.website_url);
+
   return (
     <article className={`partner-card partner-card--${partner.tier}`}>
       <div className="partner-card__logo">{body}</div>
@@ -131,16 +136,17 @@ function SponsorCard({ partner }: { partner: Partner }) {
     </article>
   );
 }
+
 export default function Home() {
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>(
-    [],
-  );
+  const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]);
   const [social, setSocial] = useState<SocialContent[]>([]);
   const [playerStats, setPlayerStats] = useState<PlayerWithStats[]>([]);
+  const [potm, setPotm] = useState<Awaited<ReturnType<typeof getPlayerOfMonth>>>(null);
+
   const load = async () => {
     try {
       const active = await getActiveCompetition();
@@ -151,6 +157,7 @@ export default function Home() {
         nextCollabs,
         nextSocial,
         nextStats,
+        nextPotm,
       ] = await Promise.all([
         getMatches(active?.id),
         getTeams(active?.id),
@@ -158,6 +165,7 @@ export default function Home() {
         getActiveCollaborations(),
         getSocialContent(),
         getAllPlayerStats(),
+        getPlayerOfMonth(),
       ]);
       setCompetition(active);
       setMatches(nextMatches);
@@ -166,6 +174,7 @@ export default function Home() {
       setCollaborations(nextCollabs);
       setSocial(nextSocial);
       setPlayerStats(nextStats);
+      setPotm(nextPotm);
     } catch (error) {
       console.error("Home data error:", error);
       setCompetition(null);
@@ -175,31 +184,22 @@ export default function Home() {
       setCollaborations([]);
       setSocial([]);
       setPlayerStats([]);
+      setPotm(null);
     }
   };
+
   useEffect(() => {
     void load();
     return subscribeToCompetition(() => void load());
   }, []);
+
   const upcoming = useMemo(() => matches.slice(0, 6), [matches]);
-  const standings = useMemo(
-    () => calculateStandings(teams, matches),
-    [teams, matches],
-  );
-  const heroBackground =
-    competition?.hero_image_url || "/assets/nebula-vertical.webp";
-  const goldPartners = useMemo(
-    () => partners.filter((partner) => partner.tier === "gold"),
-    [partners],
-  );
-  const silverPartners = useMemo(
-    () => partners.filter((partner) => partner.tier === "silver"),
-    [partners],
-  );
-  const bronzePartners = useMemo(
-    () => partners.filter((partner) => partner.tier === "bronze"),
-    [partners],
-  );
+  const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
+  const heroBackground = competition?.hero_image_url || "/assets/nebula-vertical.webp";
+  const goldPartners = useMemo(() => partners.filter((partner) => partner.tier === "gold"), [partners]);
+  const silverPartners = useMemo(() => partners.filter((partner) => partner.tier === "silver"), [partners]);
+  const bronzePartners = useMemo(() => partners.filter((partner) => partner.tier === "bronze"), [partners]);
+
   return (
     <>
       <section
@@ -208,78 +208,39 @@ export default function Home() {
         aria-labelledby="home-hero-title"
       >
         <div className="hero-inner">
-          <div
-            className="hero-data-panels hero-data-panels--full"
-            aria-label="Calendario e classifica della competizione"
-          >
-            <section
-              className="hero-calendar"
-              id="home-matches"
-              aria-labelledby="home-matches-title"
-            >
+          <div className="hero-data-panels hero-data-panels--full" aria-label="Calendario e classifica della competizione">
+            <section className="hero-calendar" id="home-matches" aria-labelledby="home-matches-title">
               <div className="hero-calendar__header">
                 <div>
                   <span className="eyebrow">Next matches</span>
                   <h2 id="home-matches-title">Calendario</h2>
                 </div>
-                <a className="hero-calendar__all" href="/partite">
-                  Vedi tutte
-                </a>
+                <a className="hero-calendar__all" href="/partite">Vedi tutte</a>
               </div>
               {upcoming.length ? (
                 <div className="hero-calendar__list">
                   {upcoming.slice(0, 4).map((match) => {
-                    const home = teams.find(
-                      (team) => team.id === match.home_team_id,
-                    );
-                    const away = teams.find(
-                      (team) => team.id === match.away_team_id,
-                    );
+                    const home = teams.find((team) => team.id === match.home_team_id);
+                    const away = teams.find((team) => team.id === match.away_team_id);
                     return (
-                      <a
-                        key={match.id}
-                        href={`/partite/${match.id}`}
-                        className="hero-match"
-                      >
+                      <a key={match.id} href={`/partite/${match.id}`} className="hero-match">
                         <div className="hero-match__meta">
-                          <span>
-                            {new Date(match.kickoff_at).toLocaleDateString(
-                              "it-IT",
-                              { day: "2-digit", month: "short" },
-                            )}
-                          </span>
-                          <span>
-                            {new Date(match.kickoff_at).toLocaleTimeString(
-                              "it-IT",
-                              { hour: "2-digit", minute: "2-digit" },
-                            )}
-                          </span>
+                          <span>{new Date(match.kickoff_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short" })}</span>
+                          <span>{new Date(match.kickoff_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</span>
                         </div>
                         <div className="hero-match__teams">
                           <div className="hero-match__team">
-                            {home?.logo_url ? (
-                              <img src={home.logo_url} alt="" />
-                            ) : (
-                              <span className="hero-match__logo-placeholder" />
-                            )}
-                            <span>{home?.short_name || home?.name || "—"}</span>
+                            {home?.logo_url ? <img src={home.logo_url} alt="" /> : <span className="hero-match__logo-placeholder" />}
+                            <span>{home?.name || "—"}</span>
                           </div>
                           <span className="hero-match__vs">VS</span>
                           <div className="hero-match__team hero-match__team--away">
-                            <span>{away?.short_name || away?.name || "—"}</span>
-                            {away?.logo_url ? (
-                              <img src={away.logo_url} alt="" />
-                            ) : (
-                              <span className="hero-match__logo-placeholder" />
-                            )}
+                            <span>{away?.name || "—"}</span>
+                            {away?.logo_url ? <img src={away.logo_url} alt="" /> : <span className="hero-match__logo-placeholder" />}
                           </div>
                         </div>
                         <div className="hero-match__footer">
-                          <span>
-                            {match.matchday
-                              ? `Giornata ${match.matchday}`
-                              : "Match"}
-                          </span>
+                          <span>{match.matchday ? match.matchday : "Match"}</span>
                           <span className="hero-match__arrow">→</span>
                         </div>
                       </a>
@@ -290,45 +251,27 @@ export default function Home() {
                 <div className="hero-calendar__empty">
                   <span className="eyebrow">Upcoming</span>
                   <h3>Nessuna partita programmata</h3>
-                  <p>
-                    {competition
-                      ? "Le prossime partite verranno mostrate qui."
-                      : "Competizione non ancora iniziata."}
-                  </p>
+                  <p>{competition ? "Le prossime partite verranno mostrate qui." : "Competizione non ancora iniziata."}</p>
                 </div>
               )}
             </section>
-            <section
-              className="hero-standings"
-              id="home-standings"
-              aria-labelledby="home-standings-title"
-            >
+
+            <section className="hero-standings" id="home-standings" aria-labelledby="home-standings-title">
               <div className="hero-standings__header">
                 <div>
                   <span className="eyebrow">Live ranking</span>
                   <h2 id="home-standings-title">Classifica</h2>
                 </div>
-                <a className="hero-calendar__all" href="/classifica">
-                  Completa
-                </a>
+                <a className="hero-calendar__all" href="/classifica">Completa</a>
               </div>
               {standings.length ? (
                 <div className="hero-standings__list">
                   {standings.slice(0, 6).map((entry, index) => (
-                    <div
-                      className={`hero-standing ${index === 0 ? "hero-standing--first" : ""}`}
-                      key={entry.team.id}
-                    >
-                      <span className="hero-standing__position">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
+                    <div className={`hero-standing ${index === 0 ? "hero-standing--first" : ""}`} key={entry.team.id}>
+                      <span className="hero-standing__position">{String(index + 1).padStart(2, "0")}</span>
                       <div className="hero-standing__team">
-                        {entry.team.logo_url ? (
-                          <img src={entry.team.logo_url} alt="" />
-                        ) : (
-                          <span className="hero-standing__logo-placeholder" />
-                        )}
-                        <span>{entry.team.short_name || entry.team.name}</span>
+                        {entry.team.logo_url ? <img src={entry.team.logo_url} alt="" /> : <span className="hero-standing__logo-placeholder" />}
+                        <span>{entry.team.name}</span>
                       </div>
                       <div className="hero-standing__stats">
                         <span>{entry.played} GP</span>
@@ -341,163 +284,92 @@ export default function Home() {
                 <div className="hero-standings__empty">
                   <span className="eyebrow">Ranking</span>
                   <h3>Classifica non disponibile</h3>
-                  <p>
-                    La classifica verrà popolata automaticamente dai risultati
-                    delle partite.
-                  </p>
+                  <p>La classifica verrà popolata automaticamente dai risultati delle partite.</p>
                 </div>
               )}
             </section>
           </div>
         </div>
       </section>
+
       <section className="section--edge leaders-section" id="home-stats">
         <SectionTitle eyebrow="Live" title="Top performers" />
         <div className="leaders">
           {leaderConfigs.map((config) => (
-            <LeaderPanel
-              key={config.key}
-              config={config}
-              players={playerStats}
-            />
+            <LeaderPanel key={config.key} config={config} players={playerStats} />
           ))}
         </div>
       </section>
+
+      <section className="section--edge potm-section" id="home-potm">
+        <SectionTitle eyebrow="Monthly award" title="POTM" />
+        <PlayerOfMonthCard item={potm} teams={teams} />
+      </section>
+
       <section className="section--edge" id="home-teams">
         <SectionTitle
           title="Squadre"
-          action={
-            <a className="btn btn--ghost" href="/squadre">
-              Esplora
-            </a>
-          }
+          action={<a className="btn btn--ghost" href="/squadre">Esplora</a>}
         />
-        {teams.length ? (
-          <div className="cards-grid">
-            {teams.slice(0, 3).map((team) => (
-              <TeamCard key={team.id} team={team} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="Nessuna squadra"
-            text="Le squadre compariranno qui quando saranno registrate nel database."
-          />
-        )}
+        {teams.length ? <TeamCarousel teams={teams} /> : <EmptyState title="Nessuna squadra" text="Le squadre compariranno qui quando saranno registrate nel database." />}
       </section>
-      <section
-        className="sponsor-band sponsor-band--redesign"
-        id="home-partners"
-      >
+
+      <section className="sponsor-band sponsor-band--redesign" id="home-partners">
         <div className="section--edge sponsor-band__inner">
-          <SectionTitle
-            eyebrow="Sponsors"
-            title="Chi sostiene la Street League"
-          />
+          <SectionTitle eyebrow="Sponsors" title="Chi sostiene la Street League" />
           <div className="sponsor-tier sponsor-tier--gold">
-            <div className="sponsor-tier__heading">
-              <div>
-                <h3>Sponsor Gold</h3>
-              </div>
-            </div>
+            <div className="sponsor-tier__heading"><div><h3>Sponsor Gold</h3></div></div>
             {goldPartners.length ? (
               <div className="partners-grid partners-grid--gold">
-                {goldPartners.map((partner) => (
-                  <SponsorCard key={partner.id} partner={partner} />
-                ))}
+                {goldPartners.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}
               </div>
-            ) : (
-              <EmptyState title="Gold sponsor in attesa" />
-            )}
+            ) : <EmptyState title="Gold sponsor in attesa" />}
           </div>
-          {collaborations.length ? (
-            <div className="sponsor-tier sponsor-tier--collab">
-              <CollabCarousel items={collaborations} variant="home" />
-            </div>
-          ) : null}
+          {collaborations.length ? <div className="sponsor-tier sponsor-tier--collab"><CollabCarousel items={collaborations} variant="home" /></div> : null}
           <div className="sponsor-tier sponsor-tier--silver">
-            <div className="sponsor-tier__heading">
-              <div>
-                <h3>Sponsor Silver</h3>
-              </div>
-            </div>
+            <div className="sponsor-tier__heading"><div><h3>Sponsor Silver</h3></div></div>
             {silverPartners.length ? (
-              <ContentCarousel>
-                {silverPartners.map((partner) => (
-                  <SponsorCard key={partner.id} partner={partner} />
-                ))}
-              </ContentCarousel>
-            ) : (
-              <EmptyState
-                title="Silver sponsor in attesa"
-                text="I partner Silver verranno mostrati qui dal database."
-              />
-            )}
+              <ContentCarousel>{silverPartners.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}</ContentCarousel>
+            ) : <EmptyState title="Silver sponsor in attesa" text="I partner Silver verranno mostrati qui dal database." />}
           </div>
           <div className="sponsor-tier sponsor-tier--network">
             <div className="sponsor-tier__heading sponsor-tier__heading--row">
-              <div>
-                <h3>Sponsor Bronze</h3>
-              </div>
-              <a className="btn btn--ghost" href="/partner">
-                Tutti i partner
-              </a>
+              <div><h3>Sponsor Bronze</h3></div>
+              <a className="btn btn--ghost" href="/partner">Tutti i partner</a>
             </div>
-            {bronzePartners.length ? (
-              <LogoScroller partners={bronzePartners} label="Bronze sponsors" />
-            ) : (
-              <LogoScroller
-                partners={partners.filter((partner) => partner.tier !== "gold")}
-                label="Street League partners"
-              />
-            )}
+            {bronzePartners.length ? <LogoScroller partners={bronzePartners} label="Bronze sponsors" /> : <LogoScroller partners={partners.filter((partner) => partner.tier !== "gold")} label="Street League partners" />}
           </div>
           <div className="sponsor-cta-row">
             <h2>Porta il tuo brand in campo con noi</h2>
-            <a className="btn btn--primary" href="/collabora">
-              Collabora con noi
-            </a>
+            <a className="btn btn--primary" href="/collabora">Collabora con noi</a>
           </div>
         </div>
       </section>
+
       <section className="section--edge" id="home-content">
         <SectionTitle title="Ultimi contenuti" />
         {social.length ? (
           <ContentCarousel>
             {social.map((item) => {
-              const imageUrl = item.image_url || item.thumbnail_url;
+              const imageUrl = item.thumbnail_url;
               return (
                 <article className="video-card" key={item.id}>
                   <div className="video-thumb">
-                    {imageUrl ? (
-                      <img src={imageUrl} alt="" />
-                    ) : (
-                      <div className="video-thumb__fallback" aria-hidden="true" />
-                    )}
-                    <a
-                      className="video-card__link"
-                      href={item.content_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Apri ${item.title}`}
-                    >
+                    {imageUrl ? <img src={imageUrl} alt="" /> : <div className="video-thumb__fallback" aria-hidden="true" />}
+                    <a className="video-card__link" href={item.content_url} target="_blank" rel="noopener noreferrer" aria-label={`Apri ${item.title}`}>
                       <span aria-hidden="true">↗</span>
                     </a>
                   </div>
                   <div className="video-card__body">
                     <span className="eyebrow">{item.platform}</span>
                     <h3>{item.title}</h3>
-                    {item.description ? <p>{item.description}</p> : null}
                   </div>
                 </article>
               );
             })}
           </ContentCarousel>
         ) : (
-          <EmptyState
-            title="Nessun contenuto"
-            text="I contenuti verranno mostrati qui quando saranno pubblicati."
-          />
+          <EmptyState title="Nessun contenuto" text="I contenuti verranno mostrati qui quando saranno pubblicati." />
         )}
       </section>
     </>
