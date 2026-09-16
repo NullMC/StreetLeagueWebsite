@@ -1,110 +1,71 @@
-/* Partner-page layout and active-collaboration geometry. */
+/* Partner page-specific collaboration carousel geometry. Shared sponsor styling lives in sponsor-neutral.css. */
 
-.sponsor-band--redesign > .sponsor-band__inner > .section-head {
-  align-items: flex-end !important;
-  justify-content: space-between !important;
-  text-align: left !important;
-}
-
-.sponsor-band--redesign > .sponsor-band__inner > .section-head > div {
-  align-items: flex-start !important;
-  text-align: left !important;
-}
-
-.sponsor-band--redesign .collab-carousel__poster {
-  border-color: rgba(1,10,8,.16) !important;
-  background: #f9f9f9;
-  box-shadow: 0 18px 44px rgba(1,10,8,.22) !important;
-}
-
-.sponsor-band--redesign .collab-carousel__item.is-active .collab-carousel__poster {
-  border-color: rgba(1,10,8,.22) !important;
-  box-shadow: 0 26px 60px rgba(1,10,8,.28), 0 0 0 1px rgba(249,249,249,.28) !important;
-}
-
-/* Partners sponsor area uses one continuous pink canvas.
-   The tier sections remain structurally separate, but their background is transparent
-   so the gradient does not restart at each section boundary. */
-.partners-page .partners-tier-section {
-  width: 100vw !important;
-  max-width: none !important;
-  margin-left: calc(50% - 50vw) !important;
-  margin-right: calc(50% - 50vw) !important;
-  background: transparent !important;
-  color: #fff !important;
-}
-
-.partners-page .partners-page__hero + .partners-tier-section {
-  background: linear-gradient(120deg,#b10f59 0%,#e42278 48%,#ed7bab 100%) !important;
-}
-
-.partners-page .partners-page__hero + .partners-tier-section,
-.partners-page .partners-page__hero + .partners-tier-section ~ .partners-tier-section {
-  position: relative;
-}
-
-.partners-page {
-  background: linear-gradient(120deg,#b10f59 0%,#e42278 48%,#ed7bab 100%);
-}
-
-/* Remove the per-section fill created by the rule above after the first sponsor tier.
-   The parent canvas is responsible for the complete sponsor-area background. */
-.partners-page .partners-page__hero + .partners-tier-section,
-.partners-page .partners-page__hero + .partners-tier-section ~ .partners-tier-section {
-  background: transparent !important;
-}
-
-.partners-page .partners-tier-section .partners-tier-heading,
-.partners-page .partners-tier-section .partners-tier-heading h2,
-.partners-page .partners-tier-section .partners-tier-heading p,
-.partners-page .partners-tier-section .eyebrow,
-.partners-page .partners-tier-section .partner-card,
-.partners-page .partners-tier-section .partner-card__name {
-  color: #fff !important;
-}
-
-.partners-page .partners-tier-section .partner-card { background: transparent !important; border: 0 !important; box-shadow: none !important; }
-.partners-page .partners-tier-section .content-carousel,
-.partners-page .partners-tier-section .content-carousel__viewport,
-.partners-page .partners-tier-section .content-carousel__item { background: transparent !important; border: 0 !important; box-shadow: none !important; }
-.partners-page .partners-tier-section .empty-state { background: transparent !important; border: 0 !important; box-shadow: none !important; color: #fff !important; }
-.partners-page .partners-tier-section .empty-state h3,
-.partners-page .partners-tier-section .empty-state p { color: #fff !important; }
-.partners-page .partners-tier-section .logo-scroller__item { background: #fff !important; border: 0 !important; }
-
-/* Partners hero transition: white at the top, pink at the bottom. */
-.partners-page .partners-page__hero {
-  background: linear-gradient(to top,#e42278 0%,#f5d3dd 38%,#f9f9f9 76%,#fff 100%) !important;
-}
-
-.partners-page .partners-page__hero-bg {
-  background: linear-gradient(to top,rgba(228,34,120,.24) 0%,rgba(245,211,221,.22) 38%,rgba(255,255,255,.82) 100%) !important;
-}
-
-/* Partners hero: title/copy on the left, active flyer carousel on the right. */
 .partners-page__hero-content--with-collabs {
-  width: min(var(--max),calc(100% - 56px)) !important;
+  width: min(var(--max), calc(100% - 56px)) !important;
   display: grid !important;
   grid-template-columns: minmax(0,1fr) minmax(380px,620px) !important;
   align-items: center !important;
   gap: clamp(34px,5vw,72px) !important;
 }
 
-.partners-page__hero-copy { min-width: 0; align-self: center; }
+.partners-page__hero-copy {
+  min-width: 0;
+  align-self: center;
+}
+
 .partners-page__hero-copy h1,
 .partners-page__hero-copy p,
-.partners-page__hero-copy .eyebrow { text-align: left !important; }
-.partners-page__hero-collabs { min-width: 0; width: 100%; align-self: center; }
-.partners-page__hero-collabs .collab-carousel__toolbar { justify-content: space-between; align-items: center; }
-.partners-page__hero-collabs .collab-carousel__viewport { min-height: 0; padding: 20px 0 34px; justify-content: flex-start; }
-.partners-page__hero-collabs .collab-carousel__item { flex-basis: min(300px,40vw); height: 420px; }
-.partners-page__hero-collabs .collab-carousel__item.is-active { flex-basis: min(470px,50vw); height: 600px; transform: scale(1); opacity: 1; filter: none; }
-.partners-page__hero-collabs .collab-carousel__poster { border: 2px solid var(--pink) !important; background: #050806; box-shadow: 0 22px 48px rgba(0,0,0,.34),0 0 0 1px rgba(228,34,120,.10) !important; }
-.partners-page__hero-collabs .collab-carousel__item.is-active .collab-carousel__poster { border-color: var(--pink) !important; box-shadow: 0 34px 74px rgba(0,0,0,.45),0 0 0 2px rgba(228,34,120,.16),0 0 36px rgba(228,34,120,.16) !important; }
+.partners-page__hero-copy .eyebrow {
+  text-align: left !important;
+}
+
+.partners-page__hero-collabs {
+  min-width: 0;
+  width: 100%;
+  align-self: center;
+}
+
+.partners-page__hero-collabs .collab-carousel__toolbar {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.partners-page__hero-collabs .collab-carousel__viewport {
+  min-height: 0;
+  padding: 20px 0 34px;
+  justify-content: flex-start;
+}
+
+.partners-page__hero-collabs .collab-carousel__item {
+  flex-basis: min(300px,40vw);
+  height: 420px;
+}
+
+.partners-page__hero-collabs .collab-carousel__item.is-active {
+  flex-basis: min(470px,50vw);
+  height: 600px;
+  transform: scale(1);
+  opacity: 1;
+  filter: none;
+}
+
+.partners-page__hero-collabs .collab-carousel__poster {
+  border: 2px solid var(--pink) !important;
+  background: #050806;
+  box-shadow: 0 22px 48px rgba(0,0,0,.34), 0 0 0 1px rgba(228,34,120,.10) !important;
+}
+
+.partners-page__hero-collabs .collab-carousel__item.is-active .collab-carousel__poster {
+  border-color: var(--pink) !important;
+  box-shadow: 0 34px 74px rgba(0,0,0,.45), 0 0 0 2px rgba(228,34,120,.16), 0 0 36px rgba(228,34,120,.16) !important;
+}
 
 @media (max-width: 900px) {
-  .sponsor-band--redesign > .sponsor-band__inner > .section-head { align-items: flex-start !important; }
-  .partners-page__hero-content--with-collabs { grid-template-columns: 1fr !important; gap: 34px !important; }
+  .partners-page__hero-content--with-collabs {
+    grid-template-columns: 1fr !important;
+    gap: 34px !important;
+  }
+
   .partners-page__hero-collabs { max-width: 620px; }
   .partners-page__hero-collabs .collab-carousel__item { flex-basis: min(240px,48vw); height: 360px; }
   .partners-page__hero-collabs .collab-carousel__item.is-active { flex-basis: min(390px,66vw); height: 520px; }
