@@ -1,28 +1,38 @@
 import { useEffect, useState } from "react";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
-import { TeamCard } from "../components/TeamCard";
+import { TeamCarousel } from "../components/TeamCarousel";
 import { EmptyState } from "../components/EmptyState";
 import { getActiveCompetition, getTeams } from "../lib/api";
 import type { Team } from "../types";
+
 export default function Teams() {
   const [items, setItems] = useState<Team[]>([]);
+
   useEffect(() => {
-    (async () => {
-      const c = await getActiveCompetition();
-      setItems(await getTeams(c?.id));
+    void (async () => {
+      try {
+        const competition = await getActiveCompetition();
+        setItems(await getTeams(competition?.id));
+      } catch (error) {
+        console.error("Teams data error:", error);
+        setItems([]);
+      }
     })();
   }, []);
+
   return (
     <PageShell>
-      <div className="page">
-        <SectionTitle eyebrow="" title="Squadre" />
+      <div className="page teams-page">
+        <SectionTitle eyebrow="League" title="Squadre" />
         {items.length ? (
-          <div className="cards-grid">
-            {items.map((t) => (
-              <TeamCard key={t.id} team={t} />
-            ))}
-          </div>
+          <>
+            <TeamCarousel teams={items} label="Tutte le squadre della competizione" />
+            <div className="teams-page__hint">
+              <span>21 squadre</span>
+              <span>Scorri per esplorarle tutte</span>
+            </div>
+          </>
         ) : (
           <EmptyState
             title="Nessuna squadra"
