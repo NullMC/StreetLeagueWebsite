@@ -122,7 +122,7 @@ export default function HomeRedesigned() {
   useEffect(() => { void load(); return subscribeToCompetition(() => void load()); }, []);
 
   const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
-  const heroBackground = competition?.hero_image_url || "/assets/nebula-vertical.webp";
+  const heroBackground = "/assets/nebula-vertical.webp";
   const heroBackdropStyle: CSSProperties = {
     position: "absolute",
     inset: 0,
