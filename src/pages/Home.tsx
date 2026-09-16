@@ -464,18 +464,34 @@ export default function Home() {
         <SectionTitle title="Ultimi contenuti" />
         {social.length ? (
           <ContentCarousel>
-            {social.map((item) => (
-              <div key={item.id} className="video-card">
-                <div className="video-thumb">
-                  {item.image_url ? <img src={item.image_url} alt="" /> : null}
-                </div>
-                <div className="video-card__body">
-                  <span className="eyebrow">{item.platform}</span>
-                  <h3>{item.title}</h3>
-                  {item.description ? <p>{item.description}</p> : null}
-                </div>
-              </div>
-            ))}
+            {social.map((item) => {
+              const imageUrl = item.image_url || item.thumbnail_url;
+              return (
+                <article className="video-card" key={item.id}>
+                  <div className="video-thumb">
+                    {imageUrl ? (
+                      <img src={imageUrl} alt="" />
+                    ) : (
+                      <div className="video-thumb__fallback" aria-hidden="true" />
+                    )}
+                    <a
+                      className="video-card__link"
+                      href={item.content_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Apri ${item.title}`}
+                    >
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  </div>
+                  <div className="video-card__body">
+                    <span className="eyebrow">{item.platform}</span>
+                    <h3>{item.title}</h3>
+                    {item.description ? <p>{item.description}</p> : null}
+                  </div>
+                </article>
+              );
+            })}
           </ContentCarousel>
         ) : (
           <EmptyState
