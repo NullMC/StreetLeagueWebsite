@@ -1,4 +1,4 @@
-/* Final responsive/header/sponsor alignment fixes. */
+/* Final responsive/header/sponsor/content alignment fixes. */
 
 /* Keep every sponsor logo, name and CTA centered on the same card axis. */
 .sponsor-band--redesign .partner-card,
@@ -10,15 +10,27 @@
 .sponsor-band--redesign .partner-card__logo,
 .partners-page--redesign .partner-card__logo {
   width: min(100%, 260px) !important;
+  min-height: 92px !important;
   margin-inline: auto !important;
   justify-self: center !important;
   display: grid !important;
   place-items: center !important;
+  position: relative !important;
 }
 
+/* Reset the legacy .partner-card img absolute positioning. That rule was
+   anchoring sponsor logos to the top-left of each card. */
 .sponsor-band--redesign .partner-card__logo img,
 .partners-page--redesign .partner-card__logo img {
-  margin-inline: auto !important;
+  position: static !important;
+  inset: auto !important;
+  margin: 0 auto !important;
+  max-width: min(100%, 220px) !important;
+  max-height: 92px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
 }
 
 .sponsor-band--redesign .partner-card__meta,
@@ -34,6 +46,73 @@
 .site-header::before {
   background-image: none !important;
   opacity: 0 !important;
+}
+
+/* Restore real social/content media and the link control over the image. */
+#home-content .video-card {
+  position: relative;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+#home-content .video-thumb {
+  position: relative !important;
+  flex: 0 0 230px !important;
+  height: 230px !important;
+  min-height: 230px !important;
+  overflow: hidden !important;
+}
+
+#home-content .video-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(1,10,8,0.04), rgba(1,10,8,0.34));
+  pointer-events: none;
+  z-index: 1;
+}
+
+#home-content .video-thumb img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  display: block !important;
+  z-index: 0;
+}
+
+#home-content .video-thumb .video-thumb__fallback {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(140deg, rgba(228,34,120,0.25), rgba(1,10,8,0.55)), url("/assets/nebula-landscape.webp") center/cover;
+}
+
+#home-content .video-card__link {
+  position: absolute !important;
+  right: 14px !important;
+  bottom: 14px !important;
+  z-index: 3 !important;
+  width: 44px !important;
+  height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  color: var(--pink) !important;
+  box-shadow: 0 10px 24px rgba(1,10,8,0.22) !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+}
+
+#home-content .video-card__link:hover {
+  color: #b10f59 !important;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 700px) {
