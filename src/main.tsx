@@ -27,8 +27,7 @@ import Matches from "./pages/Matches";
 import MatchDetail from "./pages/MatchDetail";
 import Partners from "./pages/Partners";
 import Collaborate from "./pages/Collaborate";
-import AdminWithPotmNav from "./pages/AdminWithPotmNav";
-import AdminPotm from "./pages/AdminPotm";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/AppLayout";
 
@@ -49,8 +48,7 @@ function App() {
         <Route path="/partite/:matchId" element={<MatchDetail />} />
         <Route path="/partner" element={<Partners />} />
         <Route path="/collabora" element={<Collaborate />} />
-        <Route path="/admin" element={<AdminWithPotmNav />} />
-        <Route path="/admin/potm" element={<AdminPotm />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
