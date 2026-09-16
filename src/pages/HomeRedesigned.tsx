@@ -129,7 +129,7 @@ export default function HomeRedesigned() {
     zIndex: 0,
     pointerEvents: "none",
     backgroundImage: [
-      "linear-gradient(to top, #f9f9f9 0%, rgba(249,249,249,0.72) 24%, rgba(249,249,249,0.12) 58%, rgba(249,249,249,0) 100%)",
+      "linear-gradient(to top, #fff 0%, rgba(249,249,249,0.72) 24%, rgba(249,249,249,0.12) 58%, rgba(249,249,249,0) 100%)",
       "linear-gradient(135deg, rgba(255,255,255,0.76) 0%, rgba(245,211,221,0.30) 54%, rgba(237,123,171,0.18) 100%)",
       `url("${heroBackground}")`,
     ].join(","),
