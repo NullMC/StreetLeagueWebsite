@@ -208,14 +208,33 @@
 @media (max-width: 700px) {
   .skip-link--nav { left: 16px; top: 48px; }
   .skip-link--footer { display: none; }
-  .site-header { padding-inline: 14px; }
+  .site-header { position: fixed; left: 0; right: 0; padding-inline: 10px; justify-content: center; }
+  .site-header > .brand {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 118px;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+  }
+  .site-header > .header-admin { display: none; }
+  .site-header > .header-right {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    margin: 0;
+    transform: translateY(-50%);
+    z-index: 4;
+  }
+  .site-header > .header-right .contact-link { display: none; }
+  .site-header > .header-right .menu-btn { display: block; margin: 0; }
   .brand { width: 138px; }
   .header-right { gap: 8px; }
   .contact-link { font-size: 10px; }
   .second-site-header { padding: 4px 8px; }
   .second-site-header__right { gap: 14px; margin-right: 4px; }
 
-  /* Full-height mobile drawer with compact, readable navigation rows. */
   .mobile-menu {
     width: 100%;
     max-width: none;
@@ -265,43 +284,23 @@
     gap: 14px;
   }
 
-  .mobile-menu__contact {
-    font-size: 10px;
-  }
-
-  .mobile-menu__socials {
-    gap: 7px;
-  }
-
-  .mobile-menu__socials .social-link {
-    width: 34px;
-    height: 34px;
-    font-size: 13px;
-  }
+  .mobile-menu__contact { font-size: 10px; }
+  .mobile-menu__socials { gap: 7px; }
+  .mobile-menu__socials .social-link { width: 34px; height: 34px; font-size: 13px; }
 
   .hero-inner { width: calc(100% - 28px); padding-top: 94px; padding-bottom: 68px; }
   .hero-data-panels { grid-template-columns: 1fr; }
-  .hero-calendar,
-  .hero-standings { padding: 16px; }
-  .hero-calendar__header,
-  .hero-standings__header,
-  .section-head { align-items: flex-start; flex-direction: column; gap: 12px; }
-  .partners-grid,
-  .cards-grid,
-  .leaders,
-  .match-grid,
-  .video-grid,
-  .sponsorship-grid { grid-template-columns: 1fr; }
-  .section--edge,
-  .page { padding-inline: 14px; }
+  .hero-calendar, .hero-standings { padding: 16px; }
+  .hero-calendar__header, .hero-standings__header, .section-head { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .partners-grid, .cards-grid, .leaders, .match-grid, .video-grid, .sponsorship-grid { grid-template-columns: 1fr; }
+  .section--edge, .page { padding-inline: 14px; }
   .section--edge { padding-block: 54px; }
   .section-head h2 { font-size: clamp(2.7rem,12vw,4.4rem); }
   .detail-hero { padding: 70px 14px 48px; }
   .detail-hero h1 { font-size: clamp(3.8rem,15vw,5.5rem); overflow-wrap: anywhere; }
   .match-detail-score { padding-inline: 14px; margin-top: -24px; }
   .scoreboard { grid-template-columns: 1fr; gap: 18px; text-align: center; }
-  .score-team.right,
-  .score-team { text-align: center; }
+  .score-team.right, .score-team { text-align: center; }
   .timeline-row { grid-template-columns: 48px 1fr; }
   .timeline-row > :nth-child(3) { grid-column: 2; }
   .footer-nav { grid-template-columns: 1fr; gap: 24px; }
@@ -312,26 +311,10 @@
   .brand { width: 124px; }
   .contact-link { display: none; }
 
-  .mobile-menu {
-    padding-inline: 18px;
-    padding-top: 64px;
-  }
-
-  .mobile-menu__nav a {
-    min-height: 46px;
-    padding: 9px 0;
-    font-size: clamp(19px, 5.9vw, 24px);
-  }
-
-  .mobile-menu__footer {
-    gap: 10px;
-  }
-
-  .mobile-menu__socials .social-link {
-    width: 32px;
-    height: 32px;
-  }
-
+  .mobile-menu { padding-inline: 18px; padding-top: 64px; }
+  .mobile-menu__nav a { min-height: 46px; padding: 9px 0; font-size: clamp(19px, 5.9vw, 24px); }
+  .mobile-menu__footer { gap: 10px; }
+  .mobile-menu__socials .social-link { width: 32px; height: 32px; }
   .hero-inner { width: calc(100% - 20px); }
   .hero-match { padding: 13px; }
   .hero-match__footer { font-size: 9px; }
@@ -339,8 +322,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skip-link,
-  .mobile-menu,
-  .mobile-menu::before,
-  .mobile-menu__socials .social-link { transition: none; }
+  .skip-link, .mobile-menu, .mobile-menu::before, .mobile-menu__socials .social-link { transition: none; }
 }
