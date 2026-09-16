@@ -137,6 +137,9 @@ export default function HomeRedesigned() {
     backgroundSize: "cover",
     backgroundRepeat: "no-repeat",
   };
+  const goldPartners = useMemo(() => partners.filter((p) => p.tier === "gold"), [partners]);
+  const silverPartners = useMemo(() => partners.filter((p) => p.tier === "silver"), [partners]);
+  const bronzePartners = useMemo(() => partners.filter((p) => p.tier === "bronze"), [partners]);
 
   return (
     <div className="home-redesign">
