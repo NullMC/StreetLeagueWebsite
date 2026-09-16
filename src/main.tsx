@@ -14,6 +14,7 @@ import "./styles/partners-background-fix.css";
 import "./styles/admin.css";
 import "./styles/final-ui-fixes.css";
 import "./styles/team-potm.css";
+import "./styles/admin-mobile.css";
 import Home from "./pages/Home";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
