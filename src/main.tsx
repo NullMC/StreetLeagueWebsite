@@ -15,7 +15,8 @@ import "./styles/admin.css";
 import "./styles/final-ui-fixes.css";
 import "./styles/team-potm.css";
 import "./styles/admin-mobile.css";
-import Home from "./pages/Home";
+import "./styles/home-redesign.css";
+import HomeRedesigned from "./pages/HomeRedesigned";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
 import Teams from "./pages/Teams";
@@ -36,7 +37,7 @@ function App() {
   return (
     <AppLayout>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<HomeRedesigned />} />
         <Route path="/competizioni" element={<Competitions />} />
         <Route path="/competizioni/:competitionId" element={<CompetitionDetail />} />
         <Route path="/classifica" element={<Standings />} />
