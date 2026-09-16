@@ -12,6 +12,7 @@ body {
   background: var(--ink);
   color: var(--white);
 }
+
 .site-header,
 .second-site-header {
   background: rgba(249, 249, 249, 0.92) !important;
@@ -21,12 +22,12 @@ body {
   -webkit-backdrop-filter: blur(18px);
   box-shadow: 0 8px 24px rgba(1, 10, 8, 0.06);
 }
+
 .site-header::before {
-  opacity: 0.52;
-  background-image:
-    linear-gradient(90deg, transparent 0 95%, rgba(228, 34, 120, 0.08) 95%),
-    linear-gradient(0deg, transparent 0 95%, rgba(1, 10, 8, 0.035) 95%);
+  background-image: none !important;
+  opacity: 0 !important;
 }
+
 .desktop-nav a,
 .contact-link,
 .second-site-header__right,
@@ -46,121 +47,7 @@ body {
   border-color: rgba(1, 10, 8, 0.1) !important;
 }
 
-/* Header: logo left, authenticated user / contact / menu grouped at far right. */
-.site-header {
-  justify-content: flex-start;
-}
-.site-header > .brand {
-  flex: 0 0 auto;
-}
-.site-header > .header-admin {
-  margin-left: auto;
-  order: 2;
-}
-.site-header > .header-right {
-  order: 3;
-  margin-left: 18px;
-}
-
-.hero {
-  background:
-    linear-gradient(
-      120deg,
-      rgba(255, 255, 255, 0.96) 0%,
-      rgba(255, 255, 255, 0.86) 42%,
-      rgba(255, 255, 255, 0.7) 58%,
-      rgba(245, 211, 221, 0.72) 100%
-    ),
-    var(--hero-image) center / cover no-repeat !important;
-}
-.hero::before {
-  background: radial-gradient(
-    circle at 78% 42%,
-    rgba(255, 255, 255, 0.72),
-    rgba(255, 255, 255, 0.22) 26%,
-    transparent 46%
-  ) !important;
-}
-.hero::after {
-  background: linear-gradient(
-    to top,
-    rgba(1, 10, 8, 0.3),
-    transparent 72%
-  ) !important;
-}
-.hero-eyebrow,
-.eyebrow {
-  color: var(--pink) !important;
-}
-.hero-content h1,
-.hero-calendar h2,
-.hero-standings h2,
-.hero-calendar__empty h3,
-.hero-standings__empty h3,
-.hero-match__team,
-.hero-standing__team,
-.hero-standing__stats strong,
-.hero-match__arrow {
-  color: var(--white);
-}
-.hero-match__meta,
-.hero-match__footer,
-.hero-calendar__empty p,
-.hero-standings__empty p,
-.hero-standing__position,
-.hero-standing__stats {
-  color: rgba(1, 10, 8, 0.45);
-}
-.hero-data-panels {
-  background: rgba(249, 249, 249, 0.92) !important;
-  border-color: rgba(1, 10, 8, 0.12) !important;
-  box-shadow: 0 22px 60px rgba(1, 10, 8, 0.1);
-  backdrop-filter: blur(12px);
-}
-.hero-calendar {
-  border-right-color: rgba(1, 10, 8, 0.1) !important;
-}
-.hero-calendar__list,
-.hero-standings__list {
-  border-color: rgba(1, 10, 8, 0.1);
-}
-.hero-match,
-.hero-standing {
-  border-bottom-color: rgba(1, 10, 8, 0.08);
-}
-.hero-match__logo-placeholder,
-.hero-standing__logo-placeholder {
-  border-color: rgba(1, 10, 8, 0.1);
-  background: rgba(1, 10, 8, 0.025);
-}
-.hero-match__vs,
-.hero-standing--first .hero-standing__position,
-.hero-standing--first .hero-standing__stats strong {
-  color: var(--pink);
-}
-
-.hero + #home-stats {
-  position: relative;
-  overflow: visible;
-}
-.hero + #home-stats::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -1px;
-  height: 140px;
-  background: linear-gradient(
-    to bottom,
-    rgba(249, 249, 249, 1) 0%,
-    rgba(249, 249, 249, 0.72) 38%,
-    rgba(249, 249, 249, 0) 100%
-  );
-  pointer-events: none;
-  transform: translateY(-100%);
-  z-index: 3;
-}
-
+/* Shared public-site surfaces. */
 .section--edge,
 .page {
   color: var(--white);
@@ -182,93 +69,15 @@ body {
 .match-card,
 .team-card,
 .video-card,
-.partner-card,
 .content-carousel,
 .leader-panel,
 .sponsorship-card,
 .collaborate-cta,
 .empty-state {
-  background: #ffffff !important;
+  background: #fff !important;
   border-color: rgba(1, 10, 8, 0.12) !important;
   color: var(--white);
   box-shadow: 0 14px 36px rgba(1, 10, 8, 0.07);
-}
-
-/* Sponsor cards sit directly on the sponsor gradient: no card chrome, centered logo, then name + Info. */
-.partner-card,
-.partner-card--gold,
-.partner-card--silver,
-.partner-card--bronze {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  min-height: 170px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-.partner-card__logo {
-  width: 100%;
-  min-height: 92px;
-  display: grid;
-  place-items: center;
-  background: transparent !important;
-}
-.partner-card__logo img {
-  max-width: min(100%, 220px);
-  max-height: 92px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-.partner-card__logo strong {
-  color: #fff;
-  font-size: 20px;
-  text-align: center;
-}
-.partner-card__meta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  min-width: 0;
-}
-.partner-card__name {
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #fff !important;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.sponsor-link-btn {
-  margin: 0;
-  background: #fff !important;
-  color: var(--pink) !important;
-  border: 0 !important;
-  border-radius: 999px !important;
-  box-shadow: 0 8px 20px rgba(1, 10, 8, 0.1);
-  padding: 8px 13px !important;
-  min-width: 66px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  white-space: nowrap;
-  flex: 0 0 auto;
-}
-.sponsor-link-btn--disabled {
-  opacity: 0.62;
 }
 
 .btn--ghost {
@@ -284,103 +93,20 @@ body {
   color: #fff !important;
 }
 
-.sponsor-band--redesign {
-  background: linear-gradient(
-    120deg,
-    #b10f59 0%,
-    #e42278 48%,
-    #ed7bab 100%
-  ) !important;
-  color: #fff;
-}
-.sponsor-band--redesign .section-head h2,
-.sponsor-band--redesign .section-head .eyebrow,
-.sponsor-band--redesign .sponsor-tier h3 {
-  color: #fff !important;
-}
-.sponsor-band--redesign .section-head > div {
-  align-items: flex-start !important;
-  text-align: left !important;
-}
-.sponsor-band--redesign .section-head {
-  justify-content: flex-start !important;
-  text-align: left !important;
-}
-.sponsor-tier {
-  border-top-color: rgba(255, 255, 255, 0.28) !important;
-}
-.sponsor-tier__heading p {
-  color: rgba(255, 255, 255, 0.8) !important;
-}
-.sponsor-tier--gold .partner-card,
-.sponsor-tier--silver .partner-card,
-.sponsor-tier--network .logo-scroller__item {
+/* Public content carousels use the same flat light system as the rest of the site. */
+.content-carousel {
   background: transparent !important;
-}
-
-
-/* Silver tier uses the same pink/rose section canvas with light text; never fall back to a white card block. */
-.sponsor-tier--silver, .sponsor-tier--silver .empty-state{
-  background: transparent !important;
-  color: #fff !important;
-}
-.sponsor-tier--silver .sponsor-tier__heading,
-.sponsor-tier--silver .sponsor-tier__heading h3,
-.sponsor-tier--silver .sponsor-tier__heading p,
-.sponsor-tier--silver .eyebrow,
-.sponsor-tier--silver .content-carousel,
-.sponsor-tier--silver .content-carousel__toolbar,
-.sponsor-tier--silver .content-carousel__controls,
-.sponsor-tier--silver .partner-card,
-.sponsor-tier--silver .partner-card__name {
-  color: #fff !important;
-  background: transparent !important;
-}
-.sponsor-tier--silver .content-carousel {
   border: 0 !important;
   box-shadow: none !important;
 }
-.sponsor-tier--silver .content-carousel__item {
-  background: transparent !important;
+.content-carousel__item > * {
+  box-shadow: 0 16px 36px rgba(1, 10, 8, 0.1);
 }
-.sponsor-tier--silver .sponsor-link-btn {
-  color: var(--pink) !important;
-  background: #fff !important;
-}
-.sponsor-tier--silver .content-carousel__controls button {
-  background: #fff !important;
-  color: var(--white) !important;
-}
-.sponsor-tier--collab .collab-carousel__toolbar p,
-.sponsor-tier--collab .collab-carousel__toolbar .eyebrow {
-  color: #fff !important;
-}
-.sponsor-cta-row {
-  border-top-color: rgba(255, 255, 255, 0.28) !important;
-}
-.sponsor-cta-row h2,
-.sponsor-cta-row p {
-  color: #fff !important;
+.content-carousel__controls button {
+  box-shadow: 0 10px 24px rgba(1, 10, 8, 0.1);
 }
 
-.logo-scroller__item {
-  background: #fff !important;
-  border-color: rgba(1, 10, 8, 0.1) !important;
-  box-shadow: 0 8px 22px rgba(1, 10, 8, 0.06);
-}
-.logo-scroller__item span {
-  color: rgba(1, 10, 8, 0.66) !important;
-}
-.logo-scroller__label {
-  color: rgba(1, 10, 8, 0.55);
-}
-.hero-sponsor-line__label {
-  color: rgba(1, 10, 8, 0.55);
-}
-.hero-sponsor-line {
-  color: var(--white);
-}
-
+/* Collaboration cards. */
 .collab-carousel__toolbar p {
   color: rgba(1, 10, 8, 0.58);
 }
@@ -439,29 +165,13 @@ body {
   background: var(--pink);
 }
 
+/* Partners and collaboration pages share the light canvas; the dedicated sponsor stylesheet controls their tier canvas. */
 .partners-page--redesign,
 .collaborate-page--redesign {
   background: #fff !important;
   color: var(--white);
 }
-.partners-page__hero {
-  min-height: calc(100vh - var(--site-header-total-height));
-  background: linear-gradient(
-    135deg,
-    #fff 0%,
-    #f9f9f9 58%,
-    #f5d3dd 100%
-  ) !important;
-}
-.partners-page__hero-bg {
-  inset: 0 !important;
-  background: linear-gradient(
-    135deg,
-    rgba(245, 211, 221, 0.9),
-    rgba(255, 255, 255, 0.7)
-  ) !important;
-  filter: none !important;
-}
+
 .partners-page__hero-content h1,
 .partners-page__hero-content p {
   color: var(--white) !important;
@@ -549,25 +259,14 @@ body {
   background: var(--pink);
 }
 
-.content-carousel {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-.content-carousel__item > * {
-  box-shadow: 0 16px 36px rgba(1, 10, 8, 0.1);
-}
-.content-carousel__controls button {
-  box-shadow: 0 10px 24px rgba(1, 10, 8, 0.1);
-}
-
+/* Admin chrome remains intentionally light and is finalized in admin.css. */
 .admin-layout,
 .admin-main {
   background: #f7f7f7 !important;
 }
 .admin-sidebar {
   background: #f9f9f9 !important;
-  color: #f9f9f9;
+  color: #010a08;
 }
 .admin-resource,
 .admin-login,
@@ -594,10 +293,4 @@ body {
 .admin-table td {
   color: rgba(1, 10, 8, 0.78);
   border-color: rgba(1, 10, 8, 0.08);
-}
-
-@media (max-width: 900px) {
-  .partners-page__hero-content--with-collabs {
-    grid-template-columns: 1fr !important;
-  }
 }
