@@ -1,4 +1,3 @@
-import "../styles/home-fixes.css";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { SectionTitle } from "../components/SectionTitle";
