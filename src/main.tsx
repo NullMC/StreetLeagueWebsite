@@ -13,6 +13,7 @@ import "./styles/admin.css";
 import "./styles/team-potm.css";
 import "./styles/admin-mobile.css";
 import "./styles/home-redesign.css";
+import "./styles/home-calendar-mobile.css";
 import HomeRedesigned from "./pages/HomeRedesigned";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
