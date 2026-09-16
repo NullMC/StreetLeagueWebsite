@@ -123,17 +123,29 @@ export default function HomeRedesigned() {
 
   const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
   const heroBackground = competition?.hero_image_url || "/assets/nebula-vertical.webp";
-  const goldPartners = useMemo(() => partners.filter((p) => p.tier === "gold"), [partners]);
-  const silverPartners = useMemo(() => partners.filter((p) => p.tier === "silver"), [partners]);
-  const bronzePartners = useMemo(() => partners.filter((p) => p.tier === "bronze"), [partners]);
+  const heroBackdropStyle: CSSProperties = {
+    position: "absolute",
+    inset: 0,
+    zIndex: 0,
+    pointerEvents: "none",
+    backgroundImage: [
+      "linear-gradient(to top, #f9f9f9 0%, rgba(249,249,249,0.72) 24%, rgba(249,249,249,0.12) 58%, rgba(249,249,249,0) 100%)",
+      "linear-gradient(135deg, rgba(255,255,255,0.76) 0%, rgba(245,211,221,0.30) 54%, rgba(237,123,171,0.18) 100%)",
+      `url("${heroBackground}")`,
+    ].join(","),
+    backgroundPosition: "center",
+    backgroundSize: "cover",
+    backgroundRepeat: "no-repeat",
+  };
 
   return (
     <div className="home-redesign">
-      <section className="home-hero" style={{ "--hero-image": `url("${heroBackground}")` } as CSSProperties} aria-labelledby="home-hero-title">
+      <section className="home-hero" style={{ background: "#f9f9f9", color: "#010a08" }} aria-labelledby="home-hero-title">
+        <div aria-hidden="true" style={heroBackdropStyle} />
         <div className="home-hero__inner">
-          <div className="home-hero__mast">
-            <div><span className="home-hero__kicker">Highlights</span><h1 id="home-hero-title">Street League</h1></div>
-            <span className="home-hero__competition">{competition?.name ?? "Street League"}</span>
+          <div className="home-hero__mast" style={{ color: "#010a08", borderBottomColor: "rgba(1,10,8,.16)" }}>
+            <div><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Highlights</span><h1 id="home-hero-title" style={{ color: "#010a08" }}>Street League</h1></div>
+            <span className="home-hero__competition" style={{ color: "rgba(1,10,8,.62)", opacity: 1 }}>{competition?.name ?? "Street League"}</span>
           </div>
           {social.length ? (
             <div className="home-hero__highlights">
@@ -153,9 +165,9 @@ export default function HomeRedesigned() {
               </div>
             </div>
           ) : (
-            <div className="home-hero__empty"><span className="home-hero__kicker">Highlights</span><h2>Nessun highlight ancora.</h2><p>I contenuti pubblicati appariranno qui.</p></div>
+            <div className="home-hero__empty"><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Highlights</span><h2 style={{ color: "#010a08" }}>Nessun highlight ancora.</h2><p style={{ color: "rgba(1,10,8,.62)" }}>I contenuti pubblicati appariranno qui.</p></div>
           )}
-          <div className="home-hero__foot"><span>Live feed / Street League</span><span>Scorri per continuare ↓</span></div>
+          <div className="home-hero__foot" style={{ color: "rgba(1,10,8,.52)", borderTopColor: "rgba(1,10,8,.14)" }}><span>Live feed / Street League</span><span>Scorri per continuare ↓</span></div>
         </div>
       </section>
 
