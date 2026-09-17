@@ -30,9 +30,13 @@ export function TeamCarousel({
       <div className="team-carousel__viewport" ref={trackRef} tabIndex={0}>
         {teams.map((team) => (
           <a className="team-carousel__item" href={`/squadre/${team.id}`} key={team.id}>
-            <span className="team-carousel__logo">
+            <span className="team-carousel__logo" style={{ padding: 0 }}>
               {team.logo_url ? (
-                <img src={team.logo_url} alt="" />
+                <img
+                  src={team.logo_url}
+                  alt=""
+                  style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "50%", display: "block" }}
+                />
               ) : (
                 <span aria-hidden="true">{team.name.slice(0, 3).toUpperCase()}</span>
               )}
