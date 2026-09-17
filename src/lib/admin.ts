@@ -118,25 +118,56 @@ export async function getAuthenticatedAdmin(): Promise<AdminProfile | null> {
   return profile;
 }
 
+async function refreshAdminSession() {
+  const client = sb();
+  const { data, error } = await client.auth.refreshSession();
+
+  if (error) throw error;
+  if (!data.session) {
+    throw new Error("Sessione amministrativa scaduta. Effettua nuovamente l'accesso.");
+  }
+
+  return data.session;
+}
+
+function isExpiredJwtError(error: unknown) {
+  const message =
+    error && typeof error === "object" && "message" in error
+      ? String((error as { message?: unknown }).message ?? "")
+      : String(error ?? "");
+
+  return /exp claim timestamp check failed|jwt.*expired|token.*expired/i.test(
+    message,
+  );
+}
+
 export async function uploadMedia(file: File, folder: string) {
   const client = sb();
   const extension = file.name.split(".").pop()?.toLowerCase() || "bin";
   const safeName = `${crypto.randomUUID()}.${extension}`;
   const path = `${folder}/${safeName}`;
+  const bucket = client.storage.from("street-league-media");
 
-  const { error } = await client.storage
-    .from("street-league-media")
-    .upload(path, file, {
+  // Keep long-lived admin sessions usable even after the browser has been idle.
+  await client.auth.getSession();
+
+  let result = await bucket.upload(path, file, {
+    upsert: false,
+    cacheControl: "3600",
+  });
+
+  // If the stored access token is stale, refresh it once and retry the upload.
+  if (result.error && isExpiredJwtError(result.error)) {
+    await refreshAdminSession();
+    result = await bucket.upload(path, file, {
       upsert: false,
       cacheControl: "3600",
     });
+  }
 
-  if (error) throw error;
+  if (result.error) throw result.error;
 
-  const { data } = client.storage
-    .from("street-league-media")
-    .getPublicUrl(path);
-
+  const { data } = bucket.getPublicUrl(path);
   return data.publicUrl;
 }
 
