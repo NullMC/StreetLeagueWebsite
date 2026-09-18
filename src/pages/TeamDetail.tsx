@@ -33,9 +33,6 @@ export default function TeamDetail() {
             <div className="detail-hero__inner">
               <span className="eyebrow">Club profile</span>
               <h1>{team.name}</h1>
-              <div className="detail-meta">
-                <span>{team.slug || "—"}</span>
-              </div>
             </div>
           </section>
           <div className="page">

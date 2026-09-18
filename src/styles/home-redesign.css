@@ -310,7 +310,8 @@
 .home-teams .team-carousel__controls { margin-bottom: 10px; }
 .home-teams .team-carousel__controls button { width: 38px; height: 38px; border-radius: 0; box-shadow: none; border: 1px solid var(--home-line); }
 .home-teams .team-carousel__item { flex-basis: 164px; gap: 10px; }
-.home-teams .team-carousel__logo { border-radius: 50%; box-shadow: none; border: 1px solid var(--home-line); }
+.home-teams .team-carousel__logo { border-radius: 50%; box-shadow: none; border: 1px solid var(--home-line); padding: 0; }
+.home-teams .team-carousel__logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .home-teams .team-carousel__name { font-size: 12px; }
 
 /* Sponsors retain the dedicated pink band but lose the decorative excess. */
