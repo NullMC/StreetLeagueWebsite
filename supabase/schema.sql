@@ -240,6 +240,7 @@ begin
   where c.profile_id = p.id
     and lower(p.username) = lower(trim(p_username))
     and p.is_active = true
+    and p.role in ('super_admin', 'admin', 'operator')
     and extensions.crypt(trim(p_code), c.code_hash) = c.code_hash;
 end;
 $$;
