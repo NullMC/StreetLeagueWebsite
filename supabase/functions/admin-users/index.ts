@@ -115,7 +115,7 @@ Deno.serve(async (req: Request) => {
       const email = normalizeEmail(body.email);
       const fullName = cleanText(body.full_name);
       const code = cleanText(body.code);
-      const role = cleanText(body.role);
+
 
       if (!username || username.length < 3 || username.length > 32) {
         return response({ error: "Username non valido." }, 400);
@@ -128,9 +128,6 @@ Deno.serve(async (req: Request) => {
           { error: "Il codice di accesso deve avere almeno 8 caratteri." },
           400,
         );
-      }
-      if (!["admin", "operator", "viewer"].includes(role)) {
-        return response({ error: "Ruolo non consentito." }, 400);
       }
 
       const { data: duplicateUsername } = await adminClient
@@ -175,7 +172,7 @@ Deno.serve(async (req: Request) => {
           username,
           email,
           full_name: fullName || null,
-          role,
+          role: "admin",
           is_active: true,
         })
         .eq("id", userId);
@@ -201,16 +198,13 @@ Deno.serve(async (req: Request) => {
       const email = normalizeEmail(body.email);
       const fullName = cleanText(body.full_name);
       const code = cleanText(body.code);
-      const role = cleanText(body.role);
+
 
       if (!userId) return response({ error: "user_id obbligatorio." }, 400);
       if (!username || username.length < 3 || username.length > 32) {
         return response({ error: "Username non valido." }, 400);
       }
       if (!email) return response({ error: "Email obbligatoria." }, 400);
-      if (!["admin", "operator", "viewer"].includes(role)) {
-        return response({ error: "Ruolo non consentito." }, 400);
-      }
       if (code && code.length < 8) {
         return response(
           { error: "Il nuovo codice deve avere almeno 8 caratteri." },
@@ -278,7 +272,7 @@ Deno.serve(async (req: Request) => {
           username,
           email,
           full_name: fullName || null,
-          role,
+          role: "admin",
         })
         .eq("id", userId);
 
