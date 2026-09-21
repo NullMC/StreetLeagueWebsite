@@ -232,27 +232,3 @@ export async function uploadMedia(file: File, folder: string) {
   return data.publicUrl;
 }
 
-export async function callAdminUsers(payload: Record<string, unknown>) {
-  const client = sb();
-  await ensureFreshAdminSession();
-
-  let result = await client.functions.invoke("admin-users", {
-    body: payload,
-  });
-
-  // Retry once with a freshly refreshed JWT when the Edge Function rejects
-  // the access token at the platform level.
-  if (result.error && responseStatus(result.error) === 401) {
-    await refreshAdminSession();
-    result = await client.functions.invoke("admin-users", {
-      body: payload,
-    });
-  }
-
-  if (result.error) {
-    throw await normalizeFunctionError(result.error);
-  }
-
-  if (result.data?.error) throw new Error(String(result.data.error));
-  return result.data;
-}
