@@ -62,9 +62,9 @@ supabase/admin_access_code_hardening.sql
 
 Il primo Super Admin deve essere inizializzato tramite `supabase/bootstrap_super_admin.sql`.
 
-Una volta effettuato l'accesso come Super Admin, la sezione **Gestione admin** consente di creare, modificare, attivare/disattivare ed eliminare gli account admin. La creazione non esegue alcun login del nuovo account: salva semplicemente username, email, nome, ruolo, stato e codice hashato. Il nuovo utente potrà quindi autenticarsi dalla pagina Admin con username + codice.
+L'accesso al back office è riservato esclusivamente al Super Admin inizializzato tramite `bootstrap_super_admin.sql`. Non è presente una procedura di creazione di ulteriori account dal back office.
 
-Ruoli disponibili: `viewer`, `operator`, `admin`, `super_admin`.
+Il ruolo operativo utilizzato per il back office è `super_admin`.
 
 ## 5. Realtime
 
