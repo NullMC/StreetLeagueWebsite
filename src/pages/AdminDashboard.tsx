@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { PageShell } from "../components/PageShell";
 import { RichTextEditor } from "../components/RichTextEditor";
 import { supabase, supabaseConfigured } from "../lib/supabase";
-import { ensureFreshAdminSession, getAuthenticatedAdmin, signInWithAccessCode, uploadMedia, callAdminUsers, type AdminProfile } from "../lib/admin";
+import { ensureFreshAdminSession, getAuthenticatedAdmin, signInWithAccessCode, uploadMedia, type AdminProfile } from "../lib/admin";
 import { getCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
 import type { Competition, Match, Player, Team } from "../types";
 
@@ -172,163 +172,12 @@ function isUploadableImage(field: string) { return field.includes("logo") || fie
 function Login({ onLogin }: { onLogin: (p: AdminProfile) => void }) { const [u, setU] = useState(""); const [c, setC] = useState(""); const [m, setM] = useState(""); const [busy, setBusy] = useState(false); const submit = async (e: FormEvent) => { e.preventDefault(); setBusy(true); setM(""); try { const r = await signInWithAccessCode(u, c); if (r.error) throw r.error; const p = await getAuthenticatedAdmin(); if (!p) throw new Error("Profilo amministratore non valido."); onLogin(p); } catch (e) { setM(errorMessage(e, "Accesso non riuscito.")); } finally { setBusy(false); } }; return <div className="admin-login"><span className="eyebrow">Street League / Admin</span><h1>Back office</h1><p>Accedi con username e codice permanente per gestire la piattaforma.</p>{m && <p className="admin-error">{m}</p>}<form onSubmit={submit}><input value={u} onChange={(e) => setU(e.target.value)} placeholder="Username" /><input type="password" value={c} onChange={(e) => setC(e.target.value)} placeholder="Codice di accesso" /><button className="btn btn--primary" disabled={busy}>{busy ? "Accesso…" : "Accedi"}</button></form></div>; }
 
 
-function AdminUsers({ profile }: { profile: AdminProfile }) {
-  type AdminUser = {
-    id: string;
-    full_name: string | null;
-    username: string | null;
-    email: string | null;
-    role: "super_admin" | "admin";
-    is_active: boolean;
-    created_at: string;
-  };
-
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [editing, setEditing] = useState<AdminUser | null>(null);
-  const [form, setForm] = useState({ username: "", email: "", full_name: "", code: "" });
-  const [busy, setBusy] = useState(false);
-
-  const load = async () => {
-    setLoading(true);
-    setMessage("");
-    try {
-      const data = await callAdminUsers({ action: "list" });
-      setUsers((data.users ?? []) as AdminUser[]);
-    } catch (e) {
-      setMessage(errorMessage(e, "Impossibile caricare gli account."));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { void load(); }, []);
-
-  const reset = () => {
-    setEditing(null);
-    setForm({ username: "", email: "", full_name: "", code: "" });
-  };
-
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setMessage("");
-    try {
-      await callAdminUsers({
-        action: editing ? "update" : "create",
-        ...(editing ? { user_id: editing.id } : {}),
-        username: form.username,
-        email: form.email,
-        full_name: form.full_name,
-        ...(form.code ? { code: form.code } : {}),
-      });
-      setMessage(editing ? "Account aggiornato." : "Account creato.");
-      reset();
-      await load();
-    } catch (e) {
-      setMessage(errorMessage(e, "Operazione non riuscita."));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const editUser = (user: AdminUser) => {
-    if (user.role === "super_admin") return;
-    setEditing(user);
-    setForm({
-      username: user.username ?? "",
-      email: user.email ?? "",
-      full_name: user.full_name ?? "",
-      code: "",
-    });
-    setMessage("");
-    window.scrollTo({ top: 120, behavior: "smooth" });
-  };
-
-  const toggleActive = async (user: AdminUser) => {
-    if (user.role === "super_admin" || user.id === profile.id) return;
-    setBusy(true);
-    setMessage("");
-    try {
-      await callAdminUsers({ action: user.is_active ? "deactivate" : "activate", user_id: user.id });
-      setMessage(user.is_active ? "Account disattivato." : "Account riattivato.");
-      await load();
-    } catch (e) {
-      setMessage(errorMessage(e, "Impossibile aggiornare lo stato."));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const remove = async (user: AdminUser) => {
-    if (user.role === "super_admin" || user.id === profile.id) return;
-    if (!confirm(`Eliminare l'account ${user.username ?? user.email ?? ""}?`)) return;
-    setBusy(true);
-    setMessage("");
-    try {
-      await callAdminUsers({ action: "delete", user_id: user.id });
-      setMessage("Account eliminato.");
-      await load();
-    } catch (e) {
-      setMessage(errorMessage(e, "Impossibile eliminare l'account."));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return <div className="admin-resource">
-    <div className="admin-resource__head">
-      <div>
-        <span className="eyebrow">SUPER ADMIN / ACCESSI</span>
-        <h2>Gestione admin</h2>
-        <p className="admin-help-text">Crea e gestisci gli account che possono accedere al back office.</p>
-      </div>
-      {editing && <button className="btn btn--ghost" type="button" onClick={reset}>Annulla</button>}
-    </div>
-
-    <form className="admin-form" onSubmit={submit}>
-      <div className="admin-form__grid">
-        <label>Nome completo<input value={form.full_name} onChange={(e) => setForm((p) => ({ ...p, full_name: e.target.value }))} /></label>
-        <label>Username<input value={form.username} onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))} required minLength={3} maxLength={32} /></label>
-        <label>Email<input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required /></label>
-        <label>Codice di accesso{editing ? <span className="admin-help-text">Lascia vuoto per non cambiarlo.</span> : null}<input type="password" value={form.code} onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))} required={!editing} minLength={8} placeholder="Minimo 8 caratteri" /></label>
-      </div>
-      {message && <p className="admin-message">{message}</p>}
-      <button className="btn btn--primary" type="submit" disabled={busy}>{busy ? "Salvataggio…" : editing ? "Salva modifiche" : "Aggiungi admin"}</button>
-    </form>
-
-    <div className="admin-records">
-      <div className="admin-table-wrap">
-        {loading ? <p className="admin-message">Caricamento…</p> : !users.length ? <p className="admin-message">Nessun account presente.</p> : <table className="admin-table">
-          <thead><tr><th>Utente</th><th>Stato</th><th>Creato</th><th>Azioni</th></tr></thead>
-          <tbody>{users.map((user) => <tr key={user.id}>
-            <td><strong>{user.full_name ?? user.username ?? "—"}</strong><br /><small>{user.username ? `@${user.username}` : user.email ?? "—"}</small></td>
-            <td>{user.is_active ? "Attivo" : "Disattivato"}</td>
-            <td>{user.created_at ? new Date(user.created_at).toLocaleDateString("it-IT") : "—"}</td>
-            <td>
-              {user.role !== "super_admin" && user.id !== profile.id ? <>
-                <button className="btn btn--ghost" type="button" onClick={() => editUser(user)} disabled={busy}>Modifica</button>
-                <button className="btn btn--ghost" type="button" onClick={() => void toggleActive(user)} disabled={busy}>{user.is_active ? "Disattiva" : "Attiva"}</button>
-                <button className="btn btn--ghost" type="button" onClick={() => void remove(user)} disabled={busy}>Elimina</button>
-              </> : <span className="admin-help-text">Protetto</span>}
-            </td>
-          </tr>)}</tbody>
-        </table>}
-      </div>
-    </div>
-  </div>;
-}
-
-const nav: Array<{ key: Resource; label: string }> = [
-  { key: "competitions", label: "Competizioni" }, { key: "teams", label: "Squadre" }, { key: "players", label: "Giocatori" }, { key: "matches", label: "Partite" }, { key: "events", label: "Eventi" }, { key: "lineups", label: "Formazioni" }, { key: "mvp", label: "MVP" }, { key: "player_of_month", label: "POTM" }, { key: "partners", label: "Sponsor" }, { key: "active_collaborations", label: "Collab attive" }, { key: "social_contents", label: "Social / Video" },
-];
 
 export default function AdminDashboard() {
-  const [profile, setProfile] = useState<AdminProfile | null>(null); const [resource, setResource] = useState<Resource>("competitions"); const [showAdminUsers, setShowAdminUsers] = useState(false); const [booting, setBooting] = useState(true);
+  const [profile, setProfile] = useState<AdminProfile | null>(null); const [resource, setResource] = useState<Resource>("competitions"); const [booting, setBooting] = useState(true);
   useEffect(() => { void getAuthenticatedAdmin().then(setProfile).catch(() => setProfile(null)).finally(() => setBooting(false)); }, []);
-  const logout = async () => { await supabase?.auth.signOut(); setProfile(null); setResource("competitions"); setShowAdminUsers(false); };
+  const logout = async () => { await supabase?.auth.signOut(); setProfile(null); setResource("competitions"); };
   if (!supabaseConfigured || booting) return <PageShell title="Admin" eyebrow="Street League"><div className="admin-help"><h3>Configurazione</h3><p>Verifica le variabili Supabase prima di accedere al back office.</p></div></PageShell>;
   if (!profile) return <PageShell title="Admin" eyebrow="Street League"><Login onLogin={setProfile} /></PageShell>;
-  return <PageShell title="Back office" eyebrow={profile.role}><div className="admin-layout"><aside className="admin-sidebar"><span className="eyebrow">Street League</span><h2>Back office</h2><p className="admin-user">{profile.full_name ?? profile.username ?? profile.email}</p><nav>{nav.map((item) => <button key={item.key} type="button" className={!showAdminUsers && resource === item.key ? "active" : ""} onClick={() => { setShowAdminUsers(false); setResource(item.key); }}>{item.label}</button>)}{profile.role === "super_admin" && <button type="button" className={showAdminUsers ? "active" : ""} onClick={() => setShowAdminUsers(true)}>Gestione admin</button>}</nav><button className="btn btn--ghost" type="button" onClick={() => void logout()}>Esci</button></aside><main className="admin-main">{showAdminUsers ? <AdminUsers profile={profile} /> : <Crud resource={resource} profile={profile} />}</main></div></PageShell>;
+  return <PageShell title="Back office" eyebrow={profile.role}><div className="admin-layout"><aside className="admin-sidebar"><span className="eyebrow">Street League</span><h2>Back office</h2><p className="admin-user">{profile.full_name ?? profile.username ?? profile.email}</p><nav>{nav.map((item) => <button key={item.key} type="button" className={!showAdminUsers && resource === item.key ? "active" : ""} onClick={() => { setShowAdminUsers(false); setResource(item.key); }}>{item.label}</button>)}</nav><button className="btn btn--ghost" type="button" onClick={() => void logout()}>Esci</button></aside><main className="admin-main"><Crud resource={resource} profile={profile} /></main></div></PageShell>;
 }
