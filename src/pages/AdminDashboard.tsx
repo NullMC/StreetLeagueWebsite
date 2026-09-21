@@ -10,6 +10,20 @@ type Resource = "competitions" | "teams" | "players" | "matches" | "events" | "l
 type Row = Record<string, unknown>;
 type Lookups = { competitions: Competition[]; teams: Team[]; players: Player[]; matches: Match[] };
 
+const nav: { key: Resource; label: string }[] = [
+  { key: "competitions", label: "Competizioni" },
+  { key: "teams", label: "Squadre" },
+  { key: "players", label: "Giocatori" },
+  { key: "matches", label: "Partite" },
+  { key: "events", label: "Eventi" },
+  { key: "lineups", label: "Formazioni" },
+  { key: "mvp", label: "MVP" },
+  { key: "player_of_month", label: "POTM" },
+  { key: "partners", label: "Sponsor" },
+  { key: "active_collaborations", label: "Collab attive" },
+  { key: "social_contents", label: "Social / Video" },
+];
+
 const labels: Record<Resource, string> = {
   competitions: "Competizioni", teams: "Squadre", players: "Giocatori", matches: "Partite",
   events: "Eventi", lineups: "Formazioni", mvp: "MVP", player_of_month: "POTM",
