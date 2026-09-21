@@ -1,5 +1,6 @@
 -- Street League / PostgreSQL schema for Supabase
-create extension if not exists pgcrypto;
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
 
 create type competition_status as enum ('upcoming','active','finished');
 create type match_status as enum ('scheduled','live','finished','postponed');
