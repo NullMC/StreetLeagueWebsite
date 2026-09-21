@@ -92,6 +92,21 @@ VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
 ```
 
+## 7. Deploy automatico delle Edge Functions
+
+Le funzioni Supabase in `supabase/functions/` non vengono pubblicate da Cloudflare Pages insieme al frontend. Il repository include quindi il workflow:
+
+`.github/workflows/deploy-supabase-functions.yml`
+
+che deploya automaticamente le Edge Functions a ogni push su `main`.
+
+Nel repository GitHub aggiungi questi **Actions secrets**:
+
+- `SUPABASE_ACCESS_TOKEN`: Personal Access Token Supabase
+- `SUPABASE_PROJECT_ID`: project reference del progetto Supabase
+
+Dopo aver configurato i secrets, ogni push su `main` che modifica `supabase/functions/**` pubblica automaticamente le funzioni sul progetto indicato.
+
 ## 7. Routing su Cloudflare
 
 Il progetto usa React Router in modalità BrowserRouter. Su Cloudflare Pages è necessario mantenere il fallback SPA verso `index.html`. Aggiungi un file `public/_redirects` con:
