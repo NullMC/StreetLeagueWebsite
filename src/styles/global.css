@@ -857,9 +857,10 @@ section,
   background: linear-gradient(180deg, transparent 45%, #07100d 100%);
 }
 .team-card__visual img {
-  max-width: 55%;
-  max-height: 55%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
   position: relative;
   z-index: 1;
 }

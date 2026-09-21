@@ -29,7 +29,6 @@ export default function Teams() {
           <>
             <TeamCarousel teams={items} label="Tutte le squadre della competizione" />
             <div className="teams-page__hint">
-              <span>21 squadre</span>
               <span>Scorri per esplorarle tutte</span>
             </div>
           </>
