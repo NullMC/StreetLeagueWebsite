@@ -76,6 +76,15 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Access codes are reserved for back-office accounts. A valid code on
+    // a public/viewer profile must never create an admin session.
+    if (!["super_admin", "admin", "operator"].includes(profile.role)) {
+      return response(
+        { error: "L'account non ha i permessi per accedere al back office." },
+        403,
+      );
+    }
+
     const { data: linkData, error: linkError } =
       await adminClient.auth.admin.generateLink({
         type: "magiclink",
