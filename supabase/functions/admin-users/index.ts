@@ -185,7 +185,12 @@ Deno.serve(async (req: Request) => {
         throw profileError;
       }
 
-      await setCode(userId, code);
+      try {
+        await setCode(userId, code);
+      } catch (error) {
+        await adminClient.auth.admin.deleteUser(userId);
+        throw error;
+      }
 
       return response({ ok: true, user_id: userId }, 201);
     }
@@ -205,6 +210,12 @@ Deno.serve(async (req: Request) => {
       if (!email) return response({ error: "Email obbligatoria." }, 400);
       if (!["admin", "operator", "viewer"].includes(role)) {
         return response({ error: "Ruolo non consentito." }, 400);
+      }
+      if (code && code.length < 8) {
+        return response(
+          { error: "Il nuovo codice deve avere almeno 8 caratteri." },
+          400,
+        );
       }
 
       const { data: target, error: targetError } = await adminClient
@@ -274,12 +285,6 @@ Deno.serve(async (req: Request) => {
       if (profileError) throw profileError;
 
       if (code) {
-        if (code.length < 8) {
-          return response(
-            { error: "Il nuovo codice deve avere almeno 8 caratteri." },
-            400,
-          );
-        }
         await setCode(userId, code);
       }
 
