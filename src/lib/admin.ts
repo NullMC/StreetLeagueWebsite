@@ -16,7 +16,7 @@ function sb() {
   return supabase;
 }
 
-async function ensureFreshAdminSession() {
+export async function ensureFreshAdminSession() {
   const client = sb();
   const {
     data: { session },
