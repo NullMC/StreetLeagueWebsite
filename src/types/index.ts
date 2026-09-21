@@ -26,8 +26,6 @@ export interface Team {
   competition_id: string;
   name: string;
   slug: string;
-  short_name: string | null;
-  city: string | null;
   logo_url: string | null;
   accent_hex: string | null;
 }

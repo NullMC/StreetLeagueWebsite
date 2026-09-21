@@ -59,7 +59,7 @@ create table if not exists competitions (
 );
 create table if not exists teams (
   id uuid primary key default gen_random_uuid(), competition_id uuid not null references competitions(id) on delete cascade,
-  name text not null, slug text not null, short_name text, logo_url text, city text, accent_hex text,
+  name text not null, slug text not null, logo_url text, accent_hex text,
   created_at timestamptz not null default now(), unique(competition_id,slug)
 );
 create table if not exists players (
@@ -148,7 +148,6 @@ create or replace function is_super_admin() returns boolean language sql stable 
   select exists(select 1 from profiles p where p.id=auth.uid() and p.is_active = true and p.role='super_admin');
 $$;
 
--- Public read policies
 create policy "public read competitions" on competitions for select using (true);
 create policy "public read teams" on teams for select using (true);
 create policy "public read players" on players for select using (true);
@@ -161,10 +160,9 @@ create policy "public read social" on social_contents for select using (true);
 create policy "public active collaborations read" on active_collaborations for select using (true);
 create policy "admin manage active collaborations" on active_collaborations for all using (is_staff('admin')) with check (is_staff('admin'));
 create policy "public player of month read" on player_of_month for select using (true);
-create policy "admin manage player of month" on player_of_month for all using (is_staff('admin')) with check (is_staff('admin'));
+create policy "admin manage player of month" on player_of_month for all using (is_staff('admin'));
 create policy "users read own profile" on profiles for select using (id=auth.uid());
 
--- Staff write policies; Admin has CRUD, Operator can manage operational records only.
 create policy "admin manage competitions" on competitions for all using (is_staff('admin')) with check (is_staff('admin'));
 create policy "admin manage teams" on teams for all using (is_staff('admin')) with check (is_staff('admin'));
 create policy "admin manage players" on players for all using (is_staff('admin')) with check (is_staff('admin'));
@@ -175,13 +173,11 @@ create policy "staff manage mvp" on match_mvp for all using (is_staff('operator'
 create policy "admin manage partners" on partners for all using (is_staff('admin')) with check (is_staff('admin'));
 create policy "admin manage social" on social_contents for all using (is_staff('admin')) with check (is_staff('admin'));
 
-
 insert into storage.buckets (id, name, public) values ('street-league-media','street-league-media',true) on conflict (id) do update set public = excluded.public;
 create policy "public media read" on storage.objects for select using (bucket_id='street-league-media');
 create policy "staff media insert" on storage.objects for insert to authenticated with check (bucket_id='street-league-media' and is_staff('admin'));
-create policy "staff media update" on storage.objects for update to authenticated using (bucket_id='street-league-media' and is_staff('admin')) with check (bucket_id='street-league-media' and is_staff('admin'));
+create policy "staff media update" on storage.objects for update to authenticated using (bucket_id='street-league-media' and is_staff('admin'));
 create policy "staff media delete" on storage.objects for delete to authenticated using (bucket_id='street-league-media' and is_staff('admin'));
-
 
 create table if not exists public.admin_access_codes (
   id uuid primary key default gen_random_uuid(),

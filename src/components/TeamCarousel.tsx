@@ -32,7 +32,7 @@ export function TeamCarousel({
           <a className="team-carousel__item" href={`/squadre/${team.id}`} key={team.id}>
             <span className="team-carousel__logo">
               {team.logo_url ? (
-                <img src={team.logo_url} alt="" />
+                <img src={team.logo_url} alt={team.name} />
               ) : (
                 <span aria-hidden="true">{team.name.slice(0, 3).toUpperCase()}</span>
               )}
