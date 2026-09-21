@@ -166,27 +166,77 @@ Deno.serve(async (req: Request) => {
 
       const userId = created.user.id;
 
+      // The auth trigger normally creates the profile, but do not rely on
+      // an UPDATE affecting an existing row: Supabase does not treat an
+      // UPDATE that matches zero rows as an error. Upsert makes account
+      // creation deterministic even if the trigger was not installed or
+      // an older database schema is being used.
       const { error: profileError } = await adminClient
         .from("profiles")
-        .update({
-          username,
-          email,
-          full_name: fullName || null,
-          role: "admin",
-          is_active: true,
-        })
-        .eq("id", userId);
+        .upsert(
+          {
+            id: userId,
+            username,
+            email,
+            full_name: fullName || null,
+            role: "admin",
+            is_active: true,
+          },
+          { onConflict: "id" },
+        );
 
       if (profileError) {
         await adminClient.auth.admin.deleteUser(userId);
-        throw profileError;
+        throw new Error(`Profilo admin non creato: ${profileError.message}`);
+      }
+
+      // Verify that the profile really exists before storing the access code.
+      const { data: profile, error: profileCheckError } = await adminClient
+        .from("profiles")
+        .select("id, username, email, role, is_active")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profileCheckError) {
+        await adminClient.auth.admin.deleteUser(userId);
+        throw profileCheckError;
+      }
+
+      if (
+        !profile ||
+        profile.username !== username ||
+        profile.email !== email ||
+        profile.role !== "admin" ||
+        profile.is_active !== true
+      ) {
+        await adminClient.auth.admin.deleteUser(userId);
+        throw new Error("Profilo admin creato ma non verificabile.");
       }
 
       try {
         await setCode(userId, code);
       } catch (error) {
         await adminClient.auth.admin.deleteUser(userId);
-        throw error;
+        throw new Error(
+          `Codice di accesso non salvato: ${error instanceof Error ? error.message : "errore RPC"}`,
+        );
+      }
+
+      // Verify that the hashed access code row exists before reporting success.
+      const { data: accessCode, error: accessCodeError } = await adminClient
+        .from("admin_access_codes")
+        .select("profile_id")
+        .eq("profile_id", userId)
+        .maybeSingle();
+
+      if (accessCodeError) {
+        await adminClient.auth.admin.deleteUser(userId);
+        throw accessCodeError;
+      }
+
+      if (!accessCode) {
+        await adminClient.auth.admin.deleteUser(userId);
+        throw new Error("Codice di accesso creato ma non verificabile.");
       }
 
       return response({ ok: true, user_id: userId }, 201);
