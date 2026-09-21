@@ -26,7 +26,7 @@ const keys: Record<Resource, string> = {
 };
 const fields: Record<Resource, string[]> = {
   competitions: ["name", "slug", "status", "season_label", "start_date", "end_date", "hero_image_url"],
-  teams: ["competition_id", "name", "slug", "short_name", "city", "accent_hex", "logo_url"],
+  teams: ["competition_id", "name", "slug", "accent_hex", "logo_url"],
   players: ["team_id", "first_name", "last_name", "shirt_number", "position", "profile_image_url", "bg_less_image_url"],
   matches: ["competition_id", "home_team_id", "away_team_id", "matchday", "kickoff_at", "status", "home_score", "away_score", "venue"],
   events: ["match_id", "player_id", "related_player_id", "event_type", "minute", "note"],
@@ -45,7 +45,7 @@ const required: Record<Resource, string[]> = {
   active_collaborations: ["title", "description"], social_contents: ["platform", "title", "content_url"],
 };
 const fieldLabels: Record<string, string> = {
-  name: "Nome", slug: "Slug", short_name: "Nome breve", city: "Città", status: "Stato", season_label: "Stagione", start_date: "Data inizio", end_date: "Data fine",
+  name: "Nome", slug: "Slug", status: "Stato", season_label: "Stagione", start_date: "Data inizio", end_date: "Data fine",
   hero_image_url: "Immagine hero", competition_id: "Competizione", accent_hex: "Colore accent", logo_url: "Logo",
   team_id: "Squadra", first_name: "Nome", last_name: "Cognome", shirt_number: "Numero", position: "Ruolo", profile_image_url: "Immagine profilo", bg_less_image_url: "Immagine sfondo",
   home_team_id: "Squadra casa", away_team_id: "Squadra ospite", matchday: "Giornata", kickoff_at: "Inizio", home_score: "Gol casa", away_score: "Gol ospite", venue: "Campo",
