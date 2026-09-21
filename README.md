@@ -51,14 +51,20 @@ Salva gli URL pubblici nelle colonne `_url` delle tabelle.
 
 ## 4. Autenticazione Admin
 
-Abilita Email/Password in Supabase Authentication. Crea gli utenti necessari dalla dashboard Supabase Auth. Dopo la creazione di un utente, assegna il ruolo nella tabella `profiles`:
+Il back office usa **username + codice di accesso permanente**. Il codice viene salvato esclusivamente come hash nella tabella `admin_access_codes`: non viene mai salvato in chiaro.
 
-```sql
-insert into public.profiles (id, full_name, role)
-values ('UUID_UTENTE_AUTH', 'Nome Operatore', 'admin');
+Dopo `schema.sql`, esegui anche:
+
+```text
+supabase/admin_access_code_migration.sql
+supabase/admin_access_code_hardening.sql
 ```
 
-Ruoli disponibili: `viewer`, `operator`, `admin`.
+Il primo Super Admin deve essere inizializzato tramite `supabase/bootstrap_super_admin.sql`.
+
+Una volta effettuato l'accesso come Super Admin, la sezione **Gestione admin** consente di creare, modificare, attivare/disattivare ed eliminare gli account admin. La creazione non esegue alcun login del nuovo account: salva semplicemente username, email, nome, ruolo, stato e codice hashato. Il nuovo utente potrà quindi autenticarsi dalla pagina Admin con username + codice.
+
+Ruoli disponibili: `viewer`, `operator`, `admin`, `super_admin`.
 
 ## 5. Realtime
 
