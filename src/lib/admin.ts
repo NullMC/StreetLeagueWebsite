@@ -123,7 +123,7 @@ export async function getAuthenticatedAdmin(): Promise<AdminProfile | null> {
   if (
     !profile ||
     !profile.is_active ||
-    !["super_admin", "admin", "operator"].includes(profile.role)
+    profile.role !== "super_admin"
   ) {
     await client.auth.signOut();
     return null;
