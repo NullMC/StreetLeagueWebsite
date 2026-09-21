@@ -240,7 +240,7 @@ Deno.serve(async (req: Request) => {
       const credentialProfile = credentialCheck?.[0];
       if (
         !credentialProfile ||
-        credentialProfile.user_id !== userId ||
+        credentialProfile.id !== userId ||
         credentialProfile.username !== username ||
         credentialProfile.email !== email ||
         credentialProfile.role !== "admin" ||
@@ -375,7 +375,7 @@ Deno.serve(async (req: Request) => {
         const credentialProfile = credentialCheck?.[0];
         if (
           !credentialProfile ||
-          credentialProfile.user_id !== userId ||
+          credentialProfile.id !== userId ||
           credentialProfile.username !== username ||
           credentialProfile.email !== email ||
           credentialProfile.role !== "admin" ||
