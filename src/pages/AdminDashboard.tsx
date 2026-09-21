@@ -178,7 +178,7 @@ function AdminUsers({ profile }: { profile: AdminProfile }) {
     full_name: string | null;
     username: string | null;
     email: string | null;
-    role: "super_admin" | "admin" | "operator" | "viewer";
+    role: "super_admin" | "admin";
     is_active: boolean;
     created_at: string;
   };
@@ -187,7 +187,7 @@ function AdminUsers({ profile }: { profile: AdminProfile }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [editing, setEditing] = useState<AdminUser | null>(null);
-  const [form, setForm] = useState({ username: "", email: "", full_name: "", role: "admin", code: "" });
+  const [form, setForm] = useState({ username: "", email: "", full_name: "", code: "" });
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
@@ -207,7 +207,7 @@ function AdminUsers({ profile }: { profile: AdminProfile }) {
 
   const reset = () => {
     setEditing(null);
-    setForm({ username: "", email: "", full_name: "", role: "admin", code: "" });
+    setForm({ username: "", email: "", full_name: "", code: "" });
   };
 
   const submit = async (e: FormEvent) => {
@@ -221,7 +221,6 @@ function AdminUsers({ profile }: { profile: AdminProfile }) {
         username: form.username,
         email: form.email,
         full_name: form.full_name,
-        role: form.role,
         ...(form.code ? { code: form.code } : {}),
       });
       setMessage(editing ? "Account aggiornato." : "Account creato.");
@@ -241,7 +240,6 @@ function AdminUsers({ profile }: { profile: AdminProfile }) {
       username: user.username ?? "",
       email: user.email ?? "",
       full_name: user.full_name ?? "",
-      role: user.role,
       code: "",
     });
     setMessage("");
@@ -294,7 +292,6 @@ function AdminUsers({ profile }: { profile: AdminProfile }) {
         <label>Nome completo<input value={form.full_name} onChange={(e) => setForm((p) => ({ ...p, full_name: e.target.value }))} /></label>
         <label>Username<input value={form.username} onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))} required minLength={3} maxLength={32} /></label>
         <label>Email<input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} required /></label>
-        <label>Ruolo<select value={form.role} onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}><option value="admin">Admin</option><option value="operator">Operator</option><option value="viewer">Viewer</option></select></label>
         <label>Codice di accesso{editing ? <span className="admin-help-text">Lascia vuoto per non cambiarlo.</span> : null}<input type="password" value={form.code} onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))} required={!editing} minLength={8} placeholder="Minimo 8 caratteri" /></label>
       </div>
       {message && <p className="admin-message">{message}</p>}
@@ -304,10 +301,9 @@ function AdminUsers({ profile }: { profile: AdminProfile }) {
     <div className="admin-records">
       <div className="admin-table-wrap">
         {loading ? <p className="admin-message">Caricamento…</p> : !users.length ? <p className="admin-message">Nessun account presente.</p> : <table className="admin-table">
-          <thead><tr><th>Utente</th><th>Ruolo</th><th>Stato</th><th>Creato</th><th>Azioni</th></tr></thead>
+          <thead><tr><th>Utente</th><th>Stato</th><th>Creato</th><th>Azioni</th></tr></thead>
           <tbody>{users.map((user) => <tr key={user.id}>
             <td><strong>{user.full_name ?? user.username ?? "—"}</strong><br /><small>{user.username ? `@${user.username}` : user.email ?? "—"}</small></td>
-            <td>{user.role}</td>
             <td>{user.is_active ? "Attivo" : "Disattivato"}</td>
             <td>{user.created_at ? new Date(user.created_at).toLocaleDateString("it-IT") : "—"}</td>
             <td>
@@ -323,7 +319,6 @@ function AdminUsers({ profile }: { profile: AdminProfile }) {
     </div>
   </div>;
 }
-
 
 const nav: Array<{ key: Resource; label: string }> = [
   { key: "competitions", label: "Competizioni" }, { key: "teams", label: "Squadre" }, { key: "players", label: "Giocatori" }, { key: "matches", label: "Partite" }, { key: "events", label: "Eventi" }, { key: "lineups", label: "Formazioni" }, { key: "mvp", label: "MVP" }, { key: "player_of_month", label: "POTM" }, { key: "partners", label: "Sponsor" }, { key: "active_collaborations", label: "Collab attive" }, { key: "social_contents", label: "Social / Video" },
