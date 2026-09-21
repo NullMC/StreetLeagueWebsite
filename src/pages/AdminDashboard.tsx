@@ -90,20 +90,79 @@ function validate(resource: Resource, payload: Row, l: Lookups) {
 }
 function rowLabel(resource: Resource, row: Row, l: Lookups) { if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource); if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim(); if (resource === "player_of_month") { const p = l.players.find((x) => x.id === row.player_id); return `${row.month_label ?? "POTM"} / ${p ? `${p.first_name} ${p.last_name}` : "Giocatore"}`; } if (resource === "matches") return `${l.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa"} - ${l.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite"}`; if (resource === "active_collaborations") return String(row.title ?? "Collaborazione"); return String(row.title ?? row.name ?? resource); }
 
+function normalizeSearch(value: unknown) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/\\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("it-IT");
+}
+function searchableRowText(resource: Resource, row: Row, l: Lookups) {
+  const values = fields[resource].map((f) => String(row[f] ?? ""));
+  const extras: string[] = [];
+  const team = row.team_id ? l.teams.find((x) => x.id === row.team_id) : undefined;
+  const competition = row.competition_id ? l.competitions.find((x) => x.id === row.competition_id) : undefined;
+  const player = row.player_id ? l.players.find((x) => x.id === row.player_id) : undefined;
+  const relatedPlayer = row.related_player_id ? l.players.find((x) => x.id === row.related_player_id) : undefined;
+  const match = row.match_id ? l.matches.find((x) => x.id === row.match_id) : undefined;
+
+  if (team) extras.push(team.name, team.slug);
+  if (competition) extras.push(competition.name, competition.slug);
+  if (player) extras.push(player.first_name, player.last_name, String(player.shirt_number ?? ""));
+  if (relatedPlayer) extras.push(relatedPlayer.first_name, relatedPlayer.last_name, String(relatedPlayer.shirt_number ?? ""));
+  if (match) {
+    const home = l.teams.find((x) => x.id === match.home_team_id);
+    const away = l.teams.find((x) => x.id === match.away_team_id);
+    extras.push(
+      home?.name ?? "",
+      away?.name ?? "",
+      String(match.matchday ?? ""),
+      String(match.venue ?? ""),
+    );
+  }
+  if (row.home_team_id) {
+    const home = l.teams.find((x) => x.id === row.home_team_id);
+    if (home) extras.push(home.name, home.slug);
+  }
+  if (row.away_team_id) {
+    const away = l.teams.find((x) => x.id === row.away_team_id);
+    if (away) extras.push(away.name, away.slug);
+  }
+
+  return normalizeSearch([...values, ...extras].join(" "));
+}
+
 function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile }) {
-  const [rows, setRows] = useState<Row[]>([]); const [form, setForm] = useState<Row>(() => defaults(resource)); const [editing, setEditing] = useState<string | null>(null); const [loading, setLoading] = useState(true); const [message, setMessage] = useState(""); const [uploadingField, setUploadingField] = useState<string | null>(null); const [lookups, setLookups] = useState<Lookups>({ competitions: [], teams: [], players: [], matches: [] });
+  const [rows, setRows] = useState<Row[]>([]); const [form, setForm] = useState<Row>(() => defaults(resource)); const [editing, setEditing] = useState<string | null>(null); const [loading, setLoading] = useState(true); const [message, setMessage] = useState(""); const [searchTerm, setSearchTerm] = useState(""); const [uploadingField, setUploadingField] = useState<string | null>(null); const [lookups, setLookups] = useState<Lookups>({ competitions: [], teams: [], players: [], matches: [] });
   const canWrite = profile.role === "super_admin" || profile.role === "admin" || (profile.role === "operator" && ["matches", "events", "lineups", "mvp"].includes(resource));
   const refresh = async () => { setLoading(true); try { setRows(await readRows(resource)); } catch (e) { setMessage(errorMessage(e, "Errore di caricamento.")); } finally { setLoading(false); } };
-  useEffect(() => { setForm(defaults(resource)); setEditing(null); setMessage(""); void refresh(); }, [resource]);
+  useEffect(() => { setForm(defaults(resource)); setEditing(null); setMessage(""); setSearchTerm(""); void refresh(); }, [resource]);
   useEffect(() => { Promise.all([getCompetitions(), getTeams(), getPlayers(), getMatches()]).then(([competitions, teams, players, matches]) => setLookups({ competitions, teams, players, matches })).catch(() => undefined); }, [resource]);
   const setField = (f: string, v: unknown) => setForm((p) => ({ ...p, [f]: v, ...(f === "competition_id" ? { home_team_id: "", away_team_id: "" } : {}), ...(f === "match_id" ? { team_id: "", player_id: "", related_player_id: "" } : {}) }));
   const edit = (r: Row) => { const n = { ...r }; setEditing(String(r[keys[resource]])); if (n.kickoff_at) n.kickoff_at = localDate(n.kickoff_at); if (n.published_at) n.published_at = localDate(n.published_at); setForm(n); setMessage(""); window.scrollTo({ top: 120, behavior: "smooth" }); };
   const cancelEdit = () => { setEditing(null); setForm(defaults(resource)); setMessage(""); };
   const uploadFor = async (field: string, file: File) => { if (!canWrite || !file) return; setUploadingField(field); setMessage(""); try { const folder = field === "flyer_url" ? "collaborations" : field.includes("logo") ? "logos" : field.includes("bg_less") ? "players/bg-less" : field.includes("profile") ? "players/profile" : field.includes("thumbnail") ? "social" : "media"; const url = await uploadMedia(file, folder); setForm((p) => ({ ...p, [field]: url })); setMessage("File caricato. Salva il record per applicare l'URL."); } catch (e) { setMessage(errorMessage(e, "Upload non riuscito.")); } finally { setUploadingField(null); } };
   const save = async (e: FormEvent) => { e.preventDefault(); if (!supabase || !canWrite) return; setMessage(""); try { const p = sanitize(resource, form); validate(resource, p, lookups); if (resource === "players" && !editing) { if (p.profile_image_url == null) delete p.profile_image_url; if (p.bg_less_image_url == null) delete p.bg_less_image_url; } const q = supabase.from(tables[resource]); const result = editing ? await q.update(p).eq(keys[resource], editing) : resource === "mvp" ? await q.upsert(p, { onConflict: "match_id" }) : await q.insert(p); if (result.error) throw result.error; setMessage(editing ? "Record aggiornato." : "Record creato."); setEditing(null); setForm(defaults(resource)); await refresh(); } catch (e) { setMessage(errorMessage(e, "Operazione non riuscita.")); } };
-  const remove = async (r: Row) => { if (!supabase || !canWrite) return; const k = r[keys[resource]]; if (!k || !confirm(`Eliminare ${rowLabel(resource, r, lookups)}?`)) return; try { const { error } = await supabase.from(tables[resource]).delete().eq(keys[resource], k); if (error) throw error; setMessage("Record eliminato."); await refresh(); } catch (e) { setMessage(errorMessage(e, "Eliminazione non riuscita.")); } };
+  const remove = async (r: Row) => { if (!supabase || !canWrite) return; const k = r[keys[resource]]; if (!k || !confirm(`Eliminare ${rowLabel(resource, r, lookups)}?`)) return; try { const { error } = await supabase.from(tables[resource]).delete().eq(keys[resource], k); if (error) throw error; setMessage("Record eliminato."); await refresh(); } catch (e) { setMessage(errorMessage(e, "Eliminazione non riuscita.")); } }; const normalizedSearch = normalizeSearch(searchTerm.trim()); const filteredRows = normalizedSearch ? rows.filter((r) => searchableRowText(resource, r, lookups).includes(normalizedSearch)) : rows;
   const render = (f: string) => { const v = form[f]; if (f === "starter") return <label className="check-field"><input type="checkbox" checked={Boolean(v)} onChange={(e) => setField(f, e.target.checked)} /> Titolare</label>; const rel = ["competition_id", "team_id", "home_team_id", "away_team_id", "match_id", "player_id", "related_player_id"]; if (rel.includes(f)) { const opts = relationOptions(f, resource, form, lookups); return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>; } if (f === "status") { const opts = resource === "competitions" ? options.competitionStatus : options.matchStatus; return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required><option value="">Seleziona</option>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select>; } if (options[f]) return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{options[f].map((o) => <option key={o} value={o}>{o}</option>)}</select>; if (f === "description") return <RichTextEditor value={String(v ?? "")} onChange={(x) => setField(f, x)} />; if (f === "note") return <textarea rows={5} value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} />; const dt = f === "kickoff_at" || f === "published_at"; const date = f === "start_date" || f === "end_date"; const num = ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f); const uploadable = isUploadableImage(f); const url = ["cta_url", "website_url", "content_url", "hero_image_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url"].includes(f); const input = <input type={dt ? "datetime-local" : date ? "date" : num ? "number" : url ? "url" : "text"} value={dt ? localDate(v) : v == null ? "" : String(v)} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)} min={num ? 0 : undefined} placeholder={f === "month_label" ? "Settembre 2026" : undefined} />; if (!uploadable) return input; return <div className="admin-input-row">{input}<input className="file-input" type="file" accept="image/*" disabled={!canWrite || uploadingField === f} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadFor(f, file); e.currentTarget.value = ""; }} />{uploadingField === f && <small className="admin-help-text">Caricamento…</small>}</div>; };
-  return <div className="admin-resource"><div className="admin-resource__head"><div><span className="eyebrow">CRUD / {labels[resource]}</span><h2>{editing ? "Modifica record" : "Nuovo record"}</h2></div>{editing && <button className="btn btn--ghost" type="button" onClick={cancelEdit}>Annulla</button>}</div>{canWrite ? <form className="admin-form" onSubmit={save}><div className="admin-form__grid">{fields[resource].map((f) => <label key={f}>{labelize(f)}{render(f)}</label>)}</div>{message && <p className="admin-message">{message}</p>}<button className="btn btn--primary" type="submit">{editing ? "Salva modifiche" : "Crea record"}</button></form> : <div className="empty-state"><div className="empty-state__mark">R</div><div><h3>Accesso in sola lettura</h3><p>Questo ruolo non può modificare questa sezione.</p></div></div>}<div className="admin-table-wrap">{loading ? <p className="admin-message">Caricamento…</p> : !rows.length ? <p className="admin-message">Nessun record presente.</p> : <table className="admin-table"><thead><tr>{fields[resource].slice(0, 6).map((f) => <th key={f}>{labelize(f)}</th>)}<th>Azioni</th></tr></thead><tbody>{rows.map((r) => <tr key={String(r[keys[resource]])}>{fields[resource].slice(0, 6).map((f) => <td key={f}>{f === "player_id" ? (() => { const p = lookups.players.find((x) => x.id === r[f]); return p ? `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` : "—"; })() : f === "team_id" ? (lookups.teams.find((x) => x.id === r[f])?.name ?? "—") : f === "competition_id" ? (lookups.competitions.find((x) => x.id === r[f])?.name ?? "—") : String(r[f] ?? "—")}</td>)}<td className="admin-actions"><button className="btn btn--ghost btn--small" type="button" onClick={() => edit(r)}>Modifica</button>{" "}<button className="btn btn--danger btn--small" type="button" onClick={() => void remove(r)}>Elimina</button></td></tr>)}</tbody></table>}</div></div>;
+  return <div className="admin-resource"><div className="admin-resource__head"><div><span className="eyebrow">CRUD / {labels[resource]}</span><h2>{editing ? "Modifica record" : "Nuovo record"}</h2></div>{editing && <button className="btn btn--ghost" type="button" onClick={cancelEdit}>Annulla</button>}</div>{canWrite ? <form className="admin-form" onSubmit={save}><div className="admin-form__grid">{fields[resource].map((f) => <label key={f}>{labelize(f)}{render(f)}</label>)}</div>{message && <p className="admin-message">{message}</p>}<button className="btn btn--primary" type="submit">{editing ? "Salva modifiche" : "Crea record"}</button></form> : <div className="empty-state"><div className="empty-state__mark">R</div><div><h3>Accesso in sola lettura</h3><p>Questo ruolo non può modificare questa sezione.</p></div></div>}<div className="admin-records">
+  <div className="admin-search">
+    <div className="admin-search__field">
+      <span className="admin-search__icon" aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder={`Cerca in ${labels[resource].toLowerCase()}…`}
+        aria-label={`Cerca in ${labels[resource].toLowerCase()}`}
+      />
+      {searchTerm && <button className="admin-search__clear" type="button" onClick={() => setSearchTerm("")} aria-label="Cancella ricerca">×</button>}
+    </div>
+    <span className="admin-search__count">{normalizedSearch ? `${filteredRows.length} di ${rows.length}` : `${rows.length} record`}</span>
+  </div>
+  <div className="admin-table-wrap">
+    {loading ? <p className="admin-message">Caricamento…</p> : !rows.length ? <p className="admin-message">Nessun record presente.</p> : !filteredRows.length ? <p className="admin-message">Nessun risultato per “{searchTerm}”.</p> : <table className="admin-table"><thead><tr>{fields[resource].slice(0, 6).map((f) => <th key={f}>{labelize(f)}</th>)}<th>Azioni</th></tr></thead><tbody>{filteredRows.map((r) => <tr key={String(r[keys[resource]])}>{fields[resource].slice(0, 6).map((f) => <td key={f}>{f === "player_id" ? (() => { const p = lookups.players.find((x) => x.id === r[f]); return p ? `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` : "—"; })() : f === "team_id" ? (lookups.teams.find((x) => x.id === r[f])?.name ?? "—") : f === "competition_id" ? (lookups.competitions.find((x) => x.id === r[f])?.name ?? "—") : String(r[f] ?? "—")}</td>)}<td className="admin-actions"><button className="btn btn--ghost btn--small" type="button" onClick={() => edit(r)}>Modifica</button>{" "}<button className="btn btn--danger btn--small" type="button" onClick={() => void remove(r)}>Elimina</button></td></tr>)}</tbody></table>}
+  </div>
+</div></div>;
 }
 
 function isUploadableImage(field: string) { return field.includes("logo") || field.includes("image") || field.includes("thumbnail") || field === "flyer_url"; }
