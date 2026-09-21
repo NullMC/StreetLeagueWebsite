@@ -155,11 +155,58 @@ function isExpiredJwtError(error: unknown) {
   );
 }
 
+function responseStatus(error: unknown) {
+  if (!error || typeof error !== "object" || !("context" in error)) {
+    return undefined;
+  }
+
+  const context = (error as { context?: unknown }).context;
+  return context instanceof Response ? context.status : undefined;
+}
+
+async function normalizeFunctionError(error: unknown) {
+  const status = responseStatus(error);
+
+  if (error && typeof error === "object" && "context" in error) {
+    const context = (error as { context?: unknown }).context;
+
+    if (context instanceof Response) {
+      try {
+        const body = (await context.clone().json()) as {
+          error?: unknown;
+          message?: unknown;
+        };
+
+        const detail =
+          typeof body.error === "string" && body.error.trim()
+            ? body.error.trim()
+            : typeof body.message === "string" && body.message.trim()
+              ? body.message.trim()
+              : "";
+
+        if (detail) return new Error(detail);
+      } catch {
+        // Keep the SDK error when the response body is not JSON.
+      }
+
+      if (status === 401) {
+        return new Error(
+          "Sessione Supabase scaduta o non valida. Effettua nuovamente l'accesso.",
+        );
+      }
+    }
+  }
+
+  return error instanceof Error
+    ? error
+    : new Error("Errore durante la chiamata alla Edge Function.");
+}
+
 export async function uploadMedia(file: File, folder: string) {
   const client = sb();
   const extension = file.name.split(".").pop()?.toLowerCase() || "bin";
-  const safeName = `${crypto.randomUUID()}.${extension}`;
-  const path = `${folder}/${safeName}`;
+  const safeName = crypto.randomUUID() + "." + extension;
+  const path = folder + "/" + safeName;
   const bucket = client.storage.from("street-league-media");
 
   // Keep long-lived admin sessions usable even after the browser has been idle.
@@ -188,11 +235,24 @@ export async function uploadMedia(file: File, folder: string) {
 export async function callAdminUsers(payload: Record<string, unknown>) {
   const client = sb();
   await ensureFreshAdminSession();
-  const { data, error } = await client.functions.invoke("admin-users", {
+
+  let result = await client.functions.invoke("admin-users", {
     body: payload,
   });
 
-  if (error) throw error;
-  if (data?.error) throw new Error(data.error);
-  return data;
+  // Retry once with a freshly refreshed JWT when the Edge Function rejects
+  // the access token at the platform level.
+  if (result.error && responseStatus(result.error) === 401) {
+    await refreshAdminSession();
+    result = await client.functions.invoke("admin-users", {
+      body: payload,
+    });
+  }
+
+  if (result.error) {
+    throw await normalizeFunctionError(result.error);
+  }
+
+  if (result.data?.error) throw new Error(String(result.data.error));
+  return result.data;
 }
