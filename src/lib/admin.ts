@@ -16,6 +16,26 @@ function sb() {
   return supabase;
 }
 
+async function ensureFreshAdminSession() {
+  const client = sb();
+  const {
+    data: { session },
+    error,
+  } = await client.auth.getSession();
+
+  if (error) throw error;
+  if (!session) {
+    throw new Error("Sessione amministrativa scaduta. Effettua nuovamente l'accesso.");
+  }
+
+  const expiresAt = session.expires_at ? session.expires_at * 1000 : 0;
+  if (expiresAt && expiresAt <= Date.now() + 60_000) {
+    return refreshAdminSession();
+  }
+
+  return session;
+}
+
 export async function getCurrentAdminProfile(): Promise<AdminProfile | null> {
   const client = sb();
   const { data: auth, error: authError } = await client.auth.getUser();
@@ -96,13 +116,7 @@ export async function signInWithAccessCode(username: string, code: string) {
 export async function getAuthenticatedAdmin(): Promise<AdminProfile | null> {
   const client = sb();
 
-  const {
-    data: { session },
-  } = await client.auth.getSession();
-
-  if (!session) {
-    return null;
-  }
+  await ensureFreshAdminSession();
 
   const profile = await getCurrentAdminProfile();
 
@@ -149,7 +163,7 @@ export async function uploadMedia(file: File, folder: string) {
   const bucket = client.storage.from("street-league-media");
 
   // Keep long-lived admin sessions usable even after the browser has been idle.
-  await client.auth.getSession();
+  await ensureFreshAdminSession();
 
   let result = await bucket.upload(path, file, {
     upsert: false,
@@ -173,6 +187,7 @@ export async function uploadMedia(file: File, folder: string) {
 
 export async function callAdminUsers(payload: Record<string, unknown>) {
   const client = sb();
+  await ensureFreshAdminSession();
   const { data, error } = await client.functions.invoke("admin-users", {
     body: payload,
   });
