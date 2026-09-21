@@ -242,5 +242,7 @@
   .admin-form__grid { grid-template-columns: 1fr; }
   .admin-resource__head { align-items: flex-start; flex-direction: column; }
   .admin-resource__head h2 { font-size: 48px; }
+  .admin-search { align-items: stretch; flex-direction: column; }
+  .admin-search__count { text-align: right; }
   .admin-cta-manager__row { grid-template-columns: 1fr; align-items: stretch; }
 }
