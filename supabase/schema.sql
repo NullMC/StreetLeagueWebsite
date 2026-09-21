@@ -25,15 +25,19 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, username, full_name, role, is_active)
+  insert into public.profiles (id, username, email, full_name, role, is_active)
   values (
     new.id,
     nullif(lower(new.raw_user_meta_data->>'username'), ''),
+    nullif(lower(new.email), ''),
     nullif(new.raw_user_meta_data->>'full_name', ''),
     'viewer',
     true
   )
-  on conflict (id) do nothing;
+  on conflict (id) do update
+    set email = coalesce(excluded.email, public.profiles.email),
+        username = coalesce(excluded.username, public.profiles.username),
+        full_name = coalesce(excluded.full_name, public.profiles.full_name);
   return new;
 end;
 $$;
@@ -227,6 +231,7 @@ begin
   join public.admin_access_codes c on c.profile_id = p.id
   where lower(p.username) = lower(trim(p_username))
     and p.is_active = true
+    and p.role in ('super_admin', 'admin', 'operator')
     and extensions.crypt(trim(p_code), c.code_hash) = c.code_hash;
 
   update public.admin_access_codes c
