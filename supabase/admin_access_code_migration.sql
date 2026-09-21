@@ -2,6 +2,7 @@
 -- Safe migration: no existing application tables are dropped.
 -- Run this file AFTER the app_role enum already contains super_admin.
 
+create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
 
 alter table public.profiles
