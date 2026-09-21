@@ -222,6 +222,36 @@ Deno.serve(async (req: Request) => {
         );
       }
 
+      // Verify the exact username + code pair immediately. This is only a
+      // server-side consistency check; it does NOT sign the new admin in.
+      const { data: credentialCheck, error: credentialCheckError } =
+        await adminClient.rpc("verify_admin_access_code", {
+          p_username: username,
+          p_code: code,
+        });
+
+      if (credentialCheckError) {
+        await adminClient.auth.admin.deleteUser(userId);
+        throw new Error(
+          `Verifica del codice non riuscita: ${credentialCheckError.message}`,
+        );
+      }
+
+      const credentialProfile = credentialCheck?.[0];
+      if (
+        !credentialProfile ||
+        credentialProfile.user_id !== userId ||
+        credentialProfile.username !== username ||
+        credentialProfile.email !== email ||
+        credentialProfile.role !== "admin" ||
+        credentialProfile.is_active !== true
+      ) {
+        await adminClient.auth.admin.deleteUser(userId);
+        throw new Error(
+          "Credenziali admin create ma non verificabili. L'account non è stato mantenuto.",
+        );
+      }
+
       // Verify that the hashed access code row exists before reporting success.
       const { data: accessCode, error: accessCodeError } = await adminClient
         .from("admin_access_codes")
@@ -318,18 +348,41 @@ Deno.serve(async (req: Request) => {
 
       const { error: profileError } = await adminClient
         .from("profiles")
-        .update({
-          username,
-          email,
-          full_name: fullName || null,
-          role: "admin",
-        })
-        .eq("id", userId);
+        .upsert(
+          {
+            id: userId,
+            username,
+            email,
+            full_name: fullName || null,
+            role: "admin",
+          },
+          { onConflict: "id" },
+        );
 
       if (profileError) throw profileError;
 
       if (code) {
         await setCode(userId, code);
+
+        const { data: credentialCheck, error: credentialCheckError } =
+          await adminClient.rpc("verify_admin_access_code", {
+            p_username: username,
+            p_code: code,
+          });
+
+        if (credentialCheckError) throw credentialCheckError;
+
+        const credentialProfile = credentialCheck?.[0];
+        if (
+          !credentialProfile ||
+          credentialProfile.user_id !== userId ||
+          credentialProfile.username !== username ||
+          credentialProfile.email !== email ||
+          credentialProfile.role !== "admin" ||
+          credentialProfile.is_active !== true
+        ) {
+          throw new Error("Il nuovo codice di accesso non è verificabile.");
+        }
       }
 
       return response({ ok: true });
