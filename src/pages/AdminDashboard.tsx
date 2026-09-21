@@ -93,7 +93,7 @@ function rowLabel(resource: Resource, row: Row, l: Lookups) { if (["competitions
 function normalizeSearch(value: unknown) {
   return String(value ?? "")
     .normalize("NFD")
-    .replace(/\\p{Diacritic}/gu, "")
+    .replace(/\p{Diacritic}/gu, "")
     .toLocaleLowerCase("it-IT");
 }
 function searchableRowText(resource: Resource, row: Row, l: Lookups) {
