@@ -5,7 +5,7 @@ create extension if not exists pgcrypto with schema extensions;
 create type competition_status as enum ('upcoming','active','finished');
 create type match_status as enum ('scheduled','live','finished','postponed');
 create type partner_tier as enum ('gold','silver','bronze');
-create type event_type as enum ('goal','assist','yellow_card','red_card','substitution','foul','other');
+create type event_type as enum ('goal','assist','yellow_card','red_card','substitution','foul','presidential_penalty','other');
 create type social_platform as enum ('youtube','instagram','tiktok');
 create type app_role as enum ('viewer','operator','admin','super_admin');
 
