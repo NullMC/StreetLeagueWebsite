@@ -43,6 +43,36 @@ export async function getActiveCompetition(): Promise<Competition | null> {
   return data as Competition | null;
 }
 
+export async function getCurrentCompetition(): Promise<Competition | null> {
+  const active = await getActiveCompetition();
+  if (active) return active;
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("competitions")
+    .select("*")
+    .eq("status", "upcoming")
+    .order("start_date", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (data) return data as Competition;
+
+  const { data: latest, error: latestError } = await supabase
+    .from("competitions")
+    .select("*")
+    .eq("status", "finished")
+    .order("end_date", { ascending: false, nullsFirst: false })
+    .order("start_date", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (latestError) throw latestError;
+  return (latest as Competition | null) ?? null;
+}
+
 export async function getTeams(competitionId?: string): Promise<Team[]> {
   if (!supabase) return [];
   let query = supabase.from("teams").select("*").order("name");
@@ -171,14 +201,19 @@ export async function getStaffRanking(
   competitionId: string,
   month?: { year: number; month: number },
 ): Promise<StaffRankingEntry[]> {
-  const [players, matches, events] = await Promise.all([
+  const [players, teams, matches, events] = await Promise.all([
     getPlayers(),
+    getTeams(competitionId),
     getMatches(competitionId),
     getAllMatchEvents(),
   ]);
 
+  const competitionTeamIds = new Set(teams.map((team) => team.id));
   const staffPlayers = players.filter(
-    (player) => player.position?.trim().toUpperCase() === "STAFF",
+    (player) =>
+      competitionTeamIds.has(player.team_id) &&
+      (player.role?.trim().toUpperCase() === "STAFF" ||
+        player.position?.trim().toUpperCase() === "STAFF"),
   );
   const staffIds = new Set(staffPlayers.map((player) => player.id));
   const competitionMatches = new Map(matches.map((match) => [match.id, match]));
