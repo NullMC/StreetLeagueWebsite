@@ -96,7 +96,20 @@ export default function Standings() {
                 <span className="position">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <strong>{row.team.name}</strong>
+                <div className="standings-team">
+                  {row.team.logo_url ? (
+                    <img
+                      src={row.team.logo_url}
+                      alt=""
+                      className="standings-team__logo"
+                    />
+                  ) : (
+                    <span className="standings-team__logo standings-team__logo--placeholder" aria-hidden="true">
+                      {row.team.name.slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
+                  <strong>{row.team.name}</strong>
+                </div>
                 <span>{row.played}</span>
                 <span>{row.wins}</span>
                 <span>{row.draws}</span>
@@ -126,7 +139,20 @@ export default function Standings() {
               {staffRows.map((row, index) => (
                 <div className="table-row" key={row.player.id}>
                   <span className="position">{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{row.player.first_name} {row.player.last_name}</strong>
+                  <div className="standings-player">
+                    {row.player.profile_image_url || row.player.bg_less_image_url ? (
+                      <img
+                        src={row.player.profile_image_url || row.player.bg_less_image_url || ""}
+                        alt=""
+                        className="standings-player__avatar"
+                      />
+                    ) : (
+                      <span className="standings-player__avatar standings-player__avatar--placeholder" aria-hidden="true">
+                        {(row.player.first_name[0] ?? "") + (row.player.last_name[0] ?? "")}
+                      </span>
+                    )}
+                    <strong>{row.player.first_name} {row.player.last_name}</strong>
+                  </div>
                   <span>{row.presidential_penalties}</span>
                   <strong>{row.presidential_penalties}</strong>
                 </div>
