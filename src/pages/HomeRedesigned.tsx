@@ -8,9 +8,10 @@ import { CollabCarousel } from "../components/CollabCarousel";
 import { LogoScroller } from "../components/LogoScroller";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
-import { calculateStandings, getActiveCollaborations, getActiveCompetition, getAllPlayerStats, getMatches, getPartners, getSocialContent, getTeams, subscribeToCompetition } from "../lib/api";
+import { StaffOfMonthCard } from "../components/StaffOfMonth";
+import { calculateStandings, getActiveCollaborations, getActiveCompetition, getAllPlayerStats, getMatches, getPartners, getSocialContent, getStaffRanking, getTeams, subscribeToCompetition } from "../lib/api";
 import { getPlayerOfMonth } from "../lib/playerOfMonth";
-import type { ActiveCollaboration, Competition, Match, Partner, Player, PlayerStats, SocialContent, Team } from "../types";
+import type { ActiveCollaboration, Competition, Match, Partner, Player, PlayerStats, SocialContent, StaffRankingEntry, Team } from "../types";
 
 type PlayerWithStats = Player & { stats: PlayerStats };
 type LeaderConfig = { key: "goals" | "assists" | "clean_sheets"; title: string };
@@ -41,6 +42,31 @@ function LeaderPanel({ config, players }: { config: LeaderConfig; players: Playe
         })}
       </div>
     </article>
+  );
+}
+
+function StaffRankingPreview({ items }: { items: StaffRankingEntry[] }) {
+  return (
+    <div className="home-staff-ranking">
+      <div className="home-mini-head">
+        <span>Migliori membri staff</span>
+        <a href="/classifica">Completa ↗</a>
+      </div>
+      <div className="home-staff-ranking__list">
+        {items.slice(0, 3).map((entry, index) => (
+          <div className="home-staff-ranking__row" key={entry.player.id}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <span>{entry.player.first_name} {entry.player.last_name}</span>
+            <strong>{entry.presidential_penalties}</strong>
+          </div>
+        ))}
+        {!items.length && (
+          <div className="home-staff-ranking__empty">
+            Nessun membro STAFF registrato.
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -105,17 +131,22 @@ export default function HomeRedesigned() {
   const [social, setSocial] = useState<SocialContent[]>([]);
   const [playerStats, setPlayerStats] = useState<PlayerWithStats[]>([]);
   const [potm, setPotm] = useState<Awaited<ReturnType<typeof getPlayerOfMonth>>>(null);
+  const [staffRanking, setStaffRanking] = useState<StaffRankingEntry[]>([]);
+  const [staffMonthlyRanking, setStaffMonthlyRanking] = useState<StaffRankingEntry[]>([]);
 
   const load = async () => {
     try {
       const active = await getActiveCompetition();
-      const [nextMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextStats, nextPotm] = await Promise.all([
+      const now = new Date();
+      const [nextMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextStats, nextPotm, nextStaff, nextStaffMonth] = await Promise.all([
         getMatches(active?.id), getTeams(active?.id), getPartners(), getActiveCollaborations(), getSocialContent(), getAllPlayerStats(), getPlayerOfMonth(),
+        active ? getStaffRanking(active.id) : Promise.resolve([]),
+        active ? getStaffRanking(active.id, { year: now.getFullYear(), month: now.getMonth() + 1 }) : Promise.resolve([]),
       ]);
-      setCompetition(active); setMatches(nextMatches); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPlayerStats(nextStats); setPotm(nextPotm);
+      setCompetition(active); setMatches(nextMatches); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPlayerStats(nextStats); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
     } catch (error) {
       console.error("Home data error:", error);
-      setCompetition(null); setMatches([]); setTeams([]); setPartners([]); setCollaborations([]); setSocial([]); setPlayerStats([]); setPotm(null);
+      setCompetition(null); setMatches([]); setTeams([]); setPartners([]); setCollaborations([]); setSocial([]); setPlayerStats([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]);
     }
   };
 
@@ -178,7 +209,7 @@ export default function HomeRedesigned() {
         <div className="home-section-head"><SectionTitle eyebrow="" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
         <div className="home-schedule__grid">
           <div><MatchList matches={matches} teams={teams} /></div>
-          <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifica</span><a href="/classifica">Completa ↗</a></div><StandingsList standings={standings} /></div>
+          <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifica</span><a href="/classifica">Completa ↗</a></div><StandingsList standings={standings} /><StaffRankingPreview items={staffRanking} /></div>
         </div>
       </section>
 
@@ -189,7 +220,21 @@ export default function HomeRedesigned() {
 
       <section className="section--edge potm-section" id="home-potm">
         <div className="home-section-head"><SectionTitle eyebrow="Monthly award" title="POTM" /></div>
-        <PlayerOfMonthCard item={potm} teams={teams} />
+        <div className="monthly-awards-grid">
+          <div className="monthly-award-column">
+            <PlayerOfMonthCard item={potm} teams={teams} />
+          </div>
+          <div className="monthly-award-column">
+            <div className="monthly-award-column__head">
+              <span className="eyebrow">Monthly award</span>
+              <h3>Miglior membro staff del mese</h3>
+            </div>
+            <StaffOfMonthCard
+              items={staffMonthlyRanking}
+              monthLabel={new Intl.DateTimeFormat("it-IT", { month: "long", year: "numeric" }).format(new Date())}
+            />
+          </div>
+        </div>
       </section>
 
       <section className="section--edge home-teams" id="home-teams">
