@@ -252,3 +252,117 @@
   .admin-potm__field--full { grid-column: auto; }
   .admin-potm__actions { align-items: flex-start; flex-direction: column; }
 }
+
+
+/* Staff of the Month */
+.staff-month-card {
+  display: grid;
+  grid-template-columns: minmax(155px, .68fr) minmax(0, 1.32fr);
+  align-items: stretch;
+  min-height: 330px;
+  overflow: hidden;
+  border: 1px solid var(--home-line, rgba(1, 10, 8, .14));
+  background: #fff;
+}
+.staff-month-card__visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 330px;
+  background: var(--pink, #e42278);
+}
+.staff-month-card__badge {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  max-width: calc(100% - 44px);
+  padding: 7px 10px;
+  background: #fff;
+  color: #010a08;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.staff-month-card__avatar {
+  width: 146px;
+  height: 146px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #010a08;
+  font-family: "Teko", sans-serif;
+  font-size: 60px;
+  line-height: 1;
+  box-shadow: 0 14px 34px rgba(1, 10, 8, .12);
+}
+.staff-month-card__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px 30px;
+  color: #010a08;
+}
+.staff-month-card__content h3 {
+  margin: 7px 0 10px;
+  font-family: "Teko", sans-serif;
+  font-size: clamp(38px, 4.2vw, 58px);
+  line-height: .92;
+  text-transform: uppercase;
+}
+.staff-month-card__stat {
+  font-family: "Teko", sans-serif;
+  font-size: 58px;
+  line-height: .88;
+  color: var(--pink, #e42278);
+}
+.staff-month-card__label {
+  margin-bottom: 14px;
+  color: var(--muted, #69727c);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.staff-month-card__content .rank-list { border-top: 1px solid #e3e5e9; }
+.staff-month-card__content .rank-row { border-color: #e3e5e9; }
+.staff-month-empty {
+  min-height: 330px;
+  padding: 30px;
+  border: 1px solid var(--home-line, rgba(1, 10, 8, .14));
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.staff-month-empty h3 {
+  margin: 8px 0;
+  font-family: "Teko", sans-serif;
+  font-size: clamp(38px, 4vw, 54px);
+  line-height: .9;
+  text-transform: uppercase;
+}
+.staff-month-empty p {
+  margin: 0;
+  color: var(--muted, #69727c);
+  line-height: 1.5;
+  max-width: 46ch;
+}
+
+.standings-staff-section { margin-top: 72px; }
+.staff-leaderboard { margin-top: 4px; }
+.staff-leaderboard .table-row {
+  grid-template-columns: 64px minmax(0, 1fr) 150px 90px;
+}
+.staff-leaderboard .table-row > *:last-child { text-align: right; }
+
+@media (max-width: 720px) {
+  .staff-month-card { grid-template-columns: 1fr; }
+  .staff-month-card__visual { min-height: 240px; }
+  .staff-month-card__avatar { width: 132px; height: 132px; font-size: 56px; }
+  .staff-month-card__content { padding: 24px 20px 26px; }
+  .staff-leaderboard .table-row {
+    grid-template-columns: 42px minmax(0, 1fr) 86px 52px;
+  }
+}
