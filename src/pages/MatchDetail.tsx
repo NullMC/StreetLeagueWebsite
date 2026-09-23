@@ -144,7 +144,11 @@ export default function MatchDetail() {
                         ? `${event.minute}'`
                         : "—"}
                     </span>
-                    <b>{event.event_type.replaceAll("_", " ")}</b>
+                    <b>
+                      {event.event_type === "presidential_penalty"
+                        ? "Rigore presidenziale"
+                        : event.event_type.replaceAll("_", " ")}
+                    </b>
                     <span>
                       {event.player_id ? playerName(event.player_id) : ""}
                       {event.note ? ` — ${event.note}` : ""}
