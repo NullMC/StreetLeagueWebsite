@@ -4,7 +4,7 @@ import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import {
   calculateStandings,
-  getActiveCompetition,
+  getCurrentCompetition,
   getMatches,
   getStaffRanking,
   getTeams,
@@ -23,7 +23,7 @@ export default function Standings() {
 
     async function load() {
       try {
-        const competition = await getActiveCompetition();
+        const competition = await getCurrentCompetition();
         if (!competition) {
           if (mounted) {
             setRows([]);
