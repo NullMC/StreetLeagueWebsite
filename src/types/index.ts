@@ -8,6 +8,7 @@ export type EventType =
   | "red_card"
   | "substitution"
   | "foul"
+  | "presidential_penalty"
   | "other";
 
 export interface Competition {
@@ -117,4 +118,9 @@ export interface PlayerStats {
   fouls: number;
   clean_sheets: number;
   mvps: number;
+}
+
+export interface StaffRankingEntry {
+  player: Player;
+  presidential_penalties: number;
 }
