@@ -9,7 +9,7 @@ import { LogoScroller } from "../components/LogoScroller";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
-import { calculateStandings, getActiveCollaborations, getActiveCompetition, getAllPlayerStats, getMatches, getPartners, getSocialContent, getStaffRanking, getTeams, subscribeToCompetition } from "../lib/api";
+import { calculateStandings, getActiveCollaborations, getAllPlayerStats, getCurrentCompetition, getMatches, getPartners, getSocialContent, getStaffRanking, getTeams, subscribeToCompetition } from "../lib/api";
 import { getPlayerOfMonth } from "../lib/playerOfMonth";
 import type { ActiveCollaboration, Competition, Match, Partner, Player, PlayerStats, SocialContent, StaffRankingEntry, Team } from "../types";
 
@@ -136,7 +136,7 @@ export default function HomeRedesigned() {
 
   const load = async () => {
     try {
-      const active = await getActiveCompetition();
+      const active = await getCurrentCompetition();
       const now = new Date();
       const [nextMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextStats, nextPotm, nextStaff, nextStaffMonth] = await Promise.all([
         getMatches(active?.id), getTeams(active?.id), getPartners(), getActiveCollaborations(), getSocialContent(), getAllPlayerStats(), getPlayerOfMonth(),
