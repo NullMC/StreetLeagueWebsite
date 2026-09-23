@@ -366,3 +366,81 @@
     grid-template-columns: 42px minmax(0, 1fr) 86px 52px;
   }
 }
+
+
+/* Standings media — team logos and player profile photos. */
+.standings-team,
+.standings-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.standings-team > strong,
+.standings-player > strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.standings-team__logo,
+.standings-player__avatar {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: block;
+  object-fit: contain;
+}
+
+.standings-team__logo {
+  border-radius: 50%;
+  background: rgba(249, 249, 249, 0.04);
+}
+
+.standings-team__logo--placeholder {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line, rgba(249, 249, 249, 0.14));
+  color: var(--pink, #e42278);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.standings-player__avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(1, 10, 8, 0.08);
+}
+
+.standings-player__avatar--placeholder {
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #010a08;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+@media (max-width: 720px) {
+  .standings-team,
+  .standings-player {
+    gap: 8px;
+  }
+
+  .standings-team__logo,
+  .standings-player__avatar {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+
+  .standings-team__logo--placeholder {
+    font-size: 16px;
+  }
+}
