@@ -442,6 +442,11 @@ export function subscribeToCompetition(onChange: () => void) {
     )
     .on(
       "postgres_changes",
+      { event: "*", schema: "public", table: "players" },
+      onChange,
+    )
+    .on(
+      "postgres_changes",
       { event: "*", schema: "public", table: "matches" },
       onChange,
     )
