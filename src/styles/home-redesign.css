@@ -373,3 +373,71 @@
   .home-match-row__meta { font-size: 8px; }
   .home-section-head .section-head h2 { font-size: clamp(38px, 11.5vw, 52px) !important; }
 }
+
+
+/* STAFF RANKING — follows the existing home classification panel. */
+.home-staff-ranking { margin-top: 28px; }
+.home-staff-ranking__list { border-top: 2px solid var(--home-ink); }
+.home-staff-ranking__row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  border-bottom: 1px solid var(--home-line);
+}
+.home-staff-ranking__row > span:first-child {
+  color: var(--home-muted);
+  font-size: 10px;
+  font-weight: 900;
+}
+.home-staff-ranking__row > span:nth-child(2) {
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home-staff-ranking__row strong {
+  text-align: right;
+  font-family: var(--display);
+  font-size: 24px;
+  color: var(--home-pink);
+}
+.home-staff-ranking__empty {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  color: var(--home-muted);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  border-bottom: 1px solid var(--home-line);
+}
+.home-staff-ranking .home-mini-head span { max-width: 75%; }
+
+.monthly-awards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.monthly-award-column { min-width: 0; }
+.monthly-award-column__head {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--home-line);
+}
+.monthly-award-column__head h3 {
+  margin: 5px 0 0;
+  font-family: var(--display);
+  font-size: clamp(29px, 3.2vw, 43px);
+  line-height: .88;
+  text-transform: uppercase;
+}
+
+@media (max-width: 980px) {
+  .monthly-awards-grid { grid-template-columns: 1fr; }
+}
