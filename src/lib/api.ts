@@ -11,6 +11,7 @@ import type {
   MatchLineup,
   MatchMvp,
   PlayerStats,
+  StaffRankingEntry,
 } from "../types";
 
 async function getRows<T>(query: any): Promise<T[]> {
@@ -166,6 +167,53 @@ export async function getAllMatchEvents(): Promise<MatchEvent[]> {
   return getRows<MatchEvent>(supabase.from("match_events").select("*"));
 }
 
+export async function getStaffRanking(
+  competitionId: string,
+  month?: { year: number; month: number },
+): Promise<StaffRankingEntry[]> {
+  const [players, matches, events] = await Promise.all([
+    getPlayers(),
+    getMatches(competitionId),
+    getAllMatchEvents(),
+  ]);
+
+  const staffPlayers = players.filter(
+    (player) => player.position?.trim().toUpperCase() === "STAFF",
+  );
+  const staffIds = new Set(staffPlayers.map((player) => player.id));
+  const competitionMatches = new Map(matches.map((match) => [match.id, match]));
+  const counts = new Map(staffPlayers.map((player) => [player.id, 0]));
+
+  events.forEach((event) => {
+    if (event.event_type !== "presidential_penalty" || !event.player_id) return;
+    if (!staffIds.has(event.player_id)) return;
+    const match = competitionMatches.get(event.match_id);
+    if (!match) return;
+
+    if (month) {
+      const date = new Date(match.kickoff_at);
+      if (
+        date.getFullYear() !== month.year ||
+        date.getMonth() + 1 !== month.month
+      ) return;
+    }
+
+    counts.set(event.player_id, (counts.get(event.player_id) ?? 0) + 1);
+  });
+
+  return staffPlayers
+    .map((player) => ({
+      player,
+      presidential_penalties: counts.get(player.id) ?? 0,
+    }))
+    .sort(
+      (a, b) =>
+        b.presidential_penalties - a.presidential_penalties ||
+        a.player.last_name.localeCompare(b.player.last_name, "it") ||
+        a.player.first_name.localeCompare(b.player.first_name, "it"),
+    );
+}
+
 export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
   const [matches, events, lineups, mvps] = await Promise.all([
     getMatches(),
@@ -181,7 +229,9 @@ export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
   const playerMvpCount = mvps.filter((x) => x.player_id === playerId).length;
 
   const goals = playerEvents.filter(
-    (x) => x.player_id === playerId && x.event_type === "goal",
+    (x) =>
+      x.player_id === playerId &&
+      (x.event_type === "goal" || x.event_type === "presidential_penalty"),
   ).length;
   const assists = playerEvents.filter(
     (x) => x.player_id === playerId && x.event_type === "assist",
@@ -255,7 +305,9 @@ export async function getAllPlayerStats(): Promise<
 
     const stats: PlayerStats = {
       goals: playerEvents.filter(
-        (x) => x.player_id === player.id && x.event_type === "goal",
+        (x) =>
+        x.player_id === player.id &&
+        (x.event_type === "goal" || x.event_type === "presidential_penalty"),
       ).length,
       appearances: playerLineups.length,
       assists: playerEvents.filter(
