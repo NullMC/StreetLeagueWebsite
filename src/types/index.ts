@@ -38,6 +38,7 @@ export interface Player {
   last_name: string;
   shirt_number: number | null;
   position: string | null;
+  role?: string | null;
   profile_image_url: string | null;
   bg_less_image_url: string | null;
 }
