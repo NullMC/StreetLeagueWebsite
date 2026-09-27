@@ -8,7 +8,26 @@ const cors = {
 };
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+// Support both legacy service_role secrets and the newer secret key format.
+function getServerKey() {
+  const legacy = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (legacy) return legacy;
+
+  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
+  if (secretKeys) {
+    try {
+      const parsed = JSON.parse(secretKeys);
+      return parsed.default ?? Object.values(parsed)[0] ?? "";
+    } catch {
+      return "";
+    }
+  }
+
+  return "";
+}
+
+const serviceRoleKey = getServerKey();
 
 const adminClient = createClient(supabaseUrl, serviceRoleKey, {
   auth: {
@@ -34,17 +53,17 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error("Missing Supabase server credentials for auth-username");
+      return response({ error: "Configurazione autenticazione incompleta." }, 500);
+    }
+
     const body = await req.json();
-    const username = String(body.username ?? "")
-      .trim()
-      .toLowerCase();
+    const username = String(body.username ?? "").trim().toLowerCase();
     const code = String(body.code ?? "").trim();
 
     if (!username || !code) {
-      return response(
-        { error: "Username e codice di accesso sono obbligatori." },
-        400,
-      );
+      return response({ error: "Username e codice di accesso sono obbligatori." }, 400);
     }
 
     if (code.length < 8) {
@@ -60,65 +79,42 @@ Deno.serve(async (req: Request) => {
     );
 
     if (verifyError) {
-      console.error("Access code verification error:", verifyError);
-      return response(
-        { error: "Errore durante la verifica delle credenziali." },
-        500,
-      );
+      console.error("verify_admin_access_code failed:", verifyError);
+      return response({ error: verifyError.message }, 500);
     }
 
     const profile = matches?.[0];
 
     if (!profile || !profile.email || !profile.is_active) {
-      return response(
-        { error: "Username o codice di accesso non validi." },
-        401,
-      );
+      return response({ error: "Username o codice di accesso non validi." }, 401);
     }
 
-    // Access codes are reserved for back-office accounts. A valid code on
-    // a public/viewer profile must never create an admin session.
     if (profile.role !== "super_admin") {
-      return response(
-        { error: "L'account non ha i permessi per accedere al back office." },
-        403,
-      );
+      return response({ error: "L'account non ha i permessi per accedere al back office." }, 403);
     }
 
-    const { data: linkData, error: linkError } =
-      await adminClient.auth.admin.generateLink({
-        type: "magiclink",
-        email: profile.email,
-      });
+    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+      type: "magiclink",
+      email: profile.email,
+    });
 
     if (linkError) {
-      console.error("Generate auth link error:", linkError);
-      return response(
-        { error: "Impossibile completare l'autenticazione." },
-        500,
-      );
+      console.error("generateLink failed:", linkError);
+      return response({ error: linkError.message }, 500);
     }
 
     const tokenHash = linkData?.properties?.hashed_token;
 
     if (!tokenHash) {
-      return response(
-        { error: "Token di autenticazione non disponibile." },
-        500,
-      );
+      console.error("generateLink response missing hashed_token", linkData);
+      return response({ error: "Token di autenticazione non disponibile." }, 500);
     }
 
-    return response({
-      ok: true,
-      token_hash: tokenHash,
-    });
+    return response({ ok: true, token_hash: tokenHash });
   } catch (error) {
     console.error("auth-username error:", error);
-    return response(
-      {
-        error: error instanceof Error ? error.message : "Errore interno.",
-      },
-      500,
-    );
+    return response({
+      error: error instanceof Error ? error.message : "Errore interno.",
+    }, 500);
   }
 });
