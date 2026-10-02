@@ -637,6 +637,18 @@ html[data-theme="night"] .admin-table td {
   color: rgba(245,247,246,.78) !important;
 }
 
+html[data-theme="night"] .admin-table tbody tr {
+  background: #111714 !important;
+}
+
+html[data-theme="night"] .admin-table tbody tr:hover {
+  background: #151c18 !important;
+}
+
+html[data-theme="night"] .admin-table tbody td {
+  background: transparent !important;
+}
+
 html[data-theme="night"] .admin-search__field input {
   background: #0e1411 !important;
   color: var(--white) !important;
