@@ -3,17 +3,17 @@
 html[data-theme="night"] {
   color-scheme: dark;
 
-  --ink: #080c0a;
+  --ink: #050806;
   --white: #f5f7f6;
   --line: rgba(245, 247, 246, 0.13);
   --muted: rgba(245, 247, 246, 0.62);
-  --street-glass: rgba(8, 12, 10, 0.86);
+  --street-glass: rgba(5, 8, 6, 0.86);
   --street-grid: rgba(245, 247, 246, 0.045);
 
   --home-ink: #f5f7f6;
   --home-muted: rgba(245, 247, 246, 0.60);
   --home-line: rgba(245, 247, 246, 0.14);
-  --home-paper: #0b100e;
+  --home-paper: #050806;
   --home-white: #111714;
   --home-pink: #e42278;
   --home-pink-dark: #b10f59;
@@ -34,17 +34,15 @@ html[data-theme="night"] body {
 /* Header / navigation */
 html[data-theme="night"] .site-header,
 html[data-theme="night"] .second-site-header {
-  background: rgba(8, 12, 10, 0.90) !important;
+  background: rgba(5, 8, 6, 0.92) !important;
   border-color: rgba(245, 247, 246, 0.12) !important;
   color: var(--white) !important;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28) !important;
 }
 
 html[data-theme="night"] .site-header::before {
-  opacity: 0.55 !important;
-  background-image:
-    linear-gradient(90deg, transparent 0 95%, rgba(228, 34, 120, 0.10) 95%),
-    linear-gradient(0deg, transparent 0 95%, rgba(245, 247, 246, 0.035) 95%) !important;
+  background-image: none !important;
+  opacity: 0 !important;
 }
 
 html[data-theme="night"] .brand img {
@@ -103,66 +101,33 @@ html[data-theme="night"] .mobile-menu__socials .social-link {
 /* Header theme switch */
 .theme-switch {
   appearance: none;
-  border: 1px solid rgba(1, 10, 8, 0.15);
-  border-radius: 999px;
-  min-height: 36px;
-  padding: 0 9px 0 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: rgba(255,255,255,0.72);
-  color: #010a08;
-  cursor: pointer;
-  font: inherit;
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .08em;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
-}
-
-.theme-switch__icon {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  color: #010a08;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.theme-switch__icon {
+  display: block;
   width: 16px;
-  font-size: 12px;
-}
-
-.theme-switch__track {
-  width: 28px;
   height: 16px;
-  display: inline-flex;
-  align-items: center;
-  padding: 2px;
-  border-radius: 999px;
-  background: rgba(1,10,8,.13);
+  font-size: 15px;
 }
 
-.theme-switch__track span {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #010a08;
-  transform: translateX(0);
-  transition: transform 180ms ease, background 180ms ease;
-}
-
-.theme-switch.is-night {
-  border-color: rgba(245,247,246,.16);
-  background: rgba(17,23,20,.82);
-  color: #f5f7f6;
-}
-
-.theme-switch.is-night .theme-switch__track {
-  background: rgba(245,247,246,.16);
-}
-
-.theme-switch.is-night .theme-switch__track span {
-  background: #f5f7f6;
-  transform: translateX(12px);
+.theme-switch:hover {
+  color: var(--pink);
+  transform: translateY(-1px);
 }
 
 .theme-switch:focus-visible {
@@ -171,32 +136,26 @@ html[data-theme="night"] .mobile-menu__socials .social-link {
 }
 
 html[data-theme="night"] .theme-switch {
-  border-color: rgba(245,247,246,.16);
-  background: rgba(17,23,20,.82);
+  background: transparent !important;
   color: var(--white);
+  border: 0 !important;
 }
 
-@media (max-width: 700px) {
-  .theme-switch {
-    min-height: 34px;
-    width: 34px;
-    padding: 0;
-    justify-content: center;
-    gap: 0;
-    border-radius: 50%;
+/* Desktop header actions stay grouped at the far right. */
+@media (min-width: 981px) {
+  .site-header > .header-admin {
+    margin-left: auto !important;
   }
 
-  .theme-switch__label,
-  .theme-switch__track {
-    display: none;
+  .site-header > .header-right {
+    margin-left: 18px !important;
+    margin-right: 0 !important;
   }
+}
 
-  .theme-switch__icon {
-    width: 16px;
-  }
-
-  html[data-theme="night"] .theme-switch {
-    background: #111714;
+@media (max-width: 980px) {
+  .site-header > .header-right {
+    margin-left: auto !important;
   }
 }
 
@@ -303,7 +262,7 @@ html[data-theme="night"] .btn--primary {
 
 /* Match / detail pages */
 html[data-theme="night"] .detail-hero {
-  background: #080c0a !important;
+  background: var(--ink) !important;
 }
 
 html[data-theme="night"] .scoreboard,
@@ -350,6 +309,14 @@ html[data-theme="night"] option {
   color: var(--white);
 }
 
+html[data-theme="night"] .collab-carousel__description,
+html[data-theme="night"] .collab-carousel__description p,
+html[data-theme="night"] .collab-carousel__description li,
+html[data-theme="night"] .collab-carousel__description span,
+html[data-theme="night"] .collab-carousel__description div {
+  color: rgba(245,247,246,.78) !important;
+}
+
 /* Collaboration / partners */
 html[data-theme="night"] .collab-carousel__toolbar p,
 html[data-theme="night"] .collab-carousel__copy p,
@@ -378,12 +345,12 @@ html[data-theme="night"] .collab-carousel__poster {
 }
 
 html[data-theme="night"] .collaborate-section {
-  background: #0b100e !important;
+  background: var(--ink) !important;
   color: var(--white) !important;
 }
 
 html[data-theme="night"] .collaborate-section--packages {
-  background: #080c0a !important;
+  background: var(--ink) !important;
 }
 
 html[data-theme="night"] .collaborate-hero {
@@ -463,7 +430,7 @@ html[data-theme="night"] .sponsor-band--redesign .collab-carousel__copy p {
 
 /* Footer */
 html[data-theme="night"] .site-footer {
-  background: #050806 !important;
+  background: var(--ink) !important;
   color: var(--white) !important;
   border-top-color: rgba(245,247,246,.12) !important;
 }
@@ -497,13 +464,13 @@ html[data-theme="night"] .home-schedule,
 html[data-theme="night"] .home-performers,
 html[data-theme="night"] .home-teams,
 html[data-theme="night"] .home-redesign .potm-section {
-  background: #0b100e !important;
+  background: var(--home-paper) !important;
   color: var(--home-ink) !important;
 }
 
 html[data-theme="night"] .home-hero > div[aria-hidden="true"] {
   background-image:
-    linear-gradient(to top, #0b100e 0%, rgba(11,16,14,.80) 24%, rgba(11,16,14,.28) 58%, rgba(11,16,14,.05) 100%),
+    linear-gradient(to top, var(--home-paper) 0%, rgba(5,8,6,.84) 24%, rgba(5,8,6,.28) 58%, rgba(5,8,6,.05) 100%),
     linear-gradient(135deg, rgba(0,0,0,.54) 0%, rgba(69,13,42,.18) 54%, rgba(228,34,120,.10) 100%),
     url("/assets/nebula-vertical.webp") !important;
 }
