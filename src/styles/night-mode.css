@@ -455,7 +455,7 @@ html[data-theme="night"] .home-redesign {
   --home-white: #111714;
   --home-pink: #e42278;
   --home-pink-dark: #b10f59;
-  background: #0b100e !important;
+  background: var(--home-paper) !important;
   color: #f5f7f6 !important;
 }
 
