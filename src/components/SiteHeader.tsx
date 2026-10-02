@@ -8,6 +8,7 @@ import {
   faYoutube,
   faTiktok,
 } from "@fortawesome/free-brands-svg-icons";
+import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 
 const links = [
   ["Home", "/"],
@@ -42,6 +43,16 @@ const socialLinks = [
 export function SiteHeader() {
   const { profile, loading } = useAdminSession();
   const [open, setOpen] = useState(false);
+  const [nightMode, setNightMode] = useState(
+    () => document.documentElement.dataset.theme === "night",
+  );
+
+  const toggleNightMode = () => {
+    const next = !nightMode;
+    document.documentElement.dataset.theme = next ? "night" : "light";
+    window.localStorage.setItem("street-league-theme", next ? "night" : "light");
+    setNightMode(next);
+  };
 
   return (
     <>
@@ -59,6 +70,24 @@ export function SiteHeader() {
         )}
 
         <div className="header-right">
+          <button
+            className={`theme-switch${nightMode ? " is-night" : ""}`}
+            type="button"
+            role="switch"
+            aria-checked={nightMode}
+            aria-label={nightMode ? "Disattiva night mode" : "Attiva night mode"}
+            onClick={toggleNightMode}
+          >
+            <span className="theme-switch__icon" aria-hidden="true">
+              <FontAwesomeIcon icon={nightMode ? faSun : faMoon} />
+            </span>
+            <span className="theme-switch__label">
+              {nightMode ? "Light" : "Night"}
+            </span>
+            <span className="theme-switch__track" aria-hidden="true">
+              <span />
+            </span>
+          </button>
           <a className="contact-link" href="mailto:streetleaguebari@gmail.com">
             Contact
           </a>
