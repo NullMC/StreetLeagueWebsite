@@ -1,8 +1,4 @@
 // Cloudflare rebuild trigger: latest main includes TypeScript compatibility fixes.
-const initialTheme = window.localStorage.getItem("street-league-theme");
-document.documentElement.dataset.theme =
-  initialTheme === "night" ? "night" : "light";
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -35,6 +31,10 @@ import Collaborate from "./pages/Collaborate";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/AppLayout";
+
+const initialTheme = window.localStorage.getItem("street-league-theme");
+document.documentElement.dataset.theme =
+  initialTheme === "night" ? "night" : "light";
 
 function App() {
   return (
