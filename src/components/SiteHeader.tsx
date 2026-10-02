@@ -76,17 +76,14 @@ export function SiteHeader() {
             role="switch"
             aria-checked={nightMode}
             aria-label={nightMode ? "Disattiva night mode" : "Attiva night mode"}
+            title={nightMode ? "Disattiva night mode" : "Attiva night mode"}
             onClick={toggleNightMode}
           >
-            <span className="theme-switch__icon" aria-hidden="true">
-              <FontAwesomeIcon icon={nightMode ? faSun : faMoon} />
-            </span>
-            <span className="theme-switch__label">
-              {nightMode ? "Light" : "Night"}
-            </span>
-            <span className="theme-switch__track" aria-hidden="true">
-              <span />
-            </span>
+            <FontAwesomeIcon
+              className="theme-switch__icon"
+              icon={nightMode ? faSun : faMoon}
+              aria-hidden="true"
+            />
           </button>
           <a className="contact-link" href="mailto:streetleaguebari@gmail.com">
             Contact
