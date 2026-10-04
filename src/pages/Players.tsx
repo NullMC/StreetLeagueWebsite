@@ -24,31 +24,32 @@ export default function Players() {
           <div className="cards-grid">
             {items.map((p) => (
               <a className="stat-card" href={`/giocatori/${p.id}`} key={p.id}>
-                {p.bg_less_image_url && (
-                  <img
-                    src={p.bg_less_image_url}
-                    alt=""
-                    style={{
-                      position: "absolute",
-                      right: 0,
-                      bottom: 0,
-                      maxHeight: "92%",
-                      maxWidth: "52%",
-                      objectFit: "contain",
-                    }}
-                  />
+                {(p.profile_image_url || p.bg_less_image_url) && (
+                  <span className="player-card__photo" aria-hidden="true">
+                    <img
+                      src={p.profile_image_url || p.bg_less_image_url || ""}
+                      alt=""
+                      className={
+                        p.profile_image_url
+                          ? "player-card__photo-image"
+                          : "player-card__photo-image player-card__photo-image--cutout"
+                      }
+                    />
+                  </span>
                 )}
-                <span className="eyebrow">
-                  #{p.shirt_number ?? "—"} / {p.position || "Player"}
-                </span>
+                <div className="player-card__content">
+                  <span className="eyebrow">
+                    #{p.shirt_number ?? "—"} / {p.position || "Player"}
+                  </span>
                 <h3>
                   {p.first_name}
                   <br />
                   {p.last_name}
                 </h3>
-                <p style={{ color: "var(--muted)" }}>
-                  {teams.find((t) => t.id === p.team_id)?.name || "—"}
-                </p>
+                  <p style={{ color: "var(--muted)" }}>
+                    {teams.find((t) => t.id === p.team_id)?.name || "—"}
+                  </p>
+                </div>
               </a>
             ))}
           </div>
