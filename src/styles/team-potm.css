@@ -291,6 +291,13 @@
   padding-right: 122px;
 }
 
+.detail-hero__inner > .eyebrow,
+.detail-hero__inner > h1,
+.detail-hero__inner > .detail-meta {
+  position: relative;
+  z-index: 2;
+}
+
 .player-detail__photo {
   position: absolute;
   right: 5%;
