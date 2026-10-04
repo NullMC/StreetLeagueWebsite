@@ -691,6 +691,19 @@ html[data-theme="night"] .admin-layout .btn--ghost {
   border-color: rgba(245,247,246,.14) !important;
 }
 
+/* Player photos */
+html[data-theme="night"] .player-card__photo,
+html[data-theme="night"] .player-detail__photo {
+  background: #f5f7f6 !important;
+  border-color: rgba(245,247,246,.18) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.28) !important;
+}
+
+html[data-theme="night"] .player-card__photo-image--cutout,
+html[data-theme="night"] .player-detail__photo-image--cutout {
+  background: transparent !important;
+}
+
 /* Reduce harsh white inline backgrounds in player/feature visuals without
    affecting uploaded images. */
 html[data-theme="night"] .potm-card__avatar,
