@@ -72,6 +72,11 @@ create table if not exists players (
   first_name text not null, last_name text not null, shirt_number integer, position text,
   profile_image_url text, bg_less_image_url text, created_at timestamptz not null default now()
 );
+
+-- Reconcile media columns when this schema is applied to an existing project.
+alter table public.players
+  add column if not exists profile_image_url text,
+  add column if not exists bg_less_image_url text;
 create table if not exists matches (
   id uuid primary key default gen_random_uuid(), competition_id uuid not null references competitions(id) on delete cascade,
   home_team_id uuid not null references teams(id), away_team_id uuid not null references teams(id),
