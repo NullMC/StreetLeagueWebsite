@@ -55,19 +55,18 @@ export default function PlayerDetail() {
         <>
           <section className="detail-hero" style={{ minHeight: 420 }}>
             <div className="detail-hero__inner">
-              {player.bg_less_image_url && (
-                <img
-                  src={player.bg_less_image_url}
-                  alt=""
-                  style={{
-                    position: "absolute",
-                    right: "8%",
-                    bottom: 0,
-                    height: "92%",
-                    maxWidth: "45%",
-                    objectFit: "contain",
-                  }}
-                />
+              {(player.profile_image_url || player.bg_less_image_url) && (
+                <div className="player-detail__photo" aria-hidden="true">
+                  <img
+                    src={player.profile_image_url || player.bg_less_image_url || ""}
+                    alt=""
+                    className={
+                      player.profile_image_url
+                        ? "player-detail__photo-image"
+                        : "player-detail__photo-image player-detail__photo-image--cutout"
+                    }
+                  />
+                </div>
               )}
 
               <span className="eyebrow">
