@@ -45,14 +45,29 @@ export default function TeamDetail() {
                     href={`/giocatori/${p.id}`}
                     key={p.id}
                   >
-                    <span className="eyebrow">
-                      #{p.shirt_number ?? "—"} / {p.position || "Player"}
-                    </span>
+                    {(p.profile_image_url || p.bg_less_image_url) && (
+                      <span className="player-card__photo" aria-hidden="true">
+                        <img
+                          src={p.profile_image_url || p.bg_less_image_url || ""}
+                          alt=""
+                          className={
+                            p.profile_image_url
+                              ? "player-card__photo-image"
+                              : "player-card__photo-image player-card__photo-image--cutout"
+                          }
+                        />
+                      </span>
+                    )}
+                    <div className="player-card__content">
+                      <span className="eyebrow">
+                        #{p.shirt_number ?? "—"} / {p.position || "Player"}
+                      </span>
                     <h3>
                       {p.first_name}
                       <br />
                       {p.last_name}
                     </h3>
+                    </div>
                   </a>
                 ))}
               </div>
