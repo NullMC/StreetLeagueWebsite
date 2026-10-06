@@ -6,11 +6,14 @@ import { EmptyState } from "../components/EmptyState";
 import { getCompetitions, getMatches, getTeams } from "../lib/api";
 import type { Competition, Match, Team } from "../types";
 import { MatchCard } from "../components/MatchCard";
+import { TeamCard } from "../components/TeamCard";
+
 export default function CompetitionDetail() {
   const { competitionId = "" } = useParams();
   const [c, setC] = useState<Competition | null>(null),
     [m, setM] = useState<Match[]>([]),
     [t, setT] = useState<Team[]>([]);
+
   useEffect(() => {
     (async () => {
       const cs = await getCompetitions();
@@ -22,6 +25,7 @@ export default function CompetitionDetail() {
       }
     })();
   }, [competitionId]);
+
   return (
     <PageShell>
       {c ? (
@@ -37,6 +41,7 @@ export default function CompetitionDetail() {
               </div>
             </div>
           </section>
+
           <div className="page">
             <SectionTitle eyebrow="Calendar" title="Partite" />
             {m.length ? (
@@ -56,6 +61,22 @@ export default function CompetitionDetail() {
                 text="Non sono ancora presenti partite per questa competizione."
               />
             )}
+
+            <section className="competition-detail-section">
+              <SectionTitle eyebrow="Iscrizioni" title="Squadre registrate" />
+              {t.length ? (
+                <div className="cards-grid">
+                  {t.map((team) => (
+                    <TeamCard key={team.id} team={team} />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  title="Nessuna squadra registrata"
+                  text="Non sono ancora presenti squadre registrate a questa competizione."
+                />
+              )}
+            </section>
           </div>
         </>
       ) : (
