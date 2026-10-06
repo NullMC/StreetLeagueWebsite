@@ -54,11 +54,11 @@ function StaffRankingPreview({ items }: { items: StaffRankingEntry[] }) {
       </div>
       <div className="home-staff-ranking__list">
         {items.slice(0, 3).map((entry, index) => (
-          <div className="home-staff-ranking__row" key={entry.player.id}>
+          <a className="home-staff-ranking__row" href={`/giocatori/${entry.player.id}`} key={entry.player.id}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <span>{entry.player.first_name} {entry.player.last_name}</span>
             <strong>{entry.presidential_penalties}</strong>
-          </div>
+          </a>
         ))}
         {!items.length && (
           <div className="home-staff-ranking__empty">
