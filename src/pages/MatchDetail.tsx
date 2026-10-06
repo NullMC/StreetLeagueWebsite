@@ -133,7 +133,7 @@ export default function MatchDetail() {
           </div>
 
           <div className="page">
-            <SectionTitle eyebrow="Match timeline" title="Eventi" />
+            <SectionTitle eyebrow="Match timeline" title="Eventi"  variant="subsection" />
 
             {events.length ? (
               <div className="timeline">
@@ -164,7 +164,7 @@ export default function MatchDetail() {
             )}
 
             <div className="section">
-              <SectionTitle eyebrow="Lineups" title="Formazioni" />
+              <SectionTitle eyebrow="Lineups" title="Formazioni"  variant="subsection" />
 
               {!lineups.length ? (
                 <EmptyState
