@@ -6,7 +6,6 @@ import {
   calculateStandings,
   getActiveCompetitions,
   getMatches,
-  getStaffRanking,
   getTeams,
   subscribeToCompetition,
 } from "../lib/api";
@@ -25,16 +24,14 @@ export default function Standings() {
         const competitions = await getActiveCompetitions();
         const data = await Promise.all(
           competitions.map(async (competition) => {
-            const [teams, matches, staff] = await Promise.all([
+            const [teams, matches] = await Promise.all([
               getTeams(competition.id),
               getMatches(competition.id),
-              getStaffRanking(competition.id),
             ]);
             return {
               id: competition.id,
               name: competition.name,
               rows: calculateStandings(teams, matches),
-              staffRows: staff,
             };
           }),
         );
@@ -90,29 +87,7 @@ export default function Standings() {
             ))}
           </div>
         )}
-
-        <div className="section standings-staff-section">
-          <SectionTitle eyebrow="Competizioni attive" title="Classifica staff" />
-          {competitionRows.map((competition) => (
-            <section className="standings-competition" key={`staff-${competition.id}`}>
-              <h3>{competition.name}</h3>
-              {!competition.staffRows.length ? (
-                <EmptyState title="Nessun membro STAFF" text="I membri STAFF della competizione verranno mostrati qui." />
-              ) : (
-                <div className="leaderboard staff-leaderboard">
-                  <div className="table-row head"><span>#</span><span>Membro staff</span><span>Rigori pres.</span><span>Gol</span></div>
-                  {competition.staffRows.map((row, index) => (
-                    <a className="table-row" href={`/giocatori/${row.player.id}`} key={row.player.id}>
-                      <span className="position">{String(index + 1).padStart(2, "0")}</span>
-                      <div className="standings-player">{row.player.profile_image_url || row.player.bg_less_image_url ? <img src={row.player.profile_image_url || row.player.bg_less_image_url || ""} alt="" className="standings-player__avatar" /> : <span className="standings-player__avatar standings-player__avatar--placeholder" aria-hidden="true">{(row.player.first_name[0] ?? "") + (row.player.last_name[0] ?? "")}</span>}<strong>{row.player.first_name} {row.player.last_name}</strong></div>
-                      <span>{row.presidential_penalties}</span><strong>{row.presidential_penalties}</strong>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </section>
-          ))}
-        </div>      </div>
+      </div>
     </PageShell>
   );
 }
