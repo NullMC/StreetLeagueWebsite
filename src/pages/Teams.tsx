@@ -3,7 +3,7 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { EmptyState } from "../components/EmptyState";
-import { getActiveCompetition, getTeams } from "../lib/api";
+import { getTeams } from "../lib/api";
 import type { Team } from "../types";
 
 export default function Teams() {
@@ -12,8 +12,7 @@ export default function Teams() {
   useEffect(() => {
     void (async () => {
       try {
-        const competition = await getActiveCompetition();
-        setItems(await getTeams(competition?.id));
+        setItems(await getTeams());
       } catch (error) {
         console.error("Teams data error:", error);
         setItems([]);
@@ -27,7 +26,7 @@ export default function Teams() {
         <SectionTitle eyebrow="League" title="Squadre" />
         {items.length ? (
           <>
-            <TeamCarousel teams={items} label="Tutte le squadre della competizione" />
+            <TeamCarousel teams={items} label="Tutte le squadre" />
             <div className="teams-page__hint">
               <span>Scorri per esplorarle tutte</span>
             </div>
