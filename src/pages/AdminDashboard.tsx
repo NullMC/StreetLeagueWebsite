@@ -103,7 +103,7 @@ function errorMessage(error: unknown, fallback: string) {
 async function readRows(resource: Resource) {
   if (!supabase) return [];
   await ensureFreshAdminSession();
-  if (resource === "teams") return (await getTeams()) as Row[];
+  if (resource === "teams") return (await getTeams()) as unknown as Row[];
   const { data, error } = await supabase
     .from(tables[resource])
     .select("*")
