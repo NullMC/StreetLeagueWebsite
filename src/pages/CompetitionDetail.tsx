@@ -43,7 +43,7 @@ export default function CompetitionDetail() {
           </section>
 
           <div className="page">
-            <SectionTitle eyebrow="Calendar" title="Partite" />
+            <SectionTitle eyebrow="Calendar" title="Partite"  variant="subsection" />
             {m.length ? (
               <div className="match-grid">
                 {m.map((x) => (
@@ -63,7 +63,7 @@ export default function CompetitionDetail() {
             )}
 
             <section className="competition-detail-section">
-              <SectionTitle eyebrow="Iscrizioni" title="Squadre registrate" />
+              <SectionTitle eyebrow="Iscrizioni" title="Squadre registrate"  variant="subsection" />
               {t.length ? (
                 <TeamCarousel
                   teams={t}
