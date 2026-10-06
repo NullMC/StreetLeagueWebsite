@@ -446,7 +446,7 @@
 .standings-staff-section { margin-top: 72px; }
 .staff-leaderboard { margin-top: 4px; }
 .staff-leaderboard .table-row {
-  grid-template-columns: 64px minmax(0, 1fr) 150px 90px;
+  grid-template-columns: 64px minmax(0, 1fr) 90px;
 }
 .staff-leaderboard .table-row > *:last-child { text-align: right; }
 
@@ -456,7 +456,7 @@
   .staff-month-card__avatar { width: 132px; height: 132px; font-size: 56px; }
   .staff-month-card__content { padding: 24px 20px 26px; }
   .staff-leaderboard .table-row {
-    grid-template-columns: 42px minmax(0, 1fr) 86px 52px;
+    grid-template-columns: 42px minmax(0, 1fr) 52px;
   }
 }
 
