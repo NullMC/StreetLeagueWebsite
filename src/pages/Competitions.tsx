@@ -4,13 +4,23 @@ import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { getCompetitions } from "../lib/api";
 import type { Competition } from "../types";
+
 export default function Competitions() {
   const [items, setItems] = useState<Competition[]>([]);
+
   useEffect(() => {
     getCompetitions()
-      .then(setItems)
+      .then((competitions) =>
+        setItems(
+          [...competitions].sort(
+            (a, b) =>
+              Number(b.status === "active") - Number(a.status === "active"),
+          ),
+        ),
+      )
       .catch(() => setItems([]));
   }, []);
+
   return (
     <PageShell>
       <div className="page">
