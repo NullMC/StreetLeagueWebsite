@@ -12,6 +12,7 @@ import type {
   MatchMvp,
   PlayerStats,
   StaffRankingEntry,
+  StatisticsGroup,
 } from "../types";
 
 async function getRows<T>(query: any): Promise<T[]> {
@@ -28,6 +29,39 @@ export async function getCompetitions(): Promise<Competition[]> {
       .select("*")
       .order("start_date", { ascending: false }),
   );
+}
+
+export async function getActiveCompetitions(): Promise<Competition[]> {
+  if (!supabase) return [];
+  return getRows<Competition>(
+    supabase
+      .from("competitions")
+      .select("*")
+      .eq("status", "active")
+      .order("start_date", { ascending: true, nullsFirst: false })
+      .order("name"),
+  );
+}
+
+export async function getStatisticsGroups(
+  competitions?: Competition[],
+): Promise<StatisticsGroup[]> {
+  const active = competitions ?? (await getActiveCompetitions());
+  const grouped = new Map<string, Competition[]>();
+
+  active.forEach((competition) => {
+    const key = competition.statistics_group?.trim() || competition.id;
+    const current = grouped.get(key) ?? [];
+    current.push(competition);
+    grouped.set(key, current);
+  });
+
+  return Array.from(grouped.entries()).map(([id, members]) => ({
+    id,
+    name: members[0].statistics_group?.trim() || members[0].name,
+    competition_ids: members.map((competition) => competition.id),
+    competitions: members,
+  }));
 }
 
 export async function getActiveCompetition(): Promise<Competition | null> {
@@ -332,9 +366,10 @@ export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
   };
 }
 
-export async function getAllPlayerStats(): Promise<
-  Array<Player & { stats: PlayerStats }>
-> {
+export async function getPlayerStatsForCompetitions(
+  competitionIds?: string[],
+): Promise<Array<Player & { stats: PlayerStats }>> {
+  const ids = competitionIds?.filter(Boolean);
   const [players, matches, events, lineups, mvps] = await Promise.all([
     getPlayers(),
     getMatches(),
@@ -343,51 +378,57 @@ export async function getAllPlayerStats(): Promise<
     getAllMatchMvps(),
   ]);
 
+  const scopedMatches = ids?.length
+    ? matches.filter((match) => ids.includes(match.competition_id))
+    : matches;
+  const matchIds = new Set(scopedMatches.map((match) => match.id));
+  const scopedLineups = lineups.filter((lineup) => matchIds.has(lineup.match_id));
+  const scopedEvents = events.filter((event) => matchIds.has(event.match_id));
+  const scopedMvps = mvps.filter((mvp) => matchIds.has(mvp.match_id));
+  const teamIds = ids?.length
+    ? new Set(
+        (await Promise.all(ids.map((id) => getTeams(id))))
+          .flat()
+          .map((team) => team.id),
+      )
+    : null;
+
+  const scopedPlayers = teamIds
+    ? players.filter((player) => teamIds.has(player.team_id))
+    : players;
+
   const finishedMatches = new Map(
-    matches.filter((m) => m.status === "finished").map((m) => [m.id, m]),
+    scopedMatches.filter((m) => m.status === "finished").map((m) => [m.id, m]),
   );
 
-  return players.map((player) => {
-    const playerLineups = lineups.filter((x) => x.player_id === player.id);
-    const playerEvents = events.filter(
+  return scopedPlayers.map((player) => {
+    const playerLineups = scopedLineups.filter((x) => x.player_id === player.id);
+    const playerEvents = scopedEvents.filter(
       (x) => x.player_id === player.id || x.related_player_id === player.id,
     );
-
     let cleanSheets = 0;
     for (const lineup of playerLineups) {
       const match = finishedMatches.get(lineup.match_id);
       if (!match) continue;
-      if (match.home_team_id === lineup.team_id && match.away_score === 0)
-        cleanSheets++;
-      if (match.away_team_id === lineup.team_id && match.home_score === 0)
-        cleanSheets++;
+      if (match.home_team_id === lineup.team_id && match.away_score === 0) cleanSheets++;
+      if (match.away_team_id === lineup.team_id && match.home_score === 0) cleanSheets++;
     }
-
     const stats: PlayerStats = {
-      goals: playerEvents.filter(
-        (x) =>
-        x.player_id === player.id &&
-        (x.event_type === "goal" || x.event_type === "presidential_penalty"),
-      ).length,
+      goals: playerEvents.filter((x) => x.player_id === player.id && (x.event_type === "goal" || x.event_type === "presidential_penalty")).length,
       appearances: playerLineups.length,
-      assists: playerEvents.filter(
-        (x) => x.player_id === player.id && x.event_type === "assist",
-      ).length,
-      yellow_cards: playerEvents.filter(
-        (x) => x.player_id === player.id && x.event_type === "yellow_card",
-      ).length,
-      red_cards: playerEvents.filter(
-        (x) => x.player_id === player.id && x.event_type === "red_card",
-      ).length,
-      fouls: playerEvents.filter(
-        (x) => x.player_id === player.id && x.event_type === "foul",
-      ).length,
+      assists: playerEvents.filter((x) => x.player_id === player.id && x.event_type === "assist").length,
+      yellow_cards: playerEvents.filter((x) => x.player_id === player.id && x.event_type === "yellow_card").length,
+      red_cards: playerEvents.filter((x) => x.player_id === player.id && x.event_type === "red_card").length,
+      fouls: playerEvents.filter((x) => x.player_id === player.id && x.event_type === "foul").length,
       clean_sheets: cleanSheets,
-      mvps: mvps.filter((x) => x.player_id === player.id).length,
+      mvps: scopedMvps.filter((x) => x.player_id === player.id).length,
     };
-
     return { ...player, stats };
   });
+}
+
+export async function getAllPlayerStats(): Promise<Array<Player & { stats: PlayerStats }>> {
+  return getPlayerStatsForCompetitions();
 }
 
 export function calculateStandings(teams: Team[], matches: Match[]) {

@@ -281,6 +281,15 @@
 .home-mini-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; border-bottom: 2px solid var(--home-ink); }
 .home-mini-head span { font-family: var(--display); font-size: 31px; text-transform: uppercase; }
 .home-mini-head a { color: var(--home-ink); font-size: 9px; font-weight: 900; text-transform: uppercase; }
+.home-active-competition { margin-top: 20px; }
+.home-active-competition h3,
+.home-stat-group > h3 { margin: 18px 0 10px; font-family: var(--display); font-size: 22px; text-transform: uppercase; }
+.home-ranking__row,
+.home-ranking__row:hover { color: inherit; text-decoration: none; }
+.home-stat-group { margin-top: 34px; }
+.home-stat-group + .home-stat-group { padding-top: 28px; border-top: 1px solid var(--home-line); }
+.home-stat-group .leaders { margin-top: 14px; }
+
 .home-ranking__row { display: grid; grid-template-columns: 32px minmax(0,1fr) 52px 38px; align-items: center; gap: 10px; min-height: 48px; border-bottom: 1px solid var(--home-line); }
 .home-ranking__pos { color: var(--home-muted); font-weight: 900; font-size: 10px; }
 .home-ranking__team { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 11px; font-weight: 800; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -378,6 +387,8 @@
 /* STAFF RANKING — follows the existing home classification panel. */
 .home-staff-ranking { margin-top: 28px; }
 .home-staff-ranking__list { border-top: 2px solid var(--home-ink); }
+.home-staff-ranking__row,
+.home-staff-ranking__row:hover { color: inherit; text-decoration: none; }
 .home-staff-ranking__row {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr) 42px;
