@@ -15,7 +15,6 @@ const links = [
   ["Competizioni", "/competizioni"],
   ["Classifica", "/classifica"],
   ["Squadre", "/squadre"],
-  ["Giocatori", "/giocatori"],
   ["Statistiche", "/statistiche"],
   ["Partners", "/partner"],
   ["Collabora", "/collabora"],
