@@ -89,7 +89,7 @@ export default function PlayerDetail() {
           </section>
 
           <div className="page">
-            <SectionTitle eyebrow="Performance" title="Statistiche" />
+            <SectionTitle eyebrow="Performance" title="Statistiche"  variant="subsection" />
 
             {!stats ? (
               <EmptyState
