@@ -256,18 +256,25 @@ export async function getAllMatchEvents(): Promise<MatchEvent[]> {
   return getRows<MatchEvent>(supabase.from("match_events").select("*"));
 }
 
-export async function getStaffRanking(
-  competitionId: string,
+export async function getStaffRankingForCompetitions(
+  competitionIds: string[],
   month?: { year: number; month: number },
 ): Promise<StaffRankingEntry[]> {
-  const [players, teams, matches, events] = await Promise.all([
+  const ids = [...new Set(competitionIds.filter(Boolean))];
+  if (!ids.length || !supabase) return [];
+
+  const [players, matches, events, memberships] = await Promise.all([
     getPlayers(),
-    getTeams(competitionId),
-    getMatches(competitionId),
+    getMatches(),
     getAllMatchEvents(),
+    getRows<{ team_id: string }>(
+      supabase.from("competition_teams").select("team_id").in("competition_id", ids),
+    ),
   ]);
 
-  const competitionTeamIds = new Set(teams.map((team) => team.id));
+  const competitionTeamIds = new Set(
+    memberships.map((membership) => membership.team_id),
+  );
   const staffPlayers = players.filter(
     (player) =>
       competitionTeamIds.has(player.team_id) &&
@@ -275,7 +282,12 @@ export async function getStaffRanking(
         player.position?.trim().toUpperCase() === "STAFF"),
   );
   const staffIds = new Set(staffPlayers.map((player) => player.id));
-  const competitionMatches = new Map(matches.map((match) => [match.id, match]));
+  const scopedMatches = matches.filter((match) =>
+    ids.includes(match.competition_id),
+  );
+  const competitionMatches = new Map(
+    scopedMatches.map((match) => [match.id, match]),
+  );
   const counts = new Map(staffPlayers.map((player) => [player.id, 0]));
 
   events.forEach((event) => {
@@ -306,6 +318,13 @@ export async function getStaffRanking(
         a.player.last_name.localeCompare(b.player.last_name, "it") ||
         a.player.first_name.localeCompare(b.player.first_name, "it"),
     );
+}
+
+export async function getStaffRanking(
+  competitionId: string,
+  month?: { year: number; month: number },
+): Promise<StaffRankingEntry[]> {
+  return getStaffRankingForCompetitions([competitionId], month);
 }
 
 export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
@@ -385,13 +404,19 @@ export async function getPlayerStatsForCompetitions(
   const scopedLineups = lineups.filter((lineup) => matchIds.has(lineup.match_id));
   const scopedEvents = events.filter((event) => matchIds.has(event.match_id));
   const scopedMvps = mvps.filter((mvp) => matchIds.has(mvp.match_id));
-  const teamIds = ids?.length
-    ? new Set(
-        (await Promise.all(ids.map((id) => getTeams(id))))
-          .flat()
-          .map((team) => team.id),
-      )
-    : null;
+  let teamIds: Set<string> | null = null;
+  if (ids?.length && supabase) {
+    const { data: memberships, error: membershipError } = await supabase
+      .from("competition_teams")
+      .select("team_id")
+      .in("competition_id", ids);
+    if (membershipError) throw membershipError;
+    teamIds = new Set(
+      ((memberships ?? []) as Array<{ team_id: string }>).map(
+        (membership) => membership.team_id,
+      ),
+    );
+  }
 
   const scopedPlayers = teamIds
     ? players.filter((player) => teamIds.has(player.team_id))
