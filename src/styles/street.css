@@ -1197,6 +1197,12 @@ main:focus {
   .section-head h2 {
     font-size: 52px;
   }
+  .section-head--group h2 {
+    font-size: 42px;
+  }
+  .section-head--subsection h2 {
+    font-size: 36px;
+  }
   .cards-grid,
   .leaders,
   .match-grid,
