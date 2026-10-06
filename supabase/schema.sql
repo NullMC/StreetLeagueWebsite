@@ -60,6 +60,7 @@ create table if not exists competitions (
   start_date date,
   end_date date,
   hero_image_url text,
+  statistics_group text,
   created_at timestamptz not null default now()
 );
 create table if not exists teams (
