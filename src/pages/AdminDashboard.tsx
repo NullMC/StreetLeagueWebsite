@@ -100,10 +100,13 @@ function errorMessage(error: unknown, fallback: string) {
   }
   return fallback;
 }
-async function readRows(resource: Resource) {
+async function readRows(resource: Resource): Promise<Row[]> {
   if (!supabase) return [];
   await ensureFreshAdminSession();
-  if (resource === "teams") return (await getTeams()) as unknown as Row[];
+  if (resource === "teams") {
+    const teams = await getTeams();
+    return teams.map((team): Row => ({ ...team, competition_ids: team.competition_ids ?? [] }));
+  }
   const { data, error } = await supabase
     .from(tables[resource])
     .select("*")
