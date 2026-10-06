@@ -104,8 +104,17 @@ async function readRows(resource: Resource): Promise<Row[]> {
   if (!supabase) return [];
   await ensureFreshAdminSession();
   if (resource === "teams") {
-    const teams = await getTeams();
-    return teams.map((team): Row => ({ ...team, competition_ids: team.competition_ids ?? [] }));
+    const { data, error } = await supabase
+      .from("teams")
+      .select("*, competition_teams(competition_id)")
+      .order("name");
+    if (error) throw error;
+    return (data ?? []).map((team) => ({
+      ...team,
+      competition_ids: Array.isArray(team.competition_teams)
+        ? team.competition_teams.map((membership) => membership.competition_id)
+        : [],
+    }));
   }
   const { data, error } = await supabase
     .from(tables[resource])
