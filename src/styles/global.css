@@ -694,6 +694,22 @@ section,
   text-transform: uppercase;
   letter-spacing: -0.03em;
 }
+
+.section-head--group h2 {
+  font-size: clamp(44px, 4.8vw, 54px);
+}
+
+.section-head--subsection h2 {
+  font-size: clamp(34px, 3.7vw, 44px);
+}
+
+.section-head--group {
+  margin-bottom: 20px;
+}
+
+.section-head--subsection {
+  margin-bottom: 18px;
+}
 .eyebrow {
   font-size: 11px;
   text-transform: uppercase;
