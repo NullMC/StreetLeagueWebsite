@@ -387,6 +387,8 @@
 /* STAFF RANKING — follows the existing home classification panel. */
 .home-staff-ranking { margin-top: 28px; }
 .home-staff-ranking__list { border-top: 2px solid var(--home-ink); }
+.home-staff-ranking__row,
+.home-staff-ranking__row:hover { color: inherit; text-decoration: none; }
 .home-staff-ranking__row {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr) 42px;
