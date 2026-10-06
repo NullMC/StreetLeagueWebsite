@@ -20,6 +20,7 @@ export interface Competition {
   start_date: string | null;
   end_date: string | null;
   hero_image_url: string | null;
+  statistics_group: string | null;
 }
 
 export interface Team {
@@ -119,6 +120,13 @@ export interface PlayerStats {
   fouls: number;
   clean_sheets: number;
   mvps: number;
+}
+
+export interface StatisticsGroup {
+  id: string;
+  name: string;
+  competition_ids: string[];
+  competitions: Competition[];
 }
 
 export interface StaffRankingEntry {
