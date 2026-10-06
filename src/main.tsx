@@ -20,7 +20,6 @@ import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
 import Teams from "./pages/Teams";
 import TeamDetail from "./pages/TeamDetail";
-import Players from "./pages/Players";
 import PlayerDetail from "./pages/PlayerDetail";
 import CompetitionDetail from "./pages/CompetitionDetail";
 import Stats from "./pages/Stats";
@@ -46,7 +45,6 @@ function App() {
         <Route path="/classifica" element={<Standings />} />
         <Route path="/squadre" element={<Teams />} />
         <Route path="/squadre/:teamId" element={<TeamDetail />} />
-        <Route path="/giocatori" element={<Players />} />
         <Route path="/giocatori/:playerId" element={<PlayerDetail />} />
         <Route path="/statistiche" element={<Stats />} />
         <Route path="/partite" element={<Matches />} />
