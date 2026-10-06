@@ -7,7 +7,7 @@ import { getCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
 import type { Competition, Match, Player, Team } from "../types";
 
 type Resource = "competitions" | "teams" | "players" | "matches" | "events" | "lineups" | "mvp" | "player_of_month" | "partners" | "active_collaborations" | "social_contents";
-type Row = Record<string, unknown>;
+type Row = Record<string, any>;
 type Lookups = { competitions: Competition[]; teams: Team[]; players: Player[]; matches: Match[] };
 
 const nav: { key: Resource; label: string }[] = [
