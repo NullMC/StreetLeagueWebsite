@@ -50,7 +50,7 @@ function StaffRankingPreview({ items }: { items: StaffRankingEntry[] }) {
     <div className="home-staff-ranking">
       <div className="home-mini-head">
         <span>Migliori membri staff</span>
-        <a href="/classifica">Completa ↗</a>
+        <a href="/statistiche">Completa ↗</a>
       </div>
       <div className="home-staff-ranking__list">
         {items.slice(0, 3).map((entry, index) => (
