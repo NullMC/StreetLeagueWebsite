@@ -104,7 +104,6 @@ export default function PlayerDetail() {
                   ["Assist", stats.assists],
                   ["Gialli", stats.yellow_cards],
                   ["Rossi", stats.red_cards],
-                  ["Falli", stats.fouls],
                   ["Clean sheets", stats.clean_sheets],
                   ["MVP", stats.mvps],
                 ].map(([label, value]) => (
