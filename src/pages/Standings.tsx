@@ -9,10 +9,9 @@ import {
   getTeams,
   subscribeToCompetition,
 } from "../lib/api";
-import type { Team } from "../types";
 
 export default function Standings() {
-  const [competitionRows, setCompetitionRows] = useState<Array<{ id: string; name: string; rows: ReturnType<typeof calculateStandings>; staffRows: Awaited<ReturnType<typeof getStaffRanking>> }>>([]);
+  const [competitionRows, setCompetitionRows] = useState<Array<{ id: string; name: string; rows: ReturnType<typeof calculateStandings> }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
