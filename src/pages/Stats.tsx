@@ -92,11 +92,11 @@ export default function Stats() {
             const leaders = leadersFor(players);
             return (
               <section className="stats-competition-group" key={group.id}>
-                <SectionTitle eyebrow="Statistiche attive" title={group.name} />
+                <SectionTitle eyebrow="Statistiche attive" title={group.name} variant="group" />
                 {group.competitions.length > 1 && <p className="admin-help-text">Dati aggregati da: {group.competitions.map((competition) => competition.name).join(" · ")}</p>}
 
                 <section className="section">
-                  <SectionTitle eyebrow="Staff" title="Classifica staff" />
+                  <SectionTitle eyebrow="Staff" title="Classifica staff" variant="subsection" />
                   {!staff.length ? (
                     <EmptyState
                       title="Nessun membro STAFF"
@@ -107,7 +107,6 @@ export default function Stats() {
                       <div className="table-row head">
                         <span>#</span>
                         <span>Membro staff</span>
-                        <span>Rigori pres.</span>
                         <span>Gol</span>
                       </div>
                       {staff.map((row, index) => (
@@ -144,7 +143,6 @@ export default function Stats() {
                               {row.player.first_name} {row.player.last_name}
                             </strong>
                           </div>
-                          <span>{row.presidential_penalties}</span>
                           <strong>{row.presidential_penalties}</strong>
                         </a>
                       ))}
@@ -160,7 +158,7 @@ export default function Stats() {
                         return <div className="stat-card" key={leader.key}><span className="eyebrow">{leader.label}</span><h3>{top ? <a href={`/giocatori/${top.id}`}>{top.first_name} {top.last_name}</a> : "Nessun dato"}</h3><div className="stat-card__value">{top ? top.stats[leader.key] : "—"}</div><div className="rank-list">{leader.rows.map((player, index) => <a className="rank-row" href={`/giocatori/${player.id}`} key={player.id}><span>{String(index + 1).padStart(2, "0")}</span><span>{player.first_name} {player.last_name}</span><strong>{player.stats[leader.key]}</strong></a>)}</div></div>;
                       })}
                     </div>
-                    <div className="section"><SectionTitle eyebrow="Player data" title="Statistiche complete" /><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Giocatore</th><th>Reti</th><th>Presenze</th><th>Assist</th><th>Gialli</th><th>Rossi</th><th>CS</th><th>MVP</th></tr></thead><tbody>{[...players].sort((a,b)=>b.stats.goals-a.stats.goals||b.stats.assists-a.stats.assists||b.stats.appearances-a.stats.appearances).map((player)=><tr key={player.id}><td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td><td>{player.stats.goals}</td><td>{player.stats.appearances}</td><td>{player.stats.assists}</td><td>{player.stats.yellow_cards}</td><td>{player.stats.red_cards}</td><td>{player.stats.clean_sheets}</td><td>{player.stats.mvps}</td></tr>)}</tbody></table></div></div>
+                    <div className="section"><SectionTitle eyebrow="Player data" title="Statistiche complete" variant="subsection" /><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Giocatore</th><th>Reti</th><th>Presenze</th><th>Assist</th><th>Gialli</th><th>Rossi</th><th>CS</th><th>MVP</th></tr></thead><tbody>{[...players].sort((a,b)=>b.stats.goals-a.stats.goals||b.stats.assists-a.stats.assists||b.stats.appearances-a.stats.appearances).map((player)=><tr key={player.id}><td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td><td>{player.stats.goals}</td><td>{player.stats.appearances}</td><td>{player.stats.assists}</td><td>{player.stats.yellow_cards}</td><td>{player.stats.red_cards}</td><td>{player.stats.clean_sheets}</td><td>{player.stats.mvps}</td></tr>)}</tbody></table></div></div>
                   </>
                 )}
               </section>
