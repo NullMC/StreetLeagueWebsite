@@ -6,7 +6,7 @@ import { EmptyState } from "../components/EmptyState";
 import { getCompetitions, getMatches, getTeams } from "../lib/api";
 import type { Competition, Match, Team } from "../types";
 import { MatchCard } from "../components/MatchCard";
-import { TeamCard } from "../components/TeamCard";
+import { TeamCarousel } from "../components/TeamCarousel";
 
 export default function CompetitionDetail() {
   const { competitionId = "" } = useParams();
@@ -65,11 +65,10 @@ export default function CompetitionDetail() {
             <section className="competition-detail-section">
               <SectionTitle eyebrow="Iscrizioni" title="Squadre registrate" />
               {t.length ? (
-                <div className="cards-grid">
-                  {t.map((team) => (
-                    <TeamCard key={team.id} team={team} />
-                  ))}
-                </div>
+                <TeamCarousel
+                  teams={t}
+                  label={`Squadre registrate a ${c.name}`}
+                />
               ) : (
                 <EmptyState
                   title="Nessuna squadra registrata"
