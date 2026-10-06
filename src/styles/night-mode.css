@@ -649,6 +649,25 @@ html[data-theme="night"] .admin-table tbody td {
   background: transparent !important;
 }
 
+html[data-theme="night"] .admin-fieldset legend {
+  color: rgba(245,247,246,.72) !important;
+}
+
+html[data-theme="night"] .admin-fieldset__help {
+  color: rgba(245,247,246,.50) !important;
+}
+
+html[data-theme="night"] .admin-checkbox {
+  background: #0e1411 !important;
+  color: rgba(245,247,246,.80) !important;
+  border-color: rgba(245,247,246,.12) !important;
+}
+
+html[data-theme="night"] .admin-checkbox:hover {
+  background: #151c18 !important;
+  border-color: rgba(228,34,120,.38) !important;
+}
+
 html[data-theme="night"] .admin-search__field input {
   background: #0e1411 !important;
   color: var(--white) !important;
