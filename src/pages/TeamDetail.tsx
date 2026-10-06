@@ -36,7 +36,7 @@ export default function TeamDetail() {
             </div>
           </section>
           <div className="page">
-            <SectionTitle eyebrow="Roster" title="Giocatori" />
+            <SectionTitle eyebrow="Roster" title="Giocatori"  variant="subsection" />
             {players.length ? (
               <div className="cards-grid">
                 {players.map((p) => (
@@ -78,7 +78,7 @@ export default function TeamDetail() {
               />
             )}
             <div className="section">
-              <SectionTitle eyebrow="History" title="Partite" />
+              <SectionTitle eyebrow="History" title="Partite"  variant="subsection" />
               {matches.length ? (
                 <div className="match-grid">
                   {matches.map((m) => (
