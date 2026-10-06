@@ -132,7 +132,7 @@ export default function HomeRedesigned() {
       const activeCompetitions = await getActiveCompetitions();
       const nextGroups = await getStatisticsGroups(activeCompetitions);
       const [nextMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
-        getMatches(active?.id), getTeams(active?.id), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
+        getMatches(active?.id), getTeams(), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
         active ? getStaffRanking(active.id) : Promise.resolve([]),
         active ? getStaffRanking(active.id, { year: now.getFullYear(), month: now.getMonth() + 1 }) : Promise.resolve([]),
         Promise.all(activeCompetitions.map(async (competition) => {
@@ -141,7 +141,7 @@ export default function HomeRedesigned() {
         })),
         Promise.all(nextGroups.map(async (group) => [group.id, await getPlayerStatsForCompetitions(group.competition_ids)] as const)),
       ]);
-      setCompetition(active); setMatches(nextMatches); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
+      setCompetition(active); setMatches(nextMatches); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
       setActiveStandings(nextStandings); setStatsGroups(nextGroups); setPlayerStatsByGroup(Object.fromEntries(nextGroupStats));
     } catch (error) {
       console.error("Home data error:", error);
