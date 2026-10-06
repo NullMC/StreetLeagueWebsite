@@ -18,7 +18,7 @@ export default function TeamDetail() {
       if (t) {
         setPlayers(await getPlayers(t.id));
         setMatches(
-          (await getMatches(t.competition_id))
+          (await getMatches())
             .filter((m) => m.home_team_id === t.id || m.away_team_id === t.id)
             .slice(0, 6),
         );

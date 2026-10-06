@@ -40,7 +40,7 @@ const keys: Record<Resource, string> = {
 };
 const fields: Record<Resource, string[]> = {
   competitions: ["name", "slug", "status", "season_label", "start_date", "end_date", "hero_image_url"],
-  teams: ["competition_id", "name", "slug", "accent_hex", "logo_url"],
+  teams: ["competition_ids", "name", "slug", "accent_hex", "logo_url"],
   players: ["team_id", "first_name", "last_name", "shirt_number", "position", "profile_image_url", "bg_less_image_url"],
   matches: ["competition_id", "home_team_id", "away_team_id", "matchday", "kickoff_at", "status", "home_score", "away_score", "venue"],
   events: ["match_id", "player_id", "related_player_id", "event_type", "minute", "note"],
@@ -52,7 +52,7 @@ const fields: Record<Resource, string[]> = {
   social_contents: ["platform", "title", "thumbnail_url", "content_url", "published_at"],
 };
 const required: Record<Resource, string[]> = {
-  competitions: ["name", "slug", "status"], teams: ["competition_id", "name", "slug"], players: ["team_id", "first_name", "last_name"],
+  competitions: ["name", "slug", "status"], teams: ["competition_ids", "name", "slug"], players: ["team_id", "first_name", "last_name"],
   matches: ["competition_id", "home_team_id", "away_team_id", "kickoff_at", "status"], events: ["match_id", "event_type"],
   lineups: ["match_id", "team_id", "player_id"], mvp: ["match_id", "player_id"],
   player_of_month: ["player_id", "month_label", "published_at"], partners: ["name", "tier"],
@@ -60,7 +60,7 @@ const required: Record<Resource, string[]> = {
 };
 const fieldLabels: Record<string, string> = {
   name: "Nome", slug: "Slug", status: "Stato", season_label: "Stagione", start_date: "Data inizio", end_date: "Data fine",
-  hero_image_url: "Immagine hero", competition_id: "Competizione", accent_hex: "Colore accent", logo_url: "Logo",
+  hero_image_url: "Immagine hero", competition_id: "Competizione", competition_ids: "Competizioni", accent_hex: "Colore accent", logo_url: "Logo",
   team_id: "Squadra", first_name: "Nome", last_name: "Cognome", shirt_number: "Numero", position: "Ruolo", profile_image_url: "Immagine profilo", bg_less_image_url: "Immagine sfondo",
   home_team_id: "Squadra casa", away_team_id: "Squadra ospite", matchday: "Giornata", kickoff_at: "Inizio", home_score: "Gol casa", away_score: "Gol ospite", venue: "Campo",
   match_id: "Partita", player_id: "Giocatore", related_player_id: "Giocatore correlato", event_type: "Tipo evento", minute: "Minuto", note: "Nota", starter: "Titolare",
@@ -72,7 +72,22 @@ const options: Record<string, string[]> = {
 
 function labelize(v: string) { return fieldLabels[v] ?? v.replaceAll("_", " ").replace(/\b\w/g, (x) => x.toUpperCase()); }
 function defaults(resource: Resource): Row {
-  return Object.fromEntries(fields[resource].map((f) => [f, f === "sort_order" ? 0 : f === "starter" ? true : f === "status" ? (resource === "competitions" ? "upcoming" : "scheduled") : ""]));
+  return Object.fromEntries(
+    fields[resource].map((f) => [
+      f,
+      f === "competition_ids"
+        ? []
+        : f === "sort_order"
+          ? 0
+          : f === "starter"
+            ? true
+            : f === "status"
+              ? resource === "competitions"
+                ? "upcoming"
+                : "scheduled"
+              : "",
+    ]),
+  );
 }
 function localDate(value: unknown) { if (!value) return ""; const d = new Date(String(value)); if (Number.isNaN(d.getTime())) return ""; const off = d.getTimezoneOffset(); return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16); }
 function toIso(value: string) { if (!value) return null; const d = new Date(value); if (Number.isNaN(d.getTime())) throw new Error("Data/ora non valida."); return d.toISOString(); }
@@ -85,26 +100,90 @@ function errorMessage(error: unknown, fallback: string) {
   }
   return fallback;
 }
-async function readRows(resource: Resource) { if (!supabase) return []; await ensureFreshAdminSession(); const { data, error } = await supabase.from(tables[resource]).select("*").order("created_at", { ascending: false }); if (error) throw error; return (data ?? []) as Row[]; }
+async function readRows(resource: Resource) {
+  if (!supabase) return [];
+  await ensureFreshAdminSession();
+  if (resource === "teams") return (await getTeams()) as Row[];
+  const { data, error } = await supabase
+    .from(tables[resource])
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Row[];
+}
 function relationOptions(field: string, resource: Resource, form: Row, l: Lookups) {
   if (field === "competition_id") return l.competitions.map((x) => ({ id: x.id, label: x.name }));
   if (field === "team_id") { if (resource === "lineups" && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; return l.teams.filter((x) => ids.includes(x.id)).map((x) => ({ id: x.id, label: x.name })); } return l.teams.map((x) => ({ id: x.id, label: x.name })); }
-  if (field === "home_team_id" || field === "away_team_id") return l.teams.filter((x) => !form.competition_id || x.competition_id === form.competition_id).map((x) => ({ id: x.id, label: x.name }));
+  if (field === "home_team_id" || field === "away_team_id") return l.teams.filter((x) => !form.competition_id || x.competition_ids?.includes(String(form.competition_id))).map((x) => ({ id: x.id, label: x.name }));
   if (field === "match_id") return l.matches.map((x) => ({ id: x.id, label: `${l.teams.find((t) => t.id === x.home_team_id)?.name ?? "Casa"} - ${l.teams.find((t) => t.id === x.away_team_id)?.name ?? "Ospite"} / ${x.matchday ?? "—"}` }));
   if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (resource === "lineups" && form.team_id) ps = ps.filter((p) => p.team_id === form.team_id); if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } if (resource === "events" && field === "player_id" && form.event_type === "presidential_penalty") ps = ps.filter((p) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"); return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
   return [];
 }
-function sanitize(resource: Resource, source: Row) { const out: Row = {}; for (const f of fields[resource]) { let v = source[f]; if (f === "kickoff_at" || f === "published_at") v = v === "" || v == null ? null : toIso(String(v)); else if (v === "") v = null; if (["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f) && v != null) v = Number(v); out[f] = f === "starter" ? Boolean(v) : v; } return out; }
+function sanitize(resource: Resource, source: Row) {
+  const out: Row = {};
+  for (const f of fields[resource]) {
+    if (f === "competition_ids") continue;
+    let v = source[f];
+    if (f === "kickoff_at" || f === "published_at") {
+      v = v === "" || v == null ? null : toIso(String(v));
+    } else if (v === "") {
+      v = null;
+    }
+    if (
+      ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f) &&
+      v != null
+    ) {
+      v = Number(v);
+    }
+    out[f] = f === "starter" ? Boolean(v) : v;
+  }
+  return out;
+}
 function validate(resource: Resource, payload: Row, l: Lookups) {
   for (const f of required[resource]) if (payload[f] == null || payload[f] === "") throw new Error(`${labelize(f)} è obbligatorio.`);
   if (["shirt_number", "home_score", "away_score", "minute", "sort_order"].some((f) => payload[f] != null && Number(payload[f]) < 0)) throw new Error("I valori numerici non possono essere negativi.");
-  if (resource === "matches") { const c = l.competitions.find((x) => x.id === payload.competition_id); const h = l.teams.find((x) => x.id === payload.home_team_id); const a = l.teams.find((x) => x.id === payload.away_team_id); if (!c || !h || !a) throw new Error("Competizione o squadre non valide."); if (h.competition_id !== c.id || a.competition_id !== c.id) throw new Error("Casa e ospite devono appartenere alla competizione selezionata."); if (h.id === a.id) throw new Error("Le squadre devono essere diverse."); }
+  if (resource === "teams") {
+    const competitionIds = payload.competition_ids;
+    if (!Array.isArray(competitionIds) || competitionIds.length === 0) {
+      throw new Error("Seleziona almeno una competizione per la squadra.");
+    }
+    if (competitionIds.some((id) => !l.competitions.some((competition) => competition.id === id))) {
+      throw new Error("Una o più competizioni selezionate non sono valide.");
+    }
+  }
+  if (resource === "matches") {
+    const c = l.competitions.find((x) => x.id === payload.competition_id);
+    const h = l.teams.find((x) => x.id === payload.home_team_id);
+    const a = l.teams.find((x) => x.id === payload.away_team_id);
+    if (!c || !h || !a) throw new Error("Competizione o squadre non valide.");
+    if (!h.competition_ids?.includes(c.id) || !a.competition_ids?.includes(c.id)) {
+      throw new Error("Casa e ospite devono partecipare alla competizione selezionata.");
+    }
+    if (h.id === a.id) throw new Error("Le squadre devono essere diverse.");
+  }
   if (resource === "events" && payload.event_type === "presidential_penalty") { const player = l.players.find((x) => x.id === payload.player_id); if (!player || (player.role?.trim().toUpperCase() !== "STAFF" && player.position?.trim().toUpperCase() !== "STAFF")) throw new Error("Per un rigore presidenziale devi selezionare un giocatore con ruolo STAFF."); }
   if (resource === "player_of_month" && !l.players.some((x) => x.id === payload.player_id)) throw new Error("Il giocatore selezionato non esiste.");
   if (resource === "active_collaborations" && payload.cta_url) { try { const parsed = new URL(String(payload.cta_url)); if (!/^https?:$/.test(parsed.protocol)) throw new Error(); } catch { throw new Error("URL CTA non valido: usa un link http:// o https://."); } }
   for (const field of ["website_url", "content_url", "hero_image_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url", "cta_url"]) { const value = payload[field]; if (value) { try { const parsed = new URL(String(value)); if (!/^https?:$/.test(parsed.protocol)) throw new Error(); } catch { throw new Error(`${labelize(field)} non valido: usa un link http:// o https://.`); } } }
   if (resource === "teams" && payload.accent_hex) { if (!/^#[0-9a-f]{6}$/i.test(String(payload.accent_hex))) throw new Error("Colore accent non valido: usa il formato #RRGGBB."); }
 }
+function displayCellValue(resource: Resource, field: string, row: Row, l: Lookups) {
+  if (field === "competition_ids") {
+    const ids = Array.isArray(row[field]) ? row[field] as string[] : [];
+    const names = ids
+      .map((id) => l.competitions.find((competition) => competition.id === id)?.name)
+      .filter((name): name is string => Boolean(name));
+    return names.length ? names.join(", ") : "—";
+  }
+  if (field === "player_id") {
+    const p = l.players.find((x) => x.id === row[field]);
+    return p ? `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` : "—";
+  }
+  if (field === "team_id") return l.teams.find((x) => x.id === row[field])?.name ?? "—";
+  if (field === "competition_id") return l.competitions.find((x) => x.id === row[field])?.name ?? "—";
+  return String(row[field] ?? "—");
+}
+
 function rowLabel(resource: Resource, row: Row, l: Lookups) { if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource); if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim(); if (resource === "player_of_month") { const p = l.players.find((x) => x.id === row.player_id); return `${row.month_label ?? "POTM"} / ${p ? `${p.first_name} ${p.last_name}` : "Giocatore"}`; } if (resource === "matches") return `${l.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa"} - ${l.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite"}`; if (resource === "active_collaborations") return String(row.title ?? "Collaborazione"); return String(row.title ?? row.name ?? resource); }
 
 function normalizeSearch(value: unknown) {
@@ -123,6 +202,12 @@ function searchableRowText(resource: Resource, row: Row, l: Lookups) {
   const match = row.match_id ? l.matches.find((x) => x.id === row.match_id) : undefined;
 
   if (team) extras.push(team.name, team.slug);
+  if (resource === "teams" && Array.isArray(row.competition_ids)) {
+    row.competition_ids.forEach((id) => {
+      const selected = l.competitions.find((x) => x.id === id);
+      if (selected) extras.push(selected.name, selected.slug);
+    });
+  }
   if (competition) extras.push(competition.name, competition.slug);
   if (player) extras.push(player.first_name, player.last_name, String(player.shirt_number ?? ""));
   if (relatedPlayer) extras.push(relatedPlayer.first_name, relatedPlayer.last_name, String(relatedPlayer.shirt_number ?? ""));
@@ -158,9 +243,100 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
   const edit = (r: Row) => { const n = { ...r }; setEditing(String(r[keys[resource]])); if (n.kickoff_at) n.kickoff_at = localDate(n.kickoff_at); if (n.published_at) n.published_at = localDate(n.published_at); setForm(n); setMessage(""); window.scrollTo({ top: 120, behavior: "smooth" }); };
   const cancelEdit = () => { setEditing(null); setForm(defaults(resource)); setMessage(""); };
   const uploadFor = async (field: string, file: File) => { if (!canWrite || !file) return; setUploadingField(field); setMessage(""); try { const folder = field === "flyer_url" ? "collaborations" : field.includes("logo") ? "logos" : field.includes("bg_less") ? "players/bg-less" : field.includes("profile") ? "players/profile" : field.includes("thumbnail") ? "social" : "media"; const url = await uploadMedia(file, folder); setForm((p) => ({ ...p, [field]: url })); setMessage("File caricato. Salva il record per applicare l'URL."); } catch (e) { setMessage(errorMessage(e, "Upload non riuscito.")); } finally { setUploadingField(null); } };
-  const save = async (e: FormEvent) => { e.preventDefault(); if (!supabase || !canWrite) return; setMessage(""); try { await ensureFreshAdminSession(); const p = sanitize(resource, form); validate(resource, p, lookups); if (resource === "players" && !editing) { if (p.profile_image_url == null) delete p.profile_image_url; if (p.bg_less_image_url == null) delete p.bg_less_image_url; } const q = supabase.from(tables[resource]); const result = editing ? await q.update(p).eq(keys[resource], editing) : resource === "mvp" ? await q.upsert(p, { onConflict: "match_id" }) : resource === "player_of_month" ? await q.upsert(p, { onConflict: "month_label" }) : await q.insert(p); if (result.error) throw result.error; setMessage(editing ? "Record aggiornato." : "Record creato."); setEditing(null); setForm(defaults(resource)); await refresh(); } catch (e) { setMessage(errorMessage(e, "Operazione non riuscita.")); } };
+  const save = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!supabase || !canWrite) return;
+    setMessage("");
+    try {
+      await ensureFreshAdminSession();
+      const p = sanitize(resource, form);
+      validate(resource, { ...p, ...(resource === "teams" ? { competition_ids: form.competition_ids } : {}) }, lookups);
+
+      if (resource === "players" && !editing) {
+        if (p.profile_image_url == null) delete p.profile_image_url;
+        if (p.bg_less_image_url == null) delete p.bg_less_image_url;
+      }
+
+      if (resource === "teams") {
+        const competitionIds = Array.isArray(form.competition_ids)
+          ? form.competition_ids.map(String)
+          : [];
+
+        let teamId = editing;
+        if (editing) {
+          const { error } = await supabase
+            .from("teams")
+            .update(p)
+            .eq("id", editing);
+          if (error) throw error;
+        } else {
+          const { data, error } = await supabase
+            .from("teams")
+            .insert(p)
+            .select("id")
+            .single();
+          if (error) throw error;
+          teamId = data.id;
+        }
+
+        const { error: membershipError } = await supabase.rpc(
+          "set_team_competitions",
+          {
+            p_team_id: teamId,
+            p_competition_ids: competitionIds,
+          },
+        );
+        if (membershipError) throw membershipError;
+      } else {
+        const q = supabase.from(tables[resource]);
+        const result = editing
+          ? await q.update(p).eq(keys[resource], editing)
+          : resource === "mvp"
+            ? await q.upsert(p, { onConflict: "match_id" })
+            : resource === "player_of_month"
+              ? await q.upsert(p, { onConflict: "month_label" })
+              : await q.insert(p);
+        if (result.error) throw result.error;
+      }
+
+      setMessage(editing ? "Record aggiornato." : "Record creato.");
+      setEditing(null);
+      setForm(defaults(resource));
+      await refresh();
+    } catch (e) {
+      setMessage(errorMessage(e, "Operazione non riuscita."));
+    }
+  };
   const remove = async (r: Row) => { if (!supabase || !canWrite) return; const k = r[keys[resource]]; if (!k || !confirm(`Eliminare ${rowLabel(resource, r, lookups)}?`)) return; try { await ensureFreshAdminSession(); const { error } = await supabase.from(tables[resource]).delete().eq(keys[resource], k); if (error) throw error; setMessage("Record eliminato."); await refresh(); } catch (e) { setMessage(errorMessage(e, "Eliminazione non riuscita.")); } }; const normalizedSearch = normalizeSearch(searchTerm.trim()); const filteredRows = normalizedSearch ? rows.filter((r) => searchableRowText(resource, r, lookups).includes(normalizedSearch)) : rows;
-  const render = (f: string) => { const v = form[f]; if (f === "starter") return <label className="check-field"><input type="checkbox" checked={Boolean(v)} onChange={(e) => setField(f, e.target.checked)} /> Titolare</label>; const rel = ["competition_id", "team_id", "home_team_id", "away_team_id", "match_id", "player_id", "related_player_id"]; if (rel.includes(f)) { const opts = relationOptions(f, resource, form, lookups); return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>; } if (f === "status") { const opts = resource === "competitions" ? options.competitionStatus : options.matchStatus; return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required><option value="">Seleziona</option>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select>; } if (options[f]) return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{options[f].map((o) => <option key={o} value={o}>{f === "event_type" && o === "presidential_penalty" ? "Rigore presidenziale" : o}</option>)}</select>; if (f === "description") return <RichTextEditor value={String(v ?? "")} onChange={(x) => setField(f, x)} />; if (f === "note") return <textarea rows={5} value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} />; const dt = f === "kickoff_at" || f === "published_at"; const date = f === "start_date" || f === "end_date"; const num = ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f); const uploadable = isUploadableImage(f); const url = ["cta_url", "website_url", "content_url", "hero_image_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url"].includes(f); const input = <input type={dt ? "datetime-local" : date ? "date" : num ? "number" : url ? "url" : "text"} value={dt ? localDate(v) : v == null ? "" : String(v)} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)} min={num ? 0 : undefined} placeholder={f === "month_label" ? "Settembre 2026" : undefined} />; if (!uploadable) return input; return <div className="admin-input-row">{input}<input className="file-input" type="file" accept="image/*" disabled={!canWrite || uploadingField === f} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadFor(f, file); e.currentTarget.value = ""; }} />{uploadingField === f && <small className="admin-help-text">Caricamento…</small>}</div>; };
+  const render = (f: string) => {
+    const v = form[f];
+    if (f === "starter") return <label className="check-field"><input type="checkbox" checked={Boolean(v)} onChange={(e) => setField(f, e.target.checked)} /> Titolare</label>;
+    if (f === "competition_ids") {
+      const selected = Array.isArray(v) ? v.map(String) : [];
+      const size = Math.min(6, Math.max(3, lookups.competitions.length));
+      return (
+        <select
+          multiple
+          size={size}
+          value={selected}
+          onChange={(e) =>
+            setField(
+              f,
+              Array.from(e.currentTarget.selectedOptions, (option) => option.value),
+            )
+          }
+          required
+          aria-label="Seleziona una o più competizioni"
+        >
+          {lookups.competitions.map((competition) => (
+            <option key={competition.id} value={competition.id}>
+              {competition.name}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    const rel = ["competition_id", "team_id", "home_team_id", "away_team_id", "match_id", "player_id", "related_player_id"]; if (rel.includes(f)) { const opts = relationOptions(f, resource, form, lookups); return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>; } if (f === "status") { const opts = resource === "competitions" ? options.competitionStatus : options.matchStatus; return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required><option value="">Seleziona</option>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select>; } if (options[f]) return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{options[f].map((o) => <option key={o} value={o}>{f === "event_type" && o === "presidential_penalty" ? "Rigore presidenziale" : o}</option>)}</select>; if (f === "description") return <RichTextEditor value={String(v ?? "")} onChange={(x) => setField(f, x)} />; if (f === "note") return <textarea rows={5} value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} />; const dt = f === "kickoff_at" || f === "published_at"; const date = f === "start_date" || f === "end_date"; const num = ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f); const uploadable = isUploadableImage(f); const url = ["cta_url", "website_url", "content_url", "hero_image_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url"].includes(f); const input = <input type={dt ? "datetime-local" : date ? "date" : num ? "number" : url ? "url" : "text"} value={dt ? localDate(v) : v == null ? "" : String(v)} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)} min={num ? 0 : undefined} placeholder={f === "month_label" ? "Settembre 2026" : undefined} />; if (!uploadable) return input; return <div className="admin-input-row">{input}<input className="file-input" type="file" accept="image/*" disabled={!canWrite || uploadingField === f} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadFor(f, file); e.currentTarget.value = ""; }} />{uploadingField === f && <small className="admin-help-text">Caricamento…</small>}</div>; };
   return <div className="admin-resource"><div className="admin-resource__head"><div><span className="eyebrow">CRUD / {labels[resource]}</span><h2>{editing ? "Modifica record" : "Nuovo record"}</h2></div>{editing && <button className="btn btn--ghost" type="button" onClick={cancelEdit}>Annulla</button>}</div>{canWrite ? <form className="admin-form" onSubmit={save}><div className="admin-form__grid">{fields[resource].map((f) => <label key={f}>{labelize(f)}{render(f)}</label>)}</div>{message && <p className="admin-message">{message}</p>}<button className="btn btn--primary" type="submit">{editing ? "Salva modifiche" : "Crea record"}</button></form> : <div className="empty-state"><div className="empty-state__mark">R</div><div><h3>Accesso in sola lettura</h3><p>Questo ruolo non può modificare questa sezione.</p></div></div>}<div className="admin-records">
   <div className="admin-search">
     <div className="admin-search__field">
@@ -177,7 +353,35 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
     <span className="admin-search__count">{normalizedSearch ? `${filteredRows.length} di ${rows.length}` : `${rows.length} record`}</span>
   </div>
   <div className="admin-table-wrap">
-    {loading ? <p className="admin-message">Caricamento…</p> : !rows.length ? <p className="admin-message">Nessun record presente.</p> : !filteredRows.length ? <p className="admin-message">Nessun risultato per “{searchTerm}”.</p> : <table className="admin-table"><thead><tr>{fields[resource].slice(0, 6).map((f) => <th key={f}>{labelize(f)}</th>)}<th>Azioni</th></tr></thead><tbody>{filteredRows.map((r) => <tr key={String(r[keys[resource]])}>{fields[resource].slice(0, 6).map((f) => <td key={f}>{f === "player_id" ? (() => { const p = lookups.players.find((x) => x.id === r[f]); return p ? `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` : "—"; })() : f === "team_id" ? (lookups.teams.find((x) => x.id === r[f])?.name ?? "—") : f === "competition_id" ? (lookups.competitions.find((x) => x.id === r[f])?.name ?? "—") : String(r[f] ?? "—")}</td>)}<td className="admin-actions"><button className="btn btn--ghost btn--small" type="button" onClick={() => edit(r)}>Modifica</button>{" "}<button className="btn btn--danger btn--small" type="button" onClick={() => void remove(r)}>Elimina</button></td></tr>)}</tbody></table>}
+    {loading ? (
+      <p className="admin-message">Caricamento…</p>
+    ) : !rows.length ? (
+      <p className="admin-message">Nessun record presente.</p>
+    ) : !filteredRows.length ? (
+      <p className="admin-message">Nessun risultato per “{searchTerm}”.</p>
+    ) : (
+      <table className="admin-table">
+        <thead>
+          <tr>
+            {fields[resource].slice(0, 6).map((f) => <th key={f}>{labelize(f)}</th>)}
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredRows.map((r) => (
+            <tr key={String(r[keys[resource]])}>
+              {fields[resource].slice(0, 6).map((f) => (
+                <td key={f}>{displayCellValue(resource, f, r, lookups)}</td>
+              ))}
+              <td className="admin-actions">
+                <button className="btn btn--ghost btn--small" type="button" onClick={() => edit(r)}>Modifica</button>{" "}
+                <button className="btn btn--danger btn--small" type="button" onClick={() => void remove(r)}>Elimina</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
   </div>
 </div></div>;
 }

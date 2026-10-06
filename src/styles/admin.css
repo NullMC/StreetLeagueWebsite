@@ -104,6 +104,15 @@
   width: 100%; min-height: 46px; border: 1px solid rgba(1,10,8,.14); border-radius: 5px; background: #fff; color: #010a08; padding: 0 12px; outline: none; font: inherit; box-sizing: border-box;
 }
 .admin-form textarea { min-height: 120px; padding: 12px; resize: vertical; }
+.admin-form select[multiple] {
+  min-height: 132px;
+  height: auto;
+  padding: 8px 10px;
+}
+
+.admin-form select[multiple] option {
+  padding: 6px 8px;
+}
 .admin-login input::placeholder, .admin-form input::placeholder, .admin-form textarea::placeholder { color: rgba(1,10,8,.42); }
 .admin-login input:focus, .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus { border-color: rgba(228,34,120,.62); box-shadow: 0 0 0 3px rgba(228,34,120,.08); }
 

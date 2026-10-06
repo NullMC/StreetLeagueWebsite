@@ -75,10 +75,35 @@ export async function getCurrentCompetition(): Promise<Competition | null> {
 
 export async function getTeams(competitionId?: string): Promise<Team[]> {
   if (!supabase) return [];
-  let query = supabase.from("teams").select("*").order("name");
-  if (competitionId) query = query.eq("competition_id", competitionId);
-  return getRows<Team>(query);
+
+  const query = competitionId
+    ? supabase
+        .from("teams")
+        .select("*, competition_teams!inner(competition_id)")
+        .eq("competition_teams.competition_id", competitionId)
+        .order("name")
+    : supabase
+        .from("teams")
+        .select("*, competition_teams(competition_id)")
+        .order("name");
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return ((data ?? []) as Array<Team & {
+    competition_teams?: Array<{ competition_id: string }>;
+  }>).map((row) => {
+    const memberships = Array.isArray(row.competition_teams)
+      ? row.competition_teams.map((item) => item.competition_id)
+      : [];
+    const { competition_teams: _memberships, ...team } = row;
+    return {
+      ...team,
+      competition_ids: memberships,
+    };
+  });
 }
+
 
 export async function getPlayers(teamId?: string): Promise<Player[]> {
   if (!supabase) return [];
@@ -438,6 +463,11 @@ export function subscribeToCompetition(onChange: () => void) {
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "competitions" },
+      onChange,
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "competition_teams" },
       onChange,
     )
     .on(

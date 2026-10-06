@@ -63,10 +63,23 @@ create table if not exists competitions (
   created_at timestamptz not null default now()
 );
 create table if not exists teams (
-  id uuid primary key default gen_random_uuid(), competition_id uuid not null references competitions(id) on delete cascade,
-  name text not null, slug text not null, logo_url text, accent_hex text,
-  created_at timestamptz not null default now(), unique(competition_id,slug)
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  slug text not null,
+  logo_url text,
+  accent_hex text,
+  created_at timestamptz not null default now()
 );
+
+create table if not exists competition_teams (
+  competition_id uuid not null references competitions(id) on delete cascade,
+  team_id uuid not null references teams(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (competition_id, team_id)
+);
+
+create index if not exists idx_competition_teams_team on competition_teams(team_id);
+create index if not exists idx_competition_teams_competition on competition_teams(competition_id);
 create table if not exists players (
   id uuid primary key default gen_random_uuid(), team_id uuid not null references teams(id) on delete cascade,
   first_name text not null, last_name text not null, shirt_number integer, position text,
@@ -146,7 +159,7 @@ from players p left join match_events e on e.player_id=p.id group by p.id;
 
 alter table profiles enable row level security;
 alter table active_collaborations enable row level security;
-alter table player_of_month enable row level security; alter table competitions enable row level security; alter table teams enable row level security;
+alter table player_of_month enable row level security; alter table competitions enable row level security; alter table teams enable row level security; alter table competition_teams enable row level security;
 alter table players enable row level security; alter table matches enable row level security; alter table match_lineups enable row level security;
 alter table match_events enable row level security; alter table match_mvp enable row level security; alter table partners enable row level security; alter table social_contents enable row level security;
 
@@ -160,6 +173,8 @@ $$;
 
 create policy "public read competitions" on competitions for select using (true);
 create policy "public read teams" on teams for select using (true);
+create policy "public read competition teams" on competition_teams for select using (true);
+create policy "admin manage competition teams" on competition_teams for all using (is_staff('admin')) with check (is_staff('admin'));
 create policy "public read players" on players for select using (true);
 create policy "public read matches" on matches for select using (true);
 create policy "public read lineups" on match_lineups for select using (true);
@@ -175,6 +190,49 @@ create policy "users read own profile" on profiles for select using (id=auth.uid
 
 create policy "admin manage competitions" on competitions for all using (is_staff('admin')) with check (is_staff('admin'));
 create policy "admin manage teams" on teams for all using (is_staff('admin')) with check (is_staff('admin'));
+create or replace function public.set_team_competitions(
+  p_team_id uuid,
+  p_competition_ids uuid[]
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $
+declare
+  v_ids uuid[];
+begin
+  if not public.is_staff('admin') then
+    raise exception 'Non hai i permessi per gestire le competizioni della squadra.';
+  end if;
+  if not exists (select 1 from public.teams where id = p_team_id) then
+    raise exception 'Squadra non trovata.';
+  end if;
+  v_ids := array(
+    select distinct x
+    from unnest(coalesce(p_competition_ids, array[]::uuid[])) as items(x)
+    where x is not null
+  );
+  if coalesce(cardinality(v_ids), 0) = 0 then
+    raise exception 'Ogni squadra deve appartenere ad almeno una competizione.';
+  end if;
+  if exists (
+    select 1
+    from unnest(v_ids) as items(x)
+    left join public.competitions c on c.id = items.x
+    where c.id is null
+  ) then
+    raise exception 'Una o più competizioni selezionate non esistono.';
+  end if;
+  delete from public.competition_teams where team_id = p_team_id;
+  insert into public.competition_teams (competition_id, team_id)
+  select x, p_team_id from unnest(v_ids) as items(x);
+end;
+$;
+
+revoke all on function public.set_team_competitions(uuid, uuid[]) from public, anon;
+grant execute on function public.set_team_competitions(uuid, uuid[]) to authenticated;
+
 create policy "admin manage players" on players for all using (is_staff('admin')) with check (is_staff('admin'));
 create policy "staff manage matches" on matches for all using (is_staff('operator')) with check (is_staff('operator'));
 create policy "staff manage lineups" on match_lineups for all using (is_staff('operator')) with check (is_staff('operator'));

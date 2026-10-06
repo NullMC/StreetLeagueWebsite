@@ -55,28 +55,29 @@ language plpgsql
 security definer
 set search_path = public
 as $$
-declare
-  home_competition uuid;
-  away_competition uuid;
 begin
-  select competition_id
-    into home_competition
-  from public.teams
-  where id = new.home_team_id;
-
-  select competition_id
-    into away_competition
-  from public.teams
-  where id = new.away_team_id;
-
-  if home_competition is null or away_competition is null then
-    raise exception 'Le squadre della partita non esistono.';
+  if not exists (
+    select 1
+    from public.competition_teams ct
+    where ct.competition_id = new.competition_id
+      and ct.team_id = new.home_team_id
+  ) then
+    raise exception
+      'La squadra di casa non appartiene alla competizione della partita.';
   end if;
 
-  if home_competition <> new.competition_id
-     or away_competition <> new.competition_id then
+  if not exists (
+    select 1
+    from public.competition_teams ct
+    where ct.competition_id = new.competition_id
+      and ct.team_id = new.away_team_id
+  ) then
     raise exception
-      'Le squadre di una partita devono appartenere alla stessa competizione.';
+      'La squadra ospite non appartiene alla competizione della partita.';
+  end if;
+
+  if new.home_team_id = new.away_team_id then
+    raise exception 'Le squadre devono essere diverse.';
   end if;
 
   return new;
@@ -90,6 +91,7 @@ create trigger trg_validate_match_competition_teams
 before insert or update on public.matches
 for each row
 execute function public.validate_match_competition_teams();
+
 
 -- ============================================================
 -- 3. FORMAZIONI: TEAM E PLAYER DEVONO ESSERE COERENTI
@@ -261,8 +263,11 @@ execute function public.validate_match_mvp_relation();
 -- 6. INDICI
 -- ============================================================
 
-create index if not exists idx_teams_competition
-  on public.teams(competition_id);
+create index if not exists idx_competition_teams_competition
+  on public.competition_teams(competition_id);
+
+create index if not exists idx_competition_teams_team
+  on public.competition_teams(team_id);
 
 create index if not exists idx_match_lineups_match_team
   on public.match_lineups(match_id, team_id);

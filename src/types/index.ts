@@ -24,11 +24,11 @@ export interface Competition {
 
 export interface Team {
   id: string;
-  competition_id: string;
   name: string;
   slug: string;
   logo_url: string | null;
   accent_hex: string | null;
+  competition_ids?: string[];
 }
 
 export interface Player {
