@@ -9,7 +9,7 @@ import { LogoScroller } from "../components/LogoScroller";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
-import { calculateStandings, getActiveCollaborations, getAllPlayerStats, getCurrentCompetition, getMatches, getPartners, getSocialContent, getStaffRanking, getTeams, subscribeToCompetition } from "../lib/api";
+import { calculateStandings, getActiveCollaborations, getActiveCompetitions, getCurrentCompetition, getMatches, getPartners, getPlayerStatsForCompetitions, getSocialContent, getStaffRanking, getStatisticsGroups, getTeams, subscribeToCompetition } from "../lib/api";
 import { getPlayerOfMonth } from "../lib/playerOfMonth";
 import type { ActiveCollaboration, Competition, Match, Partner, Player, PlayerStats, SocialContent, StaffRankingEntry, Team } from "../types";
 
@@ -108,18 +108,7 @@ function MatchList({ matches, teams }: { matches: Match[]; teams: Team[] }) {
 
 function StandingsList({ standings }: { standings: ReturnType<typeof calculateStandings> }) {
   if (!standings.length) return <EmptyState title="Classifica non disponibile" text="I risultati delle partite alimenteranno automaticamente la classifica." />;
-  return (
-    <div className="home-ranking">
-      {standings.slice(0, 8).map((entry, index) => (
-        <div className={`home-ranking__row ${index === 0 ? "is-first" : ""}`} key={entry.team.id}>
-          <span className="home-ranking__pos">{String(index + 1).padStart(2, "0")}</span>
-          <span className="home-ranking__team">{entry.team.logo_url ? <img src={entry.team.logo_url} alt="" /> : <i aria-hidden="true" />}{entry.team.name}</span>
-          <span className="home-ranking__record">{entry.played} G</span>
-          <strong>{entry.points}</strong>
-        </div>
-      ))}
-    </div>
-  );
+  return <div className="home-ranking">{standings.slice(0, 8).map((entry, index) => <a className={`home-ranking__row ${index === 0 ? "is-first" : ""}`} href={`/squadre/${entry.team.id}`} key={entry.team.id}><span className="home-ranking__pos">{String(index + 1).padStart(2, "0")}</span><span className="home-ranking__team">{entry.team.logo_url ? <img src={entry.team.logo_url} alt="" /> : <i aria-hidden="true" />}{entry.team.name}</span><span className="home-ranking__record">{entry.played} G</span><strong>{entry.points}</strong></a>)}</div>;
 }
 
 export default function HomeRedesigned() {
@@ -129,7 +118,9 @@ export default function HomeRedesigned() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]);
   const [social, setSocial] = useState<SocialContent[]>([]);
-  const [playerStats, setPlayerStats] = useState<PlayerWithStats[]>([]);
+  const [playerStatsByGroup, setPlayerStatsByGroup] = useState<Record<string, PlayerWithStats[]>>({});
+  const [activeStandings, setActiveStandings] = useState<Array<{ id: string; name: string; standings: ReturnType<typeof calculateStandings>; staff: StaffRankingEntry[] }>>([]);
+  const [statsGroups, setStatsGroups] = useState<Awaited<ReturnType<typeof getStatisticsGroups>>>([]);
   const [potm, setPotm] = useState<Awaited<ReturnType<typeof getPlayerOfMonth>>>(null);
   const [staffRanking, setStaffRanking] = useState<StaffRankingEntry[]>([]);
   const [staffMonthlyRanking, setStaffMonthlyRanking] = useState<StaffRankingEntry[]>([]);
@@ -138,21 +129,28 @@ export default function HomeRedesigned() {
     try {
       const active = await getCurrentCompetition();
       const now = new Date();
-      const [nextMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextStats, nextPotm, nextStaff, nextStaffMonth] = await Promise.all([
-        getMatches(active?.id), getTeams(active?.id), getPartners(), getActiveCollaborations(), getSocialContent(), getAllPlayerStats(), getPlayerOfMonth(),
+      const activeCompetitions = await getActiveCompetitions();
+      const nextGroups = await getStatisticsGroups(activeCompetitions);
+      const [nextMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
+        getMatches(active?.id), getTeams(active?.id), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
         active ? getStaffRanking(active.id) : Promise.resolve([]),
         active ? getStaffRanking(active.id, { year: now.getFullYear(), month: now.getMonth() + 1 }) : Promise.resolve([]),
+        Promise.all(activeCompetitions.map(async (competition) => {
+          const [competitionTeams, competitionMatches, staff] = await Promise.all([getTeams(competition.id), getMatches(competition.id), getStaffRanking(competition.id)]);
+          return { id: competition.id, name: competition.name, standings: calculateStandings(competitionTeams, competitionMatches), staff };
+        })),
+        Promise.all(nextGroups.map(async (group) => [group.id, await getPlayerStatsForCompetitions(group.competition_ids)] as const)),
       ]);
-      setCompetition(active); setMatches(nextMatches); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPlayerStats(nextStats); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
+      setCompetition(active); setMatches(nextMatches); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
+      setActiveStandings(nextStandings); setStatsGroups(nextGroups); setPlayerStatsByGroup(Object.fromEntries(nextGroupStats));
     } catch (error) {
       console.error("Home data error:", error);
-      setCompetition(null); setMatches([]); setTeams([]); setPartners([]); setCollaborations([]); setSocial([]); setPlayerStats([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]);
+      setCompetition(null); setMatches([]); setTeams([]); setPartners([]); setCollaborations([]); setSocial([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]); setActiveStandings([]); setStatsGroups([]); setPlayerStatsByGroup({});
     }
   };
 
   useEffect(() => { void load(); return subscribeToCompetition(() => void load()); }, []);
 
-  const standings = useMemo(() => calculateStandings(teams, matches), [teams, matches]);
   const heroBackground = "/assets/nebula-vertical.webp";
   const heroBackdropStyle: CSSProperties = {
     position: "absolute",
@@ -209,13 +207,13 @@ export default function HomeRedesigned() {
         <div className="home-section-head"><SectionTitle eyebrow="" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
         <div className="home-schedule__grid">
           <div><MatchList matches={matches} teams={teams} /></div>
-          <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifica</span><a href="/classifica">Completa ↗</a></div><StandingsList standings={standings} /><StaffRankingPreview items={staffRanking} /></div>
+          <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifiche attive</span><a href="/classifica">Complete ↗</a></div>{activeStandings.map((competition) => <div className="home-active-competition" key={competition.id}><h3>{competition.name}</h3><StandingsList standings={competition.standings} /><StaffRankingPreview items={competition.staff} /></div>)}{!activeStandings.length && <EmptyState title="Nessuna competizione attiva" text="Le classifiche appariranno qui quando ci saranno competizioni attive." />}</div>
         </div>
       </section>
 
       <section className="section--edge home-performers" id="home-stats">
         <div className="home-section-head"><SectionTitle eyebrow="Live data" title="Top performers" /></div>
-        <div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStats} />)}</div>
+        {statsGroups.map((group) => <div className="home-stat-group" key={group.id}><h3>{group.name}</h3>{group.competitions.length > 1 && <p className="admin-help-text">Dati aggregati da: {group.competitions.map((competition) => competition.name).join(" · ")}</p>}<div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStatsByGroup[group.id] ?? []} />)}</div></div>)}{!statsGroups.length && <EmptyState title="Nessuna statistica attiva" text="Le statistiche appariranno qui quando ci saranno competizioni attive." />}
       </section>
 
       <section className="section--edge potm-section" id="home-potm">
