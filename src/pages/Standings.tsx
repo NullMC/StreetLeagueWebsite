@@ -67,7 +67,7 @@ export default function Standings() {
           <div className="standings-competition-list">
             {competitionRows.map((competition) => (
               <section className="standings-competition" key={competition.id}>
-                <SectionTitle eyebrow="Competizione attiva" title={competition.name} />
+                <SectionTitle eyebrow="Competizione attiva" title={competition.name} variant="group" />
                 {!competition.rows.length ? (
                   <EmptyState title="Nessuna classifica" text="La classifica viene derivata dalle partite concluse." />
                 ) : (
