@@ -156,7 +156,7 @@ export default function Stats() {
                         return <div className="stat-card" key={leader.key}><span className="eyebrow">{leader.label}</span><h3>{top ? <a href={`/giocatori/${top.id}`}>{top.first_name} {top.last_name}</a> : "Nessun dato"}</h3><div className="stat-card__value">{top ? top.stats[leader.key] : "—"}</div><div className="rank-list">{leader.rows.map((player, index) => <a className="rank-row" href={`/giocatori/${player.id}`} key={player.id}><span>{String(index + 1).padStart(2, "0")}</span><span>{player.first_name} {player.last_name}</span><strong>{player.stats[leader.key]}</strong></a>)}</div></div>;
                       })}
                     </div>
-
+                  </>
                 )}
               </section>
             );
