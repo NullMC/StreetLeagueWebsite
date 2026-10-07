@@ -1732,6 +1732,25 @@ section,
   }
 }
 
+@media (max-width: 700px) {
+  .stats-competition-group {
+    margin-top: 62px;
+    padding-top: 10px;
+  }
+
+  .page > .stats-competition-group:first-of-type {
+    margin-top: 34px;
+  }
+
+  .stats-competition-group > .section {
+    padding-block: 44px;
+  }
+
+  .standings-competition-list {
+    gap: 58px;
+  }
+}
+
 @media (max-width: 640px) {
   :root {
     --site-header-height: 44px;
