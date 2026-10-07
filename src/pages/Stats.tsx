@@ -13,13 +13,11 @@ import type { PlayerStats, StaffRankingEntry, StatisticsGroup } from "../types";
 type StatKey = keyof PlayerStats;
 
 const categories: Array<{ key: StatKey; label: string }> = [
-  { key: "goals", label: "Reti" },
-  { key: "appearances", label: "Presenze" },
-  { key: "assists", label: "Assist" },
-  { key: "yellow_cards", label: "Gialli" },
-  { key: "red_cards", label: "Rossi" },
-  { key: "clean_sheets", label: "Clean sheets" },
-  { key: "mvps", label: "MVP" },
+  { key: "goals", label: "Miglior marcatore" },
+  { key: "mvps", label: "Miglior giocatore (MVP)" },
+  { key: "clean_sheets", label: "Miglior portiere (Clean sheets)" },
+  { key: "yellow_cards", label: "Cartellini gialli" },
+  { key: "red_cards", label: "Cartellini rossi" },
 ];
 
 export default function Stats() {
@@ -158,8 +156,7 @@ export default function Stats() {
                         return <div className="stat-card" key={leader.key}><span className="eyebrow">{leader.label}</span><h3>{top ? <a href={`/giocatori/${top.id}`}>{top.first_name} {top.last_name}</a> : "Nessun dato"}</h3><div className="stat-card__value">{top ? top.stats[leader.key] : "—"}</div><div className="rank-list">{leader.rows.map((player, index) => <a className="rank-row" href={`/giocatori/${player.id}`} key={player.id}><span>{String(index + 1).padStart(2, "0")}</span><span>{player.first_name} {player.last_name}</span><strong>{player.stats[leader.key]}</strong></a>)}</div></div>;
                       })}
                     </div>
-                    <div className="section"><SectionTitle eyebrow="Player data" title="Statistiche complete" variant="subsection" /><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Giocatore</th><th>Reti</th><th>Presenze</th><th>Assist</th><th>Gialli</th><th>Rossi</th><th>CS</th><th>MVP</th></tr></thead><tbody>{[...players].sort((a,b)=>b.stats.goals-a.stats.goals||b.stats.assists-a.stats.assists||b.stats.appearances-a.stats.appearances).map((player)=><tr key={player.id}><td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td><td>{player.stats.goals}</td><td>{player.stats.appearances}</td><td>{player.stats.assists}</td><td>{player.stats.yellow_cards}</td><td>{player.stats.red_cards}</td><td>{player.stats.clean_sheets}</td><td>{player.stats.mvps}</td></tr>)}</tbody></table></div></div>
-                  </>
+
                 )}
               </section>
             );
