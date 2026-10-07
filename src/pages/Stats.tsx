@@ -14,8 +14,8 @@ type StatKey = keyof PlayerStats;
 
 const categories: Array<{ key: StatKey; label: string }> = [
   { key: "goals", label: "Miglior marcatore" },
-  { key: "mvps", label: "Miglior giocatore (MVP)" },
-  { key: "clean_sheets", label: "Miglior portiere (Clean sheets)" },
+  { key: "mvps", label: "Miglior giocatore" },
+  { key: "clean_sheets", label: "Miglior portiere" },
   { key: "yellow_cards", label: "Cartellini gialli" },
   { key: "red_cards", label: "Cartellini rossi" },
 ];
