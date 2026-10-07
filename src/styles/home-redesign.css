@@ -286,8 +286,8 @@
 .home-stat-group > h3 { margin: 18px 0 10px; font-family: var(--display); font-size: 22px; text-transform: uppercase; }
 .home-ranking__row,
 .home-ranking__row:hover { color: inherit; text-decoration: none; }
-.home-stat-group { margin-top: 34px; }
-.home-stat-group + .home-stat-group { padding-top: 28px; border-top: 1px solid var(--home-line); }
+.home-stat-group { margin-top: 48px; }
+.home-stat-group + .home-stat-group { margin-top: 56px; padding-top: 34px; border-top: 1px solid var(--home-line); }
 .home-stat-group .leaders { margin-top: 14px; }
 
 .home-ranking__row { display: grid; grid-template-columns: 32px minmax(0,1fr) 52px 38px; align-items: center; gap: 10px; min-height: 48px; border-bottom: 1px solid var(--home-line); }
