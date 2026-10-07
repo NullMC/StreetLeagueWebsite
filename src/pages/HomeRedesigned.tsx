@@ -14,17 +14,31 @@ import { getPlayerOfMonth } from "../lib/playerOfMonth";
 import type { ActiveCollaboration, Competition, Match, Partner, Player, PlayerStats, SocialContent, StaffRankingEntry, Team } from "../types";
 
 type PlayerWithStats = Player & { stats: PlayerStats };
-type LeaderConfig = { key: "goals" | "assists" | "clean_sheets"; title: string };
+type LeaderConfig = {
+  key: "goals" | "mvps" | "clean_sheets" | "yellow_cards" | "red_cards";
+  title: string;
+};
 
 const leaderConfigs: LeaderConfig[] = [
   { key: "goals", title: "Miglior marcatore" },
-  { key: "assists", title: "Top uomo-assist" },
-  { key: "clean_sheets", title: "Clean sheets" },
+  { key: "mvps", title: "Miglior giocatore (MVP)" },
+  { key: "clean_sheets", title: "Miglior portiere (Clean sheets)" },
+  { key: "yellow_cards", title: "Cartellini gialli" },
+  { key: "red_cards", title: "Cartellini rossi" },
 ];
 
 function LeaderPanel({ config, players }: { config: LeaderConfig; players: PlayerWithStats[] }) {
   const ranked = useMemo(() => [...players].filter((p) => p.stats[config.key] > 0).sort((a, b) => b.stats[config.key] - a.stats[config.key] || a.last_name.localeCompare(b.last_name, "it") || a.first_name.localeCompare(b.first_name, "it")).slice(0, 3), [config.key, players]);
-  const statLabel = config.key === "goals" ? "gol" : config.key === "assists" ? "assist" : "clean sheet";
+  const statLabel =
+    config.key === "goals"
+      ? "gol"
+      : config.key === "mvps"
+        ? "MVP"
+        : config.key === "clean_sheets"
+          ? "clean sheet"
+          : config.key === "yellow_cards"
+            ? "gialli"
+            : "rossi";
   return (
     <article className="stat-card leader-stat-card">
       <span className="eyebrow">{config.title}</span>
