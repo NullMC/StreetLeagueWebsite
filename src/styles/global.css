@@ -749,6 +749,36 @@ section,
   margin-top: 76px;
 }
 
+/* Public page rhythm — repeated data groups need clear visual separation. */
+.stats-competition-group {
+  margin-top: 88px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.page > .stats-competition-group:first-of-type {
+  margin-top: 50px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.stats-competition-group > .section {
+  padding-block: 58px;
+}
+
+.standings-competition-list {
+  display: grid;
+  gap: 82px;
+}
+
+.standings-competition + .standings-competition {
+  padding-top: 8px;
+}
+
+.competition-detail-section {
+  margin-top: 84px;
+}
+
 .match-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
