@@ -99,13 +99,11 @@ export default function PlayerDetail() {
             ) : (
               <div className="leaders">
                 {[
-                  ["Reti", stats.goals],
-                  ["Presenze", stats.appearances],
-                  ["Assist", stats.assists],
-                  ["Gialli", stats.yellow_cards],
-                  ["Rossi", stats.red_cards],
-                  ["Clean sheets", stats.clean_sheets],
-                  ["MVP", stats.mvps],
+                  ["Miglior marcatore", stats.goals],
+                  ["Miglior giocatore (MVP)", stats.mvps],
+                  ["Miglior portiere (Clean sheets)", stats.clean_sheets],
+                  ["Cartellini gialli", stats.yellow_cards],
+                  ["Cartellini rossi", stats.red_cards],
                 ].map(([label, value]) => (
                   <div className="stat-card" key={String(label)}>
                     <span className="eyebrow">{label}</span>
