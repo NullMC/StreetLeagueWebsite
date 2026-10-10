@@ -194,7 +194,15 @@ function MatchList({
                 )}
                 <span>{home?.name ?? "—"}</span>
               </div>
-              <b>vs</b>
+              <b>
+                {match.status === "finished"
+                  ? `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`
+                  : match.status === "live"
+                    ? "LIVE"
+                    : match.status === "postponed"
+                      ? "RINV."
+                      : "vs"}
+              </b>
               <div className="home-match-row__team home-match-row__team--away">
                 {away?.logo_url ? (
                   <img src={away.logo_url} alt="" aria-hidden="true" />
