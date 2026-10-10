@@ -271,8 +271,12 @@
 .home-match-row__date span,
 .home-match-row__meta { color: var(--home-muted); font-size: 9px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
 .home-match-row__teams { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 12px; align-items: center; font-weight: 800; text-transform: uppercase; font-size: 12px; min-width: 0; }
-.home-match-row__teams span { min-width: 0; overflow-wrap: anywhere; }
-.home-match-row__teams span:last-child { text-align: right; }
+.home-match-row__team { display: flex; align-items: center; gap: 8px; min-width: 0; text-align: left; }
+.home-match-row__team--away { flex-direction: row-reverse; text-align: right; }
+.home-match-row__team > span:not(.home-match-row__logo-placeholder) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home-match-row__team img,
+.home-match-row__logo-placeholder { width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; object-fit: contain; background: #f0f0ef; }
+.home-match-row__logo-placeholder { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--home-line); color: var(--home-pink); font-size: 13px; font-weight: 900; }
 .home-match-row__teams b { color: var(--home-pink); font-size: 9px; }
 .home-match-row__meta { display: flex; justify-content: space-between; gap: 12px; min-width: 0; }
 .home-match-row__meta span:first-child { min-width: 0; overflow-wrap: anywhere; }
@@ -371,6 +375,10 @@
   }
   .home-match-row__date { grid-column: 1; grid-row: 1 / span 2; align-self: center; }
   .home-match-row__teams { grid-column: 2; grid-row: 1; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 8px; font-size: 11px; }
+  .home-match-row__team { gap: 5px; }
+  .home-match-row__team img,
+  .home-match-row__logo-placeholder { width: 24px; height: 24px; flex-basis: 24px; }
+  .home-match-row__logo-placeholder { font-size: 11px; }
   .home-match-row__meta { grid-column: 2; grid-row: 2; justify-content: flex-end; gap: 8px; font-size: 8px; }
   .home-match-row__meta span:last-child { font-size: 15px; }
 }
