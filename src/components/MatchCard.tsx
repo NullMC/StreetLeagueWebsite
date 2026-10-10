@@ -16,18 +16,46 @@ export function MatchCard({
         <span>{match.matchday || "CALENDARIO"}</span>
       </div>
       <div className="match-card__teams">
-        <div>
-          <b>{home?.name || "—"}</b>
-          <small>{home?.name || "Squadra"}</small>
+        <div className="match-card__team match-card__team--home">
+          {home?.logo_url ? (
+            <img
+              className="match-card__team-logo"
+              src={home.logo_url}
+              alt=""
+              aria-hidden="true"
+            />
+          ) : (
+            <span className="match-card__team-logo match-card__team-logo--placeholder" aria-hidden="true">
+              {home?.name?.slice(0, 1).toUpperCase() ?? "?"}
+            </span>
+          )}
+          <div className="match-card__team-copy">
+            <b>{home?.name || "—"}</b>
+            <small>Casa</small>
+          </div>
         </div>
-        <strong>
+        <strong className="match-card__score">
           {match.status === "scheduled"
             ? "VS"
             : `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`}
         </strong>
-        <div className="right">
-          <b>{away?.name || "—"}</b>
-          <small>{away?.name || "Squadra"}</small>
+        <div className="match-card__team match-card__team--away right">
+          {away?.logo_url ? (
+            <img
+              className="match-card__team-logo"
+              src={away.logo_url}
+              alt=""
+              aria-hidden="true"
+            />
+          ) : (
+            <span className="match-card__team-logo match-card__team-logo--placeholder" aria-hidden="true">
+              {away?.name?.slice(0, 1).toUpperCase() ?? "?"}
+            </span>
+          )}
+          <div className="match-card__team-copy">
+            <b>{away?.name || "—"}</b>
+            <small>Trasferta</small>
+          </div>
         </div>
       </div>
       <div className={`match-card__status status-${match.status}`}>
