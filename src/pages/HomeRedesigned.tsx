@@ -242,8 +242,9 @@ export default function HomeRedesigned() {
       const now = new Date();
       const activeCompetitions = await getActiveCompetitions();
       const nextGroups = await getStatisticsGroups(activeCompetitions);
-      const [allMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
-        getMatches(), getTeams(), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
+      const [matchSets, nextTeams, nextPartners, nextCollabs, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
+        Promise.all(activeCompetitions.map((item) => getMatches(item.id))).then((sets) => sets.flat()),
+        getTeams(), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
         active ? getStaffRanking(active.id) : Promise.resolve([]),
         active ? getStaffRanking(active.id, { year: now.getFullYear(), month: now.getMonth() + 1 }) : Promise.resolve([]),
         Promise.all(activeCompetitions.map(async (competition) => {
@@ -252,7 +253,7 @@ export default function HomeRedesigned() {
         })),
         Promise.all(nextGroups.map(async (group) => [group.id, await getPlayerStatsForCompetitions(group.competition_ids)] as const)),
       ]);
-      const nextMatches = getNextMatchdayMatches(allMatches, activeCompetitions);
+      const nextMatches = getNextMatchdayMatches(matchSets, activeCompetitions);
       setMatches(nextMatches); setActiveCompetitionList(activeCompetitions); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
       setActiveStandings(nextStandings); setStatsGroups(nextGroups); setPlayerStatsByGroup(Object.fromEntries(nextGroupStats));
     } catch (error) {
