@@ -223,7 +223,6 @@ function StandingsList({ standings }: { standings: ReturnType<typeof calculateSt
 }
 
 export default function HomeRedesigned() {
-  const [competition, setCompetition] = useState<Competition | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [activeCompetitionList, setActiveCompetitionList] = useState<Competition[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -254,11 +253,11 @@ export default function HomeRedesigned() {
         Promise.all(nextGroups.map(async (group) => [group.id, await getPlayerStatsForCompetitions(group.competition_ids)] as const)),
       ]);
       const nextMatches = getNextMatchdayMatches(allMatches, activeCompetitions);
-      setCompetition(active); setMatches(nextMatches); setActiveCompetitionList(activeCompetitions); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
+      setMatches(nextMatches); setActiveCompetitionList(activeCompetitions); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
       setActiveStandings(nextStandings); setStatsGroups(nextGroups); setPlayerStatsByGroup(Object.fromEntries(nextGroupStats));
     } catch (error) {
       console.error("Home data error:", error);
-      setCompetition(null); setMatches([]); setActiveCompetitionList([]); setTeams([]); setPartners([]); setCollaborations([]); setSocial([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]); setActiveStandings([]); setStatsGroups([]); setPlayerStatsByGroup({});
+      setMatches([]); setActiveCompetitionList([]); setTeams([]); setPartners([]); setCollaborations([]); setSocial([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]); setActiveStandings([]); setStatsGroups([]); setPlayerStatsByGroup({});
     }
   };
 
@@ -316,7 +315,7 @@ export default function HomeRedesigned() {
       </section>
 
       <section className="section--edge home-schedule" id="home-matches">
-        <span className="home-hero__competition" style={{ color: "rgba(1,10,8,.62)", opacity: 1 }}>{competition?.name ?? "Street League"}</span>
+        <span className="home-hero__competition" style={{ color: "rgba(1,10,8,.62)", opacity: 1 }}>Prossime giornate · tutte le competizioni attive</span>
         <div className="home-section-head"><SectionTitle eyebrow="" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
         <div className="home-schedule__grid">
           <div><MatchList matches={matches} teams={teams} competitions={activeCompetitionList} /></div>
