@@ -101,13 +101,85 @@ function SponsorCard({ partner }: { partner: Partner }) {
   );
 }
 
-function MatchList({ matches, teams }: { matches: Match[]; teams: Team[] }) {
+function localMatchDateKey(value: string): string | null {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+/**
+ * For each active competition, find its next date containing scheduled/live
+ * matches, then keep every fixture on that date so a complete matchday remains
+ * visible even when earlier kick-offs have already started or finished.
+ */
+function getNextMatchdayMatches(
+  matches: Match[],
+  activeCompetitions: Competition[],
+  now = new Date(),
+): Match[] {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const nextDateByCompetition = new Map<string, string>();
+
+  activeCompetitions.forEach((competition) => {
+    const eligible = matches
+      .filter((match) => {
+        if (
+          match.competition_id !== competition.id ||
+          (match.status !== "scheduled" && match.status !== "live")
+        ) {
+          return false;
+        }
+
+        const kickoff = new Date(match.kickoff_at);
+        return !Number.isNaN(kickoff.getTime()) && kickoff.getTime() >= today;
+      })
+      .sort(
+        (a, b) =>
+          new Date(a.kickoff_at).getTime() -
+          new Date(b.kickoff_at).getTime(),
+      );
+
+    const nextDate = eligible[0]
+      ? localMatchDateKey(eligible[0].kickoff_at)
+      : null;
+
+    if (nextDate) nextDateByCompetition.set(competition.id, nextDate);
+  });
+
+  const competitionOrder = new Map(
+    activeCompetitions.map((competition, index) => [competition.id, index]),
+  );
+
+  return matches
+    .filter((match) => {
+      const nextDate = nextDateByCompetition.get(match.competition_id);
+      return Boolean(nextDate && localMatchDateKey(match.kickoff_at) === nextDate);
+    })
+    .sort(
+      (a, b) =>
+        new Date(a.kickoff_at).getTime() -
+          new Date(b.kickoff_at).getTime() ||
+        (competitionOrder.get(a.competition_id) ?? 0) -
+          (competitionOrder.get(b.competition_id) ?? 0),
+    );
+}
+
+function MatchList({
+  matches,
+  teams,
+  competitions,
+}: {
+  matches: Match[];
+  teams: Team[];
+  competitions: Competition[];
+}) {
   if (!matches.length) return <EmptyState title="Nessuna partita programmata" text="Le prossime partite verranno mostrate qui." />;
   return (
     <div className="home-schedule__matches">
-      {matches.slice(0, 6).map((match) => {
+      {matches.map((match) => {
         const home = teams.find((t) => t.id === match.home_team_id);
         const away = teams.find((t) => t.id === match.away_team_id);
+        const competition = competitions.find((item) => item.id === match.competition_id);
         return (
           <a key={match.id} className="home-match-row" href={`/partite/${match.id}`}>
             <div className="home-match-row__date"><strong>{new Date(match.kickoff_at).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit" })}</strong><span>{new Date(match.kickoff_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</span></div>
@@ -134,14 +206,17 @@ function MatchList({ matches, teams }: { matches: Match[]; teams: Team[] }) {
                 <span>{away?.name ?? "—"}</span>
               </div>
             </div>
-            <div className="home-match-row__meta"><span>{match.matchday ?? "Match"}</span><span>→</span></div>
+            <div className="home-match-row__meta">
+              <span className="home-match-row__competition">{competition?.name ?? "Competizione"}</span>
+              <span className="home-match-row__matchday">{match.matchday ?? "Match"}</span>
+              <span aria-hidden="true">→</span>
+            </div>
           </a>
         );
       })}
     </div>
   );
 }
-
 function StandingsList({ standings }: { standings: ReturnType<typeof calculateStandings> }) {
   if (!standings.length) return <EmptyState title="Classifica non disponibile" text="I risultati delle partite alimenteranno automaticamente la classifica." />;
   return <div className="home-ranking">{standings.slice(0, 8).map((entry, index) => <a className={`home-ranking__row ${index === 0 ? "is-first" : ""}`} href={`/squadre/${entry.team.id}`} key={entry.team.id}><span className="home-ranking__pos">{String(index + 1).padStart(2, "0")}</span><span className="home-ranking__team">{entry.team.logo_url ? <img src={entry.team.logo_url} alt="" /> : <i aria-hidden="true" />}{entry.team.name}</span><span className="home-ranking__record">{entry.played} G</span><strong>{entry.points}</strong></a>)}</div>;
@@ -150,6 +225,7 @@ function StandingsList({ standings }: { standings: ReturnType<typeof calculateSt
 export default function HomeRedesigned() {
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [activeCompetitionList, setActiveCompetitionList] = useState<Competition[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]);
@@ -167,8 +243,8 @@ export default function HomeRedesigned() {
       const now = new Date();
       const activeCompetitions = await getActiveCompetitions();
       const nextGroups = await getStatisticsGroups(activeCompetitions);
-      const [nextMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
-        getMatches(active?.id), getTeams(), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
+      const [allMatches, nextTeams, nextPartners, nextCollabs, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
+        getMatches(), getTeams(), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
         active ? getStaffRanking(active.id) : Promise.resolve([]),
         active ? getStaffRanking(active.id, { year: now.getFullYear(), month: now.getMonth() + 1 }) : Promise.resolve([]),
         Promise.all(activeCompetitions.map(async (competition) => {
@@ -177,11 +253,12 @@ export default function HomeRedesigned() {
         })),
         Promise.all(nextGroups.map(async (group) => [group.id, await getPlayerStatsForCompetitions(group.competition_ids)] as const)),
       ]);
-      setCompetition(active); setMatches(nextMatches); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
+      const nextMatches = getNextMatchdayMatches(allMatches, activeCompetitions);
+      setCompetition(active); setMatches(nextMatches); setActiveCompetitionList(activeCompetitions); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
       setActiveStandings(nextStandings); setStatsGroups(nextGroups); setPlayerStatsByGroup(Object.fromEntries(nextGroupStats));
     } catch (error) {
       console.error("Home data error:", error);
-      setCompetition(null); setMatches([]); setTeams([]); setPartners([]); setCollaborations([]); setSocial([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]); setActiveStandings([]); setStatsGroups([]); setPlayerStatsByGroup({});
+      setCompetition(null); setMatches([]); setActiveCompetitionList([]); setTeams([]); setPartners([]); setCollaborations([]); setSocial([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]); setActiveStandings([]); setStatsGroups([]); setPlayerStatsByGroup({});
     }
   };
 
@@ -242,7 +319,7 @@ export default function HomeRedesigned() {
         <span className="home-hero__competition" style={{ color: "rgba(1,10,8,.62)", opacity: 1 }}>{competition?.name ?? "Street League"}</span>
         <div className="home-section-head"><SectionTitle eyebrow="" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
         <div className="home-schedule__grid">
-          <div><MatchList matches={matches} teams={teams} /></div>
+          <div><MatchList matches={matches} teams={teams} competitions={activeCompetitionList} /></div>
           <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifiche attive</span><a href="/classifica">Complete ↗</a></div>{activeStandings.map((competition) => <div className="home-active-competition" key={competition.id}><h3>{competition.name}</h3><StandingsList standings={competition.standings} /><StaffRankingPreview items={competition.staff} /></div>)}{!activeStandings.length && <EmptyState title="Nessuna competizione attiva" text="Le classifiche appariranno qui quando ci saranno competizioni attive." />}</div>
         </div>
       </section>
