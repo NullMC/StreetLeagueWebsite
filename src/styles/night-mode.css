@@ -528,6 +528,18 @@ html[data-theme="night"] .home-ranking__team img {
   background: #1a211d !important;
 }
 
+html[data-theme="night"] .home-match-row__team img,
+html[data-theme="night"] .home-match-row__logo-placeholder,
+html[data-theme="night"] .match-card__team-logo {
+  background: #1a211d !important;
+}
+
+html[data-theme="night"] .home-match-row__logo-placeholder,
+html[data-theme="night"] .match-card__team-logo--placeholder {
+  color: var(--pink2) !important;
+  border-color: rgba(245,247,246,.16) !important;
+}
+
 html[data-theme="night"] .home-redesign .stat-card,
 html[data-theme="night"] .home-redesign .potm-card,
 html[data-theme="night"] .home-redesign .staff-month-card,
