@@ -111,7 +111,29 @@ function MatchList({ matches, teams }: { matches: Match[]; teams: Team[] }) {
         return (
           <a key={match.id} className="home-match-row" href={`/partite/${match.id}`}>
             <div className="home-match-row__date"><strong>{new Date(match.kickoff_at).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit" })}</strong><span>{new Date(match.kickoff_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</span></div>
-            <div className="home-match-row__teams"><span>{home?.name ?? "—"}</span><b>vs</b><span>{away?.name ?? "—"}</span></div>
+            <div className="home-match-row__teams">
+              <div className="home-match-row__team home-match-row__team--home">
+                {home?.logo_url ? (
+                  <img src={home.logo_url} alt="" aria-hidden="true" />
+                ) : (
+                  <span className="home-match-row__logo-placeholder" aria-hidden="true">
+                    {home?.name?.slice(0, 1).toUpperCase() ?? "?"}
+                  </span>
+                )}
+                <span>{home?.name ?? "—"}</span>
+              </div>
+              <b>vs</b>
+              <div className="home-match-row__team home-match-row__team--away">
+                {away?.logo_url ? (
+                  <img src={away.logo_url} alt="" aria-hidden="true" />
+                ) : (
+                  <span className="home-match-row__logo-placeholder" aria-hidden="true">
+                    {away?.name?.slice(0, 1).toUpperCase() ?? "?"}
+                  </span>
+                )}
+                <span>{away?.name ?? "—"}</span>
+              </div>
+            </div>
             <div className="home-match-row__meta"><span>{match.matchday ?? "Match"}</span><span>→</span></div>
           </a>
         );
