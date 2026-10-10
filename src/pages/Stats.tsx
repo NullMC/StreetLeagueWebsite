@@ -61,11 +61,24 @@ export default function Stats() {
 
         const groupedEntries = await Promise.all(
           nextGroups.map(async (group) => {
-            const [players, staff] = await Promise.all([
+            const [players, staff, allTeams] = await Promise.all([
               getPlayerStatsForCompetitions(group.competition_ids),
               getStaffRankingForCompetitions(group.competition_ids),
+              Promise.all(group.competition_ids.map((competitionId) => getTeams(competitionId))).then(
+                (teamsByCompetition) => teamsByCompetition.flat(),
+              ),
             ]);
-            return [group.id, { players, staff }] as const;
+
+            const teamMap = new Map<string, Team>(
+              allTeams.map((team) => [team.id, team]),
+            );
+
+            const scopedPlayers: PlayerWithStats[] = players.map((player) => ({
+              ...player,
+              team_name: teamMap.get(player.team_id)?.name ?? "—",
+            }));
+
+            return [group.id, { players: scopedPlayers, staff }] as const;
           }),
         );
 
