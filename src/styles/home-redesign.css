@@ -278,9 +278,37 @@
 .home-match-row__logo-placeholder { width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; object-fit: contain; background: #f0f0ef; }
 .home-match-row__logo-placeholder { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--home-line); color: var(--home-pink); font-size: 13px; font-weight: 900; }
 .home-match-row__teams b { color: var(--home-pink); font-size: 9px; }
-.home-match-row__meta { display: flex; justify-content: space-between; gap: 12px; min-width: 0; }
+.home-match-row__meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 3px;
+  min-width: 0;
+}
 .home-match-row__meta span:first-child { min-width: 0; overflow-wrap: anywhere; }
-.home-match-row__meta span:last-child { color: var(--home-ink); font-size: 19px; }
+.home-match-row__competition {
+  grid-column: 1;
+  color: var(--home-pink);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.home-match-row__matchday {
+  grid-column: 1;
+  font-size: 8px;
+}
+.home-match-row__meta span:last-child {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  color: var(--home-ink);
+  font-size: 19px;
+}
 .home-schedule__ranking { border-left: 1px solid var(--home-line); padding-left: 28px; }
 .home-mini-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; border-bottom: 2px solid var(--home-ink); }
 .home-mini-head span { font-family: var(--display); font-size: 31px; text-transform: uppercase; }
@@ -379,7 +407,14 @@
   .home-match-row__team img,
   .home-match-row__logo-placeholder { width: 24px; height: 24px; flex-basis: 24px; }
   .home-match-row__logo-placeholder { font-size: 11px; }
-  .home-match-row__meta { grid-column: 2; grid-row: 2; justify-content: flex-end; gap: 8px; font-size: 8px; }
+  .home-match-row__meta {
+    grid-column: 2;
+    grid-row: 2;
+    grid-template-columns: minmax(0, 1fr) 18px;
+    column-gap: 8px;
+    row-gap: 2px;
+    font-size: 8px;
+  }
   .home-match-row__meta span:last-child { font-size: 15px; }
 }
 
