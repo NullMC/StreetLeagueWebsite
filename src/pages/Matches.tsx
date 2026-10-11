@@ -3,16 +3,21 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { MatchCard } from "../components/MatchCard";
 import { EmptyState } from "../components/EmptyState";
-import { getActiveCompetition, getMatches, getTeams } from "../lib/api";
+import { getActiveCompetitions, getMatches, getTeams } from "../lib/api";
 import type { Match, Team } from "../types";
 export default function Matches() {
   const [m, setM] = useState<Match[]>([]),
     [teams, setTeams] = useState<Team[]>([]);
   useEffect(() => {
     (async () => {
-      const c = await getActiveCompetition();
-      setM(await getMatches(c?.id));
-      setTeams(await getTeams(c?.id));
+      const competitions = await getActiveCompetitions();
+      const [matchSets, teamSets] = await Promise.all([
+        Promise.all(competitions.map((competition) => getMatches(competition.id))),
+        Promise.all(competitions.map((competition) => getTeams(competition.id))),
+      ]);
+      const uniqueTeams = new Map(teamSets.flat().map((team) => [team.id, team]));
+      setM(matchSets.flat());
+      setTeams(Array.from(uniqueTeams.values()));
     })();
   }, []);
   return (
