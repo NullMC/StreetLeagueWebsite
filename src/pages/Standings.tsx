@@ -4,7 +4,7 @@ import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import {
   calculateStandings,
-  getActiveCompetitions,
+  getCompetitions,
   getMatches,
   getTeams,
   subscribeToCompetition,
@@ -20,7 +20,7 @@ export default function Standings() {
 
     async function load() {
       try {
-        const competitions = await getActiveCompetitions();
+        const competitions = await getCompetitions();
         const data = await Promise.all(
           competitions.map(async (competition) => {
             const [teams, matches] = await Promise.all([
@@ -55,29 +55,54 @@ export default function Standings() {
   return (
     <PageShell>
       <div className="page">
-        <SectionTitle eyebrow="Competizioni attive" title="Classifiche" />
+        <SectionTitle eyebrow="Tutte le competizioni" title="Classifiche" />
 
         {error && <p className="admin-error">{error}</p>}
 
         {loading ? (
           <p className="admin-message">Caricamento…</p>
         ) : !competitionRows.length ? (
-          <EmptyState title="Nessuna classifica" text="Non ci sono competizioni attive da mostrare." />
+          <EmptyState title="Nessuna classifica" text="Non ci sono competizioni da mostrare." />
         ) : (
           <div className="standings-competition-list">
             {competitionRows.map((competition) => (
               <section className="standings-competition" key={competition.id}>
-                <SectionTitle eyebrow="Competizione attiva" title={competition.name} variant="group" />
+                <SectionTitle eyebrow="Classifica competizione" title={competition.name} variant="group" />
                 {!competition.rows.length ? (
-                  <EmptyState title="Nessuna classifica" text="La classifica viene derivata dalle partite concluse." />
+                  <EmptyState title="Nessuna classifica" text="La classifica viene derivata dalle partite concluse con un risultato registrato." />
                 ) : (
-                  <div className="leaderboard">
-                    <div className="table-row head"><span>#</span><span>Squadra</span><span>P</span><span>W</span><span>D</span><span>L</span><span>DG</span><span>PTS</span></div>
+                  <div className="leaderboard standings-table" role="region" aria-label={`Classifica ${competition.name}`} tabIndex={0}>
+                    <div className="table-row head">
+                      <span title="Posizione">#</span>
+                      <span>Squadra</span>
+                      <span title="Partite giocate">PG</span>
+                      <span>Vittorie</span>
+                      <span>Pareggi</span>
+                      <span>Sconfitte</span>
+                      <span>Goal fatti</span>
+                      <span>Goal subiti</span>
+                      <span>Differenza reti</span>
+                      <span>Punti</span>
+                    </div>
                     {competition.rows.map((row, index) => (
                       <a className="table-row" href={`/squadre/${row.team.id}`} key={row.team.id}>
                         <span className="position">{String(index + 1).padStart(2, "0")}</span>
-                        <div className="standings-team">{row.team.logo_url ? <img src={row.team.logo_url} alt="" className="standings-team__logo" /> : <span className="standings-team__logo standings-team__logo--placeholder" aria-hidden="true">{row.team.name.slice(0, 1).toUpperCase()}</span>}<strong>{row.team.name}</strong></div>
-                        <span>{row.played}</span><span>{row.wins}</span><span>{row.draws}</span><span>{row.losses}</span><span>{row.gd > 0 ? `+${row.gd}` : row.gd}</span><strong>{row.points}</strong>
+                        <div className="standings-team">
+                          {row.team.logo_url ? (
+                            <img src={row.team.logo_url} alt="" className="standings-team__logo" />
+                          ) : (
+                            <span className="standings-team__logo standings-team__logo--placeholder" aria-hidden="true">{row.team.name.slice(0, 1).toUpperCase()}</span>
+                          )}
+                          <strong>{row.team.name}</strong>
+                        </div>
+                        <span>{row.played}</span>
+                        <span>{row.wins}</span>
+                        <span>{row.draws}</span>
+                        <span>{row.losses}</span>
+                        <span>{row.gf}</span>
+                        <span>{row.ga}</span>
+                        <span>{row.gd > 0 ? `+${row.gd}` : row.gd}</span>
+                        <strong>{row.points}</strong>
                       </a>
                     ))}
                   </div>
