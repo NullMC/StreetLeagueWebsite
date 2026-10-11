@@ -175,6 +175,7 @@ export default function Stats() {
             player,
             competitionId: competition.id,
             competitionName: competition.name,
+            competitionStatus: competition.status,
           })),
       )
     : [];
@@ -235,9 +236,14 @@ export default function Stats() {
                     </tr>
                   </thead>
                   <tbody>
-                    {playerSearchResults.map(({ player, competitionId, competitionName }) => (
+                    {playerSearchResults.map(({ player, competitionId, competitionName, competitionStatus }) => (
                       <tr key={`${competitionId}-${player.id}`}>
-                        <td>{competitionName}</td>
+                        <td>
+                          {competitionName}{" "}
+                          <small className="stats-search-status">
+                            · {competitionStatus === "upcoming" ? "In arrivo" : "Attiva"}
+                          </small>
+                        </td>
                         <td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td>
                         <td>{player.team_name}</td>
                         <td>{player.stats.goals}</td>
