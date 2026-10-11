@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
-import { getTeams, getPlayers, getMatches } from "../lib/api";
+import { getActiveCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
 import type { Team, Player, Match } from "../types";
 
 function RosterCards({ members, staff = false }: { members: Player[]; staff?: boolean }) {
@@ -60,14 +60,16 @@ export default function TeamDetail() {
         if (!mounted) return;
         setTeam(selectedTeam);
         if (selectedTeam) {
-          const [teamPlayers, teamMatches] = await Promise.all([
+          const activeCompetitions = await getActiveCompetitions();
+          const [teamPlayers, matchesByCompetition] = await Promise.all([
             getPlayers(selectedTeam.id),
-            getMatches(),
+            Promise.all(activeCompetitions.map((competition) => getMatches(competition.id))),
           ]);
           if (!mounted) return;
           setPlayers(teamPlayers);
           setMatches(
-            teamMatches
+            matchesByCompetition
+              .flat()
               .filter((match) => match.home_team_id === selectedTeam.id || match.away_team_id === selectedTeam.id)
               .slice(0, 6),
           );
