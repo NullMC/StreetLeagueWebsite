@@ -116,7 +116,7 @@ export default function CompetitionDetail() {
               <h1>{title || competition.name}</h1>
               <div className="detail-meta">
                 {aggregated ? (
-                  <span>{sections.map((section) => section.competition.name).join(" · ")}</span>
+                  <span>{`${sections.length} competizioni incluse · ogni fase è mostrata separatamente`}</span>
                 ) : (
                   <>
                     <span>{competition.season_label || "—"}</span>
