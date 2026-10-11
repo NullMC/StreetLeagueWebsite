@@ -29,7 +29,9 @@ export default function PlayerDetail() {
         const activeCompetitionIds = activeCompetitions.map((competition) => competition.id);
         const [teams, activePlayerStats] = await Promise.all([
           getTeams(),
-          getPlayerStatsForCompetitions(activeCompetitionIds),
+          activeCompetitionIds.length
+            ? getPlayerStatsForCompetitions(activeCompetitionIds)
+            : Promise.resolve([]),
         ]);
 
         if (!mounted) return;
