@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
-import { getPlayers, getTeams, getPlayerStats } from "../lib/api";
+import { getActiveCompetitions, getPlayers, getTeams, getPlayerStatsForCompetitions } from "../lib/api";
 import type { Player, Team, PlayerStats } from "../types";
 
 export default function PlayerDetail() {
@@ -25,15 +25,18 @@ export default function PlayerDetail() {
 
         if (!current) return;
 
-        const [teams, currentStats] = await Promise.all([
+        const activeCompetitions = await getActiveCompetitions();
+        const activeCompetitionIds = activeCompetitions.map((competition) => competition.id);
+        const [teams, activePlayerStats] = await Promise.all([
           getTeams(),
-          getPlayerStats(current.id),
+          getPlayerStatsForCompetitions(activeCompetitionIds),
         ]);
 
         if (!mounted) return;
 
         setTeam(teams.find((item) => item.id === current.team_id) ?? null);
-        setStats(currentStats);
+        const currentStats = activePlayerStats.find((item) => item.id === current.id);
+        setStats(currentStats?.stats ?? null);
       } catch {
         if (mounted) {
           setPlayer(null);
