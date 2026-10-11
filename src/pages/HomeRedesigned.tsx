@@ -253,7 +253,7 @@ export default function HomeRedesigned() {
       const [matchSets, nextTeams, nextPartners, nextCollabs, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
         Promise.all(activeCompetitions.map((item) => getMatches(item.id))).then((sets) => sets.flat()),
         Promise.all(activeCompetitions.map((item) => getTeams(item.id))).then((sets) => {
-          const unique = new Map(sets.flat().map((team) => [team.id, team]));
+          const unique = new Map(sets.flat().map((team) => [team.id, team] as const));
           return Array.from(unique.values());
         }), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
         active ? getStaffRanking(active.id) : Promise.resolve([]),
