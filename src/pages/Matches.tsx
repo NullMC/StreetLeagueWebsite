@@ -15,7 +15,7 @@ export default function Matches() {
         Promise.all(competitions.map((competition) => getMatches(competition.id))),
         Promise.all(competitions.map((competition) => getTeams(competition.id))),
       ]);
-      const uniqueTeams = new Map(teamSets.flat().map((team) => [team.id, team]));
+      const uniqueTeams = new Map(teamSets.flat().map((team) => [team.id, team] as const));
       setM(matchSets.flat());
       setTeams(Array.from(uniqueTeams.values()));
     })();
