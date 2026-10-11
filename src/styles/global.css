@@ -2188,7 +2188,8 @@ section,
   min-width: 980px;
   width: 100%;
 }
-.standings-table .table-row > * {
+.standings-table .table-row > span,
+.standings-table .table-row > strong {
   display: block !important;
 }
 .standings-table .table-row > span:not(.position),
