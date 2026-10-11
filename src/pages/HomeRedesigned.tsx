@@ -9,7 +9,7 @@ import { LogoScroller } from "../components/LogoScroller";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
-import { calculateStandings, getActiveCollaborations, getActiveCompetitions, getCurrentCompetition, getMatches, getPartners, getPlayerStatsForCompetitions, getSocialContent, getStaffRanking, getStatisticsGroups, getTeams, subscribeToCompetition } from "../lib/api";
+import { calculateStandings, getActiveCollaborations, getActiveCompetitions, getMatches, getPartners, getPlayerStatsForCompetitions, getSocialContent, getStaffRankingForCompetitions, getStatisticsGroups, getTeams, subscribeToCompetition } from "../lib/api";
 import { getPlayerOfMonth } from "../lib/playerOfMonth";
 import type { ActiveCollaboration, Competition, Match, Partner, Player, PlayerStats, SocialContent, StaffRankingEntry, Team } from "../types";
 
@@ -246,7 +246,6 @@ export default function HomeRedesigned() {
 
   const load = async () => {
     try {
-      const active = await getCurrentCompetition();
       const now = new Date();
       const activeCompetitions = await getActiveCompetitions();
       const nextGroups = await getStatisticsGroups(activeCompetitions);
@@ -256,8 +255,8 @@ export default function HomeRedesigned() {
           const unique = new Map(sets.flat().map((team) => [team.id, team] as const));
           return Array.from(unique.values());
         }), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
-        active ? getStaffRanking(active.id) : Promise.resolve([]),
-        active ? getStaffRanking(active.id, { year: now.getFullYear(), month: now.getMonth() + 1 }) : Promise.resolve([]),
+        getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id)),
+        getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id), { year: now.getFullYear(), month: now.getMonth() + 1 }),
         Promise.all(activeCompetitions.map(async (competition) => {
           const [competitionTeams, competitionMatches, staff] = await Promise.all([getTeams(competition.id), getMatches(competition.id), getStaffRanking(competition.id)]);
           return { id: competition.id, name: competition.name, standings: calculateStandings(competitionTeams, competitionMatches), staff };
