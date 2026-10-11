@@ -475,7 +475,13 @@ export function calculateStandings(teams: Team[], matches: Match[]) {
       (match) =>
         match.status === "finished" &&
         match.home_score !== null &&
-        match.away_score !== null,
+        match.home_score !== undefined &&
+        match.away_score !== null &&
+        match.away_score !== undefined &&
+        Number.isFinite(Number(match.home_score)) &&
+        Number.isFinite(Number(match.away_score)) &&
+        Number(match.home_score) >= 0 &&
+        Number(match.away_score) >= 0,
     )
     .forEach((match) => {
       const home = map.get(match.home_team_id);
