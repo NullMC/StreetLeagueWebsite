@@ -263,7 +263,7 @@ export default function Stats() {
         ) : !groups.length ? (
           <EmptyState
             title="Nessuna statistica"
-            text="Non ci sono competizioni attive da analizzare."
+            text="Non ci sono competizioni da analizzare."
           />
         ) : (
           groups.map((group) => {
