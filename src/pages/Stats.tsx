@@ -3,7 +3,7 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import {
-  getActiveCompetitions,
+  getCompetitions,
   getPlayerStatsForCompetitions,
   getStaffRankingForCompetitions,
   getStatisticsGroups,
@@ -24,6 +24,7 @@ type PlayerWithStats = {
   last_name: string;
   shirt_number: number | null;
   position: string | null;
+  role?: string | null;
   stats: PlayerStats;
   team_name: string;
 };
@@ -47,6 +48,7 @@ export default function Stats() {
   const [staffByGroup, setStaffByGroup] = useState<
     Record<string, StaffRankingEntry[]>
   >({});
+  const [playerSearch, setPlayerSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -56,7 +58,7 @@ export default function Stats() {
     async function load() {
       try {
         setLoading(true);
-        const competitions = await getActiveCompetitions();
+        const competitions = await getCompetitions();
         const nextGroups = await getStatisticsGroups(competitions);
 
         const groupedEntries = await Promise.all(
@@ -152,10 +154,107 @@ export default function Stats() {
         .slice(0, 3),
     }));
 
+  const normalizedPlayerSearch = playerSearch.trim().toLocaleLowerCase("it");
+  const playerSearchResults = normalizedPlayerSearch
+    ? groups.flatMap((group) =>
+        group.competitions.flatMap((competition) =>
+          (playersByCompetition[competition.id] ?? [])
+            .filter((player) => {
+              if (player.role?.trim().toUpperCase() === "STAFF") return false;
+              const firstLast = `${player.first_name} ${player.last_name}`.toLocaleLowerCase("it");
+              const lastFirst = `${player.last_name} ${player.first_name}`.toLocaleLowerCase("it");
+              return firstLast.includes(normalizedPlayerSearch) || lastFirst.includes(normalizedPlayerSearch);
+            })
+            .map((player) => ({
+              player,
+              competitionId: competition.id,
+              competitionName: competition.name,
+            })),
+        ),
+      )
+    : [];
+
   return (
     <PageShell>
       <div className="page">
         <SectionTitle eyebrow="Live" title="Statistiche" />
+
+        {!loading && groups.length > 0 && (
+          <div className="stats-tools">
+            <div className="stats-tools__heading">
+              <span className="eyebrow">Navigazione rapida</span>
+              <strong>Vai direttamente alla competizione</strong>
+            </div>
+            <nav className="stats-competition-nav" aria-label="Navigazione competizioni">
+              {groups.flatMap((group) => group.competitions).map((competition) => (
+                <a key={competition.id} href={`#stats-competition-${competition.id}`}>
+                  {competition.name}
+                </a>
+              ))}
+            </nav>
+            <label className="stats-player-search">
+              <span>Cerca un giocatore</span>
+              <input
+                type="search"
+                value={playerSearch}
+                onChange={(event) => setPlayerSearch(event.target.value)}
+                placeholder="Scrivi nome o cognome…"
+                aria-label="Cerca giocatore per nome o cognome"
+              />
+            </label>
+          </div>
+        )}
+
+        {normalizedPlayerSearch && !loading && (
+          <section className="stats-search-results" aria-live="polite">
+            <SectionTitle
+              eyebrow="Ricerca giocatore"
+              title={`Risultati per “${playerSearch.trim()}”`}
+              variant="subsection"
+            />
+            {playerSearchResults.length ? (
+              <div className="admin-table-wrap">
+                <table className="admin-table stats-search-table">
+                  <thead>
+                    <tr>
+                      <th>Competizione</th>
+                      <th>Giocatore</th>
+                      <th>Squadra</th>
+                      <th>Reti</th>
+                      <th>Presenze</th>
+                      <th>Assist</th>
+                      <th>MVP</th>
+                      <th>Clean sheets</th>
+                      <th>Gialli</th>
+                      <th>Rossi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {playerSearchResults.map(({ player, competitionId, competitionName }) => (
+                      <tr key={`${competitionId}-${player.id}`}>
+                        <td>{competitionName}</td>
+                        <td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td>
+                        <td>{player.team_name}</td>
+                        <td>{player.stats.goals}</td>
+                        <td>{player.stats.appearances}</td>
+                        <td>{player.stats.assists}</td>
+                        <td>{player.stats.mvps}</td>
+                        <td>{player.stats.clean_sheets}</td>
+                        <td>{player.stats.yellow_cards}</td>
+                        <td>{player.stats.red_cards}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <EmptyState
+                title="Nessun giocatore trovato"
+                text="Prova con un nome o un cognome diverso."
+              />
+            )}
+          </section>
+        )}
 
         {error && <p className="admin-error">{error}</p>}
 
@@ -310,6 +409,7 @@ export default function Stats() {
                         return (
                           <section
                             className="stats-player-list"
+                            id={`stats-competition-${competition.id}`}
                             key={competition.id}
                           >
                             <SectionTitle
