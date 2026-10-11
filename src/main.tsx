@@ -41,6 +41,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeRedesigned />} />
         <Route path="/competizioni" element={<Competitions />} />
+        <Route path="/competizioni/gruppo/:groupName" element={<CompetitionDetail />} />
         <Route path="/competizioni/:competitionId" element={<CompetitionDetail />} />
         <Route path="/classifica" element={<Standings />} />
         <Route path="/squadre" element={<Teams />} />
