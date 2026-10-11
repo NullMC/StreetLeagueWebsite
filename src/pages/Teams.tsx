@@ -3,7 +3,7 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { EmptyState } from "../components/EmptyState";
-import { getTeams } from "../lib/api";
+import { getActiveCompetitions, getTeams } from "../lib/api";
 import type { Team } from "../types";
 
 export default function Teams() {
@@ -12,7 +12,12 @@ export default function Teams() {
   useEffect(() => {
     void (async () => {
       try {
-        setItems(await getTeams());
+        const competitions = await getActiveCompetitions();
+        const teamsByCompetition = await Promise.all(
+          competitions.map((competition) => getTeams(competition.id)),
+        );
+        const uniqueTeams = new Map(teamsByCompetition.flat().map((team) => [team.id, team]));
+        setItems(Array.from(uniqueTeams.values()).sort((a, b) => a.name.localeCompare(b.name, "it")));
       } catch (error) {
         console.error("Teams data error:", error);
         setItems([]);
