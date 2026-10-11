@@ -72,17 +72,9 @@ export default function Competitions() {
                 <a className="stat-card competition-list-card" key={listing.key} href={href}>
                   <span className="eyebrow">
                     {listing.status}
-                    {listing.competitions.length > 1 ? ` · ${listing.competitions.length} fasi` : ""}
+                    
                   </span>
                   <h3>{listing.name}</h3>
-                  <p>
-                    {listing.competitions.length > 1
-                      ? `${listing.competitions.length} competizioni incluse · gironi e fasi finali`
-                      : listing.competitions[0].season_label || "—"}
-                  </p>
-                  {listing.competitions.length > 1 && (
-                    <span className="competition-list-card__hint">Apri calendario e squadre per fase <span aria-hidden="true">↗</span></span>
-                  )}
                 </a>
               );
             })}
