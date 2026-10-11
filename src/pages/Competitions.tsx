@@ -77,7 +77,7 @@ export default function Competitions() {
                   <h3>{listing.name}</h3>
                   <p>
                     {listing.competitions.length > 1
-                      ? listing.competitions.map((competition) => competition.name).join(" · ")
+                      ? `${listing.competitions.length} competizioni incluse · gironi e fasi finali`
                       : listing.competitions[0].season_label || "—"}
                   </p>
                   {listing.competitions.length > 1 && (
