@@ -64,7 +64,7 @@ const fieldLabels: Record<string, string> = {
   team_id: "Squadra", first_name: "Nome", last_name: "Cognome", shirt_number: "Numero", position: "Ruolo", profile_image_url: "Immagine profilo", bg_less_image_url: "Immagine sfondo",
   home_team_id: "Squadra casa", away_team_id: "Squadra ospite", matchday: "Giornata", kickoff_at: "Inizio", home_score: "Gol casa", away_score: "Gol ospite", venue: "Campo",
   match_id: "Partita", player_id: "Giocatore", related_player_id: "Giocatore correlato", event_type: "Tipo evento", minute: "Minuto", note: "Nota", starter: "Titolare",
-  tier: "Livello", website_url: "Sito web", sort_order: "Ordine", platform: "Piattaforma", title: "Titolo", description: "Descrizione", thumbnail_url: "Anteprima", content_url: "URL contenuto", published_at: "Pubblicato", flyer_url: "Volantino", cta_url: "URL CTA", month_label: "Mese", statistics_group: "Gruppo aggregazione competizioni",
+  tier: "Livello", website_url: "Sito web", sort_order: "Ordine", platform: "Piattaforma", title: "Titolo", description: "Descrizione", thumbnail_url: "Anteprima", content_url: "URL contenuto", published_at: "Pubblicato", flyer_url: "Volantino", cta_url: "URL CTA", month_label: "Mese", statistics_group: "Gruppo competizioni (aggregazione)",
 };
 const options: Record<string, string[]> = {
   competitionStatus: ["upcoming", "active", "finished"], matchStatus: ["scheduled", "live", "finished", "postponed"], tier: ["gold", "silver", "bronze"], platform: ["youtube", "instagram", "tiktok"], event_type: ["goal", "assist", "yellow_card", "red_card", "substitution", "foul", "presidential_penalty", "other"],
