@@ -2529,3 +2529,9 @@ section,
     font-size: 11px;
   }
 }
+
+.stats-search-status {
+  color: var(--muted);
+  font-size: 9px;
+  white-space: nowrap;
+}
