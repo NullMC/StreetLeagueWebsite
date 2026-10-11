@@ -16,7 +16,7 @@ export default function Teams() {
         const teamsByCompetition = await Promise.all(
           competitions.map((competition) => getTeams(competition.id)),
         );
-        const uniqueTeams = new Map(teamsByCompetition.flat().map((team) => [team.id, team]));
+        const uniqueTeams = new Map(teamsByCompetition.flat().map((team) => [team.id, team] as const));
         setItems(Array.from(uniqueTeams.values()).sort((a, b) => a.name.localeCompare(b.name, "it")));
       } catch (error) {
         console.error("Teams data error:", error);
