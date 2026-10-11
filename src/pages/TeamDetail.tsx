@@ -83,8 +83,13 @@ export default function TeamDetail() {
     };
   }, [teamId]);
 
-  const staffMembers = players.filter((player) => player.role?.trim().toUpperCase() === "STAFF");
-  const rosterPlayers = players.filter((player) => player.role?.trim().toUpperCase() !== "STAFF");
+  // Nel back office il ruolo viene salvato nel campo "position"; "role"
+  // resta supportato per compatibilità con record o versioni precedenti.
+  const isStaffMember = (player: Player) =>
+    player.position?.trim().toUpperCase() === "STAFF" ||
+    player.role?.trim().toUpperCase() === "STAFF";
+  const staffMembers = players.filter(isStaffMember);
+  const rosterPlayers = players.filter((player) => !isStaffMember(player));
 
   return (
     <PageShell>
