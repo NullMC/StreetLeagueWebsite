@@ -12,6 +12,7 @@ import {
 import type {
   PlayerStats,
   StaffRankingEntry,
+  Competition,
   StatisticsGroup,
   Team,
 } from "../types";
@@ -48,6 +49,7 @@ export default function Stats() {
   const [staffByGroup, setStaffByGroup] = useState<
     Record<string, StaffRankingEntry[]>
   >({});
+  const [searchCompetitions, setSearchCompetitions] = useState<Competition[]>([]);
   const [playerSearch, setPlayerSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -58,7 +60,11 @@ export default function Stats() {
     async function load() {
       try {
         setLoading(true);
-        const competitions = await getCompetitions();
+        const allCompetitions = await getCompetitions();
+        const competitions = allCompetitions.filter((competition) => competition.status === "active");
+        const searchableCompetitions = allCompetitions.filter(
+          (competition) => competition.status === "active" || competition.status === "upcoming",
+        );
         const nextGroups = await getStatisticsGroups(competitions);
 
         const groupedEntries = await Promise.all(
@@ -85,7 +91,7 @@ export default function Stats() {
         );
 
         const competitionEntries = await Promise.all(
-          competitions.map(async (competition) => {
+          searchableCompetitions.map(async (competition) => {
             const [players, teams] = await Promise.all([
               getPlayerStatsForCompetitions([competition.id]),
               getTeams(competition.id),
@@ -107,6 +113,7 @@ export default function Stats() {
         if (!mounted) return;
 
         setGroups(nextGroups);
+        setSearchCompetitions(searchableCompetitions);
         setPlayersByGroup(
           Object.fromEntries(
             groupedEntries.map(([id, data]) => [id, data.players]),
@@ -156,21 +163,19 @@ export default function Stats() {
 
   const normalizedPlayerSearch = playerSearch.trim().toLocaleLowerCase("it");
   const playerSearchResults = normalizedPlayerSearch
-    ? groups.flatMap((group) =>
-        group.competitions.flatMap((competition) =>
-          (playersByCompetition[competition.id] ?? [])
-            .filter((player) => {
-              if (player.role?.trim().toUpperCase() === "STAFF") return false;
-              const firstLast = `${player.first_name} ${player.last_name}`.toLocaleLowerCase("it");
-              const lastFirst = `${player.last_name} ${player.first_name}`.toLocaleLowerCase("it");
-              return firstLast.includes(normalizedPlayerSearch) || lastFirst.includes(normalizedPlayerSearch);
-            })
-            .map((player) => ({
-              player,
-              competitionId: competition.id,
-              competitionName: competition.name,
-            })),
-        ),
+    ? searchCompetitions.flatMap((competition) =>
+        (playersByCompetition[competition.id] ?? [])
+          .filter((player) => {
+            if (player.role?.trim().toUpperCase() === "STAFF") return false;
+            const firstLast = `${player.first_name} ${player.last_name}`.toLocaleLowerCase("it");
+            const lastFirst = `${player.last_name} ${player.first_name}`.toLocaleLowerCase("it");
+            return firstLast.includes(normalizedPlayerSearch) || lastFirst.includes(normalizedPlayerSearch);
+          })
+          .map((player) => ({
+            player,
+            competitionId: competition.id,
+            competitionName: competition.name,
+          })),
       )
     : [];
 
