@@ -39,11 +39,13 @@ export default function CompetitionDetail() {
             // React Router usually provides an already-decoded parameter.
           }
           selected = allCompetitions.filter(
-            (item) => item.statistics_group?.trim() === decodedName,
+            (item) => item.status === "active" && item.statistics_group?.trim() === decodedName,
           );
           selectedTitle = decodedName;
         } else {
-          const found = allCompetitions.find((item) => item.id === competitionId);
+          const found = allCompetitions.find(
+            (item) => item.id === competitionId && item.status === "active",
+          );
           selected = found ? [found] : [];
           selectedTitle = found?.name ?? "";
         }
