@@ -258,7 +258,7 @@ export default function HomeRedesigned() {
         getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id)),
         getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id), { year: now.getFullYear(), month: now.getMonth() + 1 }),
         Promise.all(activeCompetitions.map(async (competition) => {
-          const [competitionTeams, competitionMatches, staff] = await Promise.all([getTeams(competition.id), getMatches(competition.id), getStaffRanking(competition.id)]);
+          const [competitionTeams, competitionMatches, staff] = await Promise.all([getTeams(competition.id), getMatches(competition.id), getStaffRankingForCompetitions([competition.id])]);
           return { id: competition.id, name: competition.name, standings: calculateStandings(competitionTeams, competitionMatches), staff };
         })),
         Promise.all(nextGroups.map(async (group) => [group.id, await getPlayerStatsForCompetitions(group.competition_ids)] as const)),
