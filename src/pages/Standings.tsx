@@ -4,7 +4,7 @@ import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import {
   calculateStandings,
-  getCompetitions,
+  getActiveCompetitions,
   getMatches,
   getTeams,
   subscribeToCompetition,
@@ -20,7 +20,7 @@ export default function Standings() {
 
     async function load() {
       try {
-        const competitions = await getCompetitions();
+        const competitions = await getActiveCompetitions();
         const data = await Promise.all(
           competitions.map(async (competition) => {
             const [teams, matches] = await Promise.all([
