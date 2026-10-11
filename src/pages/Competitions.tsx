@@ -37,11 +37,11 @@ function buildCompetitionListings(competitions: Competition[]): CompetitionListi
   return Array.from(groups.values())
     .map((listing) => ({
       ...listing,
-      status: listing.competitions.some((competition) => competition.status === "active")
+      status: (listing.competitions.some((competition) => competition.status === "active")
         ? "active"
         : listing.competitions.some((competition) => competition.status === "upcoming")
           ? "upcoming"
-          : "finished",
+          : "finished") as Competition["status"],
     }))
     .sort((a, b) =>
       Number(b.status === "active") - Number(a.status === "active") ||
