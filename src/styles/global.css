@@ -2176,3 +2176,178 @@ section,
     font-size: 64px;
   }
 }
+
+
+/* Complete league tables: keep every requested statistic available on desktop and mobile. */
+.standings-table {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.standings-table .table-row {
+  grid-template-columns: 50px minmax(190px, 1fr) repeat(8, minmax(80px, 94px));
+  min-width: 980px;
+  width: 100%;
+}
+.standings-table .table-row > * {
+  display: block !important;
+}
+.standings-table .table-row > span:not(.position),
+.standings-table .table-row > strong {
+  text-align: center;
+}
+.standings-table .standings-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.standings-table .standings-team strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.competition-list-card__hint {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--pink2);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.competition-detail-stage + .competition-detail-stage {
+  margin-top: 84px;
+  padding-top: 42px;
+  border-top: 1px solid var(--line);
+}
+.competition-detail-section--stage {
+  margin-top: 54px;
+}
+.team-staff-section {
+  margin-top: 22px;
+  padding-block: 48px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.team-roster-card--staff {
+  border-color: rgba(228, 34, 120, .24);
+}
+.stats-tools {
+  position: sticky;
+  top: var(--site-header-total-height, 72px);
+  z-index: 12;
+  margin: 28px 0 32px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--line);
+  background: var(--ink);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .12);
+}
+.stats-tools__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.stats-tools__heading strong {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.stats-competition-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 0 10px;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+.stats-competition-nav a {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+.stats-competition-nav a:hover,
+.stats-competition-nav a:focus-visible {
+  border-color: var(--pink);
+  color: var(--pink2);
+}
+.stats-player-search {
+  display: grid;
+  grid-template-columns: minmax(130px, .35fr) minmax(220px, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.stats-player-search > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.stats-player-search input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  outline: none;
+  background: rgba(249, 249, 249, .035);
+  color: var(--white);
+  font: inherit;
+}
+.stats-player-search input:focus {
+  border-color: var(--pink);
+}
+.stats-search-results {
+  margin: 42px 0 56px;
+  padding: 24px 0 36px;
+  border-bottom: 1px solid var(--line);
+}
+.stats-search-table {
+  min-width: 980px;
+}
+.stats-player-list {
+  scroll-margin-top: calc(var(--site-header-total-height, 72px) + 110px);
+}
+.competition-detail-page .competition-detail-stage {
+  scroll-margin-top: calc(var(--site-header-total-height, 72px) + 24px);
+}
+@media (max-width: 700px) {
+  .standings-table .table-row {
+    min-width: 980px;
+  }
+  .stats-tools {
+    margin-top: 20px;
+    padding: 11px;
+  }
+  .stats-tools__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .stats-player-search {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .competition-detail-stage + .competition-detail-stage {
+    margin-top: 58px;
+    padding-top: 30px;
+  }
+  .team-staff-section {
+    margin-top: 10px;
+    padding-block: 36px;
+  }
+}
