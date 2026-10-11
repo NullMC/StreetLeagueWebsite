@@ -75,6 +75,11 @@ export default function Competitions() {
                     
                   </span>
                   <h3>{listing.name}</h3>
+                  
+                  <p>{listing.competitions[0].season_label || "—"}</p>
+                 
+                  <span className="competition-list-card__hint">Apri <span aria-hidden="true">↗</span></span>
+                  
                 </a>
               );
             })}
