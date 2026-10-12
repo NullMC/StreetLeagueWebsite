@@ -103,7 +103,9 @@ export default function PlayerDetail() {
               )}
 
               <span className="eyebrow">
-                Player profile / {team?.name || "—"}
+                Profilo giocatore 
+                <br />
+                {team?.name || "—"}
               </span>
 
               <h1>
