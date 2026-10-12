@@ -145,21 +145,39 @@ export default function Stats() {
     };
   }, []);
 
+  const isGoalkeeper = (player: PlayerWithStats) => {
+    const position = player.position?.trim().toLocaleLowerCase("it") ?? "";
+    return (
+      position.includes("portier") ||
+      position.includes("goalkeeper") ||
+      position.includes("goalie") ||
+      position === "gk" ||
+      position === "por"
+    );
+  };
+
   const leadersFor = (players: PlayerWithStats[]) =>
-    categories.map((category) => ({
-      ...category,
-      rows: [...players]
-        .filter((player) => player.stats[category.key] > 0)
-        .sort(
-          (a, b) =>
-            b.stats[category.key] - a.stats[category.key] ||
-            `${a.first_name} ${a.last_name}`.localeCompare(
-              `${b.first_name} ${b.last_name}`,
-              "it",
-            ),
-        )
-        .slice(0, 3),
-    }));
+    categories.map((category) => {
+      const eligiblePlayers =
+        category.key === "clean_sheets"
+          ? players.filter(isGoalkeeper)
+          : players;
+
+      return {
+        ...category,
+        rows: [...eligiblePlayers]
+          .filter((player) => player.stats[category.key] > 0)
+          .sort(
+            (a, b) =>
+              b.stats[category.key] - a.stats[category.key] ||
+              `${a.first_name} ${a.last_name}`.localeCompare(
+                `${b.first_name} ${b.last_name}`,
+                "it",
+              ),
+          )
+          .slice(0, 3),
+      };
+    });
 
   const normalizedPlayerSearch = playerSearch.trim().toLocaleLowerCase("it");
   const playerSearchResults = normalizedPlayerSearch
@@ -225,12 +243,12 @@ export default function Stats() {
                     <tr>
                       <th>Competizione</th>
                       <th>Giocatore</th>
+                      <th>N° maglia</th>
                       <th>Squadra</th>
                       <th>Reti</th>
                       <th>Presenze</th>
                       <th>Assist</th>
                       <th>MVP</th>
-                      <th>Clean sheets</th>
                       <th>Gialli</th>
                       <th>Rossi</th>
                     </tr>
@@ -245,12 +263,12 @@ export default function Stats() {
                           </small>
                         </td>
                         <td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td>
+                        <td>{player.shirt_number ?? "—"}</td>
                         <td>{player.team_name}</td>
                         <td>{player.stats.goals}</td>
                         <td>{player.stats.appearances}</td>
                         <td>{player.stats.assists}</td>
                         <td>{player.stats.mvps}</td>
-                        <td>{player.stats.clean_sheets}</td>
                         <td>{player.stats.yellow_cards}</td>
                         <td>{player.stats.red_cards}</td>
                       </tr>
@@ -441,10 +459,10 @@ export default function Stats() {
                                     <tr>
                                       <th>#</th>
                                       <th>Giocatore</th>
+                                      <th>N° maglia</th>
                                       <th>Squadra</th>
                                       <th>Reti</th>
                                       <th>MVP</th>
-                                      <th>Clean sheets</th>
                                       <th>Gialli</th>
                                       <th>Rossi</th>
                                     </tr>
@@ -471,10 +489,10 @@ export default function Stats() {
                                               {player.last_name}
                                             </a>
                                           </td>
+                                          <td>{player.shirt_number ?? "—"}</td>
                                           <td>{player.team_name}</td>
                                           <td>{player.stats.goals}</td>
                                           <td>{player.stats.mvps}</td>
-                                          <td>{player.stats.clean_sheets}</td>
                                           <td>
                                             {player.stats.yellow_cards}
                                           </td>
