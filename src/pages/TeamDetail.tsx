@@ -139,26 +139,6 @@ export default function TeamDetail() {
                   })}
                 </div>
               ) : (
-                              <span className="match-card__team-logo match-card__team-logo--placeholder" aria-hidden="true">
-                                {(matchTeam?.name ?? "?").slice(0, 1).toUpperCase()}
-                              </span>
-                            )}
-                            <div className="match-card__team-copy">
-                              <b>{matchTeam?.name ?? "Squadra non disponibile"}</b>
-                              <small>{index === 0 ? "Casa" : "Trasferta"}</small>
-                            </div>
-                          </div>
-                        ))}
-                        <strong>
-                          {match.status === "scheduled"
-                            ? "VS"
-                            : `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`}
-                        </strong>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              ) : (
                 <EmptyState title="Nessuna partita" />
               )}
             </section>
