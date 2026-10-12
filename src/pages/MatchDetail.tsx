@@ -115,8 +115,16 @@ export default function MatchDetail() {
           <div className="match-detail-score">
             <div className="scoreboard">
               <div className="score-team">
-                
-                <h2>{home?.name || "—"}</h2>
+                <div className="score-team__identity">
+                  {home?.logo_url ? (
+                    <img className="score-team__logo" src={home.logo_url} alt="" aria-hidden="true" />
+                  ) : (
+                    <span className="score-team__logo score-team__logo--placeholder" aria-hidden="true">
+                      {home?.name?.slice(0, 1).toUpperCase() ?? "?"}
+                    </span>
+                  )}
+                  <h2>{home?.name || "—"}</h2>
+                </div>
               </div>
 
               <div className="score">
@@ -126,8 +134,16 @@ export default function MatchDetail() {
               </div>
 
               <div className="score-team right">
-                
-                <h2>{away?.name || "—"}</h2>
+                <div className="score-team__identity">
+                  {away?.logo_url ? (
+                    <img className="score-team__logo" src={away.logo_url} alt="" aria-hidden="true" />
+                  ) : (
+                    <span className="score-team__logo score-team__logo--placeholder" aria-hidden="true">
+                      {away?.name?.slice(0, 1).toUpperCase() ?? "?"}
+                    </span>
+                  )}
+                  <h2>{away?.name || "—"}</h2>
+                </div>
               </div>
             </div>
           </div>
