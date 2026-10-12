@@ -255,10 +255,8 @@ export default function Stats() {
                       <th>N° maglia</th>
                       <th>Giocatore</th>
                       <th>Squadra</th>
-                      <th>Reti</th>
-                      <th>Presenze</th>
+                      <th>Gol</th>
                       <th>Assist</th>
-                      <th>MVP</th>
                       <th>Gialli</th>
                       <th>Rossi</th>
                     </tr>
@@ -276,9 +274,7 @@ export default function Stats() {
                         <td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td>
                         <td>{player.team_name}</td>
                         <td>{player.stats.goals}</td>
-                        <td>{player.stats.appearances}</td>
                         <td>{player.stats.assists}</td>
-                        <td>{player.stats.mvps}</td>
                         <td>{player.stats.yellow_cards}</td>
                         <td>{player.stats.red_cards}</td>
                       </tr>
@@ -471,8 +467,8 @@ export default function Stats() {
                                       <th>N° maglia</th>
                                       <th>Giocatore</th>
                                       <th>Squadra</th>
-                                      <th>Reti</th>
-                                      <th>MVP</th>
+                                      <th>Gol</th>
+                                      <th>Assist</th>
                                       <th>Gialli</th>
                                       <th>Rossi</th>
                                     </tr>
@@ -502,7 +498,7 @@ export default function Stats() {
                                           </td>
                                           <td>{player.team_name}</td>
                                           <td>{player.stats.goals}</td>
-                                          <td>{player.stats.mvps}</td>
+                                          <td>{player.stats.assists}</td>
                                           <td>
                                             {player.stats.yellow_cards}
                                           </td>
