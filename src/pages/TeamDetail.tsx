@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
+import { MatchCard } from "../components/MatchCard";
 import { getActiveCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
 import type { Team, Player, Match } from "../types";
 
@@ -124,28 +125,20 @@ export default function TeamDetail() {
               <SectionTitle eyebrow="" title="Partite" variant="subsection" />
               {matches.length ? (
                 <div className="match-grid">
-                  {matches.map((match) => (
-                    <a key={match.id} className="match-card" href={`/partite/${match.id}`}>
-                      <div className="match-card__meta">
-                        <span>{new Date(match.kickoff_at).toLocaleDateString("it-IT")}</span>
-                        <span>{match.matchday || "—"}</span>
-                      </div>
-                      <div className="match-card__teams">
-                        {[
-                          allTeams.find((item) => item.id === match.home_team_id),
-                          allTeams.find((item) => item.id === match.away_team_id),
-                        ].map((matchTeam, index) => (
-                          <div
-                            className={`match-card__team${index === 1 ? " match-card__team--away" : ""}`}
-                            key={matchTeam?.id ?? `${match.id}-team-${index}`}
-                          >
-                            {matchTeam?.logo_url ? (
-                              <img
-                                className="match-card__team-logo"
-                                src={matchTeam.logo_url}
-                                alt={`Logo ${matchTeam.name}`}
-                              />
-                            ) : (
+                  {matches.map((match) => {
+                    const home = allTeams.find((item) => item.id === match.home_team_id);
+                    const away = allTeams.find((item) => item.id === match.away_team_id);
+                    return (
+                      <MatchCard
+                        key={match.id}
+                        match={match}
+                        home={home}
+                        away={away}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
                               <span className="match-card__team-logo match-card__team-logo--placeholder" aria-hidden="true">
                                 {(matchTeam?.name ?? "?").slice(0, 1).toUpperCase()}
                               </span>
