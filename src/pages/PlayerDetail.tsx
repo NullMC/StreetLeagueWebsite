@@ -104,8 +104,6 @@ export default function PlayerDetail() {
 
               <span className="eyebrow">
                 Profilo giocatore 
-                <br />
-                {team?.name || "—"}
               </span>
 
               <h1>
@@ -118,6 +116,7 @@ export default function PlayerDetail() {
 
               <div className="detail-meta">
                 <span>{player.position || "—"}</span>
+                <span> - </span>
                 <span>{team?.name || "—"}</span>
               </div>
             </div>
