@@ -115,11 +115,6 @@ export default function CompetitionDetail() {
           <section className="detail-hero">
             <div className="detail-hero__inner">
               <h1>{title || competition.name}</h1>
-              <div className="detail-meta"> 
-                <span>{competition.season_label || "—"}</span>
-                <span>{competition.start_date || "—"}</span>
-                <span>{competition.end_date || "—"}</span>
-              </div>
             </div>
           </section>
 
