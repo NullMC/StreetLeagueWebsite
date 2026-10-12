@@ -81,10 +81,12 @@ export default function Stats() {
               allTeams.map((team) => [team.id, team]),
             );
 
-            const scopedPlayers: PlayerWithStats[] = players.map((player) => ({
-              ...player,
-              team_name: teamMap.get(player.team_id)?.name ?? "—",
-            }));
+            const scopedPlayers: PlayerWithStats[] = players
+              .filter((player) => !isStaffMember(player))
+              .map((player) => ({
+                ...player,
+                team_name: teamMap.get(player.team_id)?.name ?? "—",
+              }));
 
             return [group.id, { players: scopedPlayers, staff }] as const;
           }),
@@ -101,10 +103,12 @@ export default function Stats() {
               teams.map((team) => [team.id, team]),
             );
 
-            const scopedPlayers: PlayerWithStats[] = players.map((player) => ({
-              ...player,
-              team_name: teamMap.get(player.team_id)?.name ?? "—",
-            }));
+            const scopedPlayers: PlayerWithStats[] = players
+              .filter((player) => !isStaffMember(player))
+              .map((player) => ({
+                ...player,
+                team_name: teamMap.get(player.team_id)?.name ?? "—",
+              }));
 
             return [competition.id, scopedPlayers] as const;
           }),
@@ -144,6 +148,12 @@ export default function Stats() {
       mounted = false;
     };
   }, []);
+
+  const isStaffMember = (
+    player: Pick<PlayerWithStats, "position" | "role">,
+  ) =>
+    player.position?.trim().toUpperCase() === "STAFF" ||
+    player.role?.trim().toUpperCase() === "STAFF";
 
   const isGoalkeeper = (player: PlayerWithStats) => {
     const position = player.position?.trim().toLocaleLowerCase("it") ?? "";
@@ -242,8 +252,8 @@ export default function Stats() {
                   <thead>
                     <tr>
                       <th>Competizione</th>
-                      <th>Giocatore</th>
                       <th>N° maglia</th>
+                      <th>Giocatore</th>
                       <th>Squadra</th>
                       <th>Reti</th>
                       <th>Presenze</th>
@@ -262,8 +272,8 @@ export default function Stats() {
                             · {competitionStatus === "upcoming" ? "In arrivo" : "Attiva"}
                           </small>
                         </td>
-                        <td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td>
                         <td>{player.shirt_number ?? "—"}</td>
+                        <td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td>
                         <td>{player.team_name}</td>
                         <td>{player.stats.goals}</td>
                         <td>{player.stats.appearances}</td>
@@ -458,8 +468,8 @@ export default function Stats() {
                                   <thead>
                                     <tr>
                                       <th>#</th>
-                                      <th>Giocatore</th>
                                       <th>N° maglia</th>
+                                      <th>Giocatore</th>
                                       <th>Squadra</th>
                                       <th>Reti</th>
                                       <th>MVP</th>
@@ -481,6 +491,7 @@ export default function Stats() {
                                           <td>
                                             {String(index + 1).padStart(2, "0")}
                                           </td>
+                                          <td>{player.shirt_number ?? "—"}</td>
                                           <td>
                                             <a
                                               href={`/giocatori/${player.id}`}
@@ -489,7 +500,6 @@ export default function Stats() {
                                               {player.last_name}
                                             </a>
                                           </td>
-                                          <td>{player.shirt_number ?? "—"}</td>
                                           <td>{player.team_name}</td>
                                           <td>{player.stats.goals}</td>
                                           <td>{player.stats.mvps}</td>
