@@ -115,7 +115,7 @@ export default function MatchDetail() {
           <div className="match-detail-score">
             <div className="scoreboard">
               <div className="score-team">
-                <span className="eyebrow">HOME</span>
+                
                 <h2>{home?.name || "—"}</h2>
               </div>
 
@@ -126,14 +126,14 @@ export default function MatchDetail() {
               </div>
 
               <div className="score-team right">
-                <span className="eyebrow">AWAY</span>
+                
                 <h2>{away?.name || "—"}</h2>
               </div>
             </div>
           </div>
 
           <div className="page">
-            <SectionTitle eyebrow="Match timeline" title="Eventi"  variant="subsection" />
+            <SectionTitle eyebrow="" title="Eventi"  variant="subsection" />
 
             {events.length ? (
               <div className="timeline">
@@ -164,7 +164,7 @@ export default function MatchDetail() {
             )}
 
             <div className="section">
-              <SectionTitle eyebrow="Lineups" title="Formazioni"  variant="subsection" />
+              <SectionTitle eyebrow="" title="Formazioni"  variant="subsection" />
 
               {!lineups.length ? (
                 <EmptyState
