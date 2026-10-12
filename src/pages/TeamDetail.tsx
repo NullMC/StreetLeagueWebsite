@@ -48,6 +48,7 @@ function RosterCards({ members, staff = false }: { members: Player[]; staff?: bo
 export default function TeamDetail() {
   const { teamId = "" } = useParams();
   const [team, setTeam] = useState<Team | null>(null);
+  const [allTeams, setAllTeams] = useState<Team[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
 
@@ -58,6 +59,7 @@ export default function TeamDetail() {
         const teams = await getTeams();
         const selectedTeam = teams.find((item) => item.id === teamId) || null;
         if (!mounted) return;
+        setAllTeams(teams);
         setTeam(selectedTeam);
         if (selectedTeam) {
           const activeCompetitions = await getActiveCompetitions();
@@ -129,13 +131,36 @@ export default function TeamDetail() {
                         <span>{match.matchday || "—"}</span>
                       </div>
                       <div className="match-card__teams">
-                        <div><b>{match.home_team_id === team.id ? team.name : "—"}</b></div>
+                        {[
+                          allTeams.find((item) => item.id === match.home_team_id),
+                          allTeams.find((item) => item.id === match.away_team_id),
+                        ].map((matchTeam, index) => (
+                          <div
+                            className={`match-card__team${index === 1 ? " match-card__team--away" : ""}`}
+                            key={matchTeam?.id ?? `${match.id}-team-${index}`}
+                          >
+                            {matchTeam?.logo_url ? (
+                              <img
+                                className="match-card__team-logo"
+                                src={matchTeam.logo_url}
+                                alt={`Logo ${matchTeam.name}`}
+                              />
+                            ) : (
+                              <span className="match-card__team-logo match-card__team-logo--placeholder" aria-hidden="true">
+                                {(matchTeam?.name ?? "?").slice(0, 1).toUpperCase()}
+                              </span>
+                            )}
+                            <div className="match-card__team-copy">
+                              <b>{matchTeam?.name ?? "Squadra non disponibile"}</b>
+                              <small>{index === 0 ? "Casa" : "Trasferta"}</small>
+                            </div>
+                          </div>
+                        ))}
                         <strong>
                           {match.status === "scheduled"
                             ? "VS"
                             : `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`}
                         </strong>
-                        <div className="right"><b>{match.away_team_id === team.id ? team.name : "—"}</b></div>
                       </div>
                     </a>
                   ))}
