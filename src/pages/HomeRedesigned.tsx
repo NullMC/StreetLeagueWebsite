@@ -332,18 +332,18 @@ export default function HomeRedesigned() {
 
       <section className="section--edge home-performers" id="home-stats">
         <div className="home-section-head"><SectionTitle eyebrow="Live data" title="Top performers" /></div>
-        {statsGroups.map((group) => <div className="home-stat-group" key={group.id}><h3>{group.name}</h3>{group.competitions.length > 1 && <p className="admin-help-text">Dati aggregati da: {group.competitions.map((competition) => competition.name).join(" · ")}</p>}<div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStatsByGroup[group.id] ?? []} />)}</div></div>)}{!statsGroups.length && <EmptyState title="Nessuna statistica attiva" text="Le statistiche appariranno qui quando ci saranno competizioni attive." />}
+        {statsGroups.map((group) => <div className="home-stat-group" key={group.id}><h3>{group.name}</h3><div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStatsByGroup[group.id] ?? []} />)}</div></div>)}{!statsGroups.length && <EmptyState title="Nessuna statistica attiva" text="Le statistiche appariranno qui quando ci saranno competizioni attive." />}
       </section>
 
       <section className="section--edge potm-section" id="home-potm">
-        <div className="home-section-head"><SectionTitle eyebrow="Monthly award" title="POTM" /></div>
+        <div className="home-section-head"><SectionTitle eyebrow="" title="POTM" /></div>
         <div className="monthly-awards-grid">
           <div className="monthly-award-column">
             <PlayerOfMonthCard item={potm} teams={teams} />
           </div>
           <div className="monthly-award-column">
             <div className="monthly-award-column__head">
-              <span className="eyebrow">Monthly award</span>
+              
               <h3>Miglior membro staff del mese</h3>
             </div>
             <StaffOfMonthCard
