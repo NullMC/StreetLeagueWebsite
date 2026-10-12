@@ -22,9 +22,7 @@ type LeaderConfig = {
 const leaderConfigs: LeaderConfig[] = [
   { key: "goals", title: "Miglior marcatore" },
   { key: "mvps", title: "Miglior giocatore (MVP)" },
-  { key: "clean_sheets", title: "Miglior portiere (Clean sheets)" },
-  { key: "yellow_cards", title: "Cartellini gialli" },
-  { key: "red_cards", title: "Cartellini rossi" },
+  { key: "clean_sheets", title: "Miglior portiere" },
 ];
 
 function LeaderPanel({ config, players }: { config: LeaderConfig; players: PlayerWithStats[] }) {
@@ -36,9 +34,7 @@ function LeaderPanel({ config, players }: { config: LeaderConfig; players: Playe
         ? "MVP"
         : config.key === "clean_sheets"
           ? "clean sheet"
-          : config.key === "yellow_cards"
-            ? "gialli"
-            : "rossi";
+          : "";
   return (
     <article className="stat-card leader-stat-card">
       <span className="eyebrow">{config.title}</span>
