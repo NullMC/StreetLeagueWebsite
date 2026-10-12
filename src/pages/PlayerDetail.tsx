@@ -60,11 +60,12 @@ export default function PlayerDetail() {
   const normalizedPosition = player?.position?.trim().toLocaleLowerCase("it") ?? "";
   const isGoalkeeper =
     !isStaffMember &&
-    (normalizedPosition.includes("portier") ||
+    (normalizedPosition.includes("Portiere") ||
       normalizedPosition.includes("goalkeeper") ||
       normalizedPosition.includes("goalie") ||
       normalizedPosition === "gk" ||
-      normalizedPosition === "por");
+      normalizedPosition === "por" ||
+      normalizedPosition === "portiere");
 
   const profileStats = !player || !stats
     ? []
