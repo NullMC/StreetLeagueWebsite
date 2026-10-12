@@ -32,7 +32,6 @@ export function MatchCard({
           )}
           <div className="match-card__team-copy">
             <b>{home?.name || "—"}</b>
-            <small>Casa</small>
           </div>
         </div>
 
@@ -62,7 +61,6 @@ export function MatchCard({
           )}
           <div className="match-card__team-copy">
             <b>{away?.name || "—"}</b>
-            <small>Trasferta</small>
           </div>
         </div>
       </div>
