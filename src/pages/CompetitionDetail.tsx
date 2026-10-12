@@ -96,14 +96,14 @@ export default function CompetitionDetail() {
         ))}
       </div>
     ) : (
-      <EmptyState title="Nessuna partita" text="Non sono ancora presenti partite per questa fase." />
+      <EmptyState title="Nessuna partita" text="Non sono ancora presenti partite " />
     );
 
   const renderTeams = (section: CompetitionSectionData) =>
     section.teams.length ? (
       <TeamCarousel teams={section.teams} label={`Squadre registrate a ${section.competition.name}`} />
     ) : (
-      <EmptyState title="Nessuna squadra registrata" text="Non sono ancora presenti squadre registrate per questa fase." />
+      <EmptyState title="Nessuna squadra registrata" text="Non sono ancora presenti squadre registrate" />
     );
 
   return (
@@ -114,18 +114,11 @@ export default function CompetitionDetail() {
         <>
           <section className="detail-hero">
             <div className="detail-hero__inner">
-              <span className="eyebrow">{aggregated ? `Competizione aggregata · ${sections.length} fasi` : `Competition / ${competition.status}`}</span>
               <h1>{title || competition.name}</h1>
-              <div className="detail-meta">
-                {aggregated ? (
-                  <span>{`${sections.length} competizioni incluse · ogni fase è mostrata separatamente`}</span>
-                ) : (
-                  <>
-                    <span>{competition.season_label || "—"}</span>
-                    <span>{competition.start_date || "—"}</span>
-                    <span>{competition.end_date || "—"}</span>
-                  </>
-                )}
+              <div className="detail-meta"> 
+                <span>{competition.season_label || "—"}</span>
+                <span>{competition.start_date || "—"}</span>
+                <span>{competition.end_date || "—"}</span>
               </div>
             </div>
           </section>
@@ -135,14 +128,14 @@ export default function CompetitionDetail() {
               sections.map((section) => (
                 <section className="competition-detail-stage" key={section.competition.id}>
                   <SectionTitle
-                    eyebrow={`Fase · ${section.competition.status}`}
+                    eyebrow={`${section.competition.status}`}
                     title={section.competition.name}
                     variant="group"
                   />
-                  <SectionTitle eyebrow="Calendario della fase" title="Partite" variant="subsection" />
+                  <SectionTitle eyebrow="" title="Partite" variant="subsection" />
                   {renderMatches(section)}
                   <section className="competition-detail-section competition-detail-section--stage">
-                    <SectionTitle eyebrow="Iscrizioni della fase" title="Squadre registrate" variant="subsection" />
+                    <SectionTitle eyebrow="" title="Squadre registrate" variant="subsection" />
                     {renderTeams(section)}
                   </section>
                 </section>
