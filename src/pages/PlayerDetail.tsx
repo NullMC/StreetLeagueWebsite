@@ -61,9 +61,6 @@ export default function PlayerDetail() {
   const isGoalkeeper =
     !isStaffMember &&
     (normalizedPosition.includes("Portiere") ||
-      normalizedPosition.includes("goalkeeper") ||
-      normalizedPosition.includes("goalie") ||
-      normalizedPosition === "gk" ||
       normalizedPosition === "por" ||
       normalizedPosition === "portiere");
 
