@@ -1,5 +1,6 @@
 import type { Match, Team } from "../types";
 import { day } from "../lib/format";
+
 export function MatchCard({
   match,
   home,
@@ -34,11 +35,18 @@ export function MatchCard({
             <small>Casa</small>
           </div>
         </div>
+
         <strong className="match-card__score">
-          {match.status === "scheduled"
-            ? "VS"
-            : `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`}
+          {match.status === "scheduled" ? (
+            <>
+              <span className="match-card__score-vs">VS</span>
+              <span className="match-card__score-placeholder">— : —</span>
+            </>
+          ) : (
+            `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`
+          )}
         </strong>
+
         <div className="match-card__team match-card__team--away right">
           {away?.logo_url ? (
             <img
