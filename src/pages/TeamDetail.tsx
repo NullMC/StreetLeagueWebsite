@@ -97,12 +97,12 @@ export default function TeamDetail() {
         <>
           <section className="detail-hero">
             <div className="detail-hero__inner">
-              <span className="eyebrow">Club profile</span>
+              <span className="eyebrow">Profilo squadra</span>
               <h1>{team.name}</h1>
             </div>
           </section>
           <div className="page">
-            <SectionTitle eyebrow="Roster" title="Giocatori" variant="subsection" />
+            <SectionTitle eyebrow="" title="Giocatori" variant="subsection" />
             {rosterPlayers.length ? (
               <RosterCards members={rosterPlayers} />
             ) : (
@@ -110,7 +110,7 @@ export default function TeamDetail() {
             )}
 
             <section className="section team-staff-section">
-              <SectionTitle eyebrow="Roster" title="Membri staff" variant="subsection" />
+              <SectionTitle eyebrow="" title="Membri staff" variant="subsection" />
               {staffMembers.length ? (
                 <RosterCards members={staffMembers} staff />
               ) : (
@@ -119,7 +119,7 @@ export default function TeamDetail() {
             </section>
 
             <section className="section">
-              <SectionTitle eyebrow="History" title="Partite" variant="subsection" />
+              <SectionTitle eyebrow="" title="Partite" variant="subsection" />
               {matches.length ? (
                 <div className="match-grid">
                   {matches.map((match) => (
