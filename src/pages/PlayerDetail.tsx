@@ -54,6 +54,36 @@ export default function PlayerDetail() {
     };
   }, [playerId]);
 
+  const isStaffMember =
+    player?.position?.trim().toUpperCase() === "STAFF" ||
+    player?.role?.trim().toUpperCase() === "STAFF";
+  const normalizedPosition = player?.position?.trim().toLocaleLowerCase("it") ?? "";
+  const isGoalkeeper =
+    !isStaffMember &&
+    (normalizedPosition.includes("portier") ||
+      normalizedPosition.includes("goalkeeper") ||
+      normalizedPosition.includes("goalie") ||
+      normalizedPosition === "gk" ||
+      normalizedPosition === "por");
+
+  const profileStats = !player || !stats
+    ? []
+    : isStaffMember
+      ? [
+          { label: "Gol", value: stats.goals },
+          { label: "Cartellini gialli", value: stats.yellow_cards },
+          { label: "Cartellini rossi", value: stats.red_cards },
+        ]
+      : [
+          { label: "Gol", value: stats.goals },
+          { label: "Assist", value: stats.assists },
+          ...(isGoalkeeper
+            ? [{ label: "Clean sheets", value: stats.clean_sheets }]
+            : []),
+          { label: "Cartellini gialli", value: stats.yellow_cards },
+          { label: "Cartellini rossi", value: stats.red_cards },
+        ];
+
   return (
     <PageShell>
       {player ? (
@@ -103,14 +133,8 @@ export default function PlayerDetail() {
               />
             ) : (
               <div className="leaders">
-                {[
-                  ["Miglior marcatore", stats.goals],
-                  ["Miglior giocatore (MVP)", stats.mvps],
-                  ["Miglior portiere (Clean sheets)", stats.clean_sheets],
-                  ["Cartellini gialli", stats.yellow_cards],
-                  ["Cartellini rossi", stats.red_cards],
-                ].map(([label, value]) => (
-                  <div className="stat-card" key={String(label)}>
+                {profileStats.map(({ label, value }) => (
+                  <div className="stat-card" key={label}>
                     <span className="eyebrow">{label}</span>
                     <div className="stat-card__value">{value}</div>
                   </div>
