@@ -1,252 +1,404 @@
+/* Active collaboration cards: editorial hierarchy, restrained borders and clear actions. */
 .collab-carousel {
+  width: 100%;
   min-width: 0;
+  color: var(--white);
 }
 
 .collab-carousel__toolbar {
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 18px;
+  gap: 18px;
+  margin-bottom: 12px;
 }
 
-.collab-carousel__toolbar p {
-  margin: 6px 0 0;
-  color: var(--muted);
+.collab-carousel__heading {
+  min-width: 0;
+}
+
+.collab-carousel__heading h2 {
+  margin: 0;
+  color: var(--white);
+  font-family: var(--display), "Barlow Condensed", sans-serif;
+  font-size: clamp(23px, 2.5vw, 31px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.025em;
+  text-transform: uppercase;
+}
+
+.collab-carousel__heading p {
+  margin: 7px 0 0;
+  color: rgba(249, 249, 249, .68);
   font-size: 12px;
+  line-height: 1.55;
 }
 
 .collab-carousel__controls {
   display: flex;
-  gap: 7px;
+  flex: 0 0 auto;
+  gap: 6px;
 }
 
-.collab-carousel__controls button {
+.collab-carousel__controls .collab-carousel__control.MuiIconButton-root {
   width: 38px;
   height: 38px;
-  border: 1px solid rgba(249, 249, 249, 0.16);
-  background: rgba(1, 10, 8, 0.58);
-  color: var(--white);
+  border: 1px solid rgba(249, 249, 249, .32);
   border-radius: 5px;
-  cursor: pointer;
+  color: var(--white);
+  background: transparent;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.collab-carousel__controls .collab-carousel__control.MuiIconButton-root:hover {
+  border-color: #fff;
+  background: rgba(249, 249, 249, .1);
 }
 
 .collab-carousel__viewport {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
   overflow-x: auto;
-  padding: 18px max(8px, calc((100% - 1120px) / 2)) 28px;
-  scrollbar-width: none;
+  padding: 10px max(4px, calc((100% - 470px) / 2)) 18px;
   scroll-snap-type: x mandatory;
-  overscroll-behavior-x: contain;
   scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .collab-carousel__viewport::-webkit-scrollbar {
   display: none;
 }
 
-.collab-carousel__item {
-  flex: 0 0 min(250px, 70vw);
-  height: 340px;
+.collab-carousel__item.MuiCard-root {
+  flex: 0 0 min(470px, calc(100vw - 56px));
+  height: 410px;
+  min-width: 0;
+  overflow: hidden;
   scroll-snap-align: center;
-  border-radius: 5px;
-  opacity: 0.62;
-  transform: scale(0.88);
-  transition:
-    transform 0.28s ease,
-    opacity 0.28s ease,
-    filter 0.28s ease;
-  filter: saturate(0.78);
+  border: 1px solid rgba(249, 249, 249, .2);
+  border-radius: 8px;
+  color: var(--white);
+  background: rgba(1, 10, 8, .8);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+  opacity: .72;
+  transform: scale(.985);
+  transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.collab-carousel__item.is-active {
-  flex-basis: min(390px, 82vw);
-  height: 500px;
+.collab-carousel__item.MuiCard-root.is-active {
+  border-color: rgba(237, 123, 171, .78);
+  box-shadow: 0 16px 36px rgba(1, 10, 8, .24), 0 0 0 1px rgba(228, 34, 120, .12);
   opacity: 1;
   transform: scale(1);
-  filter: none;
-  z-index: 2;
 }
 
 .collab-carousel__ad {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(135px, .72fr);
   width: 100%;
   height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid rgba(1, 10, 8, 0.12);
-  border-radius: 5px;
-  box-shadow: 0 18px 42px rgba(1, 10, 8, 0.12);
+  min-width: 0;
 }
 
 .collab-carousel__ad.is-copy-only {
-  grid-template-rows: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  background:
+    radial-gradient(circle at 100% 100%, rgba(228, 34, 120, .18), transparent 47%),
+    linear-gradient(145deg, rgba(249, 249, 249, .035), rgba(1, 10, 8, .3));
 }
 
-.collab-carousel__item.is-active .collab-carousel__ad {
-  border-color: rgba(228, 34, 120, 0.24);
-  box-shadow: 0 24px 56px rgba(228, 34, 120, 0.17);
-}
-
-.collab-carousel__copy {
-  padding: 22px 22px 16px;
-}
-
-.collab-carousel__ad.is-copy-only .collab-carousel__copy {
+.collab-carousel__copy.MuiCardContent-root {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 100%;
-  padding: 34px;
-}
-
-.collab-carousel__copy h3 {
-  margin: 5px 0 8px;
+  align-items: flex-start;
+  gap: 0;
+  min-width: 0;
+  height: 100%;
+  padding: clamp(20px, 2.6vw, 30px);
   color: var(--white);
-  font-family: var(--display);
-  font-size: 34px;
-  line-height: 0.92;
+}
+
+.collab-carousel__title.MuiTypography-root {
+  display: -webkit-box;
+  width: 100%;
+  margin: 0 0 14px;
+  overflow: hidden;
+  color: #f9f9f9;
+  font-family: var(--display), "Barlow Condensed", sans-serif;
+  font-size: clamp(27px, 3vw, 39px);
+  font-weight: 800;
+  line-height: .95;
+  letter-spacing: -.025em;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
-.collab-carousel__copy p,
 .collab-carousel__description {
-  margin: 0;
-  color: rgba(1, 10, 8, 0.62);
+  width: 100%;
+  max-height: 170px;
+  overflow-y: auto;
+  color: rgba(249, 249, 249, .76);
   font-size: 12px;
-  line-height: 1.6;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(249, 249, 249, .3) transparent;
 }
 
-.collab-carousel__description > p {
-  margin: 0 0 8px;
+.collab-carousel__description p {
+  margin: 0 0 9px;
 }
 
-.collab-carousel__description > p:last-child,
-.collab-carousel__description > div:last-child {
+.collab-carousel__description p:last-child {
   margin-bottom: 0;
 }
 
 .collab-carousel__description ul,
 .collab-carousel__description ol {
-  margin: 6px 0 8px 20px;
-  padding: 0;
+  margin: 7px 0 9px;
+  padding-left: 19px;
 }
 
 .collab-carousel__description a {
-  color: #b10f59;
+  color: #ff9bc4;
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.collab-carousel__cta {
-  display: inline-flex;
+.collab-carousel__description-empty.MuiTypography-root {
+  color: rgba(249, 249, 249, .68);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.collab-carousel__footer {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 16px;
-  min-height: 36px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--pink);
-  color: #fff !important;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.collab-carousel__cta.MuiButton-root {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid rgba(249, 249, 249, .72);
+  border-radius: 5px;
+  color: #fff;
+  background: transparent;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1;
+  letter-spacing: .045em;
+  line-height: 1.2;
+  text-align: left;
   text-transform: uppercase;
-  box-shadow: 0 8px 20px rgba(1, 10, 8, 0.1);
-  white-space: nowrap;
+  transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
 }
 
-.collab-carousel__cta:hover {
-  background: #b10f59;
-  transform: translateY(-1px);
+.collab-carousel__cta.MuiButton-root:hover {
+  border-color: #fff;
+  color: #010a08;
+  background: #fff;
 }
 
-.collab-carousel__cta.is-disabled {
-  opacity: 0.5;
-  cursor: default;
+.collab-carousel__cta .MuiButton-endIcon {
+  margin-left: 5px;
+}
+
+.collab-carousel__counter.MuiTypography-root {
+  flex: 0 0 auto;
+  color: rgba(249, 249, 249, .48);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
 }
 
 .collab-carousel__poster {
-  width: 100%;
-  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
   min-height: 0;
+  height: 100%;
+  margin: 0;
+  padding: 12px;
   overflow: hidden;
-  border: 0;
-  border-radius: 0;
-  background: #fff;
-  box-shadow: none;
+  border-left: 1px solid rgba(249, 249, 249, .18);
+  background: rgba(249, 249, 249, .025);
 }
 
 .collab-carousel__poster img {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
+  min-width: 0;
   object-fit: contain;
-  background: #fff;
+  object-position: center;
+}
+
+.collab-carousel__visual-accent {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  min-width: 0;
+  padding: 20px;
+  overflow: hidden;
+  border-left: 1px solid rgba(249, 249, 249, .12);
+  background:
+    radial-gradient(circle at 72% 22%, rgba(237, 123, 171, .24), transparent 33%),
+    linear-gradient(145deg, rgba(228, 34, 120, .19), rgba(1, 10, 8, .1));
+}
+
+.collab-carousel__visual-accent span {
+  color: rgba(249, 249, 249, .08);
+  font-family: var(--display), "Barlow Condensed", sans-serif;
+  font-size: clamp(76px, 9vw, 130px);
+  font-weight: 900;
+  line-height: .75;
+  letter-spacing: -.08em;
 }
 
 .collab-carousel__dots {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
   margin-top: 2px;
 }
 
-.collab-carousel__dots span {
-  width: 20px;
+.collab-carousel__dots button {
+  display: block;
+  width: 18px;
   height: 3px;
-  background: rgba(249, 249, 249, 0.16);
-  transform: skewX(-20deg);
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: rgba(249, 249, 249, .26);
+  cursor: pointer;
+  transition: width 160ms ease, background 160ms ease;
 }
 
-.collab-carousel__dots span.is-active {
-  background: var(--pink);
+.collab-carousel__dots button.is-active {
+  width: 34px;
+  background: var(--pink2, #ed7bab);
+}
+
+.collab-carousel__dots button:focus-visible,
+.collab-carousel__controls .collab-carousel__control:focus-visible,
+.collab-carousel__cta.MuiButton-root:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.sponsor-band--redesign .collab-carousel__copy h3,
+.sponsor-band--redesign .collab-carousel__copy .MuiTypography-root {
+  color: #f9f9f9 !important;
+}
+
+.sponsor-band--redesign .collab-carousel__poster {
+  border-left-color: rgba(249, 249, 249, .18) !important;
+  background: rgba(249, 249, 249, .025) !important;
+  box-shadow: none !important;
 }
 
 @media (max-width: 700px) {
   .collab-carousel__toolbar {
-    align-items: start;
+    align-items: center;
   }
 
-  .collab-carousel__item {
-    flex-basis: min(200px, 58vw);
-    height: 320px;
+  .collab-carousel__heading h2 {
+    font-size: 25px;
   }
 
-  .collab-carousel__item.is-active {
-    flex-basis: min(300px, 78vw);
-    height: 430px;
+  .collab-carousel__item.MuiCard-root {
+    flex-basis: min(420px, calc(100vw - 36px));
+    height: 390px;
   }
 
-  .collab-carousel__viewport {
-    padding-inline: max(4px, calc((100% - 300px) / 2));
+  .collab-carousel__ad.has-poster {
+    grid-template-columns: minmax(0, 1fr) minmax(100px, .72fr);
   }
 
-  .collab-carousel__copy {
-    padding: 18px 18px 14px;
+  .collab-carousel__copy.MuiCardContent-root {
+    padding: 18px 14px;
+  }
+
+  .collab-carousel__title.MuiTypography-root {
+    font-size: clamp(24px, 7vw, 31px);
+    margin-bottom: 10px;
+  }
+
+  .collab-carousel__description {
+    font-size: 11px;
+    line-height: 1.5;
+    max-height: 148px;
+  }
+
+  .collab-carousel__poster {
+    padding: 6px;
+  }
+
+  .collab-carousel__footer {
+    padding-top: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .collab-carousel__cta.MuiButton-root {
+    max-width: 100%;
+    font-size: 9px;
+    padding-inline: 9px;
+  }
+
+  .collab-carousel__visual-accent {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .collab-carousel__item.MuiCard-root {
+    height: 460px;
+  }
+
+  .collab-carousel__ad.has-poster {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(150px, .8fr);
+  }
+
+  .collab-carousel__copy.MuiCardContent-root {
+    padding: 18px;
+  }
+
+  .collab-carousel__poster {
+    border-top: 1px solid rgba(249, 249, 249, .18);
+    border-left: 0;
+  }
+
+  .collab-carousel__visual-accent {
+    display: none;
   }
 
   .collab-carousel__ad.is-copy-only .collab-carousel__copy {
-    padding: 24px;
-  }
-
-  .collab-carousel__copy h3 {
-    font-size: 28px;
+    padding: 23px 18px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .collab-carousel__item,
-  .collab-carousel__cta {
-    transition: none;
-  }
-
+  .collab-carousel__item.MuiCard-root,
+  .collab-carousel__controls .collab-carousel__control,
+  .collab-carousel__dots button,
   .collab-carousel__viewport {
+    transition: none;
     scroll-behavior: auto;
   }
 }
