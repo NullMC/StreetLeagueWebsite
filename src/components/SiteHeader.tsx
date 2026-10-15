@@ -123,7 +123,7 @@ export function SiteHeader() {
         anchor="right"
         open={open}
         onClose={() => setOpen(false)}
-        slotProps={{ paper: { className: "mobile-menu mobile-menu--mui", id: "mobile-navigation" } }}
+        slotProps={{ paper: { className: "mobile-menu--mui", id: "mobile-navigation" } }}
       >
         <div className="mobile-menu__head">
           <span className="eyebrow">Street League</span>
