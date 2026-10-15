@@ -84,15 +84,15 @@
   border-radius: 8px;
   color: var(--white);
   background: rgba(1, 10, 8, .8);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+  box-shadow: none;
   opacity: .72;
   transform: scale(.985);
-  transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease;
 }
 
 .collab-carousel__item.MuiCard-root.is-active {
   border-color: rgba(237, 123, 171, .78);
-  box-shadow: 0 16px 36px rgba(1, 10, 8, .24), 0 0 0 1px rgba(228, 34, 120, .12);
+  box-shadow: none;
   opacity: 1;
   transform: scale(1);
 }
