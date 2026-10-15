@@ -38,7 +38,7 @@ export default function Matches() {
   }, []);
 
   return <PageShell>
-    <div className="page matches-page">
+    <div className="page page--sponsor-band matches-page">
       <section className="page-sponsor-band" aria-label="Calendario e sponsor">
         <div className="page-sponsor-band__inner">
           <SectionTitle title="Calendario partite" />

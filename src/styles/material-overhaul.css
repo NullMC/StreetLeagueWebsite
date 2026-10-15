@@ -327,3 +327,8 @@
     gap: 16px;
   }
 }
+
+/* Let the top pink band begin immediately under the fixed site navigation. */
+.page.page--sponsor-band {
+  padding-top: 0 !important;
+}

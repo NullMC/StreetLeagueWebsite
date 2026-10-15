@@ -61,7 +61,7 @@ export default function Competitions() {
 
   return (
     <PageShell>
-      <div className="page">
+      <div className="page page--sponsor-band">
         <section className="page-sponsor-band" aria-label="Competizioni e sponsor">
           <div className="page-sponsor-band__inner">
             <SectionTitle title="Competizioni" />

@@ -211,7 +211,7 @@ export default function Stats() {
 
   return (
     <PageShell>
-      <div className="page">
+      <div className="page page--sponsor-band">
         <section className="page-sponsor-band" aria-label="Statistiche e sponsor">
           <div className="page-sponsor-band__inner">
             <SectionTitle title="Statistiche" />
