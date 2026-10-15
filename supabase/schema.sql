@@ -114,7 +114,7 @@ create table if not exists match_mvp (
   created_at timestamptz not null default now()
 );
 create table if not exists partners (
-  id uuid primary key default gen_random_uuid(), name text not null, tier partner_tier not null,
+  id uuid primary key default gen_random_uuid(), name text not null, description text, tier partner_tier not null default 'gold',
   logo_url text, website_url text, sort_order integer not null default 0, created_at timestamptz not null default now()
 );
 create table if not exists social_contents (
@@ -140,6 +140,7 @@ create table if not exists player_of_month (
   player_id uuid not null references players(id) on delete cascade,
   month_label text not null,
   note text,
+  card_image_url text,
   published_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
   unique (month_label)

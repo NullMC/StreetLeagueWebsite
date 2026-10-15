@@ -74,6 +74,7 @@ export interface MatchMvp {
 export interface Partner {
   id: string;
   name: string;
+  description?: string | null;
   tier: PartnerTier;
   logo_url: string | null;
   website_url: string | null;

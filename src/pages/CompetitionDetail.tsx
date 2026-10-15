@@ -7,6 +7,7 @@ import { getCompetitions, getMatches, getTeams } from "../lib/api";
 import type { Competition, Match, Team } from "../types";
 import { MatchCard } from "../components/MatchCard";
 import { TeamCarousel } from "../components/TeamCarousel";
+import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 
 type CompetitionSectionData = {
   competition: Competition;
@@ -109,7 +110,8 @@ export default function CompetitionDetail() {
   return (
     <PageShell>
       {loading ? (
-        <div className="page"><p className="admin-message">Caricamento competizione…</p></div>
+        <div className="page">
+        <SponsorWatermarkStrip /><p className="admin-message">Caricamento competizione…</p></div>
       ) : competition ? (
         <>
           <section className="detail-hero">

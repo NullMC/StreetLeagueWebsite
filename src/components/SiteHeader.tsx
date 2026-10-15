@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Drawer, IconButton } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import { Logo } from "./Logo";
 import { useAdminSession } from "../hooks/useAdminSession";
@@ -13,11 +14,11 @@ import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 const links = [
   ["Home", "/"],
   ["Competizioni", "/competizioni"],
+  ["Calendario", "/partite"],
   ["Classifica", "/classifica"],
   ["Squadre", "/squadre"],
   ["Statistiche", "/statistiche"],
-  ["Partners", "/partner"],
-  ["Collabora", "/collabora"],
+  ["Sponsor & collabora", "/partner"],
   ["Admin", "/admin"],
 ];
 
@@ -118,65 +119,34 @@ export function SiteHeader() {
         </div>
       </header>
 
-      <aside
-        className={`mobile-menu${open ? " is-open" : ""}`}
-        id="mobile-navigation"
-        aria-label="Navigazione principale"
-        aria-hidden={!open}
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={() => setOpen(false)}
+        slotProps={{ paper: { className: "mobile-menu mobile-menu--mui", id: "mobile-navigation" } }}
       >
         <div className="mobile-menu__head">
           <span className="eyebrow">Street League</span>
-          <button
-            className="mobile-menu__close"
-            type="button"
-            aria-label="Chiudi menu"
-            onClick={() => setOpen(false)}
-          >
-            ×
-          </button>
+          <IconButton className="mobile-menu__close" type="button" aria-label="Chiudi menu" onClick={() => setOpen(false)} size="small">×</IconButton>
         </div>
-
-        <nav className="mobile-menu__nav">
+        <nav className="mobile-menu__nav" aria-label="Navigazione principale">
           {links.map(([label, to]) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === "/"}
-              onClick={() => setOpen(false)}
-            >
-              <span>{label}</span>
-              <span aria-hidden="true">↗</span>
+            <NavLink key={to} to={to} end={to === "/"} onClick={() => setOpen(false)}>
+              <span>{label}</span><span aria-hidden="true">↗</span>
             </NavLink>
           ))}
         </nav>
-
         <div className="mobile-menu__footer">
-          <a
-            className="mobile-menu__contact"
-            href="mailto:streetleaguebari@gmail.com"
-            onClick={() => setOpen(false)}
-          >
-            Contact
-          </a>
-          <div
-            className="mobile-menu__socials"
-            aria-label="Social Street League"
-          >
+          <a className="mobile-menu__contact" href="mailto:streetleaguebari@gmail.com" onClick={() => setOpen(false)}>Contatta Street League</a>
+          <div className="mobile-menu__socials" aria-label="Social Street League">
             {socialLinks.map(({ label, href, icon }) => (
-              <a
-                className="social-link"
-                href={href}
-                key={label}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-              >
+              <a className="social-link" href={href} key={label} target="_blank" rel="noopener noreferrer" aria-label={label}>
                 <FontAwesomeIcon icon={icon} aria-hidden="true" />
               </a>
             ))}
           </div>
         </div>
-      </aside>
+      </Drawer>
     </>
   );
 }

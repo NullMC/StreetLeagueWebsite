@@ -1,7 +1,8 @@
 // Cloudflare rebuild trigger: latest main includes TypeScript compatibility fixes.
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { MaterialUiProvider } from "./components/MaterialUiProvider";
 import "./styles/global.css";
 import "./styles/street.css";
 import "./styles/app-layout.css";
@@ -15,6 +16,7 @@ import "./styles/admin-mobile.css";
 import "./styles/home-redesign.css";
 import "./styles/home-calendar-mobile.css";
 import "./styles/night-mode.css";
+import "./styles/material-overhaul.css";
 import HomeRedesigned from "./pages/HomeRedesigned";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
@@ -26,7 +28,6 @@ import Stats from "./pages/Stats";
 import Matches from "./pages/Matches";
 import MatchDetail from "./pages/MatchDetail";
 import Partners from "./pages/Partners";
-import Collaborate from "./pages/Collaborate";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/AppLayout";
@@ -51,7 +52,7 @@ function App() {
         <Route path="/partite" element={<Matches />} />
         <Route path="/partite/:matchId" element={<MatchDetail />} />
         <Route path="/partner" element={<Partners />} />
-        <Route path="/collabora" element={<Collaborate />} />
+        <Route path="/collabora" element={<Navigate to="/partner#collabora" replace />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
@@ -61,8 +62,10 @@ function App() {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <MaterialUiProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </MaterialUiProvider>
   </React.StrictMode>,
 );

@@ -5,6 +5,7 @@ export type PlayerOfMonth = {
   player_id: string;
   month_label: string;
   note: string | null;
+  card_image_url?: string | null;
   published_at: string;
   created_at: string;
   player: {
@@ -19,17 +20,26 @@ export type PlayerOfMonth = {
 
 export async function getPlayerOfMonth(): Promise<PlayerOfMonth | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase
+  const withGraphic = await supabase
     .from("player_of_month")
-    .select(
-      "id, player_id, month_label, note, published_at, created_at, player:players(id,first_name,last_name,shirt_number,position,team_id)",
-    )
+    .select("id, player_id, month_label, note, card_image_url, published_at, created_at, player:players(id,first_name,last_name,shirt_number,position,team_id)")
     .order("published_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (error) throw error;
-  return (data as PlayerOfMonth | null) ?? null;
+  if (withGraphic.error) {
+    const message = withGraphic.error.message || "";
+    if (!message.includes("card_image_url")) throw withGraphic.error;
+    const fallback = await supabase
+      .from("player_of_month")
+      .select("id, player_id, month_label, note, published_at, created_at, player:players(id,first_name,last_name,shirt_number,position,team_id)")
+      .order("published_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (fallback.error) throw fallback.error;
+    return fallback.data ? ({ ...fallback.data, card_image_url: null } as PlayerOfMonth) : null;
+  }
+  return (withGraphic.data as PlayerOfMonth | null) ?? null;
 }
 
 export function subscribeToPlayerOfMonth(onChange: () => void) {

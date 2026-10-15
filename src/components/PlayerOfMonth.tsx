@@ -26,9 +26,11 @@ export function PlayerOfMonthCard({
     <article className="potm-card">
       <div className="potm-card__visual">
         <span className="potm-card__badge">POTM</span>
-        <div className="potm-card__avatar" aria-hidden="true">
-          {initials}
-        </div>
+        {item.card_image_url ? (
+          <img className="potm-card__figurina" src={item.card_image_url} alt={"Figurina Player of the Month: " + player.first_name + " " + player.last_name} />
+        ) : (
+          <div className="potm-card__avatar" aria-hidden="true">{initials}</div>
+        )}
       </div>
       <div className="potm-card__content">
         <span className="eyebrow">Player of the Month · {item.month_label}</span>

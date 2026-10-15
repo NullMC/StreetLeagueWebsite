@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
+import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 import { getCompetitions } from "../lib/api";
 import type { Competition } from "../types";
 
@@ -61,7 +62,8 @@ export default function Competitions() {
   return (
     <PageShell>
       <div className="page">
-        <SectionTitle eyebrow="" title="Competizioni" />
+        <SectionTitle title="Competizioni" />
+        <SponsorWatermarkStrip />
         {items.length ? (
           <div className="cards-grid">
             {items.map((listing) => {

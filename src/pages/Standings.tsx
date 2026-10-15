@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
+import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 import {
   calculateStandings,
   getActiveCompetitions,
@@ -55,7 +56,8 @@ export default function Standings() {
   return (
     <PageShell>
       <div className="page">
-        <SectionTitle eyebrow="Tutte le competizioni" title="Classifiche" />
+        <SectionTitle title="Classifiche" />
+        <SponsorWatermarkStrip />
 
         {error && <p className="admin-error">{error}</p>}
 

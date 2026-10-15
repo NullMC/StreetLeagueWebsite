@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
+import { Typography } from "@mui/material";
 export function SectionTitle({
-  eyebrow,
+  eyebrow: _eyebrow,
   title,
   action,
   variant = "primary",
@@ -13,8 +14,7 @@ export function SectionTitle({
   return (
     <div className={`section-head section-head--${variant}`}>
       <div>
-        {eyebrow && <span className="eyebrow">{eyebrow}</span>}
-        <h2>{title}</h2>
+        <Typography component="h2" variant="h2">{title}</Typography>
       </div>
       {action}
     </div>

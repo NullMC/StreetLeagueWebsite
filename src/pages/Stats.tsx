@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
+import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 import {
   getCompetitions,
   getPlayerStatsForCompetitions,
@@ -211,7 +212,8 @@ export default function Stats() {
   return (
     <PageShell>
       <div className="page">
-        <SectionTitle eyebrow="Live" title="Statistiche" />
+        <SectionTitle title="Statistiche" />
+        <SponsorWatermarkStrip />
 
         {!loading && groups.length > 0 && (
           <div className="stats-tools">

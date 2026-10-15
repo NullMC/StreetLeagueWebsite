@@ -3,11 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
-import { ContentCarousel } from "../components/ContentCarousel";
 import { CollabCarousel } from "../components/CollabCarousel";
-import { LogoScroller } from "../components/LogoScroller";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
+import { SponsorGrid } from "../components/SponsorGrid";
+import { TopSevenOfMonth } from "../components/TopSevenOfMonth";
+import { Button, Typography } from "@mui/material";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
 import { calculateStandings, getActiveCollaborations, getActiveCompetitions, getMatches, getPartners, getPlayerStatsForCompetitions, getSocialContent, getStaffRankingForCompetitions, getStatisticsGroups, getTeams, subscribeToCompetition } from "../lib/api";
 import { getPlayerOfMonth } from "../lib/playerOfMonth";
@@ -77,23 +78,6 @@ function StaffRankingPreview({ items }: { items: StaffRankingEntry[] }) {
         )}
       </div>
     </div>
-  );
-}
-
-function SponsorCard({ partner }: { partner: Partner }) {
-  const hasLink = Boolean(partner.website_url);
-  return (
-    <article className={`partner-card partner-card--${partner.tier}`}>
-      <div className="partner-card__logo">{partner.logo_url ? <img src={partner.logo_url} alt={partner.name} /> : <strong>{partner.name}</strong>}</div>
-      <div className="partner-card__meta">
-        <span className="partner-card__name">{partner.name}</span>
-        {(partner.tier === "gold" || partner.tier === "silver") && (
-          <a className={`sponsor-link-btn ${hasLink ? "" : "sponsor-link-btn--disabled"}`} href={hasLink ? partner.website_url! : "#"} target={hasLink ? "_blank" : undefined} rel={hasLink ? "noopener noreferrer" : undefined} aria-disabled={!hasLink} onClick={(event) => !hasLink && event.preventDefault()}>
-            <span>Info</span><span aria-hidden="true">↗</span>
-          </a>
-        )}
-      </div>
-    </article>
   );
 }
 
@@ -286,11 +270,7 @@ export default function HomeRedesigned() {
     backgroundSize: "cover",
     backgroundRepeat: "no-repeat",
   };
-  const goldPartners = useMemo(() => partners.filter((p) => p.tier === "gold"), [partners]);
-  const silverPartners = useMemo(() => partners.filter((p) => p.tier === "silver"), [partners]);
-  const bronzePartners = useMemo(() => partners.filter((p) => p.tier === "bronze"), [partners]);
-
-  return (
+    return (
     <div className="home-redesign">
       <section className="home-hero" style={{ background: "#fff", color: "#010a08" }} aria-labelledby="home-hero-title">
         <div aria-hidden="true" style={heroBackdropStyle} />
@@ -354,6 +334,8 @@ export default function HomeRedesigned() {
         </div>
       </section>
 
+      <TopSevenOfMonth />
+
       <section className="section--edge home-teams" id="home-teams">
         <div className="home-section-head"><SectionTitle title="Squadre" /><a className="home-section-head__link" href="/squadre">Tutte le squadre ↗</a></div>
         {teams.length ? <TeamCarousel teams={teams} /> : <EmptyState title="Nessuna squadra" text="Le squadre compariranno qui quando saranno registrate nel database." />}
@@ -361,12 +343,22 @@ export default function HomeRedesigned() {
 
       <section className="sponsor-band sponsor-band--redesign" id="home-partners">
         <div className="section--edge sponsor-band__inner">
-          <div className="home-section-head home-section-head--on-pink"><SectionTitle eyebrow="Partners" title="Chi sostiene la Street League" /></div>
-          <div className="sponsor-tier sponsor-tier--gold"><div className="sponsor-tier__heading"><div><h3>Sponsor Gold</h3></div></div>{goldPartners.length ? <div className="partners-grid partners-grid--gold">{goldPartners.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}</div> : <EmptyState title="Gold sponsor in attesa" />}</div>
-          {collaborations.length ? <div className="sponsor-tier sponsor-tier--collab"><CollabCarousel items={collaborations} variant="home" /></div> : null}
-          <div className="sponsor-tier sponsor-tier--silver"><div className="sponsor-tier__heading"><div><h3>Sponsor Silver</h3></div></div>{silverPartners.length ? <ContentCarousel>{silverPartners.map((partner) => <SponsorCard key={partner.id} partner={partner} />)}</ContentCarousel> : <EmptyState title="Silver sponsor in attesa" text="I partner Silver verranno mostrati qui dal database." />}</div>
-          <div className="sponsor-tier sponsor-tier--network"><div className="sponsor-tier__heading sponsor-tier__heading--row"><div><h3>Sponsor Bronze</h3></div><a className="btn btn--ghost" href="/partner">Tutti i partner</a></div>{bronzePartners.length ? <LogoScroller partners={bronzePartners} label="Bronze sponsors" /> : <LogoScroller partners={partners.filter((p) => p.tier !== "gold")} label="Street League partners" />}</div>
-          <div className="sponsor-cta-row"><h2>Porta il tuo brand in campo con noi</h2><a className="btn btn--primary" href="/collabora">Collabora con noi</a></div>
+          <section className="home-collab-proposal" id="home-collaborate">
+            <div className="home-collab-proposal__copy">
+              <SectionTitle title="Collabora con Street League" />
+              <p>Nessun pacchetto predefinito: raccontaci la tua attività e costruiamo insieme una proposta adatta al tuo brand.</p>
+              <Button component="a" href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League" variant="contained">Contattaci per saperne di più</Button>
+            </div>
+            {collaborations.length ? <div className="home-collab-proposal__media"><CollabCarousel items={collaborations} variant="home" /></div> : null}
+          </section>
+          <section className="home-sponsors" aria-label="Sponsor Street League">
+            <div className="home-section-head"><SectionTitle title="I nostri sponsor" /></div>
+            {partners.length ? <SponsorGrid partners={partners} /> : <EmptyState title="Sponsor in aggiornamento" text="Le attività che sostengono la Street League compariranno qui." />}
+            <div className="sponsor-cta-row">
+              <Typography component="span" className="sponsor-cta-row__title">Il prossimo nome può essere il tuo.</Typography>
+              <Button component="a" href="/partner#collabora" variant="outlined">Diventa sponsor ↗</Button>
+            </div>
+          </section>
         </div>
       </section>
     </div>

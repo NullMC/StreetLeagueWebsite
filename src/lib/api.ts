@@ -166,8 +166,7 @@ export async function getPartners(): Promise<Partner[]> {
     supabase
       .from("partners")
       .select("*")
-      .order("tier")
-      .order("sort_order")
+      .order("sort_order", { ascending: true })
       .order("name"),
   );
 }

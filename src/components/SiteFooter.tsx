@@ -10,6 +10,7 @@ export function SiteFooter() {
         <div>
           <span>NAVIGAZIONE</span>
           <a href="/competizioni">Competizioni</a>
+          <a href="/partite">Calendario</a>
           <a href="/classifica">Classifica</a>
           <a href="/squadre">Squadre</a>
           <a href="/giocatori">Giocatori</a>
@@ -17,8 +18,7 @@ export function SiteFooter() {
         </div>
         <div>
           <span>STREET LEAGUE</span>
-          <a href="/partner">Partner</a>
-          <a href="/collabora">Collabora con noi</a>
+          <a href="/partner">Sponsor & collabora</a>
           <a href="mailto:streetleaguebari@gmail.com">Contatti</a>
         </div>
         <div>

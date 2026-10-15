@@ -1,166 +1,61 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { Button, Paper, Typography } from "@mui/material";
+import { PageShell } from "../components/PageShell";
+import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
-import { ContentCarousel } from "../components/ContentCarousel";
 import { CollabCarousel } from "../components/CollabCarousel";
-import { LogoScroller } from "../components/LogoScroller";
+import { SponsorGrid } from "../components/SponsorGrid";
+import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 import { getActiveCollaborations, getPartners } from "../lib/api";
 import type { ActiveCollaboration, Partner } from "../types";
 
-function SponsorCard({ partner }: { partner: Partner }) {
-  const body = partner.logo_url ? (
-    <img src={partner.logo_url} alt={partner.name} />
-  ) : (
-    <strong>{partner.name}</strong>
-  );
-  const hasLink = Boolean(partner.website_url);
-  const isPrimary = partner.tier === "gold" || partner.tier === "silver";
-  return (
-    <article className={`partner-card partner-card--${partner.tier}`}>
-      <div className="partner-card__logo">{body}</div>
-      <div className="partner-card__meta">
-        <span className="partner-card__name">{partner.name}</span>
-        {isPrimary ? (
-          <a
-            className={`sponsor-link-btn ${hasLink ? "" : "sponsor-link-btn--disabled"}`}
-            href={hasLink ? partner.website_url! : "#"}
-            target={hasLink ? "_blank" : undefined}
-            rel={hasLink ? "noopener noreferrer" : undefined}
-            aria-disabled={!hasLink}
-            onClick={(event) => {
-              if (!hasLink) event.preventDefault();
-            }}
-          >
-            <span>Info</span>
-            <span aria-hidden="true">↗</span>
-          </a>
-        ) : null}
-      </div>
-    </article>
-  );
-}
-
 export default function Partners() {
-  const [items, setItems] = useState<Partner[]>([]);
-  const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>(
-    [],
-  );
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]);
   useEffect(() => {
+    let mounted = true;
     Promise.all([getPartners(), getActiveCollaborations()])
-      .then(([partners, collabs]) => {
-        setItems(partners);
+      .then(([items, collabs]) => {
+        if (!mounted) return;
+        setPartners(items);
         setCollaborations(collabs);
       })
       .catch(() => {
-        setItems([]);
+        if (!mounted) return;
+        setPartners([]);
         setCollaborations([]);
       });
+    return () => { mounted = false; };
   }, []);
-  const gold = useMemo(
-    () => items.filter((partner) => partner.tier === "gold"),
-    [items],
-  );
-  const silver = useMemo(
-    () => items.filter((partner) => partner.tier === "silver"),
-    [items],
-  );
-  const bronze = useMemo(
-    () => items.filter((partner) => partner.tier === "bronze"),
-    [items],
-  );
-  return (
-    <div className="partners-page partners-page--redesign">
-      <section className="partners-page__hero">
-        <div className="partners-page__hero-bg" aria-hidden="true" />
-        <div className="partners-page__hero-content partners-page__hero-content--with-collabs">
-          <div className="partners-page__hero-copy">
-            <h1>I nostri partner</h1>
-            <p>
-              Il network di brand e attività che sostiene il progetto dentro e
-              fuori dal campo.
-            </p>
-            <a className="btn btn--primary" href="/collabora">
-              Collabora con noi
-            </a>
-          </div>
-          {collaborations.length ? (
-            <div className="partners-page__hero-collabs">
-              <CollabCarousel items={collaborations} />
-            </div>
-          ) : null}
+
+  return <PageShell>
+    <div className="page partners-unified-page">
+      <Paper component="section" variant="outlined" className="unified-collab-section" id="collabora" elevation={0}>
+        <div className="unified-collab-section__copy">
+          <Typography component="h1" variant="h1">Collabora con Street League</Typography>
+          <Typography component="p">
+            Sostieni il progetto, dai visibilità alla tua attività e costruisci una collaborazione su misura.
+            Non esistono pacchetti predefiniti: contattaci e valutiamo insieme le opportunità più adatte.
+          </Typography>
+          <Button component="a" href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League" variant="contained">
+            Richiedi informazioni
+          </Button>
         </div>
-      </section>
-      <section
-        className="section--edge partners-tier-section partners-tier-section--gold"
-        style={{
-          paddingLeft: "10vw",
-          paddingRight: "10vw",
-        }}
-      >
-        <div className="partners-tier-heading">
-          <div>
-            <span className="eyebrow">Main partners</span>
-            <h2>Partner Gold</h2>
-            <p>La fascia di partnership con maggiore visibilità.</p>
-          </div>
-        </div>
-        {gold.length ? (
-          <div className="partners-grid partners-grid--gold">
-            {gold.map((partner) => (
-              <SponsorCard key={partner.id} partner={partner} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="Gold sponsor in attesa"
-            text="I partner Gold verranno mostrati qui dal database."
-          />
-        )}
-      </section>
-      <section className="section--edge partners-tier-section partners-tier-section--silver"
-        style={{
-          paddingLeft: "10vw",
-          paddingRight: "10vw",
-        }}
-      >
-        <div className="partners-tier-heading">
-          <div>
-            <h2>Partner Silver</h2>
-            <p>Presenza editoriale e digitale dedicata.</p>
-          </div>
-        </div>
-        {silver.length ? (
-          <ContentCarousel>
-            {silver.map((partner) => (
-              <SponsorCard key={partner.id} partner={partner} />
-            ))}
-          </ContentCarousel>
-        ) : (
-          <EmptyState
-            title="Silver sponsor in attesa"
-            text="I partner Silver verranno mostrati qui dal database."
-          />
-        )}
-      </section>
-      <section className="section--edge partners-tier-section partners-tier-section--bronze"
-        style={{
-          paddingLeft: "10vw",
-          paddingRight: "10vw",
-        }}
-      >
-        <div className="partners-tier-heading">
-          <div>
-            <h2>Partner Bronze</h2>
-          </div>
-        </div>
-        {bronze.length ? (
-          <LogoScroller partners={bronze} label="Bronze sponsors" />
-        ) : (
-          <LogoScroller
-            partners={items.filter((partner) => partner.tier !== "gold")}
-            label="League partners"
-          />
-        )}
+        {collaborations.length
+          ? <div className="unified-collab-section__media"><CollabCarousel items={collaborations} /></div>
+          : <div className="unified-collab-section__note">
+              <Typography component="h2" variant="h4">Una presenza dentro e fuori dal campo.</Typography>
+              <Typography component="p">Raccontaci la tua attività: definiremo insieme una proposta di collaborazione personalizzata.</Typography>
+            </div>}
+      </Paper>
+      <section className="unified-sponsors-section" id="sponsor">
+        <SectionTitle title="I nostri sponsor" />
+        <Typography component="p" className="unified-sponsors-section__intro">
+          Le attività e i brand che contribuiscono alla crescita della Street League.
+        </Typography>
+        <SponsorWatermarkStrip />
+        {partners.length ? <SponsorGrid partners={partners} /> : <EmptyState title="Sponsor in aggiornamento" text="I partner compariranno qui non appena saranno pubblicati dal back office." />}
       </section>
     </div>
-  );
+  </PageShell>;
 }
