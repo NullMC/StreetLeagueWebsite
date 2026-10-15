@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Typography } from "@mui/material";
 export function SectionTitle({
-  eyebrow: _eyebrow,
   title,
   action,
   variant = "primary",

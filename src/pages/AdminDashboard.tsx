@@ -55,7 +55,7 @@ const required: Record<Resource, string[]> = {
   competitions: ["name", "slug", "status"], teams: ["competition_ids", "name", "slug"], players: ["team_id", "first_name", "last_name"],
   matches: ["competition_id", "home_team_id", "away_team_id", "kickoff_at", "status"], events: ["match_id", "event_type"],
   lineups: ["match_id", "team_id", "player_id"], mvp: ["match_id", "player_id"],
-  player_of_month: ["player_id", "month_label", "published_at"], partners: ["name"],
+  player_of_month: ["player_id", "month_label", "published_at"], partners: ["name", "logo_url", "description", "website_url"],
   active_collaborations: ["title", "description"], social_contents: ["platform", "title", "content_url"],
 };
 const fieldLabels: Record<string, string> = {
@@ -64,7 +64,7 @@ const fieldLabels: Record<string, string> = {
   team_id: "Squadra", first_name: "Nome", last_name: "Cognome", shirt_number: "Numero", position: "Ruolo", profile_image_url: "Immagine profilo", bg_less_image_url: "Immagine sfondo",
   home_team_id: "Squadra casa", away_team_id: "Squadra ospite", matchday: "Giornata", kickoff_at: "Inizio", home_score: "Gol casa", away_score: "Gol ospite", venue: "Campo",
   match_id: "Partita", player_id: "Giocatore", related_player_id: "Giocatore correlato", event_type: "Tipo evento", minute: "Minuto", note: "Nota", starter: "Titolare",
-  tier: "Livello", card_image_url: "Figurina grafica POTM", website_url: "Sito web", sort_order: "Ordine", platform: "Piattaforma", title: "Titolo", description: "Descrizione", thumbnail_url: "Anteprima", content_url: "URL contenuto", published_at: "Pubblicato", flyer_url: "Volantino", cta_url: "URL CTA", month_label: "Mese", statistics_group: "Gruppo competizioni (aggregazione)",
+  card_image_url: "Figurina grafica POTM", website_url: "Sito web", sort_order: "Ordine", platform: "Piattaforma", title: "Titolo", description: "Descrizione", thumbnail_url: "Anteprima", content_url: "URL contenuto", published_at: "Pubblicato", flyer_url: "Volantino", cta_url: "URL CTA", month_label: "Mese", statistics_group: "Gruppo competizioni (aggregazione)",
 };
 const options: Record<string, string[]> = {
   competitionStatus: ["upcoming", "active", "finished"], matchStatus: ["scheduled", "live", "finished", "postponed"], platform: ["youtube", "instagram", "tiktok"], event_type: ["goal", "assist", "yellow_card", "red_card", "substitution", "foul", "presidential_penalty", "other"],
