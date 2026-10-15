@@ -107,9 +107,7 @@
 
 .collab-carousel__ad.is-copy-only {
   grid-template-columns: minmax(0, 1fr);
-  background:
-    radial-gradient(circle at 100% 100%, rgba(228, 34, 120, .18), transparent 47%),
-    linear-gradient(145deg, rgba(249, 249, 249, .035), rgba(1, 10, 8, .3));
+  background: transparent;
 }
 
 .collab-carousel__copy.MuiCardContent-root {
@@ -246,28 +244,6 @@
   object-position: center;
 }
 
-.collab-carousel__visual-accent {
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  min-width: 0;
-  padding: 20px;
-  overflow: hidden;
-  border-left: 1px solid rgba(249, 249, 249, .12);
-  background:
-    radial-gradient(circle at 72% 22%, rgba(237, 123, 171, .24), transparent 33%),
-    linear-gradient(145deg, rgba(228, 34, 120, .19), rgba(1, 10, 8, .1));
-}
-
-.collab-carousel__visual-accent span {
-  color: rgba(249, 249, 249, .08);
-  font-family: var(--display), "Barlow Condensed", sans-serif;
-  font-size: clamp(76px, 9vw, 130px);
-  font-weight: 900;
-  line-height: .75;
-  letter-spacing: -.08em;
-}
-
 .collab-carousel__dots {
   display: flex;
   align-items: center;
@@ -360,9 +336,6 @@
     padding-inline: 9px;
   }
 
-  .collab-carousel__visual-accent {
-    padding: 12px;
-  }
 }
 
 @media (max-width: 420px) {
@@ -384,9 +357,6 @@
     border-left: 0;
   }
 
-  .collab-carousel__visual-accent {
-    display: none;
-  }
 
   .collab-carousel__ad.is-copy-only .collab-carousel__copy {
     padding: 23px 18px;

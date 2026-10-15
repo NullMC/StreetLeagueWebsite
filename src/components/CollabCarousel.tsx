@@ -149,11 +149,7 @@ export function CollabCarousel({
                   <Box component="figure" className="collab-carousel__poster">
                     <img src={item.flyer_url!} alt={`Materiale promozionale: ${item.title}`} loading="lazy" />
                   </Box>
-                ) : (
-                  <Box className="collab-carousel__visual-accent" aria-hidden="true">
-                    <span>SL</span>
-                  </Box>
-                )}
+                ) : null}
               </Box>
             </Card>
           );
