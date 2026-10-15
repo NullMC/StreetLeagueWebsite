@@ -1,5 +1,6 @@
 import "../styles/collab-carousel.css";
 import { useMemo, useRef, useState } from "react";
+import { Box, Button, Card, CardContent, IconButton, Typography } from "@mui/material";
 import type { ActiveCollaboration } from "../types";
 import { sanitizeRichTextHtml } from "../lib/richText";
 
@@ -19,15 +20,17 @@ export function CollabCarousel({
 
   if (!ordered.length) return null;
 
-  const move = (direction: 1 | -1) => {
-    const next = (active + direction + ordered.length) % ordered.length;
+  const goTo = (index: number) => {
+    const next = (index + ordered.length) % ordered.length;
     setActive(next);
-    viewportRef.current?.children[next]?.scrollIntoView({
+    viewportRef.current?.children.item(next)?.scrollIntoView({
       behavior: "smooth",
       block: "nearest",
       inline: "center",
     });
   };
+
+  const move = (direction: 1 | -1) => goTo(active + direction);
 
   const updateActive = () => {
     const viewport = viewportRef.current;
@@ -44,76 +47,133 @@ export function CollabCarousel({
         closest = index;
       }
     });
-    setActive(closest);
+    setActive((current) => current === closest ? current : closest);
   };
 
   return (
-    <div
+    <Box
+      component="section"
       className={`collab-carousel ${variant === "home" ? "collab-carousel--home" : ""}`}
       aria-label="Collaborazioni attive"
+      aria-roledescription="carosello"
     >
-      <div className="collab-carousel__toolbar">
-        <div>
-          <span className="eyebrow">Collaborazioni attive</span>
-          <p>Scopri le iniziative e le offerte attualmente attive.</p>
-        </div>
-        {ordered.length > 1 && (
-          <div className="collab-carousel__controls">
-            <button type="button" onClick={() => move(-1)} aria-label="Collaborazione precedente">←</button>
-            <button type="button" onClick={() => move(1)} aria-label="Collaborazione successiva">→</button>
-          </div>
-        )}
-      </div>
-      <div className="collab-carousel__viewport" ref={viewportRef} onScroll={updateActive}>
+      <Box className="collab-carousel__toolbar">
+        <Box className="collab-carousel__heading">
+          <Typography component="h2" variant="h5">Collaborazioni attive</Typography>
+          <Typography component="p" variant="body2">
+            Progetti, iniziative e opportunità per la community Street League.
+          </Typography>
+        </Box>
+        {ordered.length > 1 ? (
+          <Box className="collab-carousel__controls">
+            <IconButton
+              type="button"
+              className="collab-carousel__control"
+              aria-label="Collaborazione precedente"
+              onClick={() => move(-1)}
+              size="small"
+            >
+              <span aria-hidden="true">←</span>
+            </IconButton>
+            <IconButton
+              type="button"
+              className="collab-carousel__control"
+              aria-label="Collaborazione successiva"
+              onClick={() => move(1)}
+              size="small"
+            >
+              <span aria-hidden="true">→</span>
+            </IconButton>
+          </Box>
+        ) : null}
+      </Box>
+
+      <Box
+        className="collab-carousel__viewport"
+        ref={viewportRef}
+        onScroll={updateActive}
+        role="region"
+        aria-label="Elenco delle collaborazioni"
+        tabIndex={0}
+      >
         {ordered.map((item, index) => {
           const hasCta = Boolean(item.cta_url);
           const hasFlyer = Boolean(item.flyer_url);
+          const contactHref = `mailto:streetleaguebari@gmail.com?subject=${encodeURIComponent("Informazioni: " + item.title)}`;
+
           return (
-            <article
+            <Card
+              component="article"
+              variant="outlined"
+              elevation={0}
               className={`collab-carousel__item ${index === active ? "is-active" : ""}`}
               key={item.id}
+              aria-label={item.title}
             >
-              <div className={`collab-carousel__ad ${hasFlyer ? "has-poster" : "is-copy-only"}`}>
-                <div className="collab-carousel__copy">
-                  <span className="eyebrow">In evidenza</span>
-                  <h3>{item.title}</h3>
-                  {item.description && (
-                    <div
+              <Box className={`collab-carousel__ad ${hasFlyer ? "has-poster" : "is-copy-only"}`}>
+                <CardContent className="collab-carousel__copy">
+                  <Typography component="h3" variant="h4" className="collab-carousel__title">
+                    {item.title}
+                  </Typography>
+
+                  {item.description ? (
+                    <Box
                       className="collab-carousel__description"
                       dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(item.description) }}
                     />
+                  ) : (
+                    <Typography component="p" variant="body2" className="collab-carousel__description-empty">
+                      Scopri i dettagli di questa iniziativa Street League.
+                    </Typography>
                   )}
-                  <a
-                    className={`collab-carousel__cta ${hasCta ? "" : "is-disabled"}`}
-                    href={hasCta ? item.cta_url! : "#"}
-                    target={hasCta ? "_blank" : undefined}
-                    rel={hasCta ? "noopener noreferrer" : undefined}
-                    aria-disabled={!hasCta}
-                    onClick={(event) => {
-                      if (!hasCta) event.preventDefault();
-                    }}
-                  >
-                    <span>Info</span>
-                    <span aria-hidden="true">↗</span>
-                  </a>
-                </div>
-                {hasFlyer && (
-                  <div className="collab-carousel__poster">
-                    <img src={item.flyer_url!} alt="" />
-                  </div>
+
+                  <Box className="collab-carousel__footer">
+                    <Button
+                      component="a"
+                      className="collab-carousel__cta"
+                      href={hasCta ? item.cta_url! : contactHref}
+                      target={hasCta ? "_blank" : undefined}
+                      rel={hasCta ? "noopener noreferrer" : undefined}
+                      variant="outlined"
+                      endIcon={<span aria-hidden="true">↗</span>}
+                    >
+                      {hasCta ? "Scopri la collaborazione" : "Richiedi informazioni"}
+                    </Button>
+                    <Typography component="span" variant="caption" className="collab-carousel__counter">
+                      {String(index + 1).padStart(2, "0")} / {String(ordered.length).padStart(2, "0")}
+                    </Typography>
+                  </Box>
+                </CardContent>
+
+                {hasFlyer ? (
+                  <Box component="figure" className="collab-carousel__poster">
+                    <img src={item.flyer_url!} alt={`Materiale promozionale: ${item.title}`} loading="lazy" />
+                  </Box>
+                ) : (
+                  <Box className="collab-carousel__visual-accent" aria-hidden="true">
+                    <span>SL</span>
+                  </Box>
                 )}
-              </div>
-            </article>
+              </Box>
+            </Card>
           );
         })}
-      </div>
-      {ordered.length > 1 && (
-        <div className="collab-carousel__dots" aria-hidden="true">
+      </Box>
+
+      {ordered.length > 1 ? (
+        <Box className="collab-carousel__dots" aria-label="Seleziona una collaborazione">
           {ordered.map((item, index) => (
-            <span key={item.id} className={index === active ? "is-active" : ""} />
+            <button
+              key={item.id}
+              type="button"
+              className={index === active ? "is-active" : ""}
+              aria-label={`Mostra collaborazione ${index + 1}: ${item.title}`}
+              aria-current={index === active ? "true" : undefined}
+              onClick={() => goTo(index)}
+            />
           ))}
-        </div>
-      )}
-    </div>
+        </Box>
+      ) : null}
+    </Box>
   );
 }
