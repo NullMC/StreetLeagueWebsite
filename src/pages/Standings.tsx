@@ -56,8 +56,12 @@ export default function Standings() {
   return (
     <PageShell>
       <div className="page">
-        <SectionTitle title="Classifiche" />
-        <SponsorWatermarkStrip />
+        <section className="page-sponsor-band" aria-label="Classifiche e sponsor">
+          <div className="page-sponsor-band__inner">
+            <SectionTitle title="Classifiche" />
+            <SponsorWatermarkStrip />
+          </div>
+        </section>
 
         {error && <p className="admin-error">{error}</p>}
 

@@ -212,8 +212,12 @@ export default function Stats() {
   return (
     <PageShell>
       <div className="page">
-        <SectionTitle title="Statistiche" />
-        <SponsorWatermarkStrip />
+        <section className="page-sponsor-band" aria-label="Statistiche e sponsor">
+          <div className="page-sponsor-band__inner">
+            <SectionTitle title="Statistiche" />
+            <SponsorWatermarkStrip />
+          </div>
+        </section>
 
         {!loading && groups.length > 0 && (
           <div className="stats-tools">

@@ -267,3 +267,63 @@
     padding-inline: 14px;
   }
 }
+
+
+/* Pink header band lets even white sponsor marks remain visible on light pages. */
+.page-sponsor-band {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  box-sizing: border-box;
+  color: #ffffff;
+  background: linear-gradient(112deg, #e42278 0%, #d9166b 58%, #c91361 100%);
+}
+.page-sponsor-band__inner {
+  width: min(1440px, calc(100% - 56px));
+  margin-inline: auto;
+  padding: 34px 0 12px;
+}
+.page-sponsor-band .section-head,
+.page-sponsor-band .section-head h2,
+.page-sponsor-band .section-head .MuiTypography-root,
+.page-sponsor-band .lede,
+.page-sponsor-band .MuiTypography-root {
+  color: #ffffff !important;
+}
+.page-sponsor-band .section-head {
+  margin-bottom: 10px;
+}
+.page-sponsor-band .sponsor-watermark-strip {
+  margin: 14px 0 0;
+  padding: 13px 0 15px;
+  border-top-color: rgba(255, 255, 255, 0.32);
+  border-bottom-color: rgba(255, 255, 255, 0.32);
+}
+.page-sponsor-band .sponsor-watermark-strip__label.MuiTypography-root {
+  color: rgba(255, 255, 255, 0.84) !important;
+}
+.page-sponsor-band .sponsor-watermark-strip__logos a,
+.page-sponsor-band .sponsor-watermark-strip__logos span,
+.page-sponsor-band .sponsor-watermark-strip__logo {
+  opacity: 1 !important;
+  filter: none !important;
+  color: #ffffff !important;
+}
+.page-sponsor-band .sponsor-watermark-strip__logos img {
+  opacity: 1 !important;
+  filter: none !important;
+}
+@media (max-width: 640px) {
+  .page-sponsor-band__inner {
+    width: calc(100% - 28px);
+    padding-top: 27px;
+    padding-bottom: 10px;
+  }
+  .page-sponsor-band .sponsor-watermark-strip {
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .page-sponsor-band .sponsor-watermark-strip__logos {
+    gap: 16px;
+  }
+}
