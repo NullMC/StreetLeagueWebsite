@@ -12,6 +12,7 @@ import type { ActiveCollaboration, Partner } from "../types";
 export default function Partners() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]);
+
   useEffect(() => {
     let mounted = true;
     Promise.all([getPartners(), getActiveCollaborations()])
@@ -28,34 +29,56 @@ export default function Partners() {
     return () => { mounted = false; };
   }, []);
 
-  return <PageShell>
-    <div className="page partners-unified-page">
-      <Paper component="section" variant="outlined" className="unified-collab-section" id="collabora" elevation={0}>
-        <div className="unified-collab-section__copy">
-          <Typography component="h1" variant="h1">Collabora con Street League</Typography>
-          <Typography component="p">
-            Sostieni il progetto, dai visibilità alla tua attività e costruisci una collaborazione su misura.
-            Non esistono pacchetti predefiniti: contattaci e valutiamo insieme le opportunità più adatte.
-          </Typography>
-          <Button component="a" href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League" variant="contained">
-            Richiedi informazioni
-          </Button>
+  return (
+    <PageShell>
+      <>
+        <div className="page partners-unified-page">
+          <Paper component="section" variant="outlined" className="unified-collab-section" id="collabora" elevation={0}>
+            <div className="unified-collab-section__copy">
+              <Typography component="h1" variant="h1">Collabora con Street League</Typography>
+              <Typography component="p">
+                Sostieni il progetto, dai visibilità alla tua attività e costruisci una collaborazione su misura.
+                Non esistono pacchetti predefiniti: contattaci e valutiamo insieme le opportunità più adatte.
+              </Typography>
+              <Button component="a" href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League" variant="contained">
+                Richiedi informazioni
+              </Button>
+            </div>
+            {collaborations.length
+              ? <div className="unified-collab-section__media"><CollabCarousel items={collaborations} /></div>
+              : <div className="unified-collab-section__note">
+                  <Typography component="h2" variant="h4">Una presenza dentro e fuori dal campo.</Typography>
+                  <Typography component="p">Raccontaci la tua attività: definiremo insieme una proposta di collaborazione personalizzata.</Typography>
+                </div>}
+          </Paper>
         </div>
-        {collaborations.length
-          ? <div className="unified-collab-section__media"><CollabCarousel items={collaborations} /></div>
-          : <div className="unified-collab-section__note">
-              <Typography component="h2" variant="h4">Una presenza dentro e fuori dal campo.</Typography>
-              <Typography component="p">Raccontaci la tua attività: definiremo insieme una proposta di collaborazione personalizzata.</Typography>
-            </div>}
-      </Paper>
-      <section className="unified-sponsors-section" id="sponsor">
-        <SectionTitle title="I nostri sponsor" />
-        <Typography component="p" className="unified-sponsors-section__intro">
-          Le attività e i brand che contribuiscono alla crescita della Street League.
-        </Typography>
-        <SponsorWatermarkStrip />
-        {partners.length ? <SponsorGrid partners={partners} /> : <EmptyState title="Sponsor in aggiornamento" text="I partner compariranno qui non appena saranno pubblicati dal back office." />}
-      </section>
-    </div>
-  </PageShell>;
+
+        <section className="sponsor-band sponsor-band--redesign partners-sponsors-band" id="sponsor">
+          <div className="section--edge sponsor-band__inner">
+            <div className="home-section-head home-section-head--on-pink">
+              <SectionTitle title="I nostri sponsor" />
+            </div>
+            <Typography component="p" className="unified-sponsors-section__intro partners-sponsors-band__intro">
+              Le attività e i brand che contribuiscono alla crescita della Street League.
+            </Typography>
+            <SponsorWatermarkStrip />
+            {partners.length
+              ? <SponsorGrid partners={partners} />
+              : <EmptyState title="Sponsor in aggiornamento" text="I partner compariranno qui non appena saranno pubblicati dal back office." />}
+            <div className="sponsor-cta-row partners-sponsors-band__cta">
+              <Typography component="span" className="sponsor-cta-row__title">Il prossimo nome può essere il tuo.</Typography>
+              <Button
+                component="a"
+                href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League"
+                variant="outlined"
+                className="partners-sponsors-band__button"
+              >
+                Diventa sponsor ↗
+              </Button>
+            </div>
+          </div>
+        </section>
+      </>
+    </PageShell>
+  );
 }

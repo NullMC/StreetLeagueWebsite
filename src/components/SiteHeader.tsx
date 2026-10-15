@@ -123,7 +123,13 @@ export function SiteHeader() {
         anchor="right"
         open={open}
         onClose={() => setOpen(false)}
-        slotProps={{ paper: { className: "mobile-menu--mui", id: "mobile-navigation" } }}
+        ModalProps={{ keepMounted: true }}
+        slotProps={{
+          paper: {
+            className: `mobile-menu--mui${open ? " is-open" : ""}`,
+            id: "mobile-navigation",
+          },
+        }}
       >
         <div className="mobile-menu__head">
           <span className="eyebrow">Street League</span>

@@ -146,3 +146,124 @@
     font-size: clamp(16px, 4.3vw, 24px);
   }
 }
+
+
+/* Off-canvas: drive the visible state explicitly so legacy styles cannot hide the MUI paper. */
+.MuiDrawer-root {
+  z-index: 1400 !important;
+}
+.MuiDrawer-root .MuiBackdrop-root {
+  background-color: rgba(1, 10, 8, 0.58) !important;
+}
+.mobile-menu--mui.MuiDrawer-paper {
+  z-index: 1401 !important;
+  box-sizing: border-box;
+  transform: translateX(100%) !important;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 220ms ease, visibility 0s linear 220ms !important;
+}
+.mobile-menu--mui.MuiDrawer-paper.is-open {
+  transform: translateX(0) !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transition: transform 220ms ease, visibility 0s !important;
+}
+
+/* Keep the sponsor tile outline, but never put a background or border behind its mark. */
+.partner-editorial-card.MuiCard-root,
+.partner-editorial-card.MuiCard-root:hover {
+  border: 1px solid rgba(255, 255, 255, 0.38) !important;
+  border-color: rgba(255, 255, 255, 0.38) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.partner-editorial-card.MuiCard-root:hover {
+  border-color: rgba(255, 255, 255, 0.82) !important;
+  transform: translateY(-2px);
+}
+.partner-editorial-card__logo,
+.partner-editorial-card__logo--placeholder {
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.partner-editorial-card__logo {
+  object-fit: contain;
+}
+
+/* The sponsor band uses the same edge-to-edge pink canvas as the home page. */
+.partners-sponsors-band.sponsor-band--redesign {
+  width: 100%;
+  margin: 0;
+  color: #ffffff;
+}
+.partners-sponsors-band .section-head,
+.partners-sponsors-band .section-head h2,
+.partners-sponsors-band .unified-sponsors-section__intro,
+.partners-sponsors-band .empty-state,
+.partners-sponsors-band .empty-state h3,
+.partners-sponsors-band .empty-state p {
+  color: #ffffff !important;
+}
+.partners-sponsors-band__intro.MuiTypography-root {
+  max-width: 680px;
+  margin: -4px 0 22px !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  line-height: 1.65;
+}
+.partners-sponsors-band .sponsor-watermark-strip {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.partners-sponsors-band .sponsor-watermark-strip__label.MuiTypography-root {
+  color: rgba(255, 255, 255, 0.8);
+}
+.partners-sponsors-band .sponsor-watermark-strip__logos a,
+.partners-sponsors-band .sponsor-watermark-strip__logo {
+  color: #ffffff;
+}
+.partners-sponsors-band .partner-editorial-card.MuiCard-root {
+  color: #ffffff;
+}
+.partners-sponsors-band .partner-editorial-card__name.MuiTypography-root {
+  color: #ffffff !important;
+}
+.partners-sponsors-band .partner-editorial-card__description {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+/* CTA links in sponsor areas: transparent, white text, visible white outline. */
+.partners-sponsors-band .partner-editorial-card__button.MuiButton-root,
+.partners-sponsors-band__button.MuiButton-root,
+.sponsor-band--redesign .home-sponsors .partner-editorial-card__button.MuiButton-root,
+.sponsor-band--redesign .home-sponsors .sponsor-cta-row .MuiButton-root {
+  color: #ffffff !important;
+  background: transparent !important;
+  border: 1px solid #ffffff !important;
+  box-shadow: none !important;
+}
+.partners-sponsors-band .partner-editorial-card__button.MuiButton-root:hover,
+.partners-sponsors-band__button.MuiButton-root:hover,
+.sponsor-band--redesign .home-sponsors .partner-editorial-card__button.MuiButton-root:hover,
+.sponsor-band--redesign .home-sponsors .sponsor-cta-row .MuiButton-root:hover {
+  color: #010a08 !important;
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+}
+.partners-sponsors-band .partner-editorial-card__button.Mui-disabled {
+  color: rgba(255, 255, 255, 0.65) !important;
+  background: transparent !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
+  opacity: 1;
+}
+.partners-sponsors-band__cta {
+  border-top-color: rgba(255,255,255,.32);
+}
+
+@media (max-width: 560px) {
+  .partners-sponsors-band .sponsor-band__inner {
+    padding-inline: 14px;
+  }
+}
