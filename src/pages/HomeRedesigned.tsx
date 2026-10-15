@@ -276,7 +276,7 @@ export default function HomeRedesigned() {
         <div aria-hidden="true" style={heroBackdropStyle} />
         <div className="home-hero__inner" style={{ position: "relative", zIndex: 1 }}>
           <div className="home-hero__mast" style={{ color: "#010a08", borderBottomColor: "rgba(1,10,8,.16)" }}>
-            <div><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Street League</span><h1 id="home-hero-title" style={{ color: "#010a08" }}>Highlights</h1></div>
+            <div><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Street League</span><h1 id="home-hero-title" style={{ color: "#010a08" }}>Contenuti in evidenza</h1></div>
           </div>
           {social.length ? (
             <div className="home-hero__highlights">
@@ -343,14 +343,14 @@ export default function HomeRedesigned() {
 
       <section className="sponsor-band sponsor-band--redesign" id="home-partners">
         <div className="section--edge sponsor-band__inner">
-          <section className="home-collab-proposal" id="home-collaborate">
+          <div className="home-collab-proposal" id="home-collaborate">
             <div className="home-collab-proposal__copy">
               <SectionTitle title="Collabora con Street League" />
               <p>Nessun pacchetto predefinito: raccontaci la tua attività e costruiamo insieme una proposta adatta al tuo brand.</p>
               <Button component="a" href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League" variant="contained">Contattaci per saperne di più</Button>
             </div>
             {collaborations.length ? <div className="home-collab-proposal__media"><CollabCarousel items={collaborations} variant="home" /></div> : null}
-          </section>
+          </div>
           <section className="home-sponsors" aria-label="Sponsor Street League">
             <div className="home-section-head"><SectionTitle title="I nostri sponsor" /></div>
             {partners.length ? <SponsorGrid partners={partners} /> : <EmptyState title="Sponsor in aggiornamento" text="Le attività che sostengono la Street League compariranno qui." />}

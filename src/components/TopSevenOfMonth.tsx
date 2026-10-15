@@ -150,7 +150,7 @@ export function TopSevenOfMonth(){
   return <Paper component="section" variant="outlined" className="top-seven-section" elevation={0}>
     <div className="top-seven-heading"><div><Typography component="h2" variant="h2">Top 7 del mese</Typography>
       <Typography component="p" className="top-seven-subtitle">I migliori interpreti tra tutte le competizioni · {monthLabel}</Typography></div>
-      <Chip label="FORMAZIONE 1–3–2–1" size="small" className="top-seven-chip"/></div>
+    </div>
     <Typography component="p" className="top-seven-method">Selezione mensile per squadra basata su presenze, gol, assist, MVP, clean sheet e cartellini registrati.</Typography>
     {loading?<div className="top-seven-loading"><CircularProgress size={30}/></div>:<div className="top-seven-pitch">
       <div className="top-seven-row top-seven-row--attack"><PlayerSlot candidate={current.attacker} label="Attaccante"/></div>
