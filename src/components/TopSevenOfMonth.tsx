@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Avatar, Chip, CircularProgress, Paper, Typography } from "@mui/material";
-import { getAllMatchEvents, getAllMatchLineups, getAllMatchMvps, getCompetitions, getMatches, getPlayers, getTeams } from "../lib/api";
+import { getAllMatchEvents, getAllMatchLineups, getAllMatchMvps, getCompetitions, getMatches, getPlayers, getTeams, subscribeToCompetition } from "../lib/api";
 import type { Match, MatchEvent, MatchLineup, MatchMvp, Player, Team } from "../types";
 
 type Role = "goalkeeper" | "defender" | "midfielder" | "attacker";
@@ -11,12 +11,37 @@ type Candidate = {
 type Lineup = { goalkeeper: Candidate | null; defenders: Array<Candidate | null>; midfielders: Array<Candidate | null>; attacker: Candidate | null };
 
 function roleFromPosition(value: string | null | undefined): Role | null {
-  const p = (value || "").toLowerCase().trim();
+  const p = (value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[._-]/g, " ");
   if (p.includes("staff")) return null;
-  if (p.includes("portier") || p.includes("goalkeeper") || p.includes("goalie") || p === "gk" || p === "por") return "goalkeeper";
-  if (p.includes("difensor") || p.includes("defender") || p.includes("terzin") || p === "df" || p === "dc" || p === "braccetto") return "defender";
-  if (p.includes("centrocamp") || p.includes("midfield") || p.includes("mediano") || p === "cm" || p === "mf" || p === "cc") return "midfielder";
-  if (p.includes("attacc") || p.includes("forward") || p.includes("punta") || p.includes("striker") || p === "fw" || p === "att" || p === "st") return "attacker";
+
+  if (
+    p.includes("portier") || p.includes("goalkeeper") || p.includes("goalie") ||
+    p === "keeper" || ["gk", "por", "pt", "goal"].includes(p)
+  ) return "goalkeeper";
+
+  if (
+    p.includes("difensor") || p.includes("defender") || p.includes("terzin") ||
+    p.includes("braccetto") || p.includes("difesa") ||
+    ["dif", "def", "df", "dc", "d", "cb", "lb", "rb", "lwb", "rwb"].includes(p)
+  ) return "defender";
+
+  if (
+    p.includes("centrocamp") || p.includes("midfield") || p.includes("mediano") ||
+    p.includes("mezzala") || p.includes("trequartista") || p.includes("regista") ||
+    ["cen", "mid", "cm", "mf", "cc", "mc", "med", "cam", "cdm", "mco"].includes(p)
+  ) return "midfielder";
+
+  if (
+    p.includes("attacc") || p.includes("forward") || p.includes("punta") ||
+    p.includes("centravanti") || p.includes("striker") ||
+    ["fw", "att", "st", "cf", "a"].includes(p)
+  ) return "attacker";
+
   return null;
 }
 function isStaff(player: Player) {
@@ -113,7 +138,12 @@ export function TopSevenOfMonth(){
       }catch(error){console.error("Top 7 monthly data error:",error);if(mounted)setLineup(null);}
       finally{if(mounted)setLoading(false);}
     }
-    void load();return()=>{mounted=false;};
+    void load();
+    const unsubscribe = subscribeToCompetition(() => { void load(); });
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   },[]);
   const empty:Lineup={goalkeeper:null,defenders:[null,null,null],midfielders:[null,null],attacker:null};
   const current=lineup||empty;
