@@ -3,7 +3,6 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
-import { CompetitionLogo } from "../components/CompetitionLogo";
 import {
   calculateStandings,
   getActiveCompetitions,
@@ -73,7 +72,7 @@ export default function Standings() {
           <div className="standings-competition-list">
             {competitionRows.map((competition) => (
               <section className="standings-competition" key={competition.competition.id}>
-                <SectionTitle eyebrow="Classifica competizione" title={competition.competition.name} leading={<CompetitionLogo competition={competition.competition} size="heading" />} variant="group" />
+                <SectionTitle eyebrow="Classifica competizione" title={competition.competition.name} variant="group" />
                 {!competition.rows.length ? (
                   <EmptyState title="Nessuna classifica" text="La classifica viene derivata dalle partite concluse con un risultato registrato." />
                 ) : (
