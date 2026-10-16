@@ -1,3 +1,4 @@
+import type React from "react";
 import {
   Button,
   Card,
@@ -11,7 +12,10 @@ import { sanitizeRichTextHtml } from "../lib/richText";
 
 export function SponsorGrid({ partners }: { partners: Partner[] }) {
   return (
-    <div className="partner-editorial-grid">
+    <div
+      className="partner-editorial-grid"
+      style={{ "--sponsor-count": Math.max(partners.length, 1) } as React.CSSProperties & { "--sponsor-count": number }}
+    >
       {partners.map((partner) => (
         <Card
           className="partner-editorial-card"

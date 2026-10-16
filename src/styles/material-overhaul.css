@@ -953,3 +953,81 @@
     gap: 16px;
   }
 }
+
+
+/* Dynamic sponsor composition: a single horizontal row that fills all available width. */
+.partner-editorial-grid {
+  display: grid !important;
+  grid-template-columns: repeat(var(--sponsor-count, 1), minmax(0, 1fr)) !important;
+  grid-auto-flow: column;
+  grid-auto-rows: 430px;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  gap: clamp(8px, 1.15vw, 16px);
+}
+.partner-editor-grid > * {
+  min-width: 0;
+}
+.partner-editorial-card.MuiCard-root,
+.partner-editorial-card.MuiCard-root:hover {
+  width: 100%;
+  min-width: 0;
+  grid-column: auto !important;
+  grid-row: auto !important;
+}
+.partner-editorial-card__name.MuiTypography-root {
+  overflow-wrap: anywhere;
+}
+.partner-editorial-card__description {
+  overflow-wrap: anywhere;
+}
+.partner-editorial-card__actions.MuiCardActions-root {
+  min-width: 0;
+}
+.partner-editorial-card__button.MuiButton-root {
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal;
+}
+@media (max-width: 1080px) {
+  .partner-editorial-grid {
+    grid-template-columns: repeat(var(--sponsor-count, 1), minmax(200px, 1fr)) !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+  .partner-editorial-card.MuiCard-root {
+    scroll-snap-align: start;
+  }
+}
+@media (max-width: 650px) {
+  .partner-editorial-grid {
+    grid-template-columns: repeat(var(--sponsor-count, 1), minmax(220px, 1fr)) !important;
+    grid-auto-rows: 410px;
+    gap: 12px;
+  }
+  .partner-editorial-card__media.MuiCardMedia-root {
+    height: 208px;
+    min-height: 208px;
+    flex-basis: 208px;
+  }
+  .partner-editorial-card__logo,
+  .partner-editorial-card__logo--placeholder {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    flex-basis: 52px;
+  }
+  .partner-editorial-card__name.MuiTypography-root {
+    font-size: clamp(18px, 4.4vw, 24px);
+  }
+  .partner-editorial-card__content.MuiCardContent-root {
+    padding: 14px 14px 8px !important;
+  }
+  .partner-editorial-card__actions.MuiCardActions-root {
+    padding: 7px 14px 14px;
+  }
+}
