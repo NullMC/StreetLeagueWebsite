@@ -3,6 +3,7 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
+import { CompetitionLogo, CompetitionLogoStack } from "../components/CompetitionLogo";
 import {
   getCompetitions,
   getPlayerStatsForCompetitions,
@@ -202,6 +203,7 @@ export default function Stats() {
           })
           .map((player) => ({
             player,
+            competition,
             competitionId: competition.id,
             competitionName: competition.name,
             competitionStatus: competition.status,
@@ -228,7 +230,8 @@ export default function Stats() {
             <nav className="stats-competition-nav" aria-label="Navigazione competizioni">
               {groups.flatMap((group) => group.competitions).map((competition) => (
                 <a key={competition.id} href={`#stats-competition-${competition.id}`}>
-                  {competition.name}
+                  <CompetitionLogo competition={competition} size="tiny" />
+                  <span>{competition.name}</span>
                 </a>
               ))}
             </nav>
@@ -268,13 +271,17 @@ export default function Stats() {
                     </tr>
                   </thead>
                   <tbody>
-                    {playerSearchResults.map(({ player, competitionId, competitionName, competitionStatus }) => (
+                    {playerSearchResults.map(({ player, competition, competitionId, competitionName, competitionStatus }) => (
                       <tr key={`${competitionId}-${player.id}`}>
                         <td>
-                          {competitionName}{" "}
-                          <small className="stats-search-status">
-                            · {competitionStatus === "upcoming" ? "In arrivo" : "Attiva"}
-                          </small>
+                          <span className="stats-competition-identity">
+                            <CompetitionLogo competition={competition} size="tiny" />
+                            <span>{competitionName}{" "}
+                              <small className="stats-search-status">
+                                · {competitionStatus === "upcoming" ? "In arrivo" : "Attiva"}
+                              </small>
+                            </span>
+                          </span>
                         </td>
                         <td>{player.shirt_number ?? "—"}</td>
                         <td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td>
@@ -317,15 +324,21 @@ export default function Stats() {
                 <SectionTitle
                   eyebrow="Statistiche attive"
                   title={group.name}
+                  leading={<CompetitionLogoStack competitions={group.competitions} size="heading" />}
                   variant="group"
                 />
 
                 {group.competitions.length > 1 && (
                   <p className="admin-help-text">
                     Dati aggregati da:{" "}
-                    {group.competitions
-                      .map((competition) => competition.name)
-                      .join(" · ")}
+                    <span className="stats-aggregated-competitions">
+                      {group.competitions.map((competition) => (
+                        <span className="stats-aggregated-competition" key={competition.id}>
+                          <CompetitionLogo competition={competition} size="tiny" />
+                          <span>{competition.name}</span>
+                        </span>
+                      ))}
+                    </span>
                   </p>
                 )}
 
@@ -456,6 +469,7 @@ export default function Stats() {
                             <SectionTitle
                               eyebrow="Giocatori"
                               title={competition.name}
+                              leading={<CompetitionLogo competition={competition} size="heading" />}
                               variant="subsection"
                             />
 

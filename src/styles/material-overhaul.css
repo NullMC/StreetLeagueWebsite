@@ -622,3 +622,39 @@
     padding: 7px 16px 16px;
   }
 }
+
+
+/* Competition pictograms are transparent image marks: no badges or placeholders. */
+.competition-logo {
+  display: block; flex: 0 0 auto; width: 24px; height: 24px; max-width: none;
+  object-fit: contain; object-position: center; border: 0; border-radius: 0;
+  padding: 0; margin: 0; background: transparent; box-shadow: none;
+}
+.competition-logo--tiny { width: 18px; height: 18px; }
+.competition-logo--small { width: 25px; height: 25px; }
+.competition-logo--heading { width: 32px; height: 32px; }
+.competition-logo--card { width: 36px; height: 36px; }
+.competition-logo--hero { width: 48px; height: 48px; }
+.competition-logo-stack { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; }
+.section-head__title-line { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.section-head__title-line > h2 { min-width: 0; }
+.competition-list-card__title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.competition-list-card__title h3 { min-width: 0; margin-block: 8px; }
+.competition-detail-title { display: flex; align-items: center; gap: clamp(12px, 2vw, 22px); }
+.competition-detail-title h1 { min-width: 0; }
+.home-match-row__competition,.stats-competition-identity,.stats-aggregated-competition {
+  display: inline-flex; align-items: center; gap: 7px; min-width: 0;
+}
+.stats-aggregated-competitions { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.stats-competition-nav a { display: inline-flex; align-items: center; gap: 8px; }
+.home-active-competition__title,.home-stat-group__title { display: flex; align-items: center; gap: 10px; }
+.home-active-competition__title { margin-top: 0; }
+.home-stat-group__title h3 { min-width: 0; margin-block: 0 12px; }
+.page.page--sponsor-band > .page-sponsor-band { margin-bottom: clamp(28px, 4vw, 48px); }
+@media (max-width: 640px) {
+  .competition-logo--heading { width: 26px; height: 26px; }
+  .competition-logo--card { width: 30px; height: 30px; }
+  .competition-logo--hero { width: 36px; height: 36px; }
+  .competition-detail-title { align-items: flex-start; }
+  .competition-detail-title h1 { overflow-wrap: anywhere; }
+}

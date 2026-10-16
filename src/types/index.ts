@@ -19,6 +19,8 @@ export interface Competition {
   season_label: string | null;
   start_date: string | null;
   end_date: string | null;
+  /** Explicit competition pictogram; hero_image_url remains a legacy fallback. */
+  logo_url?: string | null;
   hero_image_url: string | null;
   statistics_group: string | null;
 }

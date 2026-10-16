@@ -6,6 +6,7 @@ import { TeamCarousel } from "../components/TeamCarousel";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
 import { SponsorGrid } from "../components/SponsorGrid";
 import { TopSevenOfMonth } from "../components/TopSevenOfMonth";
+import { CompetitionLogo, CompetitionLogoStack } from "../components/CompetitionLogo";
 import { Button, Typography } from "@mui/material";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
 import { calculateStandings, getActiveCompetitions, getMatches, getPartners, getPlayerStatsForCompetitions, getSocialContent, getStaffRankingForCompetitions, getStatisticsGroups, getTeams, subscribeToCompetition } from "../lib/api";
@@ -193,7 +194,10 @@ function MatchList({
               </div>
             </div>
             <div className="home-match-row__meta">
-              <span className="home-match-row__competition">{competition?.name ?? "Competizione"}</span>
+              <span className="home-match-row__competition">
+                {competition ? <CompetitionLogo competition={competition} size="tiny" /> : null}
+                <span>{competition?.name ?? "Competizione"}</span>
+              </span>
               <span className="home-match-row__matchday">{match.matchday ?? "Match"}</span>
               <span aria-hidden="true">→</span>
             </div>
@@ -215,7 +219,7 @@ export default function HomeRedesigned() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [social, setSocial] = useState<SocialContent[]>([]);
   const [playerStatsByGroup, setPlayerStatsByGroup] = useState<Record<string, PlayerWithStats[]>>({});
-  const [activeStandings, setActiveStandings] = useState<Array<{ id: string; name: string; standings: ReturnType<typeof calculateStandings>; staff: StaffRankingEntry[] }>>([]);
+  const [activeStandings, setActiveStandings] = useState<Array<{ competition: Competition; standings: ReturnType<typeof calculateStandings>; staff: StaffRankingEntry[] }>>([]);
   const [statsGroups, setStatsGroups] = useState<Awaited<ReturnType<typeof getStatisticsGroups>>>([]);
   const [potm, setPotm] = useState<Awaited<ReturnType<typeof getPlayerOfMonth>>>(null);
   const [staffRanking, setStaffRanking] = useState<StaffRankingEntry[]>([]);
@@ -236,7 +240,7 @@ export default function HomeRedesigned() {
         getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id), { year: now.getFullYear(), month: now.getMonth() + 1 }),
         Promise.all(activeCompetitions.map(async (competition) => {
           const [competitionTeams, competitionMatches, staff] = await Promise.all([getTeams(competition.id), getMatches(competition.id), getStaffRankingForCompetitions([competition.id])]);
-          return { id: competition.id, name: competition.name, standings: calculateStandings(competitionTeams, competitionMatches), staff };
+          return { competition, standings: calculateStandings(competitionTeams, competitionMatches), staff };
         })),
         Promise.all(nextGroups.map(async (group) => [group.id, await getPlayerStatsForCompetitions(group.competition_ids)] as const)),
       ]);
@@ -303,13 +307,13 @@ export default function HomeRedesigned() {
         <div className="home-section-head"><SectionTitle eyebrow="" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
         <div className="home-schedule__grid">
           <div><MatchList matches={matches} teams={teams} competitions={activeCompetitionList} /></div>
-          <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifiche attive</span><a href="/classifica">Complete ↗</a></div>{activeStandings.map((competition) => <div className="home-active-competition" key={competition.id}><h3>{competition.name}</h3><StandingsList standings={competition.standings} /><StaffRankingPreview items={competition.staff} /></div>)}{!activeStandings.length && <EmptyState title="Nessuna competizione attiva" text="Le classifiche appariranno qui quando ci saranno competizioni attive." />}</div>
+          <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifiche attive</span><a href="/classifica">Complete ↗</a></div>{activeStandings.map((competition) => <div className="home-active-competition" key={competition.competition.id}><h3 className="home-active-competition__title"><CompetitionLogo competition={competition.competition} size="small" />{competition.competition.name}</h3><StandingsList standings={competition.standings} /><StaffRankingPreview items={competition.staff} /></div>)}{!activeStandings.length && <EmptyState title="Nessuna competizione attiva" text="Le classifiche appariranno qui quando ci saranno competizioni attive." />}</div>
         </div>
       </section>
 
       <section className="section--edge home-performers" id="home-stats">
         <div className="home-section-head"><SectionTitle eyebrow="Live data" title="Top performers" /></div>
-        {statsGroups.map((group) => <div className="home-stat-group" key={group.id}><h3>{group.name}</h3><div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStatsByGroup[group.id] ?? []} />)}</div></div>)}{!statsGroups.length && <EmptyState title="Nessuna statistica attiva" text="Le statistiche appariranno qui quando ci saranno competizioni attive." />}
+        {statsGroups.map((group) => <div className="home-stat-group" key={group.id}><div className="home-stat-group__title"><CompetitionLogoStack competitions={group.competitions} size="small" /><h3>{group.name}</h3></div><div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStatsByGroup[group.id] ?? []} />)}</div></div>)}{!statsGroups.length && <EmptyState title="Nessuna statistica attiva" text="Le statistiche appariranno qui quando ci saranno competizioni attive." />}
       </section>
 
       <section className="section--edge potm-section" id="home-potm">

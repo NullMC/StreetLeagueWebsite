@@ -3,6 +3,7 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
+import { CompetitionLogo } from "../components/CompetitionLogo";
 import {
   calculateStandings,
   getActiveCompetitions,
@@ -12,7 +13,7 @@ import {
 } from "../lib/api";
 
 export default function Standings() {
-  const [competitionRows, setCompetitionRows] = useState<Array<{ id: string; name: string; rows: ReturnType<typeof calculateStandings> }>>([]);
+  const [competitionRows, setCompetitionRows] = useState<Array<{ competition: Awaited<ReturnType<typeof getActiveCompetitions>>[number]; rows: ReturnType<typeof calculateStandings> }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -29,8 +30,7 @@ export default function Standings() {
               getMatches(competition.id),
             ]);
             return {
-              id: competition.id,
-              name: competition.name,
+              competition,
               rows: calculateStandings(teams, matches),
             };
           }),
@@ -72,12 +72,12 @@ export default function Standings() {
         ) : (
           <div className="standings-competition-list">
             {competitionRows.map((competition) => (
-              <section className="standings-competition" key={competition.id}>
-                <SectionTitle eyebrow="Classifica competizione" title={competition.name} variant="group" />
+              <section className="standings-competition" key={competition.competition.id}>
+                <SectionTitle eyebrow="Classifica competizione" title={competition.competition.name} leading={<CompetitionLogo competition={competition.competition} size="heading" />} variant="group" />
                 {!competition.rows.length ? (
                   <EmptyState title="Nessuna classifica" text="La classifica viene derivata dalle partite concluse con un risultato registrato." />
                 ) : (
-                  <div className="leaderboard standings-table" role="region" aria-label={`Classifica ${competition.name}`} tabIndex={0}>
+                  <div className="leaderboard standings-table" role="region" aria-label={`Classifica ${competition.competition.name}`} tabIndex={0}>
                     <div className="table-row head">
                       <span title="Posizione">#</span>
                       <span>Squadra</span>

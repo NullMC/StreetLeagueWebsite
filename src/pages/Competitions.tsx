@@ -3,6 +3,7 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
+import { CompetitionLogoStack } from "../components/CompetitionLogo";
 import { getCompetitions } from "../lib/api";
 import type { Competition } from "../types";
 
@@ -80,7 +81,10 @@ export default function Competitions() {
                     {listing.status}
                     
                   </span>
-                  <h3>{listing.name}</h3>
+                  <div className="competition-list-card__title">
+                    <CompetitionLogoStack competitions={listing.competitions} size="card" />
+                    <h3>{listing.name}</h3>
+                  </div>
                   
                   <p>{listing.competitions[0].season_label || "—"}</p>
                  

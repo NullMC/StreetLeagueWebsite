@@ -59,10 +59,13 @@ create table if not exists competitions (
   season_label text,
   start_date date,
   end_date date,
+  logo_url text,
   hero_image_url text,
   statistics_group text,
   created_at timestamptz not null default now()
 );
+alter table public.competitions add column if not exists logo_url text;
+
 create table if not exists teams (
   id uuid primary key default gen_random_uuid(),
   name text not null,
