@@ -75,6 +75,7 @@ export interface Partner {
   id: string;
   name: string;
   description?: string | null;
+  activity_image_url?: string | null;
   tier: PartnerTier;
   logo_url: string | null;
   website_url: string | null;

@@ -1,84 +1,90 @@
 import { useEffect, useState } from "react";
-import { Button, Paper, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
-import { CollabCarousel } from "../components/CollabCarousel";
 import { SponsorGrid } from "../components/SponsorGrid";
-import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
-import { getActiveCollaborations, getPartners } from "../lib/api";
-import type { ActiveCollaboration, Partner } from "../types";
+import { getPartners } from "../lib/api";
+import type { Partner } from "../types";
 
 export default function Partners() {
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
-    Promise.all([getPartners(), getActiveCollaborations()])
-      .then(([items, collabs]) => {
-        if (!mounted) return;
-        setPartners(items);
-        setCollaborations(collabs);
+    getPartners()
+      .then((items) => {
+        if (mounted) setPartners(items);
       })
-      .catch(() => {
-        if (!mounted) return;
-        setPartners([]);
-        setCollaborations([]);
+      .catch((error) => {
+        console.error("Impossibile caricare gli sponsor:", error);
+        if (mounted) setPartners([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
       });
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return (
     <PageShell>
-      <>
-        <div className="page partners-unified-page">
-          <Paper component="section" variant="outlined" className="unified-collab-section" id="collabora" elevation={0}>
-            <div className="unified-collab-section__copy">
-              <Typography component="h1" variant="h1">Collabora con Street League</Typography>
-              <Typography component="p">
-                Sostieni il progetto, dai visibilità alla tua attività e costruisci una collaborazione su misura.
-                Non esistono pacchetti predefiniti: contattaci e valutiamo insieme le opportunità più adatte.
-              </Typography>
-              <Button component="a" href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League" variant="contained">
-                Richiedi informazioni
+      <section className="sponsor-band sponsor-band--redesign partners-sponsors-band" id="home-partners">
+        <div className="section--edge sponsor-band__inner">
+          <section className="home-collab-proposal" id="collabora">
+            <div className="home-collab-proposal__copy">
+              <SectionTitle title="Collabora con Street League" />
+              <p>
+                Nessun pacchetto predefinito: raccontaci la tua attività e
+                costruiamo insieme una proposta adatta al tuo brand.
+              </p>
+              <Button
+                component="a"
+                href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League"
+                variant="outlined"
+                className="home-collab-proposal__button"
+              >
+                Contattaci per saperne di più <span aria-hidden="true">↗</span>
               </Button>
             </div>
-            {collaborations.length
-              ? <div className="unified-collab-section__media"><CollabCarousel items={collaborations} /></div>
-              : <div className="unified-collab-section__note">
-                  <Typography component="h2" variant="h4">Una presenza dentro e fuori dal campo.</Typography>
-                  <Typography component="p">Raccontaci la tua attività: definiremo insieme una proposta di collaborazione personalizzata.</Typography>
-                </div>}
-          </Paper>
-        </div>
-
-        <section className="sponsor-band sponsor-band--redesign partners-sponsors-band" id="sponsor">
-          <div className="section--edge sponsor-band__inner">
+          </section>
+          <section className="home-sponsors" aria-label="Sponsor Street League" id="sponsor">
             <div className="home-section-head home-section-head--on-pink">
               <SectionTitle title="I nostri sponsor" />
             </div>
-            <Typography component="p" className="unified-sponsors-section__intro partners-sponsors-band__intro">
+            <Typography component="p" className="home-sponsors__intro">
               Le attività e i brand che contribuiscono alla crescita della Street League.
             </Typography>
-            <SponsorWatermarkStrip />
-            {partners.length
-              ? <SponsorGrid partners={partners} />
-              : <EmptyState title="Sponsor in aggiornamento" text="I partner compariranno qui non appena saranno pubblicati dal back office." />}
-            <div className="sponsor-cta-row partners-sponsors-band__cta">
-              <Typography component="span" className="sponsor-cta-row__title">Il prossimo nome può essere il tuo.</Typography>
+            {loading ? (
+              <Typography component="p" className="home-sponsors__loading">
+                Caricamento sponsor…
+              </Typography>
+            ) : partners.length ? (
+              <SponsorGrid partners={partners} />
+            ) : (
+              <EmptyState
+                title="Sponsor in aggiornamento"
+                text="I partner compariranno qui non appena saranno pubblicati dal back office."
+              />
+            )}
+            <div className="sponsor-cta-row">
+              <Typography component="span" className="sponsor-cta-row__title">
+                Il prossimo nome può essere il tuo.
+              </Typography>
               <Button
                 component="a"
                 href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League"
                 variant="outlined"
                 className="partners-sponsors-band__button"
               >
-                Diventa sponsor ↗
+                Diventa sponsor <span aria-hidden="true">↗</span>
               </Button>
             </div>
-          </div>
-        </section>
-      </>
+          </section>
+        </div>
+      </section>
     </PageShell>
   );
 }
