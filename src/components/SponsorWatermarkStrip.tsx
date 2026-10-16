@@ -15,9 +15,9 @@ export function SponsorWatermarkStrip() {
     <Typography component="span" className="sponsor-watermark-strip__label">Supported by</Typography>
     <div className="sponsor-watermark-strip__logos">
       {partners.map(partner => {
-        const image = partner.logo_url ? <img src={partner.logo_url} alt={partner.name} title={partner.name} /> : <span title={partner.name}>{partner.name}</span>;
+        const image = partner.logo_url ? <img className="sponsor-watermark-strip__image" src={partner.logo_url} alt={partner.name} title={partner.name} loading="lazy" /> : <span className="sponsor-watermark-strip__fallback" title={partner.name}>{partner.name}</span>;
         return partner.website_url
-          ? <a key={partner.id} href={partner.website_url} target="_blank" rel="noopener noreferrer" aria-label={partner.name}>{image}</a>
+          ? <a className="sponsor-watermark-strip__logo" key={partner.id} href={partner.website_url} target="_blank" rel="noopener noreferrer" aria-label={partner.name} title={partner.name}>{image}</a>
           : <span className="sponsor-watermark-strip__logo" key={partner.id}>{image}</span>;
       })}
     </div>
