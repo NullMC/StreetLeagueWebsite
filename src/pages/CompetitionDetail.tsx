@@ -8,7 +8,6 @@ import type { Competition, Match, Team } from "../types";
 import { MatchCard } from "../components/MatchCard";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
-import { CompetitionLogo, CompetitionLogoStack } from "../components/CompetitionLogo";
 
 type CompetitionSectionData = {
   competition: Competition;
@@ -118,7 +117,6 @@ export default function CompetitionDetail() {
           <section className="detail-hero">
             <div className="detail-hero__inner">
               <div className="competition-detail-title">
-                <CompetitionLogoStack competitions={sections.map((section) => section.competition)} size="hero" />
                 <h1>{title || competition.name}</h1>
               </div>
             </div>
@@ -131,7 +129,6 @@ export default function CompetitionDetail() {
                   <SectionTitle
                     eyebrow={`${section.competition.status}`}
                     title={section.competition.name}
-                    leading={<CompetitionLogo competition={section.competition} size="heading" />}
                     variant="group"
                   />
                   <SectionTitle eyebrow="" title="Partite" variant="subsection" />
