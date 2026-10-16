@@ -5,7 +5,6 @@ import { SectionTitle } from "../components/SectionTitle";
 import { MatchCard } from "../components/MatchCard";
 import { EmptyState } from "../components/EmptyState";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
-import { CompetitionLogo } from "../components/CompetitionLogo";
 import { getActiveCompetitions, getMatches, getTeams } from "../lib/api";
 import type { Competition, Match, Team } from "../types";
 
@@ -52,7 +51,7 @@ export default function Matches() {
         : <div className="matches-competition-list">
             {groups.map(({ competition, matches, teams }) => <Paper component="section" variant="outlined" className="matches-competition-group" key={competition.id} elevation={0}>
               <div className="matches-competition-group__heading">
-                <SectionTitle title={competition.name} leading={<CompetitionLogo competition={competition} size="heading" />} variant="group" />
+                <SectionTitle title={competition.name} variant="group" />
                 <Typography component="span" className="matches-competition-group__count">{matches.length} {matches.length === 1 ? "partita" : "partite"}</Typography>
               </div>
               {matches.length
