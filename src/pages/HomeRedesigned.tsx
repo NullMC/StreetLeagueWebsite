@@ -296,7 +296,7 @@ export default function HomeRedesigned() {
               </div>
             </div>
           ) : (
-            <div className="home-hero__empty"><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Highlights</span><h2 style={{ color: "#010a08" }}>Nessun highlight ancora.</h2><p style={{ color: "rgba(1,10,8,.62)" }}>I contenuti pubblicati appariranno qui.</p></div>
+            <div className="home-hero__empty"><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Contenuti in evidenza</span><h2 style={{ color: "#010a08" }}>Nessun contenuto in evidenza ancora.</h2><p style={{ color: "rgba(1,10,8,.62)" }}>I contenuti pubblicati appariranno qui.</p></div>
           )}
         </div>
       </section>
