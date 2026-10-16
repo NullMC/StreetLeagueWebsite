@@ -1,18 +1,16 @@
-import "../styles/collab-carousel.css";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
-import { CollabCarousel } from "../components/CollabCarousel";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
 import { SponsorGrid } from "../components/SponsorGrid";
 import { TopSevenOfMonth } from "../components/TopSevenOfMonth";
 import { Button, Typography } from "@mui/material";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
-import { calculateStandings, getActiveCollaborations, getActiveCompetitions, getMatches, getPartners, getPlayerStatsForCompetitions, getSocialContent, getStaffRankingForCompetitions, getStatisticsGroups, getTeams, subscribeToCompetition } from "../lib/api";
+import { calculateStandings, getActiveCompetitions, getMatches, getPartners, getPlayerStatsForCompetitions, getSocialContent, getStaffRankingForCompetitions, getStatisticsGroups, getTeams, subscribeToCompetition } from "../lib/api";
 import { getPlayerOfMonth } from "../lib/playerOfMonth";
-import type { ActiveCollaboration, Competition, Match, Partner, Player, PlayerStats, SocialContent, StaffRankingEntry, Team } from "../types";
+import type { Competition, Match, Partner, Player, PlayerStats, SocialContent, StaffRankingEntry, Team } from "../types";
 
 type PlayerWithStats = Player & { stats: PlayerStats };
 type LeaderConfig = {
@@ -215,7 +213,6 @@ export default function HomeRedesigned() {
   const [activeCompetitionList, setActiveCompetitionList] = useState<Competition[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [collaborations, setCollaborations] = useState<ActiveCollaboration[]>([]);
   const [social, setSocial] = useState<SocialContent[]>([]);
   const [playerStatsByGroup, setPlayerStatsByGroup] = useState<Record<string, PlayerWithStats[]>>({});
   const [activeStandings, setActiveStandings] = useState<Array<{ id: string; name: string; standings: ReturnType<typeof calculateStandings>; staff: StaffRankingEntry[] }>>([]);
@@ -229,12 +226,12 @@ export default function HomeRedesigned() {
       const now = new Date();
       const activeCompetitions = await getActiveCompetitions();
       const nextGroups = await getStatisticsGroups(activeCompetitions);
-      const [matchSets, nextTeams, nextPartners, nextCollabs, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
+      const [matchSets, nextTeams, nextPartners, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
         Promise.all(activeCompetitions.map((item) => getMatches(item.id))).then((sets) => sets.flat()),
         Promise.all(activeCompetitions.map((item) => getTeams(item.id))).then((sets) => {
           const unique = new Map(sets.flat().map((team) => [team.id, team] as const));
           return Array.from(unique.values());
-        }), getPartners(), getActiveCollaborations(), getSocialContent(), getPlayerOfMonth(),
+        }), getPartners(), getSocialContent(), getPlayerOfMonth(),
         getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id)),
         getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id), { year: now.getFullYear(), month: now.getMonth() + 1 }),
         Promise.all(activeCompetitions.map(async (competition) => {
@@ -244,11 +241,11 @@ export default function HomeRedesigned() {
         Promise.all(nextGroups.map(async (group) => [group.id, await getPlayerStatsForCompetitions(group.competition_ids)] as const)),
       ]);
       const nextMatches = getNextMatchdayMatches(matchSets, activeCompetitions);
-      setMatches(nextMatches); setActiveCompetitionList(activeCompetitions); setTeams(nextTeams); setPartners(nextPartners); setCollaborations(nextCollabs); setSocial(nextSocial); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
+      setMatches(nextMatches); setActiveCompetitionList(activeCompetitions); setTeams(nextTeams); setPartners(nextPartners); setSocial(nextSocial); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
       setActiveStandings(nextStandings); setStatsGroups(nextGroups); setPlayerStatsByGroup(Object.fromEntries(nextGroupStats));
     } catch (error) {
       console.error("Home data error:", error);
-      setMatches([]); setActiveCompetitionList([]); setTeams([]); setPartners([]); setCollaborations([]); setSocial([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]); setActiveStandings([]); setStatsGroups([]); setPlayerStatsByGroup({});
+      setMatches([]); setActiveCompetitionList([]); setTeams([]); setPartners([]); setSocial([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]); setActiveStandings([]); setStatsGroups([]); setPlayerStatsByGroup({});
     }
   };
 
@@ -349,10 +346,10 @@ export default function HomeRedesigned() {
               <p>Nessun pacchetto predefinito: raccontaci la tua attività e costruiamo insieme una proposta adatta al tuo brand.</p>
               <Button component="a" href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League" variant="contained">Contattaci per saperne di più</Button>
             </div>
-            {collaborations.length ? <div className="home-collab-proposal__media"><CollabCarousel items={collaborations} variant="home" /></div> : null}
           </div>
           <section className="home-sponsors" aria-label="Sponsor Street League">
             <div className="home-section-head"><SectionTitle title="I nostri sponsor" /></div>
+            <Typography component="p" className="home-sponsors__intro">Le attività e i brand che contribuiscono alla crescita della Street League.</Typography>
             {partners.length ? <SponsorGrid partners={partners} /> : <EmptyState title="Sponsor in aggiornamento" text="Le attività che sostengono la Street League compariranno qui." />}
             <div className="sponsor-cta-row">
               <Typography component="span" className="sponsor-cta-row__title">Il prossimo nome può essere il tuo.</Typography>
