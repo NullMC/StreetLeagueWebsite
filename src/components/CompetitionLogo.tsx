@@ -29,7 +29,8 @@ export function CompetitionLogoStack({
 }) {
   const visible = competitions.filter((competition) => getCompetitionLogoUrl(competition));
   if (!visible.length) return null;
-  return <span className={["competition-logo-stack", className].filter(Boolean).join(" ")}>
+  const stackClass = visible.length > 1 ? "competition-logo-stack--multiple" : "";
+  return <span className={["competition-logo-stack", stackClass, className].filter(Boolean).join(" ")}>
     {visible.map((competition) => <CompetitionLogo key={competition.id} competition={competition} size={size} />)}
   </span>;
 }
