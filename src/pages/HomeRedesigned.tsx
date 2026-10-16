@@ -6,7 +6,6 @@ import { TeamCarousel } from "../components/TeamCarousel";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
 import { SponsorGrid } from "../components/SponsorGrid";
 import { TopSevenOfMonth } from "../components/TopSevenOfMonth";
-import { CompetitionLogo, CompetitionLogoStack } from "../components/CompetitionLogo";
 import { Button, Typography } from "@mui/material";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
 import { calculateStandings, getActiveCompetitions, getMatches, getPartners, getPlayerStatsForCompetitions, getSocialContent, getStaffRankingForCompetitions, getStatisticsGroups, getTeams, subscribeToCompetition } from "../lib/api";
@@ -195,7 +194,6 @@ function MatchList({
             </div>
             <div className="home-match-row__meta">
               <span className="home-match-row__competition">
-                {competition ? <CompetitionLogo competition={competition} size="tiny" /> : null}
                 <span>{competition?.name ?? "Competizione"}</span>
               </span>
               <span className="home-match-row__matchday">{match.matchday ?? "Match"}</span>
@@ -307,13 +305,13 @@ export default function HomeRedesigned() {
         <div className="home-section-head"><SectionTitle eyebrow="" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
         <div className="home-schedule__grid">
           <div><MatchList matches={matches} teams={teams} competitions={activeCompetitionList} /></div>
-          <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifiche attive</span><a href="/classifica">Complete ↗</a></div>{activeStandings.map((competition) => <div className="home-active-competition" key={competition.competition.id}><h3 className="home-active-competition__title"><CompetitionLogo competition={competition.competition} size="small" /><span className="home-active-competition__title-text">{competition.competition.name}</span></h3><StandingsList standings={competition.standings} /><StaffRankingPreview items={competition.staff} /></div>)}{!activeStandings.length && <EmptyState title="Nessuna competizione attiva" text="Le classifiche appariranno qui quando ci saranno competizioni attive." />}</div>
+          <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifiche attive</span><a href="/classifica">Complete ↗</a></div>{activeStandings.map((competition) => <div className="home-active-competition" key={competition.competition.id}><h3 className="home-active-competition__title"><span className="home-active-competition__title-text">{competition.competition.name}</span></h3><StandingsList standings={competition.standings} /><StaffRankingPreview items={competition.staff} /></div>)}{!activeStandings.length && <EmptyState title="Nessuna competizione attiva" text="Le classifiche appariranno qui quando ci saranno competizioni attive." />}</div>
         </div>
       </section>
 
       <section className="section--edge home-performers" id="home-stats">
         <div className="home-section-head"><SectionTitle eyebrow="Live data" title="Top performers" /></div>
-        {statsGroups.map((group) => <div className="home-stat-group" key={group.id}><div className="home-stat-group__title"><CompetitionLogoStack competitions={group.competitions} size="small" /><h3>{group.name}</h3></div><div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStatsByGroup[group.id] ?? []} />)}</div></div>)}{!statsGroups.length && <EmptyState title="Nessuna statistica attiva" text="Le statistiche appariranno qui quando ci saranno competizioni attive." />}
+        {statsGroups.map((group) => <div className="home-stat-group" key={group.id}><div className="home-stat-group__title"><h3>{group.name}</h3></div><div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStatsByGroup[group.id] ?? []} />)}</div></div>)}{!statsGroups.length && <EmptyState title="Nessuna statistica attiva" text="Le statistiche appariranno qui quando ci saranno competizioni attive." />}
       </section>
 
       <section className="section--edge potm-section" id="home-potm">
