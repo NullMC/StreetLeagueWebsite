@@ -26,7 +26,6 @@ import TeamDetail from "./pages/TeamDetail";
 import PlayerDetail from "./pages/PlayerDetail";
 import CompetitionDetail from "./pages/CompetitionDetail";
 import Stats from "./pages/Stats";
-import Matches from "./pages/Matches";
 import MatchDetail from "./pages/MatchDetail";
 import Partners from "./pages/Partners";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -51,7 +50,6 @@ function App() {
         <Route path="/giocatori/:playerId" element={<PlayerDetail />} />
         <Route path="/statistiche" element={<Stats />} />
         <Route path="/statistiche/:groupId/:statKey" element={<StatsDetail />} />
-        <Route path="/partite" element={<Matches />} />
         <Route path="/partite/:matchId" element={<MatchDetail />} />
         <Route path="/partner" element={<Partners />} />
         <Route path="/collabora" element={<Navigate to="/partner#collabora" replace />} />
