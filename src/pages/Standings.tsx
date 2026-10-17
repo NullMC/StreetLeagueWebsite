@@ -12,7 +12,10 @@ import {
 } from "../lib/api";
 
 export default function Standings() {
-  const [competitionRows, setCompetitionRows] = useState<Array<{ competition: Awaited<ReturnType<typeof getActiveCompetitions>>[number]; rows: ReturnType<typeof calculateStandings> }>>([]);
+  const [competitionRows, setCompetitionRows] = useState<Array<{
+    competition: Awaited<ReturnType<typeof getActiveCompetitions>>[number];
+    rows: ReturnType<typeof calculateStandings>;
+  }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -22,30 +25,26 @@ export default function Standings() {
     async function load() {
       try {
         const competitions = await getActiveCompetitions();
-        const data = await Promise.all(
-          competitions.map(async (competition) => {
-            const [teams, matches] = await Promise.all([
-              getTeams(competition.id),
-              getMatches(competition.id),
-            ]);
-            return {
-              competition,
-              rows: calculateStandings(teams, matches),
-            };
-          }),
-        );
-        if (mounted) setCompetitionRows(data);
-      } catch (loadError) {
+        const data = await Promise.all(competitions.map(async (competition) => {
+          const [teams, matches] = await Promise.all([
+            getTeams(competition.id),
+            getMatches(competition.id),
+          ]);
+          return { competition, rows: calculateStandings(teams, matches) };
+        }));
         if (mounted) {
-          setError(loadError instanceof Error ? loadError.message : "Errore classifica.");
+          setCompetitionRows(data);
+          setError("");
         }
+      } catch (loadError) {
+        if (mounted) setError(loadError instanceof Error ? loadError.message : "Errore classifica.");
       } finally {
         if (mounted) setLoading(false);
       }
     }
+
     void load();
     const unsubscribe = subscribeToCompetition(() => void load());
-
     return () => {
       mounted = false;
       unsubscribe();
@@ -54,18 +53,15 @@ export default function Standings() {
 
   return (
     <PageShell>
-      <div className="page page--sponsor-band">
-        <section className="page-sponsor-band" aria-label="Classifiche e sponsor">
-          <div className="page-sponsor-band__inner">
-            <SectionTitle title="Classifiche" />
-            <SponsorWatermarkStrip />
-          </div>
-        </section>
+      <div className="page standings-page">
+        <header className="platform-page-heading">
+          <SectionTitle title="Classifiche" />
+          <p>La situazione aggiornata delle competizioni attive.</p>
+        </header>
 
-        {error && <p className="admin-error">{error}</p>}
-
+        {error ? <p className="admin-error">{error}</p> : null}
         {loading ? (
-          <p className="admin-message">Caricamento…</p>
+          <p className="admin-message">Caricamento classifiche…</p>
         ) : !competitionRows.length ? (
           <EmptyState title="Nessuna classifica" text="Non ci sono competizioni da mostrare." />
         ) : (
@@ -76,37 +72,33 @@ export default function Standings() {
                 {!competition.rows.length ? (
                   <EmptyState title="Nessuna classifica" text="La classifica viene derivata dalle partite concluse con un risultato registrato." />
                 ) : (
-                  <div className="leaderboard standings-table" role="region" aria-label={`Classifica ${competition.competition.name}`} tabIndex={0}>
+                  <div className="leaderboard standings-table" role="region" aria-label={"Classifica " + competition.competition.name} tabIndex={0}>
                     <div className="table-row head">
                       <span title="Posizione">#</span>
                       <span>Squadra</span>
                       <span title="Partite giocate">PG</span>
-                      <span>Vittorie</span>
-                      <span>Pareggi</span>
-                      <span>Sconfitte</span>
-                      <span>Goal fatti</span>
-                      <span>Goal subiti</span>
-                      <span>Differenza reti</span>
-                      <span>Punti</span>
+                      <span title="Goal fatti">GF</span>
+                      <span title="Goal subiti">GS</span>
+                      <span title="Differenza reti">DR</span>
+                      <span title="Punti">Punti</span>
                     </div>
                     {competition.rows.map((row, index) => (
-                      <a className="table-row" href={`/squadre/${row.team.id}`} key={row.team.id}>
+                      <a className="table-row" href={"/squadre/" + row.team.id} key={row.team.id}>
                         <span className="position">{String(index + 1).padStart(2, "0")}</span>
-                        <div className="standings-team">
+                        <span className="standings-team">
                           {row.team.logo_url ? (
                             <img src={row.team.logo_url} alt="" className="standings-team__logo" />
                           ) : (
-                            <span className="standings-team__logo standings-team__logo--placeholder" aria-hidden="true">{row.team.name.slice(0, 1).toUpperCase()}</span>
+                            <span className="standings-team__logo standings-team__logo--placeholder" aria-hidden="true">
+                              {row.team.name.slice(0, 1).toUpperCase()}
+                            </span>
                           )}
                           <strong>{row.team.name}</strong>
-                        </div>
+                        </span>
                         <span>{row.played}</span>
-                        <span>{row.wins}</span>
-                        <span>{row.draws}</span>
-                        <span>{row.losses}</span>
                         <span>{row.gf}</span>
                         <span>{row.ga}</span>
-                        <span>{row.gd > 0 ? `+${row.gd}` : row.gd}</span>
+                        <span>{row.gd > 0 ? "+" + row.gd : row.gd}</span>
                         <strong>{row.points}</strong>
                       </a>
                     ))}
@@ -117,6 +109,7 @@ export default function Standings() {
           </div>
         )}
       </div>
+      <SponsorWatermarkStrip />
     </PageShell>
   );
 }
