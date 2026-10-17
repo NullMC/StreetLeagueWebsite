@@ -20,6 +20,7 @@ import type { Competition, Match, SocialContent, Team } from "../types";
 type HomeMatchday = {
   key: string;
   label: string;
+  competitionId: string;
   competitionName: string;
   matches: Match[];
   firstKickoff: number;
@@ -59,6 +60,7 @@ function groupMatchesByMatchday(
         buckets.set(key, {
           key,
           label,
+          competitionId: competition.id,
           competitionName: competition.name,
           matches: [match],
           firstKickoff: kickoff,
@@ -78,6 +80,7 @@ function groupMatchesByMatchday(
 }
 
 type HomeData = {
+  competitions: Competition[];
   teams: Team[];
   social: SocialContent[];
   potm: Awaited<ReturnType<typeof getPlayerOfMonth>>;
@@ -86,6 +89,7 @@ type HomeData = {
 };
 
 const initialData: HomeData = {
+  competitions: [],
   teams: [],
   social: [],
   potm: null,
@@ -134,6 +138,7 @@ export default function HomeRedesigned() {
   const [data, setData] = useState<HomeData>(initialData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedCompetitionId, setSelectedCompetitionId] = useState("");
   const [selectedMatchdayKey, setSelectedMatchdayKey] = useState("");
 
   useEffect(() => {
@@ -157,14 +162,17 @@ export default function HomeRedesigned() {
         const uniqueTeams = Array.from(new Map(allTeams.map((team) => [team.id, team] as const)).values());
         const matchdays = groupMatchesByMatchday(matchesByCompetition);
         setData({
+          competitions: activeCompetitions,
           teams: uniqueTeams,
           social,
           potm,
           staffOfMonth,
           matchdays,
         });
-        setSelectedMatchdayKey((current) =>
-          matchdays.some((day) => day.key === current) ? current : (matchdays[0]?.key ?? ""),
+        setSelectedCompetitionId((current) =>
+          activeCompetitions.some((competition) => competition.id === current)
+            ? current
+            : (activeCompetitions[0]?.id ?? ""),
         );
         setError("");
       } catch (loadError) {
@@ -185,8 +193,15 @@ export default function HomeRedesigned() {
     };
   }, []);
 
+  const selectedCompetition =
+    data.competitions.find((competition) => competition.id === selectedCompetitionId) ??
+    data.competitions[0];
+  const competitionMatchdays = selectedCompetition
+    ? data.matchdays.filter((matchday) => matchday.competitionId === selectedCompetition.id)
+    : [];
   const selectedMatchday =
-    data.matchdays.find((matchday) => matchday.key === selectedMatchdayKey) ?? data.matchdays[0];
+    competitionMatchdays.find((matchday) => matchday.key === selectedMatchdayKey) ??
+    competitionMatchdays[0];
 
   return (
     <div className="home-redesign home-redesign--ordered">
@@ -217,41 +232,66 @@ export default function HomeRedesigned() {
         </div>
         {loading ? (
           <p className="admin-message">Caricamento partite…</p>
-        ) : data.matchdays.length && selectedMatchday ? (
+        ) : data.competitions.length ? (
           <div className="home-matchdays">
-            <div className="home-matchdays__tabs" aria-label="Seleziona giornata">
-              {data.matchdays.map((matchday) => (
-                <button
-                  type="button"
-                  className="home-matchday-tab"
-                  key={matchday.key}
-                  aria-pressed={selectedMatchday.key === matchday.key}
-                  onClick={() => setSelectedMatchdayKey(matchday.key)}
-                >
-                  <span>{matchday.competitionName}</span>
-                  <strong>{matchday.label}</strong>
-                </button>
-              ))}
+            <div className="home-matchdays__competition">
+              <label htmlFor="home-match-competition">Seleziona competizione</label>
+              <select
+                id="home-match-competition"
+                value={selectedCompetition?.id ?? ""}
+                onChange={(event) => {
+                  setSelectedCompetitionId(event.target.value);
+                  setSelectedMatchdayKey("");
+                }}
+              >
+                {data.competitions.map((competition) => (
+                  <option key={competition.id} value={competition.id}>
+                    {competition.name}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="home-matchdays__summary">
-              <h3>{selectedMatchday.competitionName} · {selectedMatchday.label}</h3>
-              <span>{selectedMatchday.matches.length} {selectedMatchday.matches.length === 1 ? "partita" : "partite"}</span>
-            </div>
-            <div className="home-match-carousel" aria-label={"Partite " + selectedMatchday.competitionName + " " + selectedMatchday.label}>
-              {selectedMatchday.matches.map((match) => (
-                <MatchCard
-                  key={match.id}
-                  match={match}
-                  home={data.teams.find((team) => team.id === match.home_team_id)}
-                  away={data.teams.find((team) => team.id === match.away_team_id)}
-                />
-              ))}
-            </div>
+            {selectedMatchday ? (
+              <>
+                <div className="home-matchdays__tabs" aria-label="Seleziona giornata">
+                  {competitionMatchdays.map((matchday) => (
+                    <button
+                      type="button"
+                      className="home-matchday-tab"
+                      key={matchday.key}
+                      aria-pressed={selectedMatchday.key === matchday.key}
+                      onClick={() => setSelectedMatchdayKey(matchday.key)}
+                    >
+                      <strong>{matchday.label}</strong>
+                    </button>
+                  ))}
+                </div>
+                <div className="home-matchdays__summary">
+                  <h3>{selectedCompetition?.name} · {selectedMatchday.label}</h3>
+                  <span>{selectedMatchday.matches.length} {selectedMatchday.matches.length === 1 ? "partita" : "partite"}</span>
+                </div>
+                <div className="home-match-carousel" aria-label={"Partite " + selectedCompetition?.name + " " + selectedMatchday.label}>
+                  {selectedMatchday.matches.map((match) => (
+                    <MatchCard
+                      key={match.id}
+                      match={match}
+                      home={data.teams.find((team) => team.id === match.home_team_id)}
+                      away={data.teams.find((team) => team.id === match.away_team_id)}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <EmptyState
+                title="Nessuna partita in calendario"
+                text={`Non ci sono ancora partite inserite per ${selectedCompetition?.name ?? "questa competizione"}.`}
+              />
+            )}
           </div>
         ) : (
           <EmptyState
-            title="Nessuna partita in calendario"
-            text="Le partite delle competizioni attive appariranno qui quando saranno inserite."
+            title="Nessuna competizione attiva"
+            text="Le partite appariranno qui quando sarà attivata una competizione e saranno inseriti gli incontri."
           />
         )}
       </section>
