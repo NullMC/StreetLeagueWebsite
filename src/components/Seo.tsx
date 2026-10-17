@@ -241,7 +241,7 @@ function breadcrumbsFor(pathname: string, config: SeoConfig, canonical: string):
   let parent: Breadcrumb | undefined;
   if (path.startsWith("/competizioni/")) parent = { name: "Competizioni", url: `${SITE_URL}/competizioni` };
   else if (path.startsWith("/squadre/") || path.startsWith("/giocatori/")) parent = { name: "Squadre", url: `${SITE_URL}/squadre` };
-  else if (path.startsWith("/partite/")) parent = { name: "Calendario partite", url: `${SITE_URL}/partite` };
+  else if (path.startsWith("/partite/")) parent = { name: "Competizioni", url: `${SITE_URL}/competizioni` };
   return [
     { name: "Home", url: `${SITE_URL}/` },
     ...(parent ? [parent] : []),
@@ -445,7 +445,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
       config, mainEntity: event,
       breadcrumbs: [
         { name: "Home", url: `${SITE_URL}/` },
-        { name: "Calendario partite", url: `${SITE_URL}/partite` },
+        { name: "Competizioni", url: `${SITE_URL}/competizioni` },
         { name, url: canonical },
       ],
     };
