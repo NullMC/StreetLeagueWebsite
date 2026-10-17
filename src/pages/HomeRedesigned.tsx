@@ -59,8 +59,6 @@ function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
               )}
             </div>
             <div className="home-feature-card__shade" />
-            <span className="home-feature-card__index">{String(index + 1).padStart(2, "0")}</span>
-            <span className="home-feature-card__platform">{item.platform}</span>
             <div className="home-feature-card__content">
               <h3>{item.title}</h3>
               {item.description ? <p>{item.description}</p> : null}
