@@ -139,6 +139,8 @@ export default function HomeRedesigned() {
         </div>
       </section>
 
+      {error ? <p className="admin-help-text home-load-error">{error}</p> : null}
+
       <section className="section--edge home-teams" id="home-teams">
         <div className="home-section-head">
           <SectionTitle eyebrow="Le protagoniste" title="Squadre" />
@@ -180,11 +182,8 @@ export default function HomeRedesigned() {
         </div>
       </section>
 
-      <section className="section--edge home-top-seven" id="home-top-seven">
-        <TopSevenOfMonth />
-      </section>
+      <div id="home-top-seven"><TopSevenOfMonth /></div>
 
-      {error ? <p className="admin-help-text home-load-error">{error}</p> : null}
       <SponsorWatermarkStrip />
     </div>
   );
