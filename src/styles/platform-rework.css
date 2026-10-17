@@ -999,7 +999,7 @@ html[data-theme="night"] .home-redesign--ordered .home-about__logo img {
     width: calc(100% - 36px);
     min-height: 100vh;
     min-height: 100svh;
-    padding: calc(var(--site-header-total-height) + 24px) 0 56px;
+    padding: clamp(28px, 5vh, 52px) 0 48px;
     text-align: center;
   }
   .home-redesign--ordered .home-about__logo {
