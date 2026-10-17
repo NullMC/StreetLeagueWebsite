@@ -141,12 +141,13 @@ create table if not exists active_collaborations (
 create table if not exists player_of_month (
   id uuid primary key default gen_random_uuid(),
   player_id uuid not null references players(id) on delete cascade,
+  award_type text not null default 'player' check (award_type in ('player', 'staff')),
   month_label text not null,
   note text,
   card_image_url text,
   published_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
-  unique (month_label)
+  unique (month_label, award_type)
 );
 
 create index if not exists active_collaborations_sort_idx on active_collaborations(sort_order, created_at);
