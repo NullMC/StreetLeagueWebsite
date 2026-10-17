@@ -80,14 +80,14 @@ function MatchdayMatchList({ section }: { section: CompetitionSectionData }) {
   return (
     <section className="competition-matchday-section">
       <nav className="matchday-nav" aria-label={"Giornate " + section.competition.name}>
-        {days.map((day, index) => (
+        {days.map((day) => (
           <button
             type="button"
             key={day.key}
             aria-pressed={selectedDay?.key === day.key}
             onClick={() => setSelectedKey(day.key)}
           >
-            <span>{day.label.match(/giornata/i) ? day.label : day.label}</span>
+            <span>{day.label}</span>
             <small>{day.matches.length}</small>
           </button>
         ))}
