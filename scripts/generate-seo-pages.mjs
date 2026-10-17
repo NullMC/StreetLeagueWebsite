@@ -137,10 +137,20 @@ function makeJsonLd(route, page, canonical, mainEntity) {
   });
   return { "@context": "https://schema.org", "@graph": graph };
 }
+function absoluteImageUrl(value) {
+  if (!value || !String(value).trim()) return SOCIAL_IMAGE;
+  try {
+    const url = new URL(String(value), `${SITE_URL}/`);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : SOCIAL_IMAGE;
+  } catch {
+    return SOCIAL_IMAGE;
+  }
+}
 function renderHtml(template, route, page) {
   const canonical = canonicalFor(route);
-  const shareImage = page.shareImage || SOCIAL_IMAGE;
-  const shareImageAlt = page.shareImage ? `${page.title.split(" | ")[0]} — Street League` : "Street League Bari — calcio, competizioni e community";
+  const shareImage = absoluteImageUrl(page.shareImage);
+  const hasCustomShareImage = Boolean(page.shareImage && shareImage !== SOCIAL_IMAGE);
+  const shareImageAlt = hasCustomShareImage ? `${page.title.split(" | ")[0]} — Street League` : "Street League Bari — calcio, competizioni e community";
   const robots = page.indexable === false
     ? "noindex,nofollow"
     : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
@@ -294,7 +304,7 @@ async function createDynamicRoutes(template, sitemapRoutes, tables) {
       ]),
       mainEntity: {
         "@type": "SportsTeam", name: team.name, url: canonicalFor(route),
-        ...(team.logo_url ? { logo: team.logo_url, image: team.logo_url } : {}),
+        ...(team.logo_url ? { logo: absoluteImageUrl(team.logo_url), image: absoluteImageUrl(team.logo_url) } : {}),
         sport: "Association football", memberOf: { "@id": ORGANIZATION_ID },
       },
     };
@@ -316,7 +326,7 @@ async function createDynamicRoutes(template, sitemapRoutes, tables) {
       ]),
       mainEntity: {
         "@type": "Person", name, url: canonicalFor(route),
-        ...(image ? { image } : {}),
+        ...(image ? { image: absoluteImageUrl(image) } : {}),
         ...(team ? { memberOf: { "@type": "SportsTeam", name: team.name, url: canonicalFor(`/squadre/${encodeURIComponent(team.id)}`) } } : {}),
       },
     };

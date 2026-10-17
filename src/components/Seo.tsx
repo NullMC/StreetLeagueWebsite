@@ -115,6 +115,24 @@ function upsertProperty(property: string, content: string) {
   node.content = content;
 }
 
+function absoluteImageUrl(value: string | null | undefined): string {
+  if (!value?.trim()) return SOCIAL_IMAGE;
+  try {
+    const url = new URL(value, `${SITE_URL}/`);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : SOCIAL_IMAGE;
+  } catch {
+    return SOCIAL_IMAGE;
+  }
+}
+
+function isDynamicEntityPath(pathname: string): boolean {
+  const parts = normalizePath(pathname).split("/").filter(Boolean);
+  if (parts[0] === "competizioni") {
+    return parts.length === 2 || (parts[1] === "gruppo" && parts.length >= 3);
+  }
+  return ["squadre", "giocatori", "partite"].includes(parts[0]) && parts.length === 2;
+}
+
 function canonicalFor(pathname: string): string {
   return new URL(normalizePath(pathname), `${SITE_URL}/`).href;
 }
@@ -224,8 +242,9 @@ function applySeo(pathname: string, resolved: ResolvedSeo) {
   const path = normalizePath(pathname);
   const { config } = resolved;
   const canonical = canonicalFor(path);
-  const shareImage = resolved.shareImage || SOCIAL_IMAGE;
-  const shareImageAlt = resolved.shareImage
+  const shareImage = absoluteImageUrl(resolved.shareImage);
+  const hasCustomShareImage = Boolean(resolved.shareImage && shareImage !== SOCIAL_IMAGE);
+  const shareImageAlt = hasCustomShareImage
     ? `${config.title.split(" | ")[0]} — Street League`
     : "Street League Bari — calcio, competizioni e community";
   const robots = config.indexable === false
@@ -280,7 +299,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
     const members = competitions.filter((item) =>
       item.statistics_group?.trim().toLocaleLowerCase("it") === groupName.trim().toLocaleLowerCase("it"),
     );
-    if (!members.length) return { config: competitions.length ? { ...fallback, indexable: false } : fallback };
+    if (!members.length) return { config: { ...fallback, indexable: false } };
     const name = members[0].statistics_group?.trim() || groupName;
     const canonical = canonicalFor(path);
     const config = {
@@ -301,7 +320,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
   if (parts[0] === "competizioni" && parts.length === 2) {
     const competitions = await getCompetitions();
     const competition = competitions.find((item) => item.id === parts[1] || item.slug === parts[1]);
-    if (!competition) return { config: competitions.length ? { ...fallback, indexable: false } : fallback };
+    if (!competition) return { config: { ...fallback, indexable: false } };
     const season = competition.season_label ? ` — stagione ${competition.season_label}` : "";
     const config = {
       title: `${competition.name} | ${SITE_NAME}`,
@@ -329,7 +348,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
   if (parts[0] === "squadre" && parts.length === 2) {
     const teams = await getTeams();
     const team = teams.find((item) => item.id === parts[1] || item.slug === parts[1]);
-    if (!team) return { config: teams.length ? { ...fallback, indexable: false } : fallback };
+    if (!team) return { config: { ...fallback, indexable: false } };
     const canonical = canonicalFor(path);
     const config = {
       title: `${team.name} | Squadre | ${SITE_NAME}`,
@@ -340,7 +359,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
       shareImage: team.logo_url || undefined,
       mainEntity: {
         "@type": "SportsTeam", name: team.name, url: canonical,
-        ...(team.logo_url ? { logo: team.logo_url, image: team.logo_url } : {}),
+        ...(team.logo_url ? { logo: absoluteImageUrl(team.logo_url), image: absoluteImageUrl(team.logo_url) } : {}),
         sport: "Association football", memberOf: { "@id": ORGANIZATION_ID },
       },
       breadcrumbs: [
@@ -354,7 +373,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
   if (parts[0] === "giocatori" && parts.length === 2) {
     const [players, teams] = await Promise.all([getPlayers(), getTeams()]);
     const player = players.find((item) => item.id === parts[1]);
-    if (!player) return { config: players.length ? { ...fallback, indexable: false } : fallback };
+    if (!player) return { config: { ...fallback, indexable: false } };
     const team = teams.find((item) => item.id === player.team_id);
     const name = `${player.first_name} ${player.last_name}`.trim();
     const canonical = canonicalFor(path);
@@ -367,7 +386,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
       config,
       shareImage: image || undefined,
       mainEntity: {
-        "@type": "Person", name, url: canonical, ...(image ? { image } : {}),
+        "@type": "Person", name, url: canonical, ...(image ? { image: absoluteImageUrl(image) } : {}),
         ...(team ? { memberOf: { "@type": "SportsTeam", name: team.name, url: `${SITE_URL}/squadre/${encodeURIComponent(team.id)}` } } : {}),
       },
       breadcrumbs: [
@@ -381,7 +400,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
   if (parts[0] === "partite" && parts.length === 2) {
     const [matches, teams, competitions] = await Promise.all([getMatches(), getTeams(), getCompetitions()]);
     const match = matches.find((item) => item.id === parts[1]);
-    if (!match) return { config: matches.length ? { ...fallback, indexable: false } : fallback };
+    if (!match) return { config: { ...fallback, indexable: false } };
     const home = teams.find((team) => team.id === match.home_team_id);
     const away = teams.find((team) => team.id === match.away_team_id);
     const competition = competitions.find((item) => item.id === match.competition_id);
@@ -429,11 +448,34 @@ export function Seo() {
   useEffect(() => {
     let active = true;
     const fallback = getSeo(pathname);
-    applySeo(pathname, { config: fallback });
+    const canonical = canonicalFor(pathname);
+    const existingCanonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href;
+    const hasMatchingPrerenderedMetadata = existingCanonical === canonical;
+
+    // Preserve build-generated metadata while the dynamic page data is loading.
+    // Client navigation still gets an immediate fallback because its canonical
+    // points to the page that was open before this route change.
+    if (!hasMatchingPrerenderedMetadata) applySeo(pathname, { config: fallback });
+
     void resolveDynamicSeo(pathname, fallback).then((resolved) => {
-      if (active) applySeo(pathname, resolved);
+      if (!active) return;
+
+      // If a direct-loaded prerendered entity cannot be re-read momentarily,
+      // keep its specific title, canonical, social image and structured data.
+      if (
+        hasMatchingPrerenderedMetadata &&
+        resolved.config.title === fallback.title &&
+        !resolved.mainEntity &&
+        !resolved.breadcrumbs
+      ) return;
+
+      applySeo(pathname, resolved);
     }).catch((error) => {
       console.warn("SEO metadata fallback:", error);
+      // Never leave an unresolved detail URL looking like an indexable generic page.
+      if (active && !hasMatchingPrerenderedMetadata && isDynamicEntityPath(pathname)) {
+        applySeo(pathname, { config: { ...fallback, indexable: false } });
+      }
     });
     return () => { active = false; };
   }, [pathname]);
