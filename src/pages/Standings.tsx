@@ -77,10 +77,10 @@ export default function Standings() {
                       <span title="Posizione">#</span>
                       <span>Squadra</span>
                       <span title="Partite giocate">PG</span>
+                      <span title="Punti">Punti</span>
                       <span title="Goal fatti">Goal fatti</span>
                       <span title="Goal subiti">Goal subiti</span>
                       <span title="Differenza reti">Differenza reti</span>
-                      <span title="Punti">Punti</span>
                     </div>
                     {competition.rows.map((row, index) => (
                       <a className="table-row" href={"/squadre/" + row.team.id} key={row.team.id}>
@@ -96,10 +96,10 @@ export default function Standings() {
                           <strong>{row.team.name}</strong>
                         </span>
                         <span>{row.played}</span>
+                        <strong>{row.points}</strong>
                         <span>{row.gf}</span>
                         <span>{row.ga}</span>
                         <span>{row.gd > 0 ? "+" + row.gd : row.gd}</span>
-                        <strong>{row.points}</strong>
                       </a>
                     ))}
                   </div>
