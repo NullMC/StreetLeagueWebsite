@@ -51,8 +51,9 @@ function getSeo(pathname: string): SeoConfig {
     description: "Consulta le classifiche delle competizioni Street League, i punti e i risultati delle squadre.",
   };
   if (path === "/squadre") return {
-    title: `Squadre partecipanti | ${SITE_NAME}`,
-    description: "Scopri le squadre della Street League Bari, le rose e il percorso nelle competizioni.",
+    title: `Squadre | ${SITE_NAME}`,
+    description: "Consulta le squadre della Street League Bari nella pagina principale.",
+    indexable: false,
   };
   if (path.startsWith("/squadre/")) return {
     title: `Squadra | ${SITE_NAME}`,
@@ -62,6 +63,20 @@ function getSeo(pathname: string): SeoConfig {
     title: `Giocatore | ${SITE_NAME}`,
     description: "Profilo del giocatore, statistiche e rendimento nelle competizioni Street League.",
   };
+  if (path.startsWith("/statistiche/")) {
+    const statKey = decodeSegment(path.split("/").filter(Boolean).at(-1));
+    const statTitles: Record<string, string> = {
+      goals: "Classifica marcatori",
+      mvps: "Storico MVP",
+      clean_sheets: "Classifica portieri",
+      staff: "Classifica staff",
+    };
+    const statTitle = statTitles[statKey] ?? "Classifica statistiche";
+    return {
+      title: `${statTitle} | ${SITE_NAME}`,
+      description: `Consulta la ${statTitle.toLocaleLowerCase("it")} delle competizioni attive Street League Bari.`,
+    };
+  }
   if (path === "/statistiche") return {
     title: `Statistiche dei giocatori | ${SITE_NAME}`,
     description: "Marcatori, MVP, clean sheet e statistiche disciplinari delle competizioni Street League Bari.",
