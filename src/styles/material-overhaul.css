@@ -1137,3 +1137,63 @@
     padding: 7px 14px 14px;
   }
 }
+
+
+/* Responsive sponsor-row correction:
+   keep the final row full-width on tablet and preserve the three-up desktop grid. */
+@media (min-width: 1081px) {
+  .partner-editorial-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+  }
+  .partner-editorial-grid .partner-editorial-card--desktop-last-single.MuiCard-root {
+    grid-column: 1 / -1 !important;
+  }
+  .partner-editorial-grid .partner-editorial-card--desktop-last-double.MuiCard-root {
+    grid-column: span 3 !important;
+  }
+}
+@media (max-width: 1080px) and (min-width: 651px) {
+  .partner-editorial-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+  .partner-editorial-grid .partner-editorial-card.MuiCard-root,
+  .partner-editorial-grid .partner-editorial-card.MuiCard-root:hover,
+  .partner-editorial-grid .partner-editorial-card--desktop-last-single.MuiCard-root,
+  .partner-editorial-grid .partner-editorial-card--desktop-last-double.MuiCard-root {
+    grid-column: span 2 !important;
+    width: 100% !important;
+    justify-self: stretch !important;
+  }
+  /* This must come after the desktop remainder rules: odd tablet counts
+     otherwise leave the last card at half width. */
+  .partner-editorial-grid .partner-editorial-card--tablet-last-single.MuiCard-root {
+    grid-column: 1 / -1 !important;
+  }
+}
+@media (max-width: 650px) {
+  .partner-editorial-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-flow: row !important;
+    grid-auto-rows: 1fr !important;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+  .partner-editorial-grid .partner-editorial-card.MuiCard-root,
+  .partner-editorial-grid .partner-editorial-card.MuiCard-root:hover,
+  .partner-editorial-grid .partner-editorial-card--desktop-last-single.MuiCard-root,
+  .partner-editorial-grid .partner-editorial-card--desktop-last-double.MuiCard-root,
+  .partner-editorial-grid .partner-editorial-card--tablet-last-single.MuiCard-root {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    justify-self: stretch !important;
+  }
+}
+
+/* Keep the image zoom on hover identical for both complete and incomplete rows. */
+.partner-editorial-card.MuiCard-root:hover .partner-editorial-card__activity-image {
+  transform: scale(1.035);
+}
