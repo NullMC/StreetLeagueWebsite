@@ -423,6 +423,9 @@
 .standings-table .table-row > span { min-width: 0; text-align: center; }
 .standings-table .table-row > span:nth-child(2) { text-align: left; }
 .standings-table .table-row.head { font-size: 10px; }
+.stats-detail-leaderboard--staff .table-row {
+  grid-template-columns: 36px minmax(0, 1fr) minmax(58px, .45fr);
+}
 .stats-detail-leaderboard {
   width: 100%;
   min-width: 0 !important;
@@ -566,8 +569,9 @@
     padding: 12px 8px;
     font-size: 11px;
   }
-  .stats-detail-leaderboard .table-row > span:nth-child(3) { display: none; }
-  .stats-detail-leaderboard .table-row.head > span:nth-child(3) { display: none; }
+  .stats-detail-leaderboard:not(.stats-detail-leaderboard--staff) .table-row > span:nth-child(3) { display: none; }
+  .stats-detail-leaderboard:not(.stats-detail-leaderboard--staff) .table-row.head > span:nth-child(3) { display: none; }
+  .stats-detail-leaderboard--staff .table-row { grid-template-columns: 24px minmax(0, 1fr) minmax(44px, .48fr); }
   .stats-detail-player img,
   .stats-detail-player__placeholder { width: 30px; height: 30px; flex-basis: 30px; }
   .stats-detail-player { gap: 7px; }
