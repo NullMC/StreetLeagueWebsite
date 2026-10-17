@@ -11,12 +11,11 @@ import {
   getActiveCompetitions,
   getMatches,
   getSocialContent,
-  getStaffRankingForCompetitions,
   getTeams,
   subscribeToCompetition,
 } from "../lib/api";
-import { getPlayerOfMonth } from "../lib/playerOfMonth";
-import type { Competition, Match, SocialContent, StaffRankingEntry, Team } from "../types";
+import { getPlayerOfMonth, getStaffOfMonth, subscribeToPlayerOfMonth } from "../lib/playerOfMonth";
+import type { Competition, Match, SocialContent, Team } from "../types";
 
 type HomeMatchday = {
   key: string;
@@ -82,7 +81,7 @@ type HomeData = {
   teams: Team[];
   social: SocialContent[];
   potm: Awaited<ReturnType<typeof getPlayerOfMonth>>;
-  staffMonthly: StaffRankingEntry[];
+  staffOfMonth: Awaited<ReturnType<typeof getStaffOfMonth>>;
   matchdays: HomeMatchday[];
 };
 
@@ -90,7 +89,7 @@ const initialData: HomeData = {
   teams: [],
   social: [],
   potm: null,
-  staffMonthly: [],
+  staffOfMonth: null,
   matchdays: [],
 };
 
@@ -107,29 +106,25 @@ function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
   return (
     <div className="home-feature-carousel" aria-label="Contenuti in evidenza">
       <div className="home-feature-carousel__track">
-        {items.map((item) => (
-          <a
-            className="home-feature-card"
-            href={item.content_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            key={item.id}
-          >
-            <div className="home-feature-card__media">
-              {item.thumbnail_url || item.image_url ? (
-                <img src={item.thumbnail_url || item.image_url || ""} alt="" loading="lazy" />
-              ) : (
-                <div className="home-highlight__fallback" />
-              )}
-            </div>
-            <div className="home-feature-card__shade" />
-            <div className="home-feature-card__content">
-              <h3>{item.title}</h3>
-              {item.description ? <p>{item.description}</p> : null}
-              <span className="home-feature-card__cta">Apri contenuto <span aria-hidden="true">↗</span></span>
-            </div>
-          </a>
-        ))}
+        {items.map((item) => {
+          const imageUrl = item.thumbnail_url || item.image_url;
+          return (
+            <article className="home-feature-card" key={item.id}>
+              <a className="home-feature-card__media-link" href={item.content_url} target="_blank" rel="noopener noreferrer" aria-label={`Apri ${item.title}`}>
+                <div className="home-feature-card__media">
+                  {imageUrl ? <img src={imageUrl} alt="" loading="lazy" /> : <div className="home-feature-card__fallback" aria-hidden="true" />}
+                </div>
+              </a>
+              <div className="home-feature-card__content">
+                <h3>{item.title}</h3>
+                {item.description ? <p>{item.description}</p> : null}
+                <a className="home-feature-card__cta" href={item.content_url} target="_blank" rel="noopener noreferrer">
+                  <span>Apri contenuto</span><span aria-hidden="true">↗</span>
+                </a>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </div>
   );
@@ -146,16 +141,12 @@ export default function HomeRedesigned() {
 
     async function load() {
       try {
-        const now = new Date();
         const activeCompetitions = await getActiveCompetitions();
-        const [allTeams, social, potm, staffMonthly, matchesByCompetition] = await Promise.all([
+        const [allTeams, social, potm, staffOfMonth, matchesByCompetition] = await Promise.all([
           getTeams(),
           getSocialContent(),
           getPlayerOfMonth(),
-          getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id), {
-            year: now.getFullYear(),
-            month: now.getMonth() + 1,
-          }),
+          getStaffOfMonth(),
           Promise.all(activeCompetitions.map(async (competition) => ({
             competition,
             matches: await getMatches(competition.id),
@@ -169,7 +160,7 @@ export default function HomeRedesigned() {
           teams: uniqueTeams,
           social,
           potm,
-          staffMonthly: staffMonthly.filter((entry) => entry.presidential_penalties > 0),
+          staffOfMonth,
           matchdays,
         });
         setSelectedMatchdayKey((current) =>
@@ -186,9 +177,11 @@ export default function HomeRedesigned() {
 
     void load();
     const unsubscribe = subscribeToCompetition(() => void load());
+    const unsubscribeAwards = subscribeToPlayerOfMonth(() => void load());
     return () => {
       mounted = false;
       unsubscribe();
+      unsubscribeAwards();
     };
   }, []);
 
@@ -284,6 +277,8 @@ export default function HomeRedesigned() {
         {loading ? <p className="admin-message">Caricamento contenuti…</p> : <FeaturedContentCarousel items={data.social} />}
       </section>
 
+      <div className="home-top-seven" id="home-top-seven"><TopSevenOfMonth /></div>
+
       <section className="section--edge potm-section" id="home-potm">
         <div className="home-section-head">
           <SectionTitle eyebrow="I protagonisti del mese" title="POTM & Staff" />
@@ -293,18 +288,13 @@ export default function HomeRedesigned() {
             <PlayerOfMonthCard item={data.potm} teams={data.teams} />
           </div>
           <div className="monthly-award-column">
-            <div className="monthly-award-column__head">
-              <h3>Miglior membro staff del mese</h3>
-            </div>
             <StaffOfMonthCard
-              items={data.staffMonthly}
+              item={data.staffOfMonth}
               monthLabel={new Intl.DateTimeFormat("it-IT", { month: "long", year: "numeric" }).format(new Date())}
             />
           </div>
         </div>
       </section>
-
-      <div className="home-top-seven" id="home-top-seven"><TopSevenOfMonth /></div>
 
       <SponsorWatermarkStrip />
     </div>
