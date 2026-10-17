@@ -1723,3 +1723,63 @@ html:not([data-theme="night"]) .partners-sponsors-band .home-collab-proposal__bu
 @media (prefers-reduced-motion: reduce) {
   .sponsor-watermark-strip__track { animation: none !important; }
 }
+
+/* Home fixtures: filter active competitions before browsing their matchdays. */
+.home-matchdays__competition {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 0 0 16px;
+}
+.home-matchdays__competition label {
+  color: #68706d;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.home-matchdays__competition select {
+  display: block;
+  width: min(100%, 390px);
+  min-width: min(100%, 250px);
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 10px 38px 10px 13px;
+  border: 1px solid rgba(17, 19, 18, .2);
+  border-radius: 4px;
+  background-color: #fff;
+  color: #111312;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.home-matchdays__competition select:focus-visible {
+  outline: 2px solid #e42278;
+  outline-offset: 2px;
+}
+html[data-theme="night"] .home-matchdays__competition label {
+  color: rgba(245,247,246,.68);
+}
+html[data-theme="night"] .home-matchdays__competition select {
+  border-color: rgba(245,247,246,.2);
+  background-color: #111714;
+  color: #f5f7f6;
+}
+html[data-theme="night"] .home-matchdays__competition option {
+  background: #111714;
+  color: #f5f7f6;
+}
+@media (max-width: 520px) {
+  .home-matchdays__competition {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .home-matchdays__competition select {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
