@@ -18,7 +18,7 @@ const nav: { key: Resource; label: string }[] = [
   { key: "events", label: "Eventi" },
   { key: "lineups", label: "Formazioni" },
   { key: "mvp", label: "MVP" },
-  { key: "player_of_month", label: "POTM" },
+  { key: "player_of_month", label: "POTM & Staff del mese" },
   { key: "partners", label: "Sponsor" },
   { key: "active_collaborations", label: "Collab attive" },
   { key: "social_contents", label: "Social / Video" },
@@ -26,7 +26,7 @@ const nav: { key: Resource; label: string }[] = [
 
 const labels: Record<Resource, string> = {
   competitions: "Competizioni", teams: "Squadre", players: "Giocatori", matches: "Partite",
-  events: "Eventi", lineups: "Formazioni", mvp: "MVP", player_of_month: "POTM",
+  events: "Eventi", lineups: "Formazioni", mvp: "MVP", player_of_month: "POTM & Staff del mese",
   partners: "Sponsor", active_collaborations: "Collab attive", social_contents: "Social / Video",
 };
 const tables: Record<Resource, string> = {
@@ -46,7 +46,7 @@ const fields: Record<Resource, string[]> = {
   events: ["match_id", "player_id", "related_player_id", "event_type", "minute", "note"],
   lineups: ["match_id", "team_id", "player_id", "starter", "shirt_number"],
   mvp: ["match_id", "player_id"],
-  player_of_month: ["player_id", "card_image_url", "month_label", "note", "published_at"],
+  player_of_month: ["award_type", "player_id", "card_image_url", "month_label", "note", "published_at"],
   partners: ["name", "logo_url", "activity_image_url", "description", "website_url", "sort_order"],
   active_collaborations: ["title", "description", "flyer_url", "cta_url", "sort_order"],
   social_contents: ["platform", "title", "thumbnail_url", "content_url", "published_at"],
@@ -55,7 +55,7 @@ const required: Record<Resource, string[]> = {
   competitions: ["name", "slug", "status"], teams: ["competition_ids", "name", "slug"], players: ["team_id", "first_name", "last_name"],
   matches: ["competition_id", "home_team_id", "away_team_id", "kickoff_at", "status"], events: ["match_id", "event_type"],
   lineups: ["match_id", "team_id", "player_id"], mvp: ["match_id", "player_id"],
-  player_of_month: ["player_id", "month_label", "published_at"], partners: ["name", "logo_url", "description", "website_url"],
+  player_of_month: ["award_type", "player_id", "month_label", "published_at"], partners: ["name", "logo_url", "description", "website_url"],
   active_collaborations: ["title", "description"], social_contents: ["platform", "title", "content_url"],
 };
 const fieldLabels: Record<string, string> = {
@@ -64,10 +64,10 @@ const fieldLabels: Record<string, string> = {
   team_id: "Squadra", first_name: "Nome", last_name: "Cognome", shirt_number: "Numero", position: "Ruolo", profile_image_url: "Immagine profilo", bg_less_image_url: "Immagine sfondo",
   home_team_id: "Squadra casa", away_team_id: "Squadra ospite", matchday: "Giornata", kickoff_at: "Inizio", home_score: "Gol casa", away_score: "Gol ospite", venue: "Campo",
   match_id: "Partita", player_id: "Giocatore", related_player_id: "Giocatore correlato", event_type: "Tipo evento", minute: "Minuto", note: "Nota", starter: "Titolare",
-  card_image_url: "Figurina grafica POTM", activity_image_url: "Immagine attività / copertina sponsor", website_url: "Sito web", sort_order: "Ordine", platform: "Piattaforma", title: "Titolo", description: "Descrizione", thumbnail_url: "Anteprima", content_url: "URL contenuto", published_at: "Pubblicato", flyer_url: "Volantino", cta_url: "URL CTA", month_label: "Mese", statistics_group: "Gruppo competizioni (aggregazione)",
+  award_type: "Riconoscimento", card_image_url: "Foto di sfondo della card", activity_image_url: "Immagine attività / copertina sponsor", website_url: "Sito web", sort_order: "Ordine", platform: "Piattaforma", title: "Titolo", description: "Descrizione", thumbnail_url: "Anteprima", content_url: "URL contenuto", published_at: "Pubblicato", flyer_url: "Volantino", cta_url: "URL CTA", month_label: "Mese", statistics_group: "Gruppo competizioni (aggregazione)",
 };
 const options: Record<string, string[]> = {
-  competitionStatus: ["upcoming", "active", "finished"], matchStatus: ["scheduled", "live", "finished", "postponed"], platform: ["youtube", "instagram", "tiktok"], event_type: ["goal", "assist", "yellow_card", "red_card", "substitution", "foul", "presidential_penalty", "other"],
+  competitionStatus: ["upcoming", "active", "finished"], matchStatus: ["scheduled", "live", "finished", "postponed"], platform: ["youtube", "instagram", "tiktok"], award_type: ["player", "staff"], event_type: ["goal", "assist", "yellow_card", "red_card", "substitution", "foul", "presidential_penalty", "other"],
 };
 
 function labelize(v: string) { return fieldLabels[v] ?? v.replaceAll("_", " ").replace(/\b\w/g, (x) => x.toUpperCase()); }
@@ -77,9 +77,11 @@ function defaults(resource: Resource): Row {
       f,
       f === "competition_ids"
         ? []
-        : f === "sort_order"
-          ? 0
-          : f === "starter"
+        : f === "award_type"
+          ? "player"
+          : f === "sort_order"
+            ? 0
+            : f === "starter"
             ? true
             : f === "status"
               ? resource === "competitions"
@@ -128,7 +130,7 @@ function relationOptions(field: string, resource: Resource, form: Row, l: Lookup
   if (field === "team_id") { if (resource === "lineups" && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; return l.teams.filter((x) => ids.includes(x.id)).map((x) => ({ id: x.id, label: x.name })); } return l.teams.map((x) => ({ id: x.id, label: x.name })); }
   if (field === "home_team_id" || field === "away_team_id") return l.teams.filter((x) => !form.competition_id || x.competition_ids?.includes(String(form.competition_id))).map((x) => ({ id: x.id, label: x.name }));
   if (field === "match_id") return l.matches.map((x) => ({ id: x.id, label: `${l.teams.find((t) => t.id === x.home_team_id)?.name ?? "Casa"} - ${l.teams.find((t) => t.id === x.away_team_id)?.name ?? "Ospite"} / ${x.matchday ?? "—"}` }));
-  if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (resource === "lineups" && form.team_id) ps = ps.filter((p) => p.team_id === form.team_id); if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } if (resource === "events" && field === "player_id" && form.event_type === "presidential_penalty") ps = ps.filter((p) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"); return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
+  if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (resource === "lineups" && form.team_id) ps = ps.filter((p) => p.team_id === form.team_id); if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } if (resource === "events" && field === "player_id" && form.event_type === "presidential_penalty") ps = ps.filter((p) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"); if (resource === "player_of_month" && field === "player_id") { const isStaff = (p: Player) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"; ps = ps.filter((p) => form.award_type === "staff" ? isStaff(p) : !isStaff(p)); } return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
   return [];
 }
 function sanitize(resource: Resource, source: Row) {
@@ -174,7 +176,13 @@ function validate(resource: Resource, payload: Row, l: Lookups) {
     if (h.id === a.id) throw new Error("Le squadre devono essere diverse.");
   }
   if (resource === "events" && payload.event_type === "presidential_penalty") { const player = l.players.find((x) => x.id === payload.player_id); if (!player || (player.role?.trim().toUpperCase() !== "STAFF" && player.position?.trim().toUpperCase() !== "STAFF")) throw new Error("Per un rigore presidenziale devi selezionare un giocatore con ruolo STAFF."); }
-  if (resource === "player_of_month" && !l.players.some((x) => x.id === payload.player_id)) throw new Error("Il giocatore selezionato non esiste.");
+  if (resource === "player_of_month") {
+    const selected = l.players.find((x) => x.id === payload.player_id);
+    if (!selected) throw new Error("Il giocatore selezionato non esiste.");
+    const isStaff = selected.role?.trim().toUpperCase() === "STAFF" || selected.position?.trim().toUpperCase() === "STAFF";
+    if (payload.award_type === "staff" && !isStaff) throw new Error("Per il riconoscimento Staff del mese seleziona una persona con ruolo STAFF.");
+    if (payload.award_type === "player" && isStaff) throw new Error("Per il POTM seleziona un giocatore, non un membro STAFF.");
+  }
   if (resource === "active_collaborations" && payload.cta_url) { try { const parsed = new URL(String(payload.cta_url)); if (!/^https?:$/.test(parsed.protocol)) throw new Error(); } catch { throw new Error("URL CTA non valido: usa un link http:// o https://."); } }
   for (const field of ["website_url", "content_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url", "cta_url", "card_image_url", "activity_image_url"]) { const value = payload[field]; if (value) { try { const parsed = new URL(String(value)); if (!/^https?:$/.test(parsed.protocol)) throw new Error(); } catch { throw new Error(`${labelize(field)} non valido: usa un link http:// o https://.`); } } }
   if (resource === "teams" && payload.accent_hex) { if (!/^#[0-9a-f]{6}$/i.test(String(payload.accent_hex))) throw new Error("Colore accent non valido: usa il formato #RRGGBB."); }
@@ -191,12 +199,13 @@ function displayCellValue(resource: Resource, field: string, row: Row, l: Lookup
     const p = l.players.find((x) => x.id === row[field]);
     return p ? `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` : "—";
   }
+  if (resource === "player_of_month" && field === "award_type") return row.award_type === "staff" ? "Staff del mese" : "POTM";
   if (field === "team_id") return l.teams.find((x) => x.id === row[field])?.name ?? "—";
   if (field === "competition_id") return l.competitions.find((x) => x.id === row[field])?.name ?? "—";
   return String(row[field] ?? "—");
 }
 
-function rowLabel(resource: Resource, row: Row, l: Lookups) { if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource); if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim(); if (resource === "player_of_month") { const p = l.players.find((x) => x.id === row.player_id); return `${row.month_label ?? "POTM"} / ${p ? `${p.first_name} ${p.last_name}` : "Giocatore"}`; } if (resource === "matches") return `${l.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa"} - ${l.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite"}`; if (resource === "active_collaborations") return String(row.title ?? "Collaborazione"); return String(row.title ?? row.name ?? resource); }
+function rowLabel(resource: Resource, row: Row, l: Lookups) { if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource); if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim(); if (resource === "player_of_month") { const p = l.players.find((x) => x.id === row.player_id); const kind = row.award_type === "staff" ? "Staff del mese" : "POTM"; return `${kind} · ${row.month_label ?? ""} / ${p ? `${p.first_name} ${p.last_name}` : "Profilo non disponibile"}`; } if (resource === "matches") return `${l.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa"} - ${l.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite"}`; if (resource === "active_collaborations") return String(row.title ?? "Collaborazione"); return String(row.title ?? row.name ?? resource); }
 
 function normalizeSearch(value: unknown) {
   return String(value ?? "")
@@ -251,7 +260,7 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
   const refresh = async () => { setLoading(true); try { setRows(await readRows(resource)); } catch (e) { setMessage(errorMessage(e, "Errore di caricamento.")); } finally { setLoading(false); } };
   useEffect(() => { setForm(defaults(resource)); setEditing(null); setMessage(""); setSearchTerm(""); void refresh(); }, [resource]);
   useEffect(() => { Promise.all([getCompetitions(), getTeams(), getPlayers(), getMatches()]).then(([competitions, teams, players, matches]) => setLookups({ competitions, teams, players, matches })).catch(() => undefined); }, [resource]);
-  const setField = (f: string, v: unknown) => setForm((p) => ({ ...p, [f]: v, ...(f === "competition_id" ? { home_team_id: "", away_team_id: "" } : {}), ...(f === "match_id" ? { team_id: "", player_id: "", related_player_id: "" } : {}), ...(f === "team_id" && resource === "lineups" ? { player_id: "", related_player_id: "" } : {}) }));
+  const setField = (f: string, v: unknown) => setForm((p) => ({ ...p, [f]: v, ...(f === "award_type" && resource === "player_of_month" ? { player_id: "" } : {}), ...(f === "competition_id" ? { home_team_id: "", away_team_id: "" } : {}), ...(f === "match_id" ? { team_id: "", player_id: "", related_player_id: "" } : {}), ...(f === "team_id" && resource === "lineups" ? { player_id: "", related_player_id: "" } : {}) }));
   const edit = (r: Row) => { const n = { ...r }; setEditing(String(r[keys[resource]])); if (n.kickoff_at) n.kickoff_at = localDate(n.kickoff_at); if (n.published_at) n.published_at = localDate(n.published_at); setForm(n); setMessage(""); window.scrollTo({ top: 120, behavior: "smooth" }); };
   const cancelEdit = () => { setEditing(null); setForm(defaults(resource)); setMessage(""); };
   const uploadFor = async (field: string, file: File) => { if (!canWrite || !file) return; setUploadingField(field); setMessage(""); try { const folder = field === "activity_image_url" ? "partners/activity" : field === "card_image_url" ? "awards" : field === "flyer_url" ? "collaborations" : field.includes("logo") ? "logos" : field.includes("bg_less") ? "players/bg-less" : field.includes("profile") ? "players/profile" : field.includes("thumbnail") ? "social" : "media"; const url = await uploadMedia(file, folder); setForm((p) => ({ ...p, [field]: url })); setMessage("File caricato. Salva il record per applicare l'URL."); } catch (e) { setMessage(errorMessage(e, "Upload non riuscito.")); } finally { setUploadingField(null); } };
@@ -307,7 +316,7 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
           : resource === "mvp"
             ? await q.upsert(p, { onConflict: "match_id" })
             : resource === "player_of_month"
-              ? await q.upsert(p, { onConflict: "month_label" })
+              ? await q.upsert(p, { onConflict: "month_label,award_type" })
               : await q.insert(p);
         if (result.error) throw result.error;
       }
@@ -349,7 +358,7 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
         </select>
       );
     }
-    const rel = ["competition_id", "team_id", "home_team_id", "away_team_id", "match_id", "player_id", "related_player_id"]; if (rel.includes(f)) { const opts = relationOptions(f, resource, form, lookups); return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>; } if (f === "status") { const opts = resource === "competitions" ? options.competitionStatus : options.matchStatus; return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required><option value="">Seleziona</option>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select>; } if (options[f]) return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{options[f].map((o) => <option key={o} value={o}>{f === "event_type" && o === "presidential_penalty" ? "Rigore presidenziale" : o}</option>)}</select>; if (f === "statistics_group") return <><input type="text" value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} placeholder="es. Street Cup" /><small className="admin-help-text">Inserisci lo stesso nome in tutte le competizioni da riunire. Saranno mostrate sotto un’unica voce pubblica e aggregate nelle statistiche. Lascia vuoto per mantenerla separata.</small></> ; if (f === "description") return <RichTextEditor value={String(v ?? "")} onChange={(x) => setField(f, x)} />; if (f === "note") return <textarea rows={5} value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} />; const dt = f === "kickoff_at" || f === "published_at"; const date = f === "start_date" || f === "end_date"; const num = ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f); const uploadable = isUploadableImage(f); const url = ["cta_url", "website_url", "content_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url", "card_image_url", "activity_image_url"].includes(f); const input = <input type={dt ? "datetime-local" : date ? "date" : num ? "number" : url ? "url" : "text"} value={dt ? localDate(v) : v == null ? "" : String(v)} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)} min={num ? 0 : undefined} placeholder={f === "month_label" ? "Settembre 2026" : undefined} />; if (!uploadable) return input; return <div className="admin-input-row">{input}<input className="file-input" type="file" accept="image/*" disabled={!canWrite || uploadingField === f} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadFor(f, file); e.currentTarget.value = ""; }} />{uploadingField === f && <small className="admin-help-text">Caricamento…</small>}</div>; };
+    const rel = ["competition_id", "team_id", "home_team_id", "away_team_id", "match_id", "player_id", "related_player_id"]; if (rel.includes(f)) { const opts = relationOptions(f, resource, form, lookups); return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>; } if (f === "status") { const opts = resource === "competitions" ? options.competitionStatus : options.matchStatus; return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required><option value="">Seleziona</option>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select>; } if (options[f]) return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{options[f].map((o) => <option key={o} value={o}>{f === "event_type" && o === "presidential_penalty" ? "Rigore presidenziale" : f === "award_type" && o === "player" ? "POTM" : f === "award_type" && o === "staff" ? "Staff del mese" : o}</option>)}</select>; if (f === "statistics_group") return <><input type="text" value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} placeholder="es. Street Cup" /><small className="admin-help-text">Inserisci lo stesso nome in tutte le competizioni da riunire. Saranno mostrate sotto un’unica voce pubblica e aggregate nelle statistiche. Lascia vuoto per mantenerla separata.</small></> ; if (f === "description") return <RichTextEditor value={String(v ?? "")} onChange={(x) => setField(f, x)} />; if (f === "note") return <textarea rows={5} value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} />; const dt = f === "kickoff_at" || f === "published_at"; const date = f === "start_date" || f === "end_date"; const num = ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f); const uploadable = isUploadableImage(f); const url = ["cta_url", "website_url", "content_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url", "card_image_url", "activity_image_url"].includes(f); const input = <input type={dt ? "datetime-local" : date ? "date" : num ? "number" : url ? "url" : "text"} value={dt ? localDate(v) : v == null ? "" : String(v)} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)} min={num ? 0 : undefined} placeholder={f === "month_label" ? "Settembre 2026" : undefined} />; if (!uploadable) return input; return <div className="admin-input-row">{input}<input className="file-input" type="file" accept="image/*" disabled={!canWrite || uploadingField === f} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadFor(f, file); e.currentTarget.value = ""; }} />{uploadingField === f && <small className="admin-help-text">Caricamento…</small>}</div>; };
   return <div className="admin-resource"><div className="admin-resource__head"><div><span className="eyebrow">CRUD / {labels[resource]}</span><h2>{editing ? "Modifica record" : "Nuovo record"}</h2></div>{editing && <button className="btn btn--ghost" type="button" onClick={cancelEdit}>Annulla</button>}</div>{canWrite ? <form className="admin-form" onSubmit={save}><div className="admin-form__grid">{fields[resource].map((f) => f === "competition_ids" ? <fieldset className="admin-fieldset" key={f}><legend>{labelize(f)}</legend><p className="admin-fieldset__help">Seleziona tutte le competizioni a cui partecipa la squadra.</p><div className="admin-checkbox-group">{lookups.competitions.map((competition) => { const selected = Array.isArray(form.competition_ids) && form.competition_ids.map(String).includes(competition.id); return <label className="admin-checkbox" key={competition.id}><input type="checkbox" checked={selected} onChange={() => { const current = Array.isArray(form.competition_ids) ? form.competition_ids.map(String) : []; setField("competition_ids", selected ? current.filter((id) => id !== competition.id) : [...current, competition.id]); }} /><span>{competition.name}</span></label>; })}</div></fieldset> : <label key={f}>{labelize(f)}{render(f)}</label>)}</div>{message && <p className="admin-message">{message}</p>}<button className="btn btn--primary" type="submit">{editing ? "Salva modifiche" : "Crea record"}</button></form> : <div className="empty-state"><div className="empty-state__mark">R</div><div><h3>Accesso in sola lettura</h3><p>Questo ruolo non può modificare questa sezione.</p></div></div>}<div className="admin-records">
   <div className="admin-search">
     <div className="admin-search__field">
