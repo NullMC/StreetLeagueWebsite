@@ -43,7 +43,6 @@ export default function Matches() {
         <div className="page-sponsor-band__inner">
           <SectionTitle title="Calendario partite" />
           <Typography component="p" className="lede">Risultati e prossimi incontri, suddivisi per competizione.</Typography>
-          <SponsorWatermarkStrip />
         </div>
       </section>
       {loading ? <p className="admin-message">Caricamento calendario…</p> : !groups.length
@@ -60,5 +59,6 @@ export default function Matches() {
             </Paper>)}
           </div>}
     </div>
+    <SponsorWatermarkStrip />
   </PageShell>;
 }
