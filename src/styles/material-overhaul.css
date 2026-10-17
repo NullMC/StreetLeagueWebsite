@@ -651,8 +651,10 @@
 /* Competition identity scale: larger marks and titles without cropping adjacent content. */
 
 .competition-list-card {
+  position: relative;
   min-width: 0;
-  overflow: visible;
+  overflow: hidden;
+  isolation: isolate;
 }
 .competition-list-card__title {
   display: flex;

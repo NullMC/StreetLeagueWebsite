@@ -1011,6 +1011,7 @@ section,
   filter: blur(34px);
   right: -90px;
   bottom: -100px;
+  pointer-events: none;
 }
 .stat-card h3 {
   font-family: "Barlow Condensed";
