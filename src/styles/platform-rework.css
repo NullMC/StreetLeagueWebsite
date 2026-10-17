@@ -833,12 +833,20 @@ html[data-theme="night"] .standings-page .standings-team strong {
 
 @media (max-width: 760px) {
   .competition-matchday-heading {
-    align-items: flex-start;
-    gap: 8px 12px;
+    align-items: baseline;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .competition-matchday-heading .section-head {
+    flex: 0 0 auto;
   }
   .competition-matchday-heading > span {
-    flex: 1 1 100%;
-    font-size: 14px;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .standings-table .table-row {
     grid-template-columns: 20px minmax(94px, 1.7fr) repeat(5, minmax(24px, .42fr));
