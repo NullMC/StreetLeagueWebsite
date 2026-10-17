@@ -1,8 +1,9 @@
 import { supabase } from "./supabase";
 
-export type PlayerOfMonth = {
+export type MonthlyAward = {
   id: string;
   player_id: string;
+  award_type: "player" | "staff";
   month_label: string;
   note: string | null;
   card_image_url?: string | null;
@@ -18,7 +19,10 @@ export type PlayerOfMonth = {
   } | null;
 };
 
-export async function getPlayerOfMonth(): Promise<PlayerOfMonth | null> {
+export type PlayerOfMonth = MonthlyAward;
+export type StaffOfMonth = MonthlyAward;
+
+async function getLegacyPlayerOfMonth(): Promise<PlayerOfMonth | null> {
   if (!supabase) return null;
   const withGraphic = await supabase
     .from("player_of_month")
@@ -28,8 +32,7 @@ export async function getPlayerOfMonth(): Promise<PlayerOfMonth | null> {
     .maybeSingle();
 
   if (withGraphic.error) {
-    const message = withGraphic.error.message || "";
-    if (!message.includes("card_image_url")) throw withGraphic.error;
+    if (!(withGraphic.error.message || "").includes("card_image_url")) throw withGraphic.error;
     const fallback = await supabase
       .from("player_of_month")
       .select("id, player_id, month_label, note, published_at, created_at, player:players(id,first_name,last_name,shirt_number,position,team_id)")
@@ -37,9 +40,50 @@ export async function getPlayerOfMonth(): Promise<PlayerOfMonth | null> {
       .limit(1)
       .maybeSingle();
     if (fallback.error) throw fallback.error;
-    return fallback.data ? ({ ...fallback.data, card_image_url: null } as PlayerOfMonth) : null;
+    return fallback.data ? ({ ...fallback.data, award_type: "player", card_image_url: null } as PlayerOfMonth) : null;
   }
-  return (withGraphic.data as PlayerOfMonth | null) ?? null;
+
+  return withGraphic.data ? ({ ...withGraphic.data, award_type: "player" } as PlayerOfMonth) : null;
+}
+
+async function getMonthlyAward(type: "player" | "staff"): Promise<MonthlyAward | null> {
+  if (!supabase) return null;
+  const result = await supabase
+    .from("player_of_month")
+    .select("id, player_id, award_type, month_label, note, card_image_url, published_at, created_at, player:players(id,first_name,last_name,shirt_number,position,team_id)")
+    .eq("award_type", type)
+    .order("published_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (result.error) {
+    const message = result.error.message || "";
+    if (message.toLowerCase().includes("award_type")) {
+      return type === "player" ? getLegacyPlayerOfMonth() : null;
+    }
+    if (message.includes("card_image_url")) {
+      const withoutGraphic = await supabase
+        .from("player_of_month")
+        .select("id, player_id, award_type, month_label, note, published_at, created_at, player:players(id,first_name,last_name,shirt_number,position,team_id)")
+        .eq("award_type", type)
+        .order("published_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (withoutGraphic.error) throw withoutGraphic.error;
+      return withoutGraphic.data ? ({ ...withoutGraphic.data, card_image_url: null } as MonthlyAward) : null;
+    }
+    throw result.error;
+  }
+
+  return (result.data as MonthlyAward | null) ?? null;
+}
+
+export async function getPlayerOfMonth(): Promise<PlayerOfMonth | null> {
+  return getMonthlyAward("player");
+}
+
+export async function getStaffOfMonth(): Promise<StaffOfMonth | null> {
+  return getMonthlyAward("staff");
 }
 
 export function subscribeToPlayerOfMonth(onChange: () => void) {
