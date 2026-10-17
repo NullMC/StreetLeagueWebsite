@@ -35,7 +35,7 @@ export default function Partners() {
         <div className="section--edge sponsor-band__inner">
           <section className="home-sponsors" aria-label="Sponsor Street League" id="sponsor">
             <div className="home-section-head home-section-head--on-pink">
-              <SectionTitle title="I nostri sponsor" />
+              <SectionTitle title="Le nostre collaborazioni: " />
             </div>
             <Typography component="p" className="home-sponsors__intro">
               Le attività che contribuiscono alla crescita della Street League.
@@ -48,8 +48,8 @@ export default function Partners() {
               <SponsorGrid partners={partners} />
             ) : (
               <EmptyState
-                title="Sponsor in aggiornamento"
-                text="I partner compariranno qui non appena saranno pubblicati dal back office."
+                title="Collaborazioni in aggiornamento"
+                text="Le nostre collaborazioni appariranno qui non appena saranno pubblicate dal back office."
               />
             )}
             
