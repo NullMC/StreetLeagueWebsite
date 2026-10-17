@@ -674,3 +674,195 @@
     padding-inline: 4px;
   }
 }
+
+
+/* Requested refinements: themes, headings, matchday navigation and standings. */
+.competition-matchday-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin: 0 0 14px;
+}
+.competition-matchday-heading .section-head {
+  width: auto;
+  margin: 0 !important;
+}
+.competition-matchday-heading .section-head h2 {
+  margin: 0 !important;
+}
+.competition-matchday-heading > span {
+  color: var(--muted);
+  font-size: clamp(14px, 1.5vw, 18px);
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.matchday-nav button {
+  gap: 0;
+}
+.standings-table .table-row > .standings-team {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+  text-align: left !important;
+}
+.standings-table .standings-team__logo {
+  display: block !important;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.standings-table .table-row > .standings-team strong {
+  min-width: 0;
+  text-align: left !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* New sections follow the selected theme; only the sponsor marquee stays pink. */
+html[data-theme="night"] .home-redesign--ordered {
+  background: #050806 !important;
+  color: #f5f7f6 !important;
+}
+html[data-theme="night"] .home-redesign--ordered .home-about,
+html[data-theme="night"] .home-redesign--ordered .home-teams,
+html[data-theme="night"] .home-redesign--ordered .home-featured,
+html[data-theme="night"] .home-redesign--ordered .potm-section,
+html[data-theme="night"] .home-redesign--ordered .home-top-seven {
+  background: #080d0a !important;
+  color: #f5f7f6 !important;
+  border-color: rgba(245,247,246,.12) !important;
+}
+html[data-theme="night"] .home-redesign--ordered .home-about__copy h1,
+html[data-theme="night"] .home-redesign--ordered .home-section-head .section-head,
+html[data-theme="night"] .home-redesign--ordered .home-section-head .section-head h2,
+html[data-theme="night"] .home-redesign--ordered .monthly-award-column__head h3,
+html[data-theme="night"] .home-redesign--ordered .top-seven-section h2,
+html[data-theme="night"] .home-redesign--ordered .top-seven-player strong {
+  color: #f5f7f6 !important;
+}
+html[data-theme="night"] .home-redesign--ordered .home-about__copy p,
+html[data-theme="night"] .home-redesign--ordered .home-about__aside,
+html[data-theme="night"] .home-redesign--ordered .home-featured .admin-message,
+html[data-theme="night"] .home-redesign--ordered .top-seven-subtitle,
+html[data-theme="night"] .home-redesign--ordered .top-seven-method,
+html[data-theme="night"] .home-redesign--ordered .top-seven-player small {
+  color: rgba(245,247,246,.72) !important;
+}
+html[data-theme="night"] .home-redesign--ordered .home-about__aside {
+  border-color: #e42278 !important;
+}
+html[data-theme="night"] .home-redesign--ordered .home-about__aside strong,
+html[data-theme="night"] .home-redesign--ordered .home-about__copy .eyebrow {
+  color: #ed7bab !important;
+}
+html[data-theme="night"] .home-redesign--ordered .team-carousel__item,
+html[data-theme="night"] .home-redesign--ordered .team-carousel__name {
+  color: #f5f7f6 !important;
+}
+html[data-theme="night"] .home-redesign--ordered .home-featured {
+  background: #0b100e !important;
+}
+html[data-theme="night"] .home-redesign--ordered .potm-empty,
+html[data-theme="night"] .home-redesign--ordered .potm-card__content,
+html[data-theme="night"] .home-redesign--ordered .staff-month-card__content,
+html[data-theme="night"] .home-redesign--ordered .staff-month-empty {
+  background: #111714 !important;
+  color: #f5f7f6 !important;
+  border-color: rgba(245,247,246,.12) !important;
+}
+html[data-theme="night"] .home-redesign--ordered .potm-card__content p,
+html[data-theme="night"] .home-redesign--ordered .staff-month-card__content p,
+html[data-theme="night"] .home-redesign--ordered .potm-card__meta,
+html[data-theme="night"] .home-redesign--ordered .staff-month-card__label {
+  color: rgba(245,247,246,.70) !important;
+}
+html[data-theme="night"] .home-redesign--ordered .top-seven-section.MuiPaper-root {
+  background: #111714 !important;
+  color: #f5f7f6 !important;
+  border-color: rgba(245,247,246,.14) !important;
+}
+html[data-theme="night"] .home-redesign--ordered .top-seven-pitch {
+  background: #0b100e !important;
+  border-color: rgba(245,247,246,.12) !important;
+}
+html[data-theme="night"] .home-redesign--ordered .top-seven-player__avatar {
+  background: #1a211d !important;
+  color: #f5f7f6 !important;
+  border-color: rgba(245,247,246,.16) !important;
+}
+html[data-theme="night"] .home-redesign--ordered .top-seven-player__team-logo {
+  background: #f5f7f6 !important;
+}
+html[data-theme="night"] .best-stats-card,
+html[data-theme="night"] .home-best-stat-card,
+html[data-theme="night"] .competition-list-card {
+  background: #111714 !important;
+  color: #f5f7f6 !important;
+  border-color: rgba(245,247,246,.12) !important;
+}
+html[data-theme="night"] .best-stats-card h3,
+html[data-theme="night"] .best-stats-card .eyebrow,
+html[data-theme="night"] .competition-list-card h3,
+html[data-theme="night"] .competition-list-card p {
+  color: #f5f7f6 !important;
+}
+html[data-theme="night"] .best-stats-card__unit,
+html[data-theme="night"] .best-stats-card__hint,
+html[data-theme="night"] .competition-list-card__hint {
+  border-color: rgba(245,247,246,.15) !important;
+}
+html[data-theme="night"] .platform-page-heading,
+html[data-theme="night"] .platform-page-heading .section-head,
+html[data-theme="night"] .platform-page-heading .section-head h2,
+html[data-theme="night"] .platform-page-heading > p,
+html[data-theme="night"] .competition-matchday-heading .section-head h2 {
+  color: #f5f7f6 !important;
+}
+html[data-theme="night"] .standings-page .standings-team strong {
+  color: #f5f7f6 !important;
+}
+
+@media (max-width: 760px) {
+  .competition-matchday-heading {
+    align-items: flex-start;
+    gap: 8px 12px;
+  }
+  .competition-matchday-heading > span {
+    flex: 1 1 100%;
+    font-size: 14px;
+  }
+  .standings-table .table-row {
+    grid-template-columns: 20px minmax(94px, 1.7fr) repeat(5, minmax(24px, .42fr));
+    gap: 3px;
+    padding: 10px 6px;
+    font-size: 10px;
+  }
+  .standings-table .standings-team { gap: 5px; }
+  .standings-table .standings-team__logo {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+  }
+  .standings-table .standings-team strong { font-size: 9px; }
+}
+@media (max-width: 390px) {
+  .standings-table .table-row {
+    grid-template-columns: 18px minmax(82px, 1.6fr) repeat(5, minmax(22px, .4fr));
+    gap: 2px;
+    padding-inline: 4px;
+  }
+  .standings-table .standings-team__logo {
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
+  }
+}
