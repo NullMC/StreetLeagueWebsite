@@ -65,7 +65,6 @@ export default function Competitions() {
         <section className="page-sponsor-band" aria-label="Competizioni e sponsor">
           <div className="page-sponsor-band__inner">
             <SectionTitle title="Competizioni" />
-            <SponsorWatermarkStrip />
           </div>
         </section>
         {items.length ? (
@@ -96,6 +95,7 @@ export default function Competitions() {
           <EmptyState title="Nessuna competizione disponibile" text="Le competizioni appariranno qui quando saranno registrate nel database." />
         )}
       </div>
+      <SponsorWatermarkStrip />
     </PageShell>
   );
 }
