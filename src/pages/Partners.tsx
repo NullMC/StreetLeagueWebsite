@@ -67,7 +67,7 @@ export default function Partners() {
               </Button>
             </div>
             <Typography component="p" className="home-sponsors__intro">
-              Le attività e i brand che contribuiscono alla crescita della Street League.
+              Le attività che contribuiscono alla crescita della Street League.
             </Typography>
             {loading ? (
               <Typography component="p" className="home-sponsors__loading">
