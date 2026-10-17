@@ -2,25 +2,88 @@ import { useEffect, useState } from "react";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { TeamCarousel } from "../components/TeamCarousel";
+import { MatchCard } from "../components/MatchCard";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
 import { TopSevenOfMonth } from "../components/TopSevenOfMonth";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 import {
   getActiveCompetitions,
+  getMatches,
   getSocialContent,
   getStaffRankingForCompetitions,
   getTeams,
   subscribeToCompetition,
 } from "../lib/api";
 import { getPlayerOfMonth } from "../lib/playerOfMonth";
-import type { SocialContent, StaffRankingEntry, Team } from "../types";
+import type { Competition, Match, SocialContent, StaffRankingEntry, Team } from "../types";
+
+type HomeMatchday = {
+  key: string;
+  label: string;
+  competitionName: string;
+  matches: Match[];
+  firstKickoff: number;
+};
+
+function groupMatchesByMatchday(
+  competitionMatches: Array<{ competition: Competition; matches: Match[] }>,
+): HomeMatchday[] {
+  const buckets = new Map<string, HomeMatchday>();
+
+  competitionMatches.forEach(({ competition, matches }) => {
+    matches.forEach((match) => {
+      const date = new Date(match.kickoff_at);
+      const hasValidDate = !Number.isNaN(date.getTime());
+      const dateKey = hasValidDate
+        ? date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0")
+        : "da-definire";
+      const suppliedDay = match.matchday?.trim() || "";
+      const normalizedDay = suppliedDay.replace(/^giornata\s*/i, "").trim();
+      const key = competition.id + ":" + (
+        suppliedDay ? "round:" + normalizedDay.toLocaleLowerCase() : "date:" + dateKey
+      );
+      const label = suppliedDay
+        ? (/giornata/i.test(suppliedDay)
+            ? suppliedDay.replace(/giornata/ig, "Giornata")
+            : "Giornata " + suppliedDay)
+        : (hasValidDate
+            ? "Data " + date.toLocaleDateString("it-IT", { day: "2-digit", month: "short" })
+            : "Data da definire");
+      const kickoff = hasValidDate ? date.getTime() : Number.MAX_SAFE_INTEGER;
+      const current = buckets.get(key);
+
+      if (current) {
+        current.matches.push(match);
+        current.firstKickoff = Math.min(current.firstKickoff, kickoff);
+      } else {
+        buckets.set(key, {
+          key,
+          label,
+          competitionName: competition.name,
+          matches: [match],
+          firstKickoff: kickoff,
+        });
+      }
+    });
+  });
+
+  return Array.from(buckets.values())
+    .map((day) => ({
+      ...day,
+      matches: [...day.matches].sort(
+        (a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime(),
+      ),
+    }))
+    .sort((a, b) => a.firstKickoff - b.firstKickoff);
+}
 
 type HomeData = {
   teams: Team[];
   social: SocialContent[];
   potm: Awaited<ReturnType<typeof getPlayerOfMonth>>;
   staffMonthly: StaffRankingEntry[];
+  matchdays: HomeMatchday[];
 };
 
 const initialData: HomeData = {
@@ -28,6 +91,7 @@ const initialData: HomeData = {
   social: [],
   potm: null,
   staffMonthly: [],
+  matchdays: [],
 };
 
 function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
@@ -75,6 +139,7 @@ export default function HomeRedesigned() {
   const [data, setData] = useState<HomeData>(initialData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedMatchdayKey, setSelectedMatchdayKey] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -83,7 +148,7 @@ export default function HomeRedesigned() {
       try {
         const now = new Date();
         const activeCompetitions = await getActiveCompetitions();
-        const [allTeams, social, potm, staffMonthly] = await Promise.all([
+        const [allTeams, social, potm, staffMonthly, matchesByCompetition] = await Promise.all([
           getTeams(),
           getSocialContent(),
           getPlayerOfMonth(),
@@ -91,16 +156,25 @@ export default function HomeRedesigned() {
             year: now.getFullYear(),
             month: now.getMonth() + 1,
           }),
+          Promise.all(activeCompetitions.map(async (competition) => ({
+            competition,
+            matches: await getMatches(competition.id),
+          }))),
         ]);
 
         if (!mounted) return;
         const uniqueTeams = Array.from(new Map(allTeams.map((team) => [team.id, team] as const)).values());
+        const matchdays = groupMatchesByMatchday(matchesByCompetition);
         setData({
           teams: uniqueTeams,
           social,
           potm,
           staffMonthly: staffMonthly.filter((entry) => entry.presidential_penalties > 0),
+          matchdays,
         });
+        setSelectedMatchdayKey((current) =>
+          matchdays.some((day) => day.key === current) ? current : (matchdays[0]?.key ?? ""),
+        );
         setError("");
       } catch (loadError) {
         console.error("Home data error:", loadError);
@@ -117,6 +191,9 @@ export default function HomeRedesigned() {
       unsubscribe();
     };
   }, []);
+
+  const selectedMatchday =
+    data.matchdays.find((matchday) => matchday.key === selectedMatchdayKey) ?? data.matchdays[0];
 
   return (
     <div className="home-redesign home-redesign--ordered">
@@ -139,6 +216,52 @@ export default function HomeRedesigned() {
       </section>
 
       {error ? <p className="admin-help-text home-load-error">{error}</p> : null}
+
+      <section className="home-matches section--edge" id="home-matches">
+        <div className="home-section-head">
+          <SectionTitle eyebrow="Calendario" title="Partite" />
+          <a className="home-section-head__link" href="/competizioni">Tutte le competizioni ↗</a>
+        </div>
+        {loading ? (
+          <p className="admin-message">Caricamento partite…</p>
+        ) : data.matchdays.length && selectedMatchday ? (
+          <div className="home-matchdays">
+            <div className="home-matchdays__tabs" aria-label="Seleziona giornata">
+              {data.matchdays.map((matchday) => (
+                <button
+                  type="button"
+                  className="home-matchday-tab"
+                  key={matchday.key}
+                  aria-pressed={selectedMatchday.key === matchday.key}
+                  onClick={() => setSelectedMatchdayKey(matchday.key)}
+                >
+                  <span>{matchday.competitionName}</span>
+                  <strong>{matchday.label}</strong>
+                </button>
+              ))}
+            </div>
+            <div className="home-matchdays__summary">
+              <h3>{selectedMatchday.competitionName} · {selectedMatchday.label}</h3>
+              <span>{selectedMatchday.matches.length} {selectedMatchday.matches.length === 1 ? "partita" : "partite"}</span>
+            </div>
+            <div className="home-match-carousel" aria-label={"Partite " + selectedMatchday.competitionName + " " + selectedMatchday.label}>
+              {selectedMatchday.matches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  home={data.teams.find((team) => team.id === match.home_team_id)}
+                  away={data.teams.find((team) => team.id === match.away_team_id)}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <EmptyState
+            title="Nessuna partita in calendario"
+            text="Le partite delle competizioni attive appariranno qui quando saranno inserite."
+          />
+        )}
+      </section>
 
       <section className="section--edge home-teams" id="home-teams">
         <div className="home-section-head">

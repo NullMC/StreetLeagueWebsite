@@ -1126,3 +1126,282 @@ html[data-theme="night"] .home-redesign--ordered .top-seven-section.MuiPaper-roo
   background: var(--ink) !important;
   color: var(--white) !important;
 }
+
+
+/* Home fixtures: active-competition rounds with a touch-scrollable row of match cards. */
+.home-redesign--ordered .home-matches {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: clamp(32px, 4.5vw, 58px) max(18px, 4vw) !important;
+  background: #fff !important;
+  color: #111312 !important;
+  border-bottom: 1px solid rgba(17, 19, 18, .12);
+}
+.home-redesign--ordered .home-matches .home-section-head {
+  align-items: end;
+  margin-bottom: 18px;
+}
+.home-matchdays { min-width: 0; }
+.home-matchdays__tabs {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 2px 1px 12px;
+  margin-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #e42278 rgba(1, 10, 8, .08);
+  overscroll-behavior-x: contain;
+}
+.home-matchday-tab {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  min-width: 142px;
+  max-width: 230px;
+  padding: 10px 14px;
+  border: 1px solid rgba(17, 19, 18, .16);
+  border-radius: 4px;
+  background: #fff;
+  color: #111312;
+  text-align: left;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+.home-matchday-tab > span {
+  max-width: 100%;
+  overflow: hidden;
+  color: #68706d;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.home-matchday-tab > strong {
+  color: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+.home-matchday-tab[aria-pressed="true"] {
+  border-color: #e42278;
+  background: #e42278;
+  color: #fff;
+}
+.home-matchday-tab[aria-pressed="true"] > span { color: rgba(255,255,255,.82); }
+.home-matchdays__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 4px 0 12px;
+}
+.home-matchdays__summary h3 {
+  min-width: 0;
+  margin: 0;
+  color: #111312;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: clamp(22px, 2.5vw, 30px);
+  font-weight: 700;
+  line-height: 1;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+.home-matchdays__summary > span {
+  flex: 0 0 auto;
+  color: #68706d;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.home-match-carousel {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 12px;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 2px;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #e42278 rgba(1, 10, 8, .08);
+  -webkit-overflow-scrolling: touch;
+}
+.home-match-carousel .match-card {
+  display: block;
+  flex: 0 0 clamp(290px, 34vw, 410px);
+  width: clamp(290px, 34vw, 410px);
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: 190px;
+  background: #fff !important;
+  color: #111312 !important;
+  border: 1px solid rgba(17, 19, 18, .14);
+  scroll-snap-align: start;
+  text-decoration: none;
+}
+.home-match-carousel .match-card__meta,
+.home-match-carousel .match-card__teams b,
+.home-match-carousel .match-card__teams > .match-card__score {
+  color: inherit;
+}
+.home-match-carousel .match-card__status { color: #b10f59; }
+html[data-theme="night"] .home-redesign--ordered .home-matches {
+  background: #080d0a !important;
+  color: #f5f7f6 !important;
+  border-color: rgba(245,247,246,.12) !important;
+}
+html[data-theme="night"] .home-redesign--ordered .home-matches .home-section-head .section-head h2,
+html[data-theme="night"] .home-redesign--ordered .home-matchdays__summary h3 {
+  color: #f5f7f6 !important;
+}
+html[data-theme="night"] .home-matchday-tab {
+  border-color: rgba(245,247,246,.16);
+  background: #111714;
+  color: #f5f7f6;
+}
+html[data-theme="night"] .home-matchday-tab > span,
+html[data-theme="night"] .home-matchdays__summary > span { color: rgba(245,247,246,.66); }
+html[data-theme="night"] .home-matchday-tab[aria-pressed="true"] {
+  border-color: #e42278;
+  background: #e42278;
+  color: #fff;
+}
+html[data-theme="night"] .home-matchday-tab[aria-pressed="true"] > span { color: rgba(255,255,255,.82); }
+html[data-theme="night"] .home-match-carousel .match-card {
+  background: #111714 !important;
+  color: #f5f7f6 !important;
+  border-color: rgba(245,247,246,.14) !important;
+}
+@media (max-width: 680px) {
+  .home-redesign--ordered .home-matches { padding: 36px 18px !important; }
+  .home-matchdays__summary { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .home-match-carousel .match-card {
+    flex-basis: min(86vw, 360px);
+    width: min(86vw, 360px);
+  }
+}
+
+/* Competition name is part of the "Partite" heading, so both use one type style. */
+.competition-matchday-heading > span { display: none; }
+.competition-matchday-heading .section-head { width: 100%; }
+.competition-matchday-heading .section-head h2 { color: var(--white); }
+
+/* Sponsor heading and content contrast: keep the title centered and override legacy CTA specificity. */
+.partners-sponsors-band .home-section-head.home-section-head--on-pink {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100%;
+  text-align: center !important;
+}
+.partners-sponsors-band .home-section-head.home-section-head--on-pink .section-head,
+.partners-sponsors-band .home-section-head.home-section-head--on-pink .section-head > div,
+.partners-sponsors-band .home-section-head.home-section-head--on-pink .section-head__title-line {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100%;
+  text-align: center !important;
+}
+.partners-sponsors-band .home-section-head.home-section-head--on-pink .section-head h2 {
+  width: 100%;
+  text-align: center !important;
+}
+html:not([data-theme="night"]) .partners-sponsors-band .home-sponsors__intro.MuiTypography-root,
+html:not([data-theme="night"]) .partners-sponsors-band .home-sponsors__loading.MuiTypography-root {
+  color: rgba(1, 10, 8, .76) !important;
+}
+html:not([data-theme="night"]) .partners-sponsors-band .partner-editorial-card__description,
+html:not([data-theme="night"]) .partners-sponsors-band .partner-editorial-card__description p {
+  color: rgba(1, 10, 8, .72) !important;
+}
+html:not([data-theme="night"]) .partners-sponsors-band .partner-editorial-card__button.MuiButton-root,
+html:not([data-theme="night"]) .partners-sponsors-band .home-sponsors .partner-editorial-card__button.MuiButton-root,
+html:not([data-theme="night"]) .partners-sponsors-band .home-sponsors .sponsor-cta-row .MuiButton-root {
+  color: #a71556 !important;
+  background: #fff !important;
+  border: 1px solid #e42278 !important;
+  -webkit-text-fill-color: #a71556 !important;
+  box-shadow: none !important;
+}
+html:not([data-theme="night"]) .partners-sponsors-band .home-sponsors .partner-editorial-card__button.MuiButton-root:hover,
+html:not([data-theme="night"]) .partners-sponsors-band .home-sponsors .sponsor-cta-row .MuiButton-root:hover {
+  color: #fff !important;
+  background: #e42278 !important;
+  border-color: #e42278 !important;
+  -webkit-text-fill-color: #fff !important;
+}
+html:not([data-theme="night"]) .partners-sponsors-band .partner-editorial-card__button.MuiButton-root.Mui-disabled {
+  color: #58615e !important;
+  background: #f0f0f0 !important;
+  border-color: #d5d5d5 !important;
+  -webkit-text-fill-color: #58615e !important;
+}
+
+/* Sponsor watermark marquees stay only a little taller than their logo content. */
+.sponsor-watermark-strip {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 8px 18px !important;
+}
+.sponsor-watermark-strip__heading {
+  flex: 0 0 auto;
+  margin: 0 !important;
+}
+.sponsor-watermark-strip__label.MuiTypography-root {
+  align-self: center;
+  margin: 0 !important;
+  padding: 0 12px 0 0 !important;
+  border-right: 1px solid rgba(255,255,255,.28);
+  font-size: 9px !important;
+  letter-spacing: .1em !important;
+  line-height: 1.2;
+}
+.sponsor-watermark-strip__viewport {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+.sponsor-watermark-strip__track { align-items: center; }
+.sponsor-watermark-strip__group {
+  align-items: center;
+  gap: clamp(20px, 3vw, 42px);
+  padding: 0 18px;
+}
+.sponsor-watermark-strip__logo {
+  height: 38px !important;
+  flex-basis: clamp(100px, 12vw, 160px);
+  width: clamp(100px, 12vw, 160px);
+}
+.sponsor-watermark-strip__image {
+  max-height: 34px !important;
+  max-width: 100%;
+}
+.sponsor-watermark-strip__fallback { font-size: 10px; }
+@media (max-width: 520px) {
+  .sponsor-watermark-strip { gap: 8px !important; padding: 8px 10px !important; }
+  .sponsor-watermark-strip__label.MuiTypography-root { padding-right: 8px !important; font-size: 8px !important; }
+  .sponsor-watermark-strip__logo {
+    flex-basis: 94px;
+    width: 94px;
+  }
+  .sponsor-watermark-strip__group { gap: 16px; padding-inline: 10px; }
+}

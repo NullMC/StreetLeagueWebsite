@@ -74,8 +74,7 @@ function matchdayBuckets(matches: Match[]): MatchdayBucket[] {
 function MatchdayHeading({ competitionName }: { competitionName: string }) {
   return (
     <div className="competition-matchday-heading">
-      <SectionTitle eyebrow="" title="Partite" variant="subsection" />
-      <span>{competitionName}</span>
+      <SectionTitle title={`Partite · ${competitionName}`} variant="subsection" />
     </div>
   );
 }
@@ -133,7 +132,6 @@ function MatchdayMatchList({ section }: { section: CompetitionSectionData }) {
 export default function CompetitionDetail() {
   const { competitionId = "", groupName } = useParams();
   const [competition, setCompetition] = useState<Competition | null>(null);
-  const [title, setTitle] = useState("");
   const [sections, setSections] = useState<CompetitionSectionData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -145,7 +143,6 @@ export default function CompetitionDetail() {
       try {
         const allCompetitions = await getCompetitions();
         let selected: Competition[];
-        let selectedTitle: string;
 
         if (groupName !== undefined) {
           let decodedName = groupName;
@@ -153,16 +150,13 @@ export default function CompetitionDetail() {
           selected = allCompetitions.filter(
             (item) => item.status === "active" && item.statistics_group?.trim() === decodedName,
           );
-          selectedTitle = decodedName;
         } else {
           const found = allCompetitions.find((item) => item.id === competitionId && item.status === "active");
           selected = found ? [found] : [];
-          selectedTitle = found?.name ?? "";
         }
 
         if (!mounted) return;
         setCompetition(selected[0] ?? null);
-        setTitle(selectedTitle);
 
         const nextSections = await Promise.all(selected.map(async (item) => {
           const [matches, teams] = await Promise.all([getMatches(item.id), getTeams(item.id)]);
@@ -198,13 +192,6 @@ export default function CompetitionDetail() {
         <div className="page"><p className="admin-message">Caricamento competizione…</p></div>
       ) : competition ? (
         <>
-          <section className="detail-hero">
-            <div className="detail-hero__inner">
-              <div className="competition-detail-title">
-                <h1>{title || competition.name}</h1>
-              </div>
-            </div>
-          </section>
           <div className="page competition-detail-page">
             {aggregated ? (
               sections.map((section) => (
