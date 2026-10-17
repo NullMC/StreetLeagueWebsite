@@ -59,7 +59,7 @@ export default function Partners() {
             <div className="home-collab-proposal__copy">
               <SectionTitle title="Collabora con Street League" />
               <p>
-                Raccontaci della tua attività, costruiamo insieme una proposta adatta al tuo brand e cresci insieme a noi.
+                Raccontaci della tua attività, costruiamo insieme una proposta adatta al tuo brand, e cresci insieme a noi!
               </p>
               <Button
                 component="a"
