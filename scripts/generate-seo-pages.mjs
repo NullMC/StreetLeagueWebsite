@@ -176,7 +176,7 @@ function outputPathForRoute(route) {
   const segments = route.split("/").filter(Boolean).map((segment) => {
     let decoded = segment;
     try { decoded = decodeURIComponent(segment); } catch {}
-    if (!decoded || decoded === "." || decoded === ".." || decoded.includes("/") || decoded.includes("\\\\")) {
+    if (!decoded || decoded === "." || decoded === ".." || decoded.includes("/") || decoded.includes("\\")) {
       throw new Error(`Unsafe route segment: ${segment}`);
     }
     return decoded;
@@ -233,7 +233,7 @@ function buildSitemap(routes) {
   const unique = [...new Set(routes)].filter((route) => route !== "/admin" && !route.startsWith("/admin/"));
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${unique.map((route) => `  <url><loc>${xmlEscape(canonicalFor(route))}</loc></url>`).join("\n")}\n</urlset>\n`;
 }
-async function createDynamicRoutes(template, routes, sitemapRoutes, tables) {
+async function createDynamicRoutes(template, sitemapRoutes, tables) {
   const { competitions, teams, players, matches } = tables;
   const teamById = new Map(teams.map((team) => [team.id, team]));
   const competitionById = new Map(competitions.map((competition) => [competition.id, competition]));
@@ -376,7 +376,7 @@ async function main() {
         loadPublicTable(baseUrl, key, "matches", "id,competition_id,home_team_id,away_team_id,kickoff_at,status,home_score,away_score,venue"),
       ]);
       const before = sitemapRoutes.length;
-      await createDynamicRoutes(template, sitemapRoutes, sitemapRoutes, { competitions, teams, players, matches });
+      await createDynamicRoutes(template, sitemapRoutes, { competitions, teams, players, matches });
       generatedEntityRoutes = sitemapRoutes.length - before;
     } catch (error) {
       console.warn("SEO prerender: dynamic database pages skipped; static pages are still generated.", error instanceof Error ? error.message : "");

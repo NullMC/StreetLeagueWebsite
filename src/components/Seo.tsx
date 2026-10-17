@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { getCompetitions, getMatches, getPlayers, getTeams } from "../lib/api";
-import type { Competition, Match, Player, Team } from "../types";
 
 const SITE_URL = "https://streetleaguebari.it";
 const SITE_NAME = "Street League Bari";
