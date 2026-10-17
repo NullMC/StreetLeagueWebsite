@@ -14,9 +14,7 @@ import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 const links = [
   ["Home", "/"],
   ["Competizioni", "/competizioni"],
-  ["Calendario", "/partite"],
   ["Classifica", "/classifica"],
-  ["Squadre", "/#home-teams"],
   ["Statistiche", "/statistiche"],
   ["Sponsor & collabora", "/partner"],
   ["Admin", "/admin"],
