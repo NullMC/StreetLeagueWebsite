@@ -43,7 +43,7 @@ function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
   return (
     <div className="home-feature-carousel" aria-label="Contenuti in evidenza">
       <div className="home-feature-carousel__track">
-        {items.map((item, index) => (
+        {items.map((item) => (
           <a
             className="home-feature-card"
             href={item.content_url}
@@ -180,7 +180,7 @@ export default function HomeRedesigned() {
         </div>
       </section>
 
-      <div id="home-top-seven"><TopSevenOfMonth /></div>
+      <div className="home-top-seven" id="home-top-seven"><TopSevenOfMonth /></div>
 
       <SponsorWatermarkStrip />
     </div>
