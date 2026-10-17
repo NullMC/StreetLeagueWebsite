@@ -29,6 +29,7 @@ const staticPages = [
   { path: "/partite", title: "Calendario e risultati delle partite | Street League Bari", description: "Consulta il calendario della Street League Bari, le prossime partite, i risultati e gli eventi di gara." },
   { path: "/partner", title: "Sponsor e collaborazioni | Street League Bari", description: "Scopri gli sponsor della Street League Bari e le opportunità di collaborazione con il torneo." },
   { path: "/admin", title: "Area riservata | Street League Bari", description: "Area operativa riservata Street League.", indexable: false },
+  { path: "/collabora", title: "Collabora con Street League | Street League Bari", description: "Contatta Street League Bari per valutare una collaborazione o una sponsorizzazione.", indexable: false },
 ];
 
 function escapeHtml(value) {
@@ -136,8 +137,20 @@ function makeJsonLd(route, page, canonical, mainEntity) {
   });
   return { "@context": "https://schema.org", "@graph": graph };
 }
+function absoluteImageUrl(value) {
+  if (!value || !String(value).trim()) return SOCIAL_IMAGE;
+  try {
+    const url = new URL(String(value), `${SITE_URL}/`);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : SOCIAL_IMAGE;
+  } catch {
+    return SOCIAL_IMAGE;
+  }
+}
 function renderHtml(template, route, page) {
   const canonical = canonicalFor(route);
+  const shareImage = absoluteImageUrl(page.shareImage);
+  const hasCustomShareImage = Boolean(page.shareImage && shareImage !== SOCIAL_IMAGE);
+  const shareImageAlt = hasCustomShareImage ? `${page.title.split(" | ")[0]} — Street League` : "Street League Bari — calcio, competizioni e community";
   const robots = page.indexable === false
     ? "noindex,nofollow"
     : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
@@ -151,8 +164,8 @@ function renderHtml(template, route, page) {
     "twitter:card": "summary_large_image",
     "twitter:title": page.title,
     "twitter:description": page.description,
-    "twitter:image": SOCIAL_IMAGE,
-    "twitter:image:alt": "Street League Bari — calcio, competizioni e community",
+    "twitter:image": shareImage,
+    "twitter:image:alt": shareImageAlt,
   })) html = setMeta(html, "name", name, value);
   for (const [property, value] of Object.entries({
     "og:site_name": BRAND_NAME,
@@ -161,8 +174,8 @@ function renderHtml(template, route, page) {
     "og:title": page.title,
     "og:description": page.description,
     "og:url": canonical,
-    "og:image": SOCIAL_IMAGE,
-    "og:image:alt": "Street League Bari — calcio, competizioni e community",
+    "og:image": shareImage,
+    "og:image:alt": shareImageAlt,
   })) html = setMeta(html, "property", property, value);
   html = setCanonical(html, canonical);
   const schema = makeJsonLd(route, page, canonical, page.mainEntity);
@@ -285,12 +298,13 @@ async function createDynamicRoutes(template, sitemapRoutes, tables) {
     const page = {
       title: `${team.name} | Squadre | Street League Bari`,
       description: `Scopri la rosa, i giocatori e le partite di ${team.name} nella Street League Bari.`,
+      shareImage: team.logo_url || undefined,
       breadcrumbs: makeBreadcrumbs([
         { name: "Home", path: "/" }, { name: "Squadre", path: "/squadre" }, { name: team.name, path: route },
       ]),
       mainEntity: {
         "@type": "SportsTeam", name: team.name, url: canonicalFor(route),
-        ...(team.logo_url ? { logo: team.logo_url, image: team.logo_url } : {}),
+        ...(team.logo_url ? { logo: absoluteImageUrl(team.logo_url), image: absoluteImageUrl(team.logo_url) } : {}),
         sport: "Association football", memberOf: { "@id": ORGANIZATION_ID },
       },
     };
@@ -306,12 +320,13 @@ async function createDynamicRoutes(template, sitemapRoutes, tables) {
     const page = {
       title: `${name} | Giocatori | Street League Bari`,
       description: `Profilo e statistiche di ${name}${team ? ` della squadra ${team.name}` : ""}, nella Street League Bari.`,
+      shareImage: image || undefined,
       breadcrumbs: makeBreadcrumbs([
         { name: "Home", path: "/" }, { name: "Squadre", path: "/squadre" }, { name, path: route },
       ]),
       mainEntity: {
         "@type": "Person", name, url: canonicalFor(route),
-        ...(image ? { image } : {}),
+        ...(image ? { image: absoluteImageUrl(image) } : {}),
         ...(team ? { memberOf: { "@type": "SportsTeam", name: team.name, url: canonicalFor(`/squadre/${encodeURIComponent(team.id)}`) } } : {}),
       },
     };

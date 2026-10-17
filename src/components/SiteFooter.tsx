@@ -13,7 +13,6 @@ export function SiteFooter() {
           <a href="/partite">Calendario</a>
           <a href="/classifica">Classifica</a>
           <a href="/squadre">Squadre</a>
-          <a href="/giocatori">Giocatori</a>
           <a href="/statistiche">Statistiche</a>
         </div>
         <div>
