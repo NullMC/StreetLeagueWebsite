@@ -8,33 +8,17 @@ import { TopSevenOfMonth } from "../components/TopSevenOfMonth";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 import {
   getActiveCompetitions,
-  getPartners,
-  getPlayerStatsForCompetitions,
   getSocialContent,
   getStaffRankingForCompetitions,
-  getStatisticsGroups,
   getTeams,
   subscribeToCompetition,
 } from "../lib/api";
 import { getPlayerOfMonth } from "../lib/playerOfMonth";
-import type {
-  Partner,
-  Player,
-  PlayerStats,
-  SocialContent,
-  StaffRankingEntry,
-  StatisticsGroup,
-  Team,
-} from "../types";
+import type { SocialContent, StaffRankingEntry, Team } from "../types";
 
-type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
 type HomeData = {
   teams: Team[];
   social: SocialContent[];
-  partners: Partner[];
-  groups: StatisticsGroup[];
-  playersByGroup: Record<string, RankedPlayer[]>;
-  staffByGroup: Record<string, StaffRankingEntry[]>;
   potm: Awaited<ReturnType<typeof getPlayerOfMonth>>;
   staffMonthly: StaffRankingEntry[];
 };
@@ -42,30 +26,9 @@ type HomeData = {
 const initialData: HomeData = {
   teams: [],
   social: [],
-  partners: [],
-  groups: [],
-  playersByGroup: {},
-  staffByGroup: {},
   potm: null,
   staffMonthly: [],
 };
-
-function isStaff(player: Pick<Player, "role" | "position">) {
-  return player.role?.trim().toUpperCase() === "STAFF" ||
-    player.position?.trim().toUpperCase() === "STAFF";
-}
-
-function isGoalkeeper(player: RankedPlayer) {
-  const position = (player.position || "").trim().toLocaleLowerCase("it");
-  return position.includes("portier") || position.includes("goalkeeper") ||
-    position.includes("goalie") || position === "gk" || position === "por";
-}
-
-const homeStats = [
-  { key: "goals", title: "Miglior marcatore", unit: "gol" },
-  { key: "mvps", title: "Record MVP", unit: "MVP" },
-  { key: "clean_sheets", title: "Miglior portiere", unit: "clean sheet" },
-] as const;
 
 function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
   if (!items.length) {
@@ -110,52 +73,6 @@ function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
   );
 }
 
-function BestStatsCard({
-  group,
-  title,
-  category,
-  players,
-  staff,
-}: {
-  group: StatisticsGroup;
-  title: string;
-  category: "goals" | "mvps" | "clean_sheets" | "staff";
-  players: RankedPlayer[];
-  staff: StaffRankingEntry[];
-}) {
-  const staffLeader = staff.filter((entry) => entry.presidential_penalties > 0)[0];
-  const ranked = category === "staff"
-    ? []
-    : [...players]
-        .filter((player) => player.stats[category] > 0)
-        .filter((player) => category !== "clean_sheets" || isGoalkeeper(player))
-        .sort((a, b) =>
-          b.stats[category] - a.stats[category] ||
-          (a.last_name + " " + a.first_name).localeCompare(b.last_name + " " + b.first_name, "it"),
-        );
-  const top = ranked[0];
-  const value = category === "staff"
-    ? staffLeader?.presidential_penalties ?? 0
-    : top?.stats[category] ?? 0;
-  const name = category === "staff"
-    ? staffLeader ? staffLeader.player.first_name + " " + staffLeader.player.last_name : "Nessun record"
-    : top ? top.first_name + " " + top.last_name : "Nessun record";
-
-  return (
-    <a
-      className="stat-card home-best-stat-card"
-      href={"/statistiche/" + encodeURIComponent(group.id) + "/" + category}
-      aria-label={"Apri la classifica: " + title + ", " + group.name}
-    >
-      <span className="eyebrow">{title}</span>
-      <h3>{name}</h3>
-      <div className="stat-card__value">{String(value).padStart(2, "0")}</div>
-      <span className="home-best-stat-card__scope">{group.name}</span>
-      <span className="home-best-stat-card__hint">Apri classifica <span aria-hidden="true">↗</span></span>
-    </a>
-  );
-}
-
 export default function HomeRedesigned() {
   const [data, setData] = useState<HomeData>(initialData);
   const [loading, setLoading] = useState(true);
@@ -168,46 +85,23 @@ export default function HomeRedesigned() {
       try {
         const now = new Date();
         const activeCompetitions = await getActiveCompetitions();
-        const groups = await getStatisticsGroups(activeCompetitions);
-
-        const [allTeams, partners, social, potm, staffMonthly, groupData] = await Promise.all([
+        const [allTeams, social, potm, staffMonthly] = await Promise.all([
           getTeams(),
-          getPartners(),
           getSocialContent(),
           getPlayerOfMonth(),
           getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id), {
             year: now.getFullYear(),
             month: now.getMonth() + 1,
           }),
-          Promise.all(groups.map(async (group) => {
-            const [players, staff] = await Promise.all([
-              getPlayerStatsForCompetitions(group.competition_ids),
-              getStaffRankingForCompetitions(group.competition_ids),
-            ]);
-            const teamsInGroup = await Promise.all(group.competition_ids.map((id) => getTeams(id)));
-            const teamById = new Map<string, Team>();
-            teamsInGroup.flat().forEach((team) => teamById.set(team.id, team));
-            const rankedPlayers: RankedPlayer[] = players
-              .filter((player) => !isStaff(player))
-              .map((player) => ({
-                ...player,
-                team_name: teamById.get(player.team_id)?.name ?? "—",
-              }));
-            return { id: group.id, players: rankedPlayers, staff };
-          })),
         ]);
 
         if (!mounted) return;
         const uniqueTeams = Array.from(new Map(allTeams.map((team) => [team.id, team] as const)).values());
         setData({
           teams: uniqueTeams,
-          partners,
           social,
           potm,
           staffMonthly: staffMonthly.filter((entry) => entry.presidential_penalties > 0),
-          groups,
-          playersByGroup: Object.fromEntries(groupData.map((entry) => [entry.id, entry.players])),
-          staffByGroup: Object.fromEntries(groupData.map((entry) => [entry.id, entry.staff])),
         });
         setError("");
       } catch (loadError) {
@@ -290,44 +184,7 @@ export default function HomeRedesigned() {
         <TopSevenOfMonth />
       </section>
 
-      <section className="home-best-stats section--edge" id="home-best-stats">
-        <div className="home-section-head">
-          <SectionTitle eyebrow="Competenze e riconoscimenti" title="Best stats" />
-          <a className="home-section-head__link" href="/statistiche">Tutte le statistiche ↗</a>
-        </div>
-        {error ? <p className="admin-help-text">{error}</p> : null}
-        {loading ? (
-          <p className="admin-message">Caricamento statistiche…</p>
-        ) : data.groups.length ? (
-          data.groups.map((group) => (
-            <section className="home-best-stats__group" key={group.id}>
-              <h3>{group.name}</h3>
-              <div className="leaders home-best-stats__grid">
-                {homeStats.map((stat) => (
-                  <BestStatsCard
-                    key={stat.key}
-                    group={group}
-                    title={stat.title}
-                    category={stat.key}
-                    players={data.playersByGroup[group.id] ?? []}
-                    staff={data.staffByGroup[group.id] ?? []}
-                  />
-                ))}
-                <BestStatsCard
-                  group={group}
-                  title="Miglior membro staff"
-                  category="staff"
-                  players={data.playersByGroup[group.id] ?? []}
-                  staff={data.staffByGroup[group.id] ?? []}
-                />
-              </div>
-            </section>
-          ))
-        ) : (
-          <EmptyState title="Nessuna statistica attiva" text="Le best stats verranno mostrate qui quando ci saranno competizioni attive." />
-        )}
-      </section>
-
+      {error ? <p className="admin-help-text home-load-error">{error}</p> : null}
       <SponsorWatermarkStrip />
     </div>
   );
