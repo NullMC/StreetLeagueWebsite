@@ -341,6 +341,62 @@
 .home-best-stat-card:hover {
   transform: translateY(-3px);
 }
+.stats-tools {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  margin: 0 0 22px;
+}
+.stats-player-search {
+  display: grid;
+  gap: 7px;
+  width: min(100%, 360px);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.stats-player-search input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--street-glass);
+  color: var(--white);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.stats-player-search input:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
+.stats-search-results {
+  margin: 0 0 36px;
+  padding: clamp(14px, 3vw, 26px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--street-glass);
+  overflow: hidden;
+}
+.stats-search-results .admin-table-wrap,
+.stats-player-list .admin-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.stats-player-list {
+  margin-top: 32px;
+}
+.stats-player-list + .stats-player-list {
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.stats-search-table { min-width: 760px; }
+.stats-player-list .admin-table { min-width: 760px; }
 .stats-competition-nav,
 .matchday-nav {
   display: flex;
@@ -423,7 +479,7 @@
 .standings-table .table-row > span { min-width: 0; text-align: center; }
 .standings-table .table-row > span:nth-child(2) { text-align: left; }
 .standings-table .table-row.head { font-size: 10px; }
-.stats-detail-leaderboard--staff .table-row {
+.stats-detail-leaderboard.stats-detail-leaderboard--staff .table-row {
   grid-template-columns: 36px minmax(0, 1fr) minmax(58px, .45fr);
 }
 .stats-detail-leaderboard {
@@ -538,6 +594,8 @@
 }
 
 @media (max-width: 760px) {
+  .stats-tools { justify-content: stretch; }
+  .stats-player-search { width: 100%; }
   .home-about {
     grid-template-columns: 1fr;
     min-height: 0;
