@@ -25,7 +25,6 @@ const staticPages = [
   { path: "/competizioni", title: "Competizioni di calcio | Street League Bari", description: "Consulta competizioni, gironi, squadre partecipanti e risultati della Street League Bari." },
   { path: "/classifica", title: "Classifiche e risultati | Street League Bari", description: "Consulta le classifiche delle competizioni Street League, i punti e i risultati delle squadre." },
   { path: "/statistiche", title: "Statistiche dei giocatori | Street League Bari", description: "Marcatori, MVP, clean sheet e statistiche disciplinari delle competizioni Street League Bari." },
-  { path: "/partite", title: "Calendario e risultati delle partite | Street League Bari", description: "Consulta il calendario della Street League Bari, le prossime partite, i risultati e gli eventi di gara." },
   { path: "/partner", title: "Sponsor e collaborazioni | Street League Bari", description: "Scopri gli sponsor della Street League Bari e le opportunità di collaborazione con il torneo." },
   { path: "/admin", title: "Area riservata | Street League Bari", description: "Area operativa riservata Street League.", indexable: false },
   { path: "/collabora", title: "Collabora con Street League | Street League Bari", description: "Contatta Street League Bari per valutare una collaborazione o una sponsorizzazione.", indexable: false },
