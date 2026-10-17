@@ -135,7 +135,7 @@ export default function StatsDetail() {
           <EmptyState title="Classifica non disponibile" text={error || "Non è stato possibile trovare la competizione."} />
         ) : key === "staff" ? (
           staffRanking.length ? (
-            <div className="leaderboard stats-detail-leaderboard" role="table" aria-label={config.staff.title}>
+            <div className="leaderboard stats-detail-leaderboard stats-detail-leaderboard--staff" role="table" aria-label={config.staff.title}>
               <div className="table-row head">
                 <span>#</span><span>Membro staff</span><span>Gol</span>
               </div>
