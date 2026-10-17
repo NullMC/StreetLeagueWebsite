@@ -17,10 +17,11 @@ import "./styles/home-redesign.css";
 import "./styles/home-calendar-mobile.css";
 import "./styles/night-mode.css";
 import "./styles/material-overhaul.css";
+import "./styles/platform-rework.css";
 import HomeRedesigned from "./pages/HomeRedesigned";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
-import Teams from "./pages/Teams";
+import StatsDetail from "./pages/StatsDetail";
 import TeamDetail from "./pages/TeamDetail";
 import PlayerDetail from "./pages/PlayerDetail";
 import CompetitionDetail from "./pages/CompetitionDetail";
@@ -45,10 +46,11 @@ function App() {
         <Route path="/competizioni/gruppo/:groupName" element={<CompetitionDetail />} />
         <Route path="/competizioni/:competitionId" element={<CompetitionDetail />} />
         <Route path="/classifica" element={<Standings />} />
-        <Route path="/squadre" element={<Teams />} />
+        <Route path="/squadre" element={<Navigate to="/#home-teams" replace />} />
         <Route path="/squadre/:teamId" element={<TeamDetail />} />
         <Route path="/giocatori/:playerId" element={<PlayerDetail />} />
         <Route path="/statistiche" element={<Stats />} />
+        <Route path="/statistiche/:groupId/:statKey" element={<StatsDetail />} />
         <Route path="/partite" element={<Matches />} />
         <Route path="/partite/:matchId" element={<MatchDetail />} />
         <Route path="/partner" element={<Partners />} />
