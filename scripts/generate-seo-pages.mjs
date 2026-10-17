@@ -92,7 +92,7 @@ function defaultBreadcrumbs(route, page, canonical) {
     : route.startsWith("/squadre/") || route.startsWith("/giocatori/")
       ? { name: "Squadre", url: `${SITE_URL}/squadre` }
       : route.startsWith("/partite/")
-        ? { name: "Calendario partite", url: `${SITE_URL}/partite` }
+        ? { name: "Competizioni", url: `${SITE_URL}/competizioni` }
         : null;
   return [
     { name: "Home", url: `${SITE_URL}/` },
@@ -350,7 +350,7 @@ async function createDynamicRoutes(template, sitemapRoutes, tables) {
       title: `${name} | Partita | Street League Bari`,
       description: `${name}.${result} Dettagli, eventi e formazioni della Street League Bari${competition ? ` — ${competition.name}` : ""}.`,
       breadcrumbs: makeBreadcrumbs([
-        { name: "Home", path: "/" }, { name: "Calendario partite", path: "/partite" }, { name, path: route },
+        { name: "Home", path: "/" }, { name: "Competizioni", path: "/competizioni" }, { name, path: route },
       ]),
       mainEntity: {
         "@type": "SportsEvent", name, url: canonicalFor(route), eventStatus: status,
