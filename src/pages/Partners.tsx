@@ -33,38 +33,9 @@ export default function Partners() {
     <PageShell>
       <section className="sponsor-band sponsor-band--redesign partners-sponsors-band" id="home-partners">
         <div className="section--edge sponsor-band__inner">
-          <section className="home-collab-proposal" id="collabora">
-            <div className="home-collab-proposal__copy">
-              <SectionTitle title="Collabora con Street League" />
-              <p>
-                Raccontaci della tua attività, costruiamo insieme una proposta adatta al tuo brand e cresci insieme a noi.
-              </p>
-              <Button
-                component="a"
-                href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League"
-                variant="outlined"
-                className="home-collab-proposal__button"
-              >
-                Contattaci per saperne di più <span aria-hidden="true">↗</span>
-              </Button>
-            </div>
-          </section>
           <section className="home-sponsors" aria-label="Sponsor Street League" id="sponsor">
             <div className="home-section-head home-section-head--on-pink">
               <SectionTitle title="I nostri sponsor" />
-            </div>
-            <div className="sponsor-cta-row">
-              <Typography component="span" className="sponsor-cta-row__title">
-                Il prossimo nome può essere il tuo.
-              </Typography>
-              <Button
-                component="a"
-                href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League"
-                variant="outlined"
-                className="partners-sponsors-band__button"
-              >
-                Diventa sponsor <span aria-hidden="true">↗</span>
-              </Button>
             </div>
             <Typography component="p" className="home-sponsors__intro">
               Le attività che contribuiscono alla crescita della Street League.
@@ -84,6 +55,22 @@ export default function Partners() {
             
           </section>
         </div>
+        <section className="home-collab-proposal" id="collabora">
+            <div className="home-collab-proposal__copy">
+              <SectionTitle title="Collabora con Street League" />
+              <p>
+                Raccontaci della tua attività, costruiamo insieme una proposta adatta al tuo brand e cresci insieme a noi.
+              </p>
+              <Button
+                component="a"
+                href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League"
+                variant="outlined"
+                className="home-collab-proposal__button"
+              >
+                Contattaci per saperne di più <span aria-hidden="true">↗</span>
+              </Button>
+            </div>
+          </section>
       </section>
     </PageShell>
   );
