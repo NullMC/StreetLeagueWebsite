@@ -81,10 +81,6 @@ function getSeo(pathname: string): SeoConfig {
     title: `Statistiche dei giocatori | ${SITE_NAME}`,
     description: "Marcatori, MVP, clean sheet e statistiche disciplinari delle competizioni Street League Bari.",
   };
-  if (path === "/partite") return {
-    title: `Calendario e risultati delle partite | ${SITE_NAME}`,
-    description: "Consulta il calendario della Street League Bari, le prossime partite, i risultati e gli eventi di gara.",
-  };
   if (path.startsWith("/partite/")) return {
     title: `Partita | ${SITE_NAME}`,
     description: "Dettagli della partita Street League: risultato, squadre, eventi e formazioni.",
