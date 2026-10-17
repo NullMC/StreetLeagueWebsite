@@ -29,8 +29,13 @@ function matchdayBuckets(matches: Match[]): MatchdayBucket[] {
     const dateKey = Number.isNaN(date.getTime())
       ? "da-definire"
       : date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
-    const suppliedDay = match.matchday?.trim();
-    const key = suppliedDay || "date:" + dateKey;
+    const rawSuppliedDay = match.matchday?.trim() || "";
+    const key = rawSuppliedDay || "date:" + dateKey;
+    const suppliedDay = rawSuppliedDay
+      ? (/giornata/i.test(rawSuppliedDay)
+          ? rawSuppliedDay.replace(/giornata/ig, "Giornata")
+          : "Giornata " + rawSuppliedDay)
+      : "";
     const label = suppliedDay || (Number.isNaN(date.getTime())
       ? "Data da definire"
       : "Data " + date.toLocaleDateString("it-IT", { day: "2-digit", month: "short" }));
@@ -48,18 +53,31 @@ function matchdayBuckets(matches: Match[]): MatchdayBucket[] {
     }
   });
 
-  return Array.from(buckets.values()).map((bucket) => ({
+  const ordered = Array.from(buckets.values()).map((bucket) => ({
     ...bucket,
     matches: [...bucket.matches].sort((a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()),
   })).sort((a, b) => {
     const numberA = a.label.match(/\d+/)?.[0];
     const numberB = b.label.match(/\d+/)?.[0];
-    if (numberA && numberB && a.key === a.label && b.key === b.label) {
+    if (numberA && numberB && !a.key.startsWith("date:") && !b.key.startsWith("date:")) {
       const difference = Number(numberA) - Number(numberB);
       if (difference) return difference;
     }
     return a.firstKickoff - b.firstKickoff;
   });
+
+  return ordered.map((bucket, index) => bucket.key.startsWith("date:")
+    ? { ...bucket, label: "Giornata " + (index + 1) + " · " + bucket.label.replace(/^Data\\s*/, "") }
+    : bucket);
+}
+
+function MatchdayHeading({ competitionName }: { competitionName: string }) {
+  return (
+    <div className="competition-matchday-heading">
+      <SectionTitle eyebrow="" title="Partite" variant="subsection" />
+      <span>{competitionName}</span>
+    </div>
+  );
 }
 
 function MatchdayMatchList({ section }: { section: CompetitionSectionData }) {
@@ -88,7 +106,6 @@ function MatchdayMatchList({ section }: { section: CompetitionSectionData }) {
             onClick={() => setSelectedKey(day.key)}
           >
             <span>{day.label}</span>
-            <small>{day.matches.length}</small>
           </button>
         ))}
       </nav>
@@ -192,8 +209,7 @@ export default function CompetitionDetail() {
             {aggregated ? (
               sections.map((section) => (
                 <section className="competition-detail-stage" key={section.competition.id}>
-                  <SectionTitle eyebrow={section.competition.status} title={section.competition.name} variant="group" />
-                  <SectionTitle eyebrow="" title="Partite" variant="subsection" />
+                  <MatchdayHeading competitionName={section.competition.name} />
                   <MatchdayMatchList section={section} />
                   <section className="competition-detail-section competition-detail-section--stage">
                     <SectionTitle eyebrow="Iscrizioni" title="Squadre registrate" variant="subsection" />
@@ -203,7 +219,7 @@ export default function CompetitionDetail() {
               ))
             ) : (
               <>
-                <SectionTitle eyebrow="Calendario" title="Partite" variant="subsection" />
+                <MatchdayHeading competitionName={sections[0].competition.name} />
                 <MatchdayMatchList section={sections[0]} />
                 <section className="competition-detail-section">
                   <SectionTitle eyebrow="Iscrizioni" title="Squadre registrate" variant="subsection" />
