@@ -264,11 +264,18 @@
 .sponsor-watermark-strip__track {
   display: flex;
   align-items: center;
+  gap: 0;
+  width: max-content;
+  animation: sponsor-marquee-scroll 32s linear infinite;
+  will-change: transform;
+}
+.sponsor-watermark-strip__group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
   gap: clamp(32px, 5vw, 78px);
   width: max-content;
   padding: 0 34px;
-  animation: sponsor-marquee-scroll 32s linear infinite;
-  will-change: transform;
 }
 .sponsor-watermark-strip:hover .sponsor-watermark-strip__track,
 .sponsor-watermark-strip:focus-within .sponsor-watermark-strip__track {
