@@ -23,6 +23,7 @@ type ResolvedSeo = {
   config: SeoConfig;
   mainEntity?: Record<string, unknown>;
   breadcrumbs?: Breadcrumb[];
+  shareImage?: string;
 };
 
 function normalizePath(pathname: string): string {
@@ -223,6 +224,10 @@ function applySeo(pathname: string, resolved: ResolvedSeo) {
   const path = normalizePath(pathname);
   const { config } = resolved;
   const canonical = canonicalFor(path);
+  const shareImage = resolved.shareImage || SOCIAL_IMAGE;
+  const shareImageAlt = resolved.shareImage
+    ? `${config.title.split(" | ")[0]} — Street League`
+    : "Street League Bari — calcio, competizioni e community";
   const robots = config.indexable === false
     ? "noindex,nofollow"
     : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
@@ -240,14 +245,14 @@ function applySeo(pathname: string, resolved: ResolvedSeo) {
   upsertProperty("og:description", config.description);
   upsertProperty("og:type", "website");
   upsertProperty("og:url", canonical);
-  upsertProperty("og:image", SOCIAL_IMAGE);
-  upsertProperty("og:image:alt", "Street League Bari — calcio, competizioni e community");
+  upsertProperty("og:image", shareImage);
+  upsertProperty("og:image:alt", shareImageAlt);
 
   upsertMeta("twitter:card", "summary_large_image");
   upsertMeta("twitter:title", config.title);
   upsertMeta("twitter:description", config.description);
-  upsertMeta("twitter:image", SOCIAL_IMAGE);
-  upsertMeta("twitter:image:alt", "Street League Bari — calcio, competizioni e community");
+  upsertMeta("twitter:image", shareImage);
+  upsertMeta("twitter:image:alt", shareImageAlt);
   upsertCanonical(canonical);
   upsertStructuredData(
     createStructuredData(
@@ -332,6 +337,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
     };
     return {
       config,
+      shareImage: team.logo_url || undefined,
       mainEntity: {
         "@type": "SportsTeam", name: team.name, url: canonical,
         ...(team.logo_url ? { logo: team.logo_url, image: team.logo_url } : {}),
@@ -359,6 +365,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
     };
     return {
       config,
+      shareImage: image || undefined,
       mainEntity: {
         "@type": "Person", name, url: canonical, ...(image ? { image } : {}),
         ...(team ? { memberOf: { "@type": "SportsTeam", name: team.name, url: `${SITE_URL}/squadre/${encodeURIComponent(team.id)}` } } : {}),

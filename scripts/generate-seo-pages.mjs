@@ -139,6 +139,8 @@ function makeJsonLd(route, page, canonical, mainEntity) {
 }
 function renderHtml(template, route, page) {
   const canonical = canonicalFor(route);
+  const shareImage = page.shareImage || SOCIAL_IMAGE;
+  const shareImageAlt = page.shareImage ? `${page.title.split(" | ")[0]} — Street League` : "Street League Bari — calcio, competizioni e community";
   const robots = page.indexable === false
     ? "noindex,nofollow"
     : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
@@ -152,8 +154,8 @@ function renderHtml(template, route, page) {
     "twitter:card": "summary_large_image",
     "twitter:title": page.title,
     "twitter:description": page.description,
-    "twitter:image": SOCIAL_IMAGE,
-    "twitter:image:alt": "Street League Bari — calcio, competizioni e community",
+    "twitter:image": shareImage,
+    "twitter:image:alt": shareImageAlt,
   })) html = setMeta(html, "name", name, value);
   for (const [property, value] of Object.entries({
     "og:site_name": BRAND_NAME,
@@ -162,8 +164,8 @@ function renderHtml(template, route, page) {
     "og:title": page.title,
     "og:description": page.description,
     "og:url": canonical,
-    "og:image": SOCIAL_IMAGE,
-    "og:image:alt": "Street League Bari — calcio, competizioni e community",
+    "og:image": shareImage,
+    "og:image:alt": shareImageAlt,
   })) html = setMeta(html, "property", property, value);
   html = setCanonical(html, canonical);
   const schema = makeJsonLd(route, page, canonical, page.mainEntity);
@@ -286,6 +288,7 @@ async function createDynamicRoutes(template, sitemapRoutes, tables) {
     const page = {
       title: `${team.name} | Squadre | Street League Bari`,
       description: `Scopri la rosa, i giocatori e le partite di ${team.name} nella Street League Bari.`,
+      shareImage: team.logo_url || undefined,
       breadcrumbs: makeBreadcrumbs([
         { name: "Home", path: "/" }, { name: "Squadre", path: "/squadre" }, { name: team.name, path: route },
       ]),
@@ -307,6 +310,7 @@ async function createDynamicRoutes(template, sitemapRoutes, tables) {
     const page = {
       title: `${name} | Giocatori | Street League Bari`,
       description: `Profilo e statistiche di ${name}${team ? ` della squadra ${team.name}` : ""}, nella Street League Bari.`,
+      shareImage: image || undefined,
       breadcrumbs: makeBreadcrumbs([
         { name: "Home", path: "/" }, { name: "Squadre", path: "/squadre" }, { name, path: route },
       ]),
