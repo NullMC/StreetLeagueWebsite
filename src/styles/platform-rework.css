@@ -479,6 +479,7 @@
 .standings-table .table-row > span { min-width: 0; text-align: center; }
 .standings-table .table-row > span:nth-child(2) { text-align: left; }
 .standings-table .table-row.head { font-size: 10px; }
+.standings-table .table-row.head > span { white-space: normal; overflow-wrap: anywhere; line-height: 1.1; }
 .stats-detail-leaderboard.stats-detail-leaderboard--staff .table-row {
   grid-template-columns: 36px minmax(0, 1fr) minmax(58px, .45fr);
 }
@@ -642,7 +643,8 @@
   .standings-table .standings-team { gap: 4px; }
   .standings-table .standings-team__logo { display: none; }
   .standings-table .standings-team strong { font-size: 9px; }
-  .standings-table .table-row.head { font-size: 9px; letter-spacing: -.03em; }
+  .standings-table .table-row.head { font-size: 8px; letter-spacing: -.03em; }
+  .standings-table .table-row.head > span { white-space: normal; overflow-wrap: anywhere; line-height: 1.05; }
   .partners-sponsors-band .home-collab-proposal {
     width: calc(100% - 28px);
     margin: 28px auto 14px;
