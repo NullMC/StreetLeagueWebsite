@@ -124,14 +124,14 @@ export default function HomeRedesigned() {
         <div className="home-hero__backdrop" aria-hidden="true" />
         <div className="home-hero__inner">
           <div className="home-about__logo">
-            <img src="/assets/pittogrammaBlack.webp" alt="Logo Street League" />
+            <img src="/assets/favicon.png" alt="Logo Street League" />
           </div>
           <div className="home-about__copy">
-            <span className="eyebrow">Street League Bari</span>
-            <h1 id="home-about-title">Il calcio di strada, raccontato da vicino.</h1>
+
+            <h1 id="home-about-title">La Street League raccontata da vicino.</h1>
             <p>
-              Street League è la piattaforma dedicata alle competizioni di calcio della community barese:
-              qui trovi squadre, partite, classifiche e statistiche aggiornate, insieme ai protagonisti
+              Questa è la piattaforma dedicata alla community della Street League, dove puoi seguire le competizioni e restare aggiornato sulle ultime novità.
+              Squadre, partite, classifiche e statistiche aggiornate, insieme ai protagonisti
               in campo e allo staff che rende possibile ogni giornata.
             </p>
           </div>

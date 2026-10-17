@@ -959,8 +959,8 @@ html[data-theme="night"] .standings-page .standings-team strong {
 }
 .home-redesign--ordered .home-about__logo img {
   display: block;
-  width: min(100%, 350px);
-  max-height: min(42vh, 400px);
+  width: min(100%, 440px);
+  max-height: min(48vh, 460px);
   object-fit: contain;
   filter: drop-shadow(0 18px 38px color-mix(in srgb, var(--ink) 42%, transparent));
 }
@@ -1008,8 +1008,8 @@ html[data-theme="night"] .home-redesign--ordered .home-about__logo img {
     padding: 0;
   }
   .home-redesign--ordered .home-about__logo img {
-    width: clamp(108px, 30vw, 170px);
-    max-height: 170px;
+    width: clamp(140px, 36vw, 210px);
+    max-height: 210px;
   }
   .home-redesign--ordered .home-about__copy {
     order: 1;
