@@ -11,9 +11,9 @@ export function PlayerOfMonthCard({
   if (!item?.player) {
     return (
       <div className="monthly-award-card monthly-award-card--empty">
-        <span className="monthly-award-card__badge">POTM</span>
+        
         <div className="monthly-award-card__content">
-          <span className="eyebrow">Player of the Month</span>
+          
           <h3>Player of the Month non ancora assegnato</h3>
           <p>Il riconoscimento verrà mostrato qui quando sarà pubblicato.</p>
         </div>

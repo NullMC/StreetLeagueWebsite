@@ -10,9 +10,9 @@ export function StaffOfMonthCard({
   if (!item?.player) {
     return (
       <div className="monthly-award-card monthly-award-card--empty">
-        <span className="monthly-award-card__badge">STAFF OF THE MONTH</span>
+        
         <div className="monthly-award-card__content">
-          <span className="eyebrow">Staff of the Month · {monthLabel}</span>
+          
           <h3>Staff del mese non ancora assegnato</h3>
           <p>Puoi assegnarlo dal back office nella stessa sezione del POTM.</p>
         </div>
