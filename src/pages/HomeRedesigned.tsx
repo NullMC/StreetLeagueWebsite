@@ -1,365 +1,334 @@
-import { useEffect, useMemo, useState } from "react";
-import type { CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
-import { SponsorGrid } from "../components/SponsorGrid";
-import { TopSevenOfMonth } from "../components/TopSevenOfMonth";
-import { Button, Typography } from "@mui/material";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
-import { calculateStandings, getActiveCompetitions, getMatches, getPartners, getPlayerStatsForCompetitions, getSocialContent, getStaffRankingForCompetitions, getStatisticsGroups, getTeams, subscribeToCompetition } from "../lib/api";
+import { TopSevenOfMonth } from "../components/TopSevenOfMonth";
+import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
+import {
+  getActiveCompetitions,
+  getPartners,
+  getPlayerStatsForCompetitions,
+  getSocialContent,
+  getStaffRankingForCompetitions,
+  getStatisticsGroups,
+  getTeams,
+  subscribeToCompetition,
+} from "../lib/api";
 import { getPlayerOfMonth } from "../lib/playerOfMonth";
-import type { Competition, Match, Partner, Player, PlayerStats, SocialContent, StaffRankingEntry, Team } from "../types";
+import type {
+  Partner,
+  Player,
+  PlayerStats,
+  SocialContent,
+  StaffRankingEntry,
+  StatisticsGroup,
+  Team,
+} from "../types";
 
-type PlayerWithStats = Player & { stats: PlayerStats };
-type LeaderConfig = {
-  key: "goals" | "mvps" | "clean_sheets" | "yellow_cards" | "red_cards";
-  title: string;
+type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
+type HomeData = {
+  teams: Team[];
+  social: SocialContent[];
+  partners: Partner[];
+  groups: StatisticsGroup[];
+  playersByGroup: Record<string, RankedPlayer[]>;
+  staffByGroup: Record<string, StaffRankingEntry[]>;
+  potm: Awaited<ReturnType<typeof getPlayerOfMonth>>;
+  staffMonthly: StaffRankingEntry[];
 };
 
-const leaderConfigs: LeaderConfig[] = [
-  { key: "goals", title: "Miglior marcatore" },
-  { key: "mvps", title: "Miglior giocatore (MVP)" },
-  { key: "clean_sheets", title: "Miglior portiere" },
-];
+const initialData: HomeData = {
+  teams: [],
+  social: [],
+  partners: [],
+  groups: [],
+  playersByGroup: {},
+  staffByGroup: {},
+  potm: null,
+  staffMonthly: [],
+};
 
-function LeaderPanel({ config, players }: { config: LeaderConfig; players: PlayerWithStats[] }) {
-  const ranked = useMemo(() => [...players].filter((p) => p.stats[config.key] > 0).sort((a, b) => b.stats[config.key] - a.stats[config.key] || a.last_name.localeCompare(b.last_name, "it") || a.first_name.localeCompare(b.first_name, "it")).slice(0, 3), [config.key, players]);
-  const statLabel =
-    config.key === "goals"
-      ? "gol"
-      : config.key === "mvps"
-        ? "MVP"
-        : config.key === "clean_sheets"
-          ? "clean sheet"
-          : "";
-  return (
-    <article className="stat-card leader-stat-card">
-      <span className="eyebrow">{config.title}</span>
-      <h3>{ranked[0] ? `${ranked[0].first_name} ${ranked[0].last_name}` : "—"}</h3>
-      <div className="stat-card__value">{ranked[0] ? String(ranked[0].stats[config.key]).padStart(2, "0") : "0"}</div>
-      <div className="rank-list">
-        {[0, 1, 2].map((index) => {
-          const player = ranked[index];
-          return (
-            <div className="rank-row" key={player?.id || `${config.key}-${index}`}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <span>{player ? `${player.first_name} ${player.last_name}` : "—"}{player ? <small> · {player.stats[config.key]}{index === 0 ? ` ${statLabel}` : ""}</small> : null}</span>
-            </div>
-          );
-        })}
-      </div>
-    </article>
-  );
+function isStaff(player: Pick<Player, "role" | "position">) {
+  return player.role?.trim().toUpperCase() === "STAFF" ||
+    player.position?.trim().toUpperCase() === "STAFF";
 }
 
-function StaffRankingPreview({ items }: { items: StaffRankingEntry[] }) {
+function isGoalkeeper(player: RankedPlayer) {
+  const position = (player.position || "").trim().toLocaleLowerCase("it");
+  return position.includes("portier") || position.includes("goalkeeper") ||
+    position.includes("goalie") || position === "gk" || position === "por";
+}
+
+const homeStats = [
+  { key: "goals", title: "Miglior marcatore", unit: "gol" },
+  { key: "mvps", title: "Record MVP", unit: "MVP" },
+  { key: "clean_sheets", title: "Miglior portiere", unit: "clean sheet" },
+] as const;
+
+function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
+  if (!items.length) {
+    return (
+      <EmptyState
+        title="Nessun contenuto in evidenza"
+        text="I contenuti pubblicati appariranno qui."
+      />
+    );
+  }
+
   return (
-    <div className="home-staff-ranking">
-      <div className="home-mini-head">
-        <span>Migliori membri staff</span>
-        <a href="/statistiche">Completa ↗</a>
-      </div>
-      <div className="home-staff-ranking__list">
-        {items.slice(0, 3).map((entry, index) => (
-          <a className="home-staff-ranking__row" href={`/giocatori/${entry.player.id}`} key={entry.player.id}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <span>{entry.player.first_name} {entry.player.last_name}</span>
-            <strong>{entry.presidential_penalties}</strong>
+    <div className="home-feature-carousel" aria-label="Contenuti in evidenza">
+      <div className="home-feature-carousel__track">
+        {items.map((item, index) => (
+          <a
+            className="home-feature-card"
+            href={item.content_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            key={item.id}
+          >
+            <div className="home-feature-card__media">
+              {item.thumbnail_url || item.image_url ? (
+                <img src={item.thumbnail_url || item.image_url || ""} alt="" loading="lazy" />
+              ) : (
+                <div className="home-highlight__fallback" />
+              )}
+            </div>
+            <div className="home-feature-card__shade" />
+            <span className="home-feature-card__index">{String(index + 1).padStart(2, "0")}</span>
+            <span className="home-feature-card__platform">{item.platform}</span>
+            <div className="home-feature-card__content">
+              <h3>{item.title}</h3>
+              {item.description ? <p>{item.description}</p> : null}
+              <span className="home-feature-card__cta">Apri contenuto <span aria-hidden="true">↗</span></span>
+            </div>
           </a>
         ))}
-        {!items.length && (
-          <div className="home-staff-ranking__empty">
-            Nessun membro STAFF registrato.
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-function localMatchDateKey(value: string): string | null {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-/**
- * For each active competition, find its next date containing scheduled/live
- * matches, then keep every fixture on that date so a complete matchday remains
- * visible even when earlier kick-offs have already started or finished.
- */
-function getNextMatchdayMatches(
-  matches: Match[],
-  activeCompetitions: Competition[],
-  now = new Date(),
-): Match[] {
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const nextDateByCompetition = new Map<string, string>();
-
-  activeCompetitions.forEach((competition) => {
-    const eligible = matches
-      .filter((match) => {
-        if (
-          match.competition_id !== competition.id ||
-          (match.status !== "scheduled" && match.status !== "live")
-        ) {
-          return false;
-        }
-
-        const kickoff = new Date(match.kickoff_at);
-        return !Number.isNaN(kickoff.getTime()) && kickoff.getTime() >= today;
-      })
-      .sort(
-        (a, b) =>
-          new Date(a.kickoff_at).getTime() -
-          new Date(b.kickoff_at).getTime(),
-      );
-
-    const nextDate = eligible[0]
-      ? localMatchDateKey(eligible[0].kickoff_at)
-      : null;
-
-    if (nextDate) nextDateByCompetition.set(competition.id, nextDate);
-  });
-
-  const competitionOrder = new Map(
-    activeCompetitions.map((competition, index) => [competition.id, index]),
-  );
-
-  return matches
-    .filter((match) => {
-      const nextDate = nextDateByCompetition.get(match.competition_id);
-      return Boolean(nextDate && localMatchDateKey(match.kickoff_at) === nextDate);
-    })
-    .sort(
-      (a, b) =>
-        new Date(a.kickoff_at).getTime() -
-          new Date(b.kickoff_at).getTime() ||
-        (competitionOrder.get(a.competition_id) ?? 0) -
-          (competitionOrder.get(b.competition_id) ?? 0),
-    );
-}
-
-function MatchList({
-  matches,
-  teams,
-  competitions,
+function BestStatsCard({
+  group,
+  title,
+  category,
+  players,
+  staff,
 }: {
-  matches: Match[];
-  teams: Team[];
-  competitions: Competition[];
+  group: StatisticsGroup;
+  title: string;
+  category: "goals" | "mvps" | "clean_sheets" | "staff";
+  players: RankedPlayer[];
+  staff: StaffRankingEntry[];
 }) {
-  if (!matches.length) return <EmptyState title="Nessuna partita programmata" text="Le prossime partite verranno mostrate qui." />;
-  return (
-    <div className="home-schedule__matches">
-      {matches.map((match) => {
-        const home = teams.find((t) => t.id === match.home_team_id);
-        const away = teams.find((t) => t.id === match.away_team_id);
-        const competition = competitions.find((item) => item.id === match.competition_id);
-        return (
-          <a key={match.id} className="home-match-row" href={`/partite/${match.id}`}>
-            <div className="home-match-row__date"><strong>{new Date(match.kickoff_at).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit" })}</strong><span>{new Date(match.kickoff_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</span></div>
-            <div className="home-match-row__teams">
-              <div className="home-match-row__team home-match-row__team--home">
-                {home?.logo_url ? (
-                  <img src={home.logo_url} alt="" aria-hidden="true" />
-                ) : (
-                  <span className="home-match-row__logo-placeholder" aria-hidden="true">
-                    {home?.name?.slice(0, 1).toUpperCase() ?? "?"}
-                  </span>
-                )}
-                <span>{home?.name ?? "—"}</span>
-              </div>
-              <b>
-                {match.status === "finished"
-                  ? `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`
-                  : match.status === "live"
-                    ? "LIVE"
-                    : match.status === "postponed"
-                      ? "RINV."
-                      : "vs"}
-              </b>
-              <div className="home-match-row__team home-match-row__team--away">
-                {away?.logo_url ? (
-                  <img src={away.logo_url} alt="" aria-hidden="true" />
-                ) : (
-                  <span className="home-match-row__logo-placeholder" aria-hidden="true">
-                    {away?.name?.slice(0, 1).toUpperCase() ?? "?"}
-                  </span>
-                )}
-                <span>{away?.name ?? "—"}</span>
-              </div>
-            </div>
-            <div className="home-match-row__meta">
-              <span className="home-match-row__competition">
-                <span>{competition?.name ?? "Competizione"}</span>
-              </span>
-              <span className="home-match-row__matchday">{match.matchday ?? "Match"}</span>
-              <span aria-hidden="true">→</span>
-            </div>
-          </a>
+  const staffLeader = staff.filter((entry) => entry.presidential_penalties > 0)[0];
+  const ranked = category === "staff"
+    ? []
+    : [...players]
+        .filter((player) => player.stats[category] > 0)
+        .filter((player) => category !== "clean_sheets" || isGoalkeeper(player))
+        .sort((a, b) =>
+          b.stats[category] - a.stats[category] ||
+          (a.last_name + " " + a.first_name).localeCompare(b.last_name + " " + b.first_name, "it"),
         );
-      })}
-    </div>
+  const top = ranked[0];
+  const value = category === "staff"
+    ? staffLeader?.presidential_penalties ?? 0
+    : top?.stats[category] ?? 0;
+  const name = category === "staff"
+    ? staffLeader ? staffLeader.player.first_name + " " + staffLeader.player.last_name : "Nessun record"
+    : top ? top.first_name + " " + top.last_name : "Nessun record";
+
+  return (
+    <a
+      className="stat-card home-best-stat-card"
+      href={"/statistiche/" + encodeURIComponent(group.id) + "/" + category}
+      aria-label={"Apri la classifica: " + title + ", " + group.name}
+    >
+      <span className="eyebrow">{title}</span>
+      <h3>{name}</h3>
+      <div className="stat-card__value">{String(value).padStart(2, "0")}</div>
+      <span className="home-best-stat-card__scope">{group.name}</span>
+      <span className="home-best-stat-card__hint">Apri classifica <span aria-hidden="true">↗</span></span>
+    </a>
   );
-}
-function StandingsList({ standings }: { standings: ReturnType<typeof calculateStandings> }) {
-  if (!standings.length) return <EmptyState title="Classifica non disponibile" text="I risultati delle partite alimenteranno automaticamente la classifica." />;
-  return <div className="home-ranking">{standings.slice(0, 8).map((entry, index) => <a className={`home-ranking__row ${index === 0 ? "is-first" : ""}`} href={`/squadre/${entry.team.id}`} key={entry.team.id}><span className="home-ranking__pos">{String(index + 1).padStart(2, "0")}</span><span className="home-ranking__team">{entry.team.logo_url ? <img src={entry.team.logo_url} alt="" /> : <i aria-hidden="true" />}{entry.team.name}</span><span className="home-ranking__record">{entry.played} G</span><strong>{entry.points}</strong></a>)}</div>;
 }
 
 export default function HomeRedesigned() {
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [activeCompetitionList, setActiveCompetitionList] = useState<Competition[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [partners, setPartners] = useState<Partner[]>([]);
-  const [social, setSocial] = useState<SocialContent[]>([]);
-  const [playerStatsByGroup, setPlayerStatsByGroup] = useState<Record<string, PlayerWithStats[]>>({});
-  const [activeStandings, setActiveStandings] = useState<Array<{ competition: Competition; standings: ReturnType<typeof calculateStandings>; staff: StaffRankingEntry[] }>>([]);
-  const [statsGroups, setStatsGroups] = useState<Awaited<ReturnType<typeof getStatisticsGroups>>>([]);
-  const [potm, setPotm] = useState<Awaited<ReturnType<typeof getPlayerOfMonth>>>(null);
-  const [staffRanking, setStaffRanking] = useState<StaffRankingEntry[]>([]);
-  const [staffMonthlyRanking, setStaffMonthlyRanking] = useState<StaffRankingEntry[]>([]);
+  const [data, setData] = useState<HomeData>(initialData);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const load = async () => {
-    try {
-      const now = new Date();
-      const activeCompetitions = await getActiveCompetitions();
-      const nextGroups = await getStatisticsGroups(activeCompetitions);
-      const [matchSets, nextTeams, nextPartners, nextSocial, nextPotm, nextStaff, nextStaffMonth, nextStandings, nextGroupStats] = await Promise.all([
-        Promise.all(activeCompetitions.map((item) => getMatches(item.id))).then((sets) => sets.flat()),
-        Promise.all(activeCompetitions.map((item) => getTeams(item.id))).then((sets) => {
-          const unique = new Map(sets.flat().map((team) => [team.id, team] as const));
-          return Array.from(unique.values());
-        }), getPartners(), getSocialContent(), getPlayerOfMonth(),
-        getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id)),
-        getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id), { year: now.getFullYear(), month: now.getMonth() + 1 }),
-        Promise.all(activeCompetitions.map(async (competition) => {
-          const [competitionTeams, competitionMatches, staff] = await Promise.all([getTeams(competition.id), getMatches(competition.id), getStaffRankingForCompetitions([competition.id])]);
-          return { competition, standings: calculateStandings(competitionTeams, competitionMatches), staff };
-        })),
-        Promise.all(nextGroups.map(async (group) => [group.id, await getPlayerStatsForCompetitions(group.competition_ids)] as const)),
-      ]);
-      const nextMatches = getNextMatchdayMatches(matchSets, activeCompetitions);
-      setMatches(nextMatches); setActiveCompetitionList(activeCompetitions); setTeams(nextTeams); setPartners(nextPartners); setSocial(nextSocial); setPotm(nextPotm); setStaffRanking(nextStaff); setStaffMonthlyRanking(nextStaffMonth.filter((entry) => entry.presidential_penalties > 0));
-      setActiveStandings(nextStandings); setStatsGroups(nextGroups); setPlayerStatsByGroup(Object.fromEntries(nextGroupStats));
-    } catch (error) {
-      console.error("Home data error:", error);
-      setMatches([]); setActiveCompetitionList([]); setTeams([]); setPartners([]); setSocial([]); setPotm(null); setStaffRanking([]); setStaffMonthlyRanking([]); setActiveStandings([]); setStatsGroups([]); setPlayerStatsByGroup({});
+  useEffect(() => {
+    let mounted = true;
+
+    async function load() {
+      try {
+        const now = new Date();
+        const activeCompetitions = await getActiveCompetitions();
+        const groups = await getStatisticsGroups(activeCompetitions);
+
+        const [allTeams, partners, social, potm, staffMonthly, groupData] = await Promise.all([
+          getTeams(),
+          getPartners(),
+          getSocialContent(),
+          getPlayerOfMonth(),
+          getStaffRankingForCompetitions(activeCompetitions.map((item) => item.id), {
+            year: now.getFullYear(),
+            month: now.getMonth() + 1,
+          }),
+          Promise.all(groups.map(async (group) => {
+            const [players, staff] = await Promise.all([
+              getPlayerStatsForCompetitions(group.competition_ids),
+              getStaffRankingForCompetitions(group.competition_ids),
+            ]);
+            const teamsInGroup = await Promise.all(group.competition_ids.map((id) => getTeams(id)));
+            const teamById = new Map<string, Team>();
+            teamsInGroup.flat().forEach((team) => teamById.set(team.id, team));
+            const rankedPlayers: RankedPlayer[] = players
+              .filter((player) => !isStaff(player))
+              .map((player) => ({
+                ...player,
+                team_name: teamById.get(player.team_id)?.name ?? "—",
+              }));
+            return { id: group.id, players: rankedPlayers, staff };
+          })),
+        ]);
+
+        if (!mounted) return;
+        const uniqueTeams = Array.from(new Map(allTeams.map((team) => [team.id, team] as const)).values());
+        setData({
+          teams: uniqueTeams,
+          partners,
+          social,
+          potm,
+          staffMonthly: staffMonthly.filter((entry) => entry.presidential_penalties > 0),
+          groups,
+          playersByGroup: Object.fromEntries(groupData.map((entry) => [entry.id, entry.players])),
+          staffByGroup: Object.fromEntries(groupData.map((entry) => [entry.id, entry.staff])),
+        });
+        setError("");
+      } catch (loadError) {
+        console.error("Home data error:", loadError);
+        if (mounted) setError("Alcuni contenuti non sono al momento disponibili.");
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
-  };
 
-  useEffect(() => { void load(); return subscribeToCompetition(() => void load()); }, []);
+    void load();
+    const unsubscribe = subscribeToCompetition(() => void load());
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, []);
 
-  const heroBackground = "/assets/nebula-vertical.webp";
-  const heroBackdropStyle: CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    zIndex: 0,
-    pointerEvents: "none",
-    backgroundImage: [
-      "linear-gradient(to top, #fff 0%, rgba(255,255,255,0.72) 24%, rgba(255,255,255,0.12) 58%, rgba(255,255,255,0) 100%),",
-
-      "linear-gradient(135deg, rgba(255,255,255,0.76) 0%, rgba(245,211,221,0.30) 54%, rgba(237,123,171,0.18) 100%)",
-      `url("${heroBackground}")`,
-    ].join(","),
-    backgroundPosition: "center",
-    backgroundSize: "cover",
-    backgroundRepeat: "no-repeat",
-  };
-    return (
-    <div className="home-redesign">
-      <section className="home-hero" style={{ background: "#fff", color: "#010a08" }} aria-labelledby="home-hero-title">
-        <div aria-hidden="true" style={heroBackdropStyle} />
-        <div className="home-hero__inner" style={{ position: "relative", zIndex: 1 }}>
-          <div className="home-hero__mast" style={{ color: "#010a08", borderBottomColor: "rgba(1,10,8,.16)" }}>
-            <div><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Street League</span><h1 id="home-hero-title" style={{ color: "#010a08" }}>Contenuti in evidenza</h1></div>
-          </div>
-          {social.length ? (
-            <div className="home-hero__highlights">
-              <a className="home-highlight home-highlight--feature" href={social[0].content_url} target="_blank" rel="noopener noreferrer">
-                <div className="home-highlight__media">{social[0].thumbnail_url ? <img src={social[0].thumbnail_url} alt="" /> : <div className="home-highlight__fallback" />}</div>
-                <div className="home-highlight__shade" />
-                <div className="home-highlight__content"><h2>{social[0].title}</h2><span className="home-highlight__cta">Apri contenuto ↗</span></div>
-              </a>
-              <div className="home-hero__rail">
-                {social.slice(1, 5).map((item, index) => (
-                  <a className="home-highlight home-highlight--rail" href={item.content_url} target="_blank" rel="noopener noreferrer" key={item.id}>
-                    <div className="home-highlight__media">{item.thumbnail_url ? <img src={item.thumbnail_url} alt="" /> : <div className="home-highlight__fallback" />}</div>
-                    <div className="home-highlight__shade" />
-                    <div className="home-highlight__content"><h3>{item.title}</h3><span className="home-highlight__arrow">↗</span></div>
-                  </a>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="home-hero__empty"><span className="home-hero__kicker" style={{ color: "#e42278", opacity: 1 }}>Contenuti in evidenza</span><h2 style={{ color: "#010a08" }}>Nessun contenuto in evidenza ancora.</h2><p style={{ color: "rgba(1,10,8,.62)" }}>I contenuti pubblicati appariranno qui.</p></div>
-          )}
+  return (
+    <div className="home-redesign home-redesign--ordered">
+      <section className="home-about section--edge" id="home-about" aria-labelledby="home-about-title">
+        <div className="home-about__copy">
+          <span className="eyebrow">Street League Bari</span>
+          <h1 id="home-about-title">Il calcio di strada, raccontato da vicino.</h1>
+          <p>
+            Street League è la piattaforma dedicata alle competizioni di calcio della community barese:
+            qui trovi squadre, partite, classifiche e statistiche aggiornate, insieme ai protagonisti
+            in campo e allo staff che rende possibile ogni giornata.
+          </p>
+        </div>
+        <div className="home-about__aside" aria-hidden="true">
+          <span>Una lega.</span>
+          <span>La nostra città.</span>
+          <strong>Il nostro gioco.</strong>
         </div>
       </section>
 
-      <section className="section--edge home-schedule" id="home-matches">
-        <span className="home-hero__competition" style={{ color: "rgba(1,10,8,.62)", opacity: 1 }}>Prossime giornate · tutte le competizioni attive</span>
-        <div className="home-section-head"><SectionTitle eyebrow="" title="Calendario" /><a className="home-section-head__link" href="/partite">Tutte le partite ↗</a></div>
-        <div className="home-schedule__grid">
-          <div><MatchList matches={matches} teams={teams} competitions={activeCompetitionList} /></div>
-          <div className="home-schedule__ranking"><div className="home-mini-head"><span>Classifiche attive</span><a href="/classifica">Complete ↗</a></div>{activeStandings.map((competition) => <div className="home-active-competition" key={competition.competition.id}><h3 className="home-active-competition__title"><span className="home-active-competition__title-text">{competition.competition.name}</span></h3><StandingsList standings={competition.standings} /><StaffRankingPreview items={competition.staff} /></div>)}{!activeStandings.length && <EmptyState title="Nessuna competizione attiva" text="Le classifiche appariranno qui quando ci saranno competizioni attive." />}</div>
+      <section className="section--edge home-teams" id="home-teams">
+        <div className="home-section-head">
+          <SectionTitle eyebrow="Le protagoniste" title="Squadre" />
+          <a className="home-section-head__link" href="/competizioni">Esplora le competizioni ↗</a>
         </div>
+        {loading ? (
+          <p className="admin-message">Caricamento squadre…</p>
+        ) : data.teams.length ? (
+          <TeamCarousel teams={data.teams} label="Tutte le squadre della piattaforma" />
+        ) : (
+          <EmptyState title="Nessuna squadra" text="Le squadre appariranno qui quando saranno registrate nel database." />
+        )}
       </section>
 
-      <section className="section--edge home-performers" id="home-stats">
-        <div className="home-section-head"><SectionTitle eyebrow="Live data" title="Top performers" /></div>
-        {statsGroups.map((group) => <div className="home-stat-group" key={group.id}><div className="home-stat-group__title"><h3>{group.name}</h3></div><div className="leaders">{leaderConfigs.map((config) => <LeaderPanel key={config.key} config={config} players={playerStatsByGroup[group.id] ?? []} />)}</div></div>)}{!statsGroups.length && <EmptyState title="Nessuna statistica attiva" text="Le statistiche appariranno qui quando ci saranno competizioni attive." />}
+      <section className="home-featured section--edge" id="home-featured">
+        <div className="home-section-head">
+          <SectionTitle eyebrow="Dalla community" title="Contenuti in evidenza" />
+        </div>
+        {loading ? <p className="admin-message">Caricamento contenuti…</p> : <FeaturedContentCarousel items={data.social} />}
       </section>
 
       <section className="section--edge potm-section" id="home-potm">
-        <div className="home-section-head"><SectionTitle eyebrow="" title="POTM" /></div>
+        <div className="home-section-head">
+          <SectionTitle eyebrow="I protagonisti del mese" title="POTM & Staff" />
+        </div>
         <div className="monthly-awards-grid">
           <div className="monthly-award-column">
-            <PlayerOfMonthCard item={potm} teams={teams} />
+            <PlayerOfMonthCard item={data.potm} teams={data.teams} />
           </div>
           <div className="monthly-award-column">
             <div className="monthly-award-column__head">
-              
               <h3>Miglior membro staff del mese</h3>
             </div>
             <StaffOfMonthCard
-              items={staffMonthlyRanking}
+              items={data.staffMonthly}
               monthLabel={new Intl.DateTimeFormat("it-IT", { month: "long", year: "numeric" }).format(new Date())}
             />
           </div>
         </div>
       </section>
 
-      <TopSevenOfMonth />
-
-      <section className="section--edge home-teams" id="home-teams">
-        <div className="home-section-head"><SectionTitle title="Squadre" /><a className="home-section-head__link" href="/squadre">Tutte le squadre ↗</a></div>
-        {teams.length ? <TeamCarousel teams={teams} /> : <EmptyState title="Nessuna squadra" text="Le squadre compariranno qui quando saranno registrate nel database." />}
+      <section className="section--edge home-top-seven" id="home-top-seven">
+        <TopSevenOfMonth />
       </section>
 
-      <section className="sponsor-band sponsor-band--redesign" id="home-partners">
-        <div className="section--edge sponsor-band__inner">
-          <div className="home-collab-proposal" id="home-collaborate">
-            <div className="home-collab-proposal__copy">
-              <SectionTitle title="Collabora con Street League" />
-              <p>Raccontaci della tua attività, costruiamo insieme una proposta adatta al tuo brand e cresci insieme a noi.</p>
-              <Button component="a" href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League" variant="contained">Contattaci per saperne di più</Button>
-            </div>
-          </div>
-          <section className="home-sponsors" aria-label="Sponsor Street League">
-            <div className="home-section-head"><SectionTitle title="I nostri sponsor" /></div>
-            <div className="sponsor-cta-row">
-              <Typography component="span" className="sponsor-cta-row__title">Il prossimo nome può essere il tuo.</Typography>
-              <Button component="a" href="/partner#collabora" variant="outlined">Diventa sponsor ↗</Button>
-            </div>
-            <Typography component="p" className="home-sponsors__intro">Le attività e i brand che contribuiscono alla crescita della Street League.</Typography>
-            {partners.length ? <SponsorGrid partners={partners} /> : <EmptyState title="Sponsor in aggiornamento" text="Le attività che sostengono la Street League compariranno qui." />}
-          </section>
+      <section className="home-best-stats section--edge" id="home-best-stats">
+        <div className="home-section-head">
+          <SectionTitle eyebrow="Competenze e riconoscimenti" title="Best stats" />
+          <a className="home-section-head__link" href="/statistiche">Tutte le statistiche ↗</a>
         </div>
+        {error ? <p className="admin-help-text">{error}</p> : null}
+        {loading ? (
+          <p className="admin-message">Caricamento statistiche…</p>
+        ) : data.groups.length ? (
+          data.groups.map((group) => (
+            <section className="home-best-stats__group" key={group.id}>
+              <h3>{group.name}</h3>
+              <div className="leaders home-best-stats__grid">
+                {homeStats.map((stat) => (
+                  <BestStatsCard
+                    key={stat.key}
+                    group={group}
+                    title={stat.title}
+                    category={stat.key}
+                    players={data.playersByGroup[group.id] ?? []}
+                    staff={data.staffByGroup[group.id] ?? []}
+                  />
+                ))}
+                <BestStatsCard
+                  group={group}
+                  title="Miglior membro staff"
+                  category="staff"
+                  players={data.playersByGroup[group.id] ?? []}
+                  staff={data.staffByGroup[group.id] ?? []}
+                />
+              </div>
+            </section>
+          ))
+        ) : (
+          <EmptyState title="Nessuna statistica attiva" text="Le best stats verranno mostrate qui quando ci saranno competizioni attive." />
+        )}
       </section>
+
+      <SponsorWatermarkStrip />
     </div>
   );
 }
