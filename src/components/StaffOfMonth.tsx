@@ -1,58 +1,49 @@
-import type { StaffRankingEntry } from "../types";
+import type { StaffOfMonth } from "../lib/playerOfMonth";
 
 export function StaffOfMonthCard({
-  items,
+  item,
   monthLabel,
 }: {
-  items: StaffRankingEntry[];
+  item: StaffOfMonth | null;
   monthLabel: string;
 }) {
-  const top = items[0];
-
-  if (!top) {
+  if (!item?.player) {
     return (
-      <div className="staff-month-empty">
-        <span className="eyebrow">Staff of the Month · {monthLabel}</span>
-        <h3>Nessun rigore presidenziale registrato</h3>
-        <p>Il riconoscimento verrà valorizzato automaticamente quando saranno registrati i rigori presidenziali del mese.</p>
+      <div className="monthly-award-card monthly-award-card--empty">
+        <span className="monthly-award-card__badge">STAFF OF THE MONTH</span>
+        <div className="monthly-award-card__content">
+          <span className="eyebrow">Staff of the Month · {monthLabel}</span>
+          <h3>Staff del mese non ancora assegnato</h3>
+          <p>Puoi assegnarlo dal back office nella stessa sezione del POTM.</p>
+        </div>
       </div>
     );
   }
 
-  const initials =
-    (top.player.first_name[0] ?? "") +
-    (top.player.last_name[0] ?? "");
+  const staff = item.player;
+  const initials = `${staff.first_name[0] ?? ""}${staff.last_name[0] ?? ""}`.toUpperCase();
 
   return (
-    <article className="staff-month-card">
-      <div className="staff-month-card__visual">
-        <span className="staff-month-card__badge">STAFF OF THE MONTH</span>
-        <div className="staff-month-card__avatar" aria-hidden="true">
-          {initials.toUpperCase()}
+    <a className="monthly-award-card" href={`/giocatori/${staff.id}`} aria-label={`Apri il profilo staff di ${staff.first_name} ${staff.last_name}`}>
+      {item.card_image_url ? (
+        <img className="monthly-award-card__background" src={item.card_image_url} alt="" aria-hidden="true" loading="lazy" />
+      ) : (
+        <div className="monthly-award-card__background monthly-award-card__background--fallback" aria-hidden="true">
+          <span>{initials}</span>
         </div>
-      </div>
-      <div className="staff-month-card__content">
-        <span className="eyebrow">Miglior membro staff · {monthLabel}</span>
-        <h3>{top.player.first_name} {top.player.last_name}</h3>
-        <div className="staff-month-card__stat">{top.presidential_penalties}</div>
-        <span className="staff-month-card__label">rigori presidenziali</span>
-        <div className="rank-list">
-          {[0, 1, 2].map((index) => {
-            const entry = items[index];
-            return (
-              <div className="rank-row" key={entry?.player.id ?? ("staff-" + index)}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <span>
-                  {entry
-                    ? entry.player.first_name + " " + entry.player.last_name
-                    : "—"}
-                </span>
-                <strong>{entry?.presidential_penalties ?? "—"}</strong>
-              </div>
-            );
-          })}
+      )}
+      <div className="monthly-award-card__shade" aria-hidden="true" />
+      <span className="monthly-award-card__badge">STAFF OF THE MONTH</span>
+      <div className="monthly-award-card__content">
+        <span className="eyebrow">Staff of the Month · {item.month_label}</span>
+        <h3>{staff.first_name} {staff.last_name}</h3>
+        <div className="monthly-award-card__meta">
+          <span>STAFF</span>
+          {staff.position && staff.position.toUpperCase() !== "STAFF" ? <span>{staff.position}</span> : null}
         </div>
+        {item.note ? <p>{item.note}</p> : null}
+        <span className="monthly-award-card__cta">Profilo staff <span aria-hidden="true">↗</span></span>
       </div>
-    </article>
+    </a>
   );
 }
