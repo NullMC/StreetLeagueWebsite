@@ -16,7 +16,37 @@ export function SponsorWatermarkStrip() {
 
   if (!partners.length) return null;
 
-  const logoItems = [...partners, ...partners];
+  const renderLogos = (clone: boolean) => partners.map((partner) => {
+    const image = partner.logo_url ? (
+      <img
+        className="sponsor-watermark-strip__image"
+        src={partner.logo_url}
+        alt={clone ? "" : partner.name}
+        title={partner.name}
+        loading="lazy"
+      />
+    ) : (
+      <span className="sponsor-watermark-strip__fallback">{partner.name}</span>
+    );
+
+    return partner.website_url ? (
+      <a
+        className="sponsor-watermark-strip__logo"
+        key={partner.id}
+        href={partner.website_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={clone ? undefined : partner.name}
+        tabIndex={clone ? -1 : undefined}
+        title={partner.name}
+      >
+        {image}
+      </a>
+    ) : (
+      <span className="sponsor-watermark-strip__logo" key={partner.id}>{image}</span>
+    );
+  });
+
   return (
     <aside className="sponsor-watermark-strip" aria-label="Sponsor Street League">
       <div className="sponsor-watermark-strip__heading">
@@ -24,44 +54,8 @@ export function SponsorWatermarkStrip() {
       </div>
       <div className="sponsor-watermark-strip__viewport">
         <div className="sponsor-watermark-strip__track">
-          {logoItems.map((partner, index) => {
-            const clone = index >= partners.length;
-            const image = partner.logo_url ? (
-              <img
-                className="sponsor-watermark-strip__image"
-                src={partner.logo_url}
-                alt={clone ? "" : partner.name}
-                title={partner.name}
-                loading="lazy"
-              />
-            ) : (
-              <span className="sponsor-watermark-strip__fallback" aria-hidden={clone || undefined}>{partner.name}</span>
-            );
-
-            return partner.website_url ? (
-              <a
-                className="sponsor-watermark-strip__logo"
-                key={partner.id + (clone ? "-clone" : "")}
-                href={partner.website_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={clone ? undefined : partner.name}
-                aria-hidden={clone || undefined}
-                tabIndex={clone ? -1 : undefined}
-                title={partner.name}
-              >
-                {image}
-              </a>
-            ) : (
-              <span
-                className="sponsor-watermark-strip__logo"
-                key={partner.id + (clone ? "-clone" : "")}
-                aria-hidden={clone || undefined}
-              >
-                {image}
-              </span>
-            );
-          })}
+          <div className="sponsor-watermark-strip__group">{renderLogos(false)}</div>
+          <div className="sponsor-watermark-strip__group" aria-hidden="true">{renderLogos(true)}</div>
         </div>
       </div>
     </aside>
