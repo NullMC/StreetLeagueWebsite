@@ -67,7 +67,7 @@ function matchdayBuckets(matches: Match[]): MatchdayBucket[] {
   });
 
   return ordered.map((bucket, index) => bucket.key.startsWith("date:")
-    ? { ...bucket, label: "Giornata " + (index + 1) + " · " + bucket.label.replace(/^Data\\s*/, "") }
+    ? { ...bucket, label: "Giornata " + (index + 1) + " · " + bucket.label.replace(/^Data\s*/, "") }
     : bucket);
 }
 
