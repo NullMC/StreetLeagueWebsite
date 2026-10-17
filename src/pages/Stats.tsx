@@ -4,54 +4,82 @@ import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 import {
-  getCompetitions,
+  getActiveCompetitions,
   getPlayerStatsForCompetitions,
   getStaffRankingForCompetitions,
   getStatisticsGroups,
-  getTeams,
 } from "../lib/api";
-import type {
-  PlayerStats,
-  StaffRankingEntry,
-  Competition,
-  StatisticsGroup,
-  Team,
-} from "../types";
+import type { Player, PlayerStats, StaffRankingEntry, StatisticsGroup } from "../types";
 
-type StatKey = keyof PlayerStats;
-type PlayerWithStats = {
-  id: string;
-  team_id: string;
-  first_name: string;
-  last_name: string;
-  shirt_number: number | null;
-  position: string | null;
-  role?: string | null;
-  stats: PlayerStats;
-  team_name: string;
+type RankedPlayer = Player & { stats: PlayerStats };
+type StatCategory = "goals" | "mvps" | "clean_sheets" | "staff";
+type GroupStats = {
+  group: StatisticsGroup;
+  players: RankedPlayer[];
+  staff: StaffRankingEntry[];
 };
 
-const categories: Array<{ key: StatKey; label: string }> = [
-  { key: "goals", label: "Miglior marcatore" },
-  { key: "mvps", label: "Miglior giocatore (MVP)" },
-  { key: "clean_sheets", label: "Miglior portiere" },
-  { key: "yellow_cards", label: "Cartellini gialli" },
-  { key: "red_cards", label: "Cartellini rossi" },
+const cards: Array<{ key: StatCategory; title: string; unit: string }> = [
+  { key: "goals", title: "Miglior marcatore", unit: "gol" },
+  { key: "mvps", title: "Miglior giocatore (MVP)", unit: "record MVP" },
+  { key: "clean_sheets", title: "Miglior portiere", unit: "clean sheet" },
+  { key: "staff", title: "Miglior membro staff", unit: "gol staff" },
 ];
 
+function isStaff(player: Pick<Player, "position" | "role">) {
+  return player.role?.trim().toUpperCase() === "STAFF" ||
+    player.position?.trim().toUpperCase() === "STAFF";
+}
+
+function isGoalkeeper(player: RankedPlayer) {
+  const position = (player.position || "").trim().toLocaleLowerCase("it");
+  return position.includes("portier") || position.includes("goalkeeper") ||
+    position.includes("goalie") || position === "gk" || position === "por";
+}
+
+function BestStatsCard({ group, players, staff, config }: {
+  group: StatisticsGroup;
+  players: RankedPlayer[];
+  staff: StaffRankingEntry[];
+  config: (typeof cards)[number];
+}) {
+  const staffLeader = staff[0];
+  const ranked = config.key === "staff" ? [] : [...players]
+    .filter((player) => config.key === "clean_sheets" ? isGoalkeeper(player) : true)
+    .filter((player) => player.stats[config.key as Exclude<StatCategory, "staff">] > 0)
+    .sort((a, b) =>
+      b.stats[config.key as Exclude<StatCategory, "staff">] - a.stats[config.key as Exclude<StatCategory, "staff">] ||
+      (a.last_name + " " + a.first_name).localeCompare(b.last_name + " " + b.first_name, "it"),
+    );
+  const leader = config.key === "staff" ? staffLeader : ranked[0];
+  const name = leader
+    ? config.key === "staff"
+      ? (leader as StaffRankingEntry).player.first_name + " " + (leader as StaffRankingEntry).player.last_name
+      : (leader as RankedPlayer).first_name + " " + (leader as RankedPlayer).last_name
+    : "Nessun record";
+  const value = leader
+    ? config.key === "staff"
+      ? (leader as StaffRankingEntry).presidential_penalties
+      : (leader as RankedPlayer).stats[config.key as Exclude<StatCategory, "staff">]
+    : 0;
+
+  return (
+    <a
+      className="stat-card best-stats-card"
+      href={"/statistiche/" + encodeURIComponent(group.id) + "/" + config.key}
+      aria-label={"Apri " + config.title + " per " + group.name}
+    >
+      <span className="eyebrow">{config.title}</span>
+      <h3>{name}</h3>
+      <div className="stat-card__value">{String(value).padStart(2, "0")}</div>
+      <span className="best-stats-card__unit">{config.unit}</span>
+      <span className="best-stats-card__hint">Classifica completa <span aria-hidden="true">↗</span></span>
+    </a>
+  );
+}
+
 export default function Stats() {
-  const [groups, setGroups] = useState<StatisticsGroup[]>([]);
-  const [playersByGroup, setPlayersByGroup] = useState<
-    Record<string, PlayerWithStats[]>
-  >({});
-  const [playersByCompetition, setPlayersByCompetition] = useState<
-    Record<string, PlayerWithStats[]>
-  >({});
-  const [staffByGroup, setStaffByGroup] = useState<
-    Record<string, StaffRankingEntry[]>
-  >({});
-  const [searchCompetitions, setSearchCompetitions] = useState<Competition[]>([]);
-  const [playerSearch, setPlayerSearch] = useState("");
+  const [groupStats, setGroupStats] = useState<GroupStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -59,481 +87,80 @@ export default function Stats() {
     let mounted = true;
 
     async function load() {
+      setLoading(true);
       try {
-        setLoading(true);
-        const allCompetitions = await getCompetitions();
-        const competitions = allCompetitions.filter((competition) => competition.status === "active");
-        const searchableCompetitions = allCompetitions.filter(
-          (competition) => competition.status === "active" || competition.status === "upcoming",
-        );
-        const nextGroups = await getStatisticsGroups(competitions);
-
-        const groupedEntries = await Promise.all(
-          nextGroups.map(async (group) => {
-            const [players, staff, allTeams] = await Promise.all([
-              getPlayerStatsForCompetitions(group.competition_ids),
-              getStaffRankingForCompetitions(group.competition_ids),
-              Promise.all(group.competition_ids.map((competitionId) => getTeams(competitionId))).then(
-                (teamsByCompetition) => teamsByCompetition.flat(),
-              ),
-            ]);
-
-            const teamMap = new Map<string, Team>(
-              allTeams.map((team) => [team.id, team]),
-            );
-
-            const scopedPlayers: PlayerWithStats[] = players
-              .filter((player) => !isStaffMember(player))
-              .map((player) => ({
-                ...player,
-                team_name: teamMap.get(player.team_id)?.name ?? "—",
-              }));
-
-            return [group.id, { players: scopedPlayers, staff }] as const;
-          }),
-        );
-
-        const competitionEntries = await Promise.all(
-          searchableCompetitions.map(async (competition) => {
-            const [players, teams] = await Promise.all([
-              getPlayerStatsForCompetitions([competition.id]),
-              getTeams(competition.id),
-            ]);
-
-            const teamMap = new Map<string, Team>(
-              teams.map((team) => [team.id, team]),
-            );
-
-            const scopedPlayers: PlayerWithStats[] = players
-              .filter((player) => !isStaffMember(player))
-              .map((player) => ({
-                ...player,
-                team_name: teamMap.get(player.team_id)?.name ?? "—",
-              }));
-
-            return [competition.id, scopedPlayers] as const;
-          }),
-        );
-
-        if (!mounted) return;
-
-        setGroups(nextGroups);
-        setSearchCompetitions(searchableCompetitions);
-        setPlayersByGroup(
-          Object.fromEntries(
-            groupedEntries.map(([id, data]) => [id, data.players]),
-          ),
-        );
-        setPlayersByCompetition(Object.fromEntries(competitionEntries));
-        setStaffByGroup(
-          Object.fromEntries(
-            groupedEntries.map(([id, data]) => [id, data.staff]),
-          ),
-        );
-      } catch (loadError) {
+        const activeCompetitions = await getActiveCompetitions();
+        const groups = await getStatisticsGroups(activeCompetitions);
+        const result = await Promise.all(groups.map(async (group) => {
+          const [playerRows, staff] = await Promise.all([
+            getPlayerStatsForCompetitions(group.competition_ids),
+            getStaffRankingForCompetitions(group.competition_ids),
+          ]);
+          return {
+            group,
+            players: playerRows.filter((player) => !isStaff(player)),
+            staff,
+          };
+        }));
         if (mounted) {
-          setError(
-            loadError instanceof Error
-              ? loadError.message
-              : "Impossibile caricare le statistiche.",
-          );
+          setGroupStats(result);
+          setError("");
         }
+      } catch (loadError) {
+        if (mounted) setError(loadError instanceof Error ? loadError.message : "Impossibile caricare le statistiche.");
       } finally {
         if (mounted) setLoading(false);
       }
     }
 
     void load();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
-
-  const isStaffMember = (
-    player: Pick<PlayerWithStats, "position" | "role">,
-  ) =>
-    player.position?.trim().toUpperCase() === "STAFF" ||
-    player.role?.trim().toUpperCase() === "STAFF";
-
-  const isGoalkeeper = (player: PlayerWithStats) => {
-    const position = player.position?.trim().toLocaleLowerCase("it") ?? "";
-    return (
-      position.includes("portier") ||
-      position.includes("goalkeeper") ||
-      position.includes("goalie") ||
-      position === "gk" ||
-      position === "por"
-    );
-  };
-
-  const leadersFor = (players: PlayerWithStats[]) =>
-    categories.map((category) => {
-      const eligiblePlayers =
-        category.key === "clean_sheets"
-          ? players.filter(isGoalkeeper)
-          : players;
-
-      return {
-        ...category,
-        rows: [...eligiblePlayers]
-          .filter((player) => player.stats[category.key] > 0)
-          .sort(
-            (a, b) =>
-              b.stats[category.key] - a.stats[category.key] ||
-              `${a.first_name} ${a.last_name}`.localeCompare(
-                `${b.first_name} ${b.last_name}`,
-                "it",
-              ),
-          )
-          .slice(0, 3),
-      };
-    });
-
-  const normalizedPlayerSearch = playerSearch.trim().toLocaleLowerCase("it");
-  const playerSearchResults = normalizedPlayerSearch
-    ? searchCompetitions.flatMap((competition) =>
-        (playersByCompetition[competition.id] ?? [])
-          .filter((player) => {
-            if (player.role?.trim().toUpperCase() === "STAFF") return false;
-            const firstLast = `${player.first_name} ${player.last_name}`.toLocaleLowerCase("it");
-            const lastFirst = `${player.last_name} ${player.first_name}`.toLocaleLowerCase("it");
-            return firstLast.includes(normalizedPlayerSearch) || lastFirst.includes(normalizedPlayerSearch);
-          })
-          .map((player) => ({
-            player,
-            competition,
-            competitionId: competition.id,
-            competitionName: competition.name,
-            competitionStatus: competition.status,
-          })),
-      )
-    : [];
 
   return (
     <PageShell>
-      <div className="page page--sponsor-band">
-        <section className="page-sponsor-band" aria-label="Statistiche e sponsor">
-          <div className="page-sponsor-band__inner">
-            <SectionTitle title="Statistiche" />
-            <SponsorWatermarkStrip />
-          </div>
-        </section>
+      <div className="page platform-stats-page">
+        <header className="platform-page-heading">
+          <SectionTitle title="Statistiche" />
+          <p>Record individuali e riconoscimenti, sempre riferiti alle competizioni attive.</p>
+        </header>
 
-        {!loading && groups.length > 0 && (
-          <div className="stats-tools">
-            <div className="stats-tools__heading">
-              <span className="eyebrow">Navigazione rapida</span>
-              <strong>Vai direttamente alla competizione</strong>
-            </div>
-            <nav className="stats-competition-nav" aria-label="Navigazione competizioni">
-              {groups.flatMap((group) => group.competitions).map((competition) => (
-                <a key={competition.id} href={`#stats-competition-${competition.id}`}>
-                  <span>{competition.name}</span>
-                </a>
-              ))}
-            </nav>
-            <label className="stats-player-search">
-              <span>Cerca un giocatore</span>
-              <input
-                type="search"
-                value={playerSearch}
-                onChange={(event) => setPlayerSearch(event.target.value)}
-                placeholder="Scrivi nome o cognome…"
-                aria-label="Cerca giocatore per nome o cognome"
-              />
-            </label>
-          </div>
-        )}
+        {!loading && groupStats.length > 0 ? (
+          <nav className="stats-competition-nav" aria-label="Vai alla competizione">
+            {groupStats.map(({ group }) => (
+              <a href={"#stats-group-" + encodeURIComponent(group.id)} key={group.id}>
+                <span>{group.name}</span>
+              </a>
+            ))}
+          </nav>
+        ) : null}
 
-        {normalizedPlayerSearch && !loading && (
-          <section className="stats-search-results" aria-live="polite">
-            <SectionTitle
-              eyebrow="Ricerca giocatore"
-              title={`Risultati per “${playerSearch.trim()}”`}
-              variant="subsection"
-            />
-            {playerSearchResults.length ? (
-              <div className="admin-table-wrap">
-                <table className="admin-table stats-search-table">
-                  <thead>
-                    <tr>
-                      <th>Competizione</th>
-                      <th>N° maglia</th>
-                      <th>Giocatore</th>
-                      <th>Squadra</th>
-                      <th>Gol</th>
-                      <th>Assist</th>
-                      <th>Gialli</th>
-                      <th>Rossi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {playerSearchResults.map(({ player, competition, competitionId, competitionName, competitionStatus }) => (
-                      <tr key={`${competitionId}-${player.id}`}>
-                        <td>
-                          <span className="stats-competition-identity">
-                            <span>{competitionName}{" "}
-                              <small className="stats-search-status">
-                                · {competitionStatus === "upcoming" ? "In arrivo" : "Attiva"}
-                              </small>
-                            </span>
-                          </span>
-                        </td>
-                        <td>{player.shirt_number ?? "—"}</td>
-                        <td><a href={`/giocatori/${player.id}`}>{player.first_name} {player.last_name}</a></td>
-                        <td>{player.team_name}</td>
-                        <td>{player.stats.goals}</td>
-                        <td>{player.stats.assists}</td>
-                        <td>{player.stats.yellow_cards}</td>
-                        <td>{player.stats.red_cards}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <EmptyState
-                title="Nessun giocatore trovato"
-                text="Prova con un nome o un cognome diverso."
-              />
-            )}
-          </section>
-        )}
-
-        {error && <p className="admin-error">{error}</p>}
-
+        {error ? <p className="admin-error">{error}</p> : null}
         {loading ? (
           <p className="admin-message">Caricamento statistiche…</p>
-        ) : !groups.length ? (
-          <EmptyState
-            title="Nessuna statistica"
-            text="Non ci sono competizioni da analizzare."
-          />
+        ) : !groupStats.length ? (
+          <EmptyState title="Nessuna statistica attiva" text="Le classifiche verranno mostrate quando ci saranno competizioni attive." />
         ) : (
-          groups.map((group) => {
-            const players = playersByGroup[group.id] ?? [];
-            const staff = staffByGroup[group.id] ?? [];
-            const leaders = leadersFor(players);
-
-            return (
-              <section className="stats-competition-group" key={group.id}>
-                <SectionTitle
-                  eyebrow="Statistiche attive"
-                  title={group.name}
-                  variant="group"
-                />
-
-                {group.competitions.length > 1 && (
+          <div className="stats-groups-list">
+            {groupStats.map(({ group, players, staff }) => (
+              <section className="stats-competition-group" id={"stats-group-" + encodeURIComponent(group.id)} key={group.id}>
+                <SectionTitle eyebrow="Competizioni attive" title={group.name} variant="group" />
+                {group.competitions.length > 1 ? (
                   <p className="admin-help-text">
-                    Dati aggregati da:{" "}
-                    <span className="stats-aggregated-competitions">
-                      {group.competitions.map((competition) => (
-                        <span className="stats-aggregated-competition" key={competition.id}>
-                          <span>{competition.name}</span>
-                        </span>
-                      ))}
-                    </span>
+                    Dati aggregati da: {group.competitions.map((competition) => competition.name).join(", ")}
                   </p>
-                )}
-
-                <section className="section stats-staff-section">
-                  <SectionTitle
-                    eyebrow="Staff"
-                    title="Classifica staff"
-                    variant="subsection"
-                  />
-
-                  {!staff.length ? (
-                    <EmptyState
-                      title="Nessun membro STAFF"
-                      text="I membri STAFF delle squadre appartenenti a questa sezione verranno mostrati qui."
-                    />
-                  ) : (
-                    <div className="leaderboard staff-leaderboard">
-                      <div className="table-row head">
-                        <span>#</span>
-                        <span>Membro staff</span>
-                        <span>Gol</span>
-                      </div>
-
-                      {staff.map((row, index) => (
-                        <a
-                          className="table-row"
-                          href={`/giocatori/${row.player.id}`}
-                          key={row.player.id}
-                        >
-                          <span className="position">
-                            {String(index + 1).padStart(2, "0")}
-                          </span>
-
-                          <div className="standings-player">
-                            {row.player.profile_image_url ||
-                            row.player.bg_less_image_url ? (
-                              <img
-                                src={
-                                  row.player.profile_image_url ||
-                                  row.player.bg_less_image_url ||
-                                  ""
-                                }
-                                alt=""
-                                className="standings-player__avatar"
-                              />
-                            ) : (
-                              <span
-                                className="standings-player__avatar standings-player__avatar--placeholder"
-                                aria-hidden="true"
-                              >
-                                {(row.player.first_name[0] ?? "") +
-                                  (row.player.last_name[0] ?? "")}
-                              </span>
-                            )}
-                            <strong>
-                              {row.player.first_name} {row.player.last_name}
-                            </strong>
-                          </div>
-
-                          <strong>{row.presidential_penalties}</strong>
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-                {!players.length ? (
-                  <EmptyState
-                    title="Nessun dato"
-                    text="Le statistiche compariranno con i dati registrati."
-                  />
-                ) : (
-                  <>
-                    <div className="leaders stats-leaders">
-                      {leaders.map((leader) => {
-                        const top = leader.rows[0];
-
-                        return (
-                          <div className="stat-card" key={leader.key}>
-                            <span className="eyebrow">{leader.label}</span>
-                            <h3>
-                              {top ? (
-                                <a href={`/giocatori/${top.id}`}>
-                                  {top.first_name} {top.last_name}
-                                </a>
-                              ) : (
-                                "Nessun dato"
-                              )}
-                            </h3>
-                            <div className="stat-card__value">
-                              {top ? top.stats[leader.key] : "—"}
-                            </div>
-                            <div className="rank-list">
-                              {leader.rows.map((player, index) => (
-                                <a
-                                  className="rank-row"
-                                  href={`/giocatori/${player.id}`}
-                                  key={player.id}
-                                >
-                                  <span>
-                                    {String(index + 1).padStart(2, "0")}
-                                  </span>
-                                  <span>
-                                    {player.first_name} {player.last_name}
-                                  </span>
-                                  <strong>
-                                    {player.stats[leader.key]}
-                                  </strong>
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <div className="stats-player-lists">
-                      {group.competitions.map((competition) => {
-                        const competitionPlayers =
-                          playersByCompetition[competition.id] ?? [];
-
-                        return (
-                          <section
-                            className="stats-player-list"
-                            id={`stats-competition-${competition.id}`}
-                            key={competition.id}
-                          >
-                            <SectionTitle
-                              eyebrow="Giocatori"
-                              title={competition.name}
-                              variant="subsection"
-                            />
-
-                            {!competitionPlayers.length ? (
-                              <EmptyState
-                                title="Nessun giocatore"
-                                text="I giocatori registrati per questa competizione verranno mostrati qui."
-                              />
-                            ) : (
-                              <div className="admin-table-wrap">
-                                <table className="admin-table">
-                                  <thead>
-                                    <tr>
-                                      <th>#</th>
-                                      <th>N° maglia</th>
-                                      <th>Giocatore</th>
-                                      <th>Squadra</th>
-                                      <th>Gol</th>
-                                      <th>Assist</th>
-                                      <th>Gialli</th>
-                                      <th>Rossi</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {[...competitionPlayers]
-                                      .sort(
-                                        (a, b) =>
-                                          `${a.last_name} ${a.first_name}`.localeCompare(
-                                            `${b.last_name} ${b.first_name}`,
-                                            "it",
-                                          ),
-                                      )
-                                      .map((player, index) => (
-                                        <tr key={player.id}>
-                                          <td>
-                                            {String(index + 1).padStart(2, "0")}
-                                          </td>
-                                          <td>{player.shirt_number ?? "—"}</td>
-                                          <td>
-                                            <a
-                                              href={`/giocatori/${player.id}`}
-                                            >
-                                              {player.first_name}{" "}
-                                              {player.last_name}
-                                            </a>
-                                          </td>
-                                          <td>{player.team_name}</td>
-                                          <td>{player.stats.goals}</td>
-                                          <td>{player.stats.assists}</td>
-                                          <td>
-                                            {player.stats.yellow_cards}
-                                          </td>
-                                          <td>{player.stats.red_cards}</td>
-                                        </tr>
-                                      ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            )}
-                          </section>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
+                ) : null}
+                <div className="leaders stats-best-cards-grid">
+                  {cards.map((config) => (
+                    <BestStatsCard key={config.key} group={group} players={players} staff={staff} config={config} />
+                  ))}
+                </div>
               </section>
-            );
-          })
+            ))}
+          </div>
         )}
       </div>
+      <SponsorWatermarkStrip />
     </PageShell>
   );
 }
