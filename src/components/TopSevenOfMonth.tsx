@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Avatar, Chip, CircularProgress, Paper, Typography } from "@mui/material";
-import { getAllMatchEvents, getAllMatchLineups, getAllMatchMvps, getCompetitions, getMatches, getPlayers, getTeams, subscribeToCompetition } from "../lib/api";
+import { getAllMatchEvents, getAllMatchLineups, getAllMatchMvps, getActiveCompetitions, getMatches, getPlayers, getTeams, subscribeToCompetition } from "../lib/api";
 import type { Match, MatchEvent, MatchLineup, MatchMvp, Player, Team } from "../types";
 
 type Role = "goalkeeper" | "defender" | "midfielder" | "attacker";
@@ -126,7 +126,7 @@ export function TopSevenOfMonth(){
     async function load(){
       setLoading(true);
       try{
-        const competitions=await getCompetitions();
+        const competitions=await getActiveCompetitions();
         const [players,teamSets,matchSets,events,allLineups,mvps]=await Promise.all([
           getPlayers(),Promise.all(competitions.map(competition=>getTeams(competition.id))),
           Promise.all(competitions.map(competition=>getMatches(competition.id))),
@@ -149,7 +149,7 @@ export function TopSevenOfMonth(){
   const current=lineup||empty;
   return <Paper component="section" variant="outlined" className="top-seven-section" elevation={0}>
     <div className="top-seven-heading"><div><Typography component="h2" variant="h2">Top 7 del mese</Typography>
-      <Typography component="p" className="top-seven-subtitle">I migliori interpreti tra tutte le competizioni · {monthLabel}</Typography></div>
+      <Typography component="p" className="top-seven-subtitle">I migliori interpreti tra le competizioni attive · {monthLabel}</Typography></div>
     </div>
     <Typography component="p" className="top-seven-method">Selezione mensile per squadra basata su presenze, gol, assist, MVP, clean sheet e cartellini registrati.</Typography>
     {loading?<div className="top-seven-loading"><CircularProgress size={30}/></div>:<div className="top-seven-pitch">
