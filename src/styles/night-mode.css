@@ -468,7 +468,7 @@ html[data-theme="night"] .home-redesign .potm-section {
   color: var(--home-ink) !important;
 }
 
-html[data-theme="night"] .home-hero > div[aria-hidden="true"] {
+html[data-theme="night"] .home-redesign:not(.home-redesign--ordered) .home-hero > div[aria-hidden="true"] {
   background-image:
     linear-gradient(to top, var(--home-paper) 0%, rgba(5,8,6,.84) 24%, rgba(5,8,6,.28) 58%, rgba(5,8,6,.05) 100%),
     linear-gradient(135deg, rgba(0,0,0,.54) 0%, rgba(69,13,42,.18) 54%, rgba(228,34,120,.10) 100%),

@@ -34,7 +34,7 @@
   content: none;
 }
 
-.home-hero > div[aria-hidden="true"] {
+.home-redesign:not(.home-redesign--ordered) .home-hero > div[aria-hidden="true"] {
   z-index: 0 !important;
   background-image:
     linear-gradient(to top, #fff 0%, rgba(255,255,255,.72) 24%, rgba(255,255,255,.12) 58%, rgba(255,255,255,0) 100%),

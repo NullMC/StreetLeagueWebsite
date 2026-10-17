@@ -1070,7 +1070,9 @@ html[data-theme="night"] .home-redesign--ordered .home-about__logo img {
   box-shadow: 0 14px 34px color-mix(in srgb, var(--ink) 10%, transparent) !important;
 }
 .partners-sponsors-band .partner-editorial-card__name.MuiTypography-root {
-  color: var(--white) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .65) !important;
 }
 .partners-sponsors-band .partner-editorial-card__description,
 .partners-sponsors-band .partner-editorial-card__description p {
