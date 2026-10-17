@@ -42,7 +42,7 @@ export default function Matches() {
       <section className="page-sponsor-band" aria-label="Calendario e sponsor">
         <div className="page-sponsor-band__inner">
           <SectionTitle title="Calendario partite" />
-          <Typography component="p" className="lede">Risultati e prossimi incontri, suddivisi per competizione attiva.</Typography>
+          <Typography component="p" className="lede">Risultati e prossimi incontri, suddivisi per competizione.</Typography>
           <SponsorWatermarkStrip />
         </div>
       </section>

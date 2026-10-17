@@ -345,18 +345,18 @@ export default function HomeRedesigned() {
           <div className="home-collab-proposal" id="home-collaborate">
             <div className="home-collab-proposal__copy">
               <SectionTitle title="Collabora con Street League" />
-              <p>Nessun pacchetto predefinito: raccontaci la tua attività e costruiamo insieme una proposta adatta al tuo brand.</p>
+              <p>Raccontaci della tua attività, costruiamo insieme una proposta adatta al tuo brand e cresci insieme a noi.</p>
               <Button component="a" href="mailto:streetleaguebari@gmail.com?subject=Collaborazione%20Street%20League" variant="contained">Contattaci per saperne di più</Button>
             </div>
           </div>
           <section className="home-sponsors" aria-label="Sponsor Street League">
             <div className="home-section-head"><SectionTitle title="I nostri sponsor" /></div>
-            <Typography component="p" className="home-sponsors__intro">Le attività e i brand che contribuiscono alla crescita della Street League.</Typography>
-            {partners.length ? <SponsorGrid partners={partners} /> : <EmptyState title="Sponsor in aggiornamento" text="Le attività che sostengono la Street League compariranno qui." />}
             <div className="sponsor-cta-row">
               <Typography component="span" className="sponsor-cta-row__title">Il prossimo nome può essere il tuo.</Typography>
               <Button component="a" href="/partner#collabora" variant="outlined">Diventa sponsor ↗</Button>
             </div>
+            <Typography component="p" className="home-sponsors__intro">Le attività e i brand che contribuiscono alla crescita della Street League.</Typography>
+            {partners.length ? <SponsorGrid partners={partners} /> : <EmptyState title="Sponsor in aggiornamento" text="Le attività che sostengono la Street League compariranno qui." />}
           </section>
         </div>
       </section>
