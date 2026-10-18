@@ -86,17 +86,20 @@ export function MatchCard({
         <span className="match-card__venue" aria-label="Stadio Di Cagno Abbrescia">
           <svg
             className="match-card__stadium-icon"
-            viewBox="0 0 24 24"
+            viewBox="0 0 32 20"
+            width="15"
+            height="10"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.6"
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"
           >
-            <path d="M3 9.5 12 5l9 4.5-9 4.5L3 9.5Z" />
-            <path d="M5 12v5l7 3 7-3v-5M8 12l-1 4M12 14v4M16 12l1 4" />
-            <path d="M2 20h20" />
+            <rect x="1" y="1" width="30" height="18" rx="0.7" />
+            <path d="M16 1v18" />
+            <circle cx="16" cy="10" r="3" />
+            <path d="M1 5h4v10H1M31 5h-4v10h4" />
           </svg>
           <span>Di Cagno Abbrescia</span>
         </span>
