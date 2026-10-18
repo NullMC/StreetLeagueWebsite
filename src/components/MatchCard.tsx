@@ -10,10 +10,22 @@ export function MatchCard({
   home?: Team;
   away?: Team;
 }) {
+  const kickoffTime =
+    match.kickoff_at && /T\d{2}:\d{2}/.test(match.kickoff_at) && !Number.isNaN(new Date(match.kickoff_at).getTime())
+      ? new Intl.DateTimeFormat("it-IT", { hour: "2-digit", minute: "2-digit" }).format(new Date(match.kickoff_at))
+      : null;
+
   return (
     <a href={`/partite/${match.id}`} className="match-card">
       <div className="match-card__meta">
-        <span>{day(match.kickoff_at)}</span>
+        <span className="match-card__date-time">
+          <span>{day(match.kickoff_at)}</span>
+          {kickoffTime && (
+            <time className="match-card__time" dateTime={match.kickoff_at ?? undefined}>
+              {kickoffTime}
+            </time>
+          )}
+        </span>
         <span>{match.matchday || "CALENDARIO"}</span>
       </div>
       <div className="match-card__teams">
