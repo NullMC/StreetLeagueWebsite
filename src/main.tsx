@@ -18,6 +18,7 @@ import "./styles/home-calendar-mobile.css";
 import "./styles/night-mode.css";
 import "./styles/material-overhaul.css";
 import "./styles/platform-rework.css";
+import "./styles/transfer-market.css";
 import HomeRedesigned from "./pages/HomeRedesigned";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
@@ -27,6 +28,7 @@ import PlayerDetail from "./pages/PlayerDetail";
 import CompetitionDetail from "./pages/CompetitionDetail";
 import Stats from "./pages/Stats";
 import MatchDetail from "./pages/MatchDetail";
+import TransferMarket from "./pages/TransferMarket";
 import Partners from "./pages/Partners";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -42,6 +44,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeRedesigned />} />
         <Route path="/competizioni" element={<Competitions />} />
+        <Route path="/calciomercato" element={<TransferMarket />} />
         <Route path="/competizioni/gruppo/:groupName" element={<CompetitionDetail />} />
         <Route path="/competizioni/:competitionId" element={<CompetitionDetail />} />
         <Route path="/classifica" element={<Standings />} />
