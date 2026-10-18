@@ -49,7 +49,7 @@ const fields: Record<Resource, string[]> = {
   partners: ["name", "logo_url", "activity_image_url", "description", "website_url", "sort_order"],
   active_collaborations: ["title", "description", "flyer_url", "cta_url", "sort_order"],
   social_contents: ["platform", "title", "thumbnail_url", "content_url", "published_at"],
-  transfer_market_entries: ["competition_id", "team_id", "slot_number", "player_id", "external_first_name", "external_last_name", "external_position", "external_shirt_number", "external_photo_url", "notes"],
+  transfer_market_entries: ["team_id", "slot_number", "player_id", "external_first_name", "external_last_name", "external_position", "external_shirt_number", "external_photo_url", "notes"],
 };
 const required: Record<Resource, string[]> = {
   competitions: ["name", "slug", "status"], teams: ["competition_ids", "name", "slug"], players: ["team_id", "first_name", "last_name"],
@@ -57,7 +57,7 @@ const required: Record<Resource, string[]> = {
   mvp: ["match_id", "player_id"],
   player_of_month: ["award_type", "player_id", "month_label", "published_at"], partners: ["name", "logo_url", "description", "website_url"],
   active_collaborations: ["title", "description"], social_contents: ["platform", "title", "content_url"],
-  transfer_market_entries: ["competition_id", "team_id", "slot_number"],
+  transfer_market_entries: ["team_id", "slot_number"],
 };
 const fieldLabels: Record<string, string> = {
   name: "Nome", slug: "Slug", status: "Stato", season_label: "Stagione", start_date: "Data inizio", end_date: "Data fine",
@@ -128,7 +128,7 @@ async function readRows(resource: Resource): Promise<Row[]> {
 }
 function relationOptions(field: string, resource: Resource, form: Row, l: Lookups) {
   if (field === "competition_id") return l.competitions.map((x) => ({ id: x.id, label: x.name }));
-  if (field === "team_id") { const teams = resource === "transfer_market_entries" && form.competition_id ? l.teams.filter((x) => x.competition_ids?.includes(String(form.competition_id))) : l.teams; return teams.map((x) => ({ id: x.id, label: x.name })); }
+  if (field === "team_id") return l.teams.map((x) => ({ id: x.id, label: x.name }));
   if (field === "home_team_id" || field === "away_team_id") return l.teams.filter((x) => !form.competition_id || x.competition_ids?.includes(String(form.competition_id))).map((x) => ({ id: x.id, label: x.name }));
   if (field === "match_id") return l.matches.map((x) => ({ id: x.id, label: `${l.teams.find((t) => t.id === x.home_team_id)?.name ?? "Casa"} - ${l.teams.find((t) => t.id === x.away_team_id)?.name ?? "Ospite"} / ${x.matchday ?? "—"}` }));
   if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (resource === "transfer_market_entries") ps = ps.filter((p) => p.role?.trim().toUpperCase() !== "STAFF" && p.position?.trim().toUpperCase() !== "STAFF"); if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } if (resource === "events" && field === "player_id" && form.event_type === "presidential_penalty") ps = ps.filter((p) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"); if (resource === "player_of_month" && field === "player_id") { const isStaff = (p: Player) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"; ps = ps.filter((p) => form.award_type === "staff" ? isStaff(p) : !isStaff(p)); } return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
@@ -167,9 +167,8 @@ function validate(resource: Resource, payload: Row, l: Lookups) {
     }
   }
   if (resource === "transfer_market_entries") {
-    const competition = l.competitions.find((x) => x.id === payload.competition_id);
     const team = l.teams.find((x) => x.id === payload.team_id);
-    if (!competition || !team || !team.competition_ids?.includes(competition.id)) throw new Error("La squadra selezionata non appartiene alla competizione scelta.");
+    if (!team) throw new Error("Seleziona una squadra valida.");
     const slot = Number(payload.slot_number);
     if (!Number.isInteger(slot) || slot < 1 || slot > 6) throw new Error("Seleziona uno slot compreso tra 1 e 6.");
     if (payload.player_id) {
