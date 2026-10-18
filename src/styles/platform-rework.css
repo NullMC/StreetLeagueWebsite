@@ -1783,3 +1783,114 @@ html[data-theme="night"] .home-matchdays__competition option {
     max-width: 100%;
   }
 }
+
+/* Statistics leaders: show a real profile photo only for an actual record. */
+.best-stats-card__photo {
+  display: block;
+  flex: 0 0 68px;
+  width: 68px;
+  height: 68px;
+  margin: 8px 0 10px;
+  border: 2px solid var(--pink);
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+}
+.best-stats-card--empty {
+  cursor: default;
+  transform: none !important;
+  opacity: .9;
+}
+.best-stats-card--empty .best-stats-card__empty-copy {
+  margin-top: auto;
+}
+.best-stats-card--empty .best-stats-card__empty-copy h3 {
+  margin: 0 0 8px;
+  font-size: clamp(20px, 2vw, 28px);
+}
+.best-stats-card--empty .best-stats-card__empty-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+html[data-theme="night"] .best-stats-card--empty .best-stats-card__empty-copy p {
+  color: rgba(245,247,246,.68);
+}
+
+/* Restore the pitch markings in dark mode instead of flattening the field to a solid shade. */
+html[data-theme="night"] .home-redesign--ordered .top-seven-pitch {
+  background: repeating-linear-gradient(
+    90deg,
+    #145c3a 0,
+    #145c3a 10%,
+    #176640 10%,
+    #176640 20%
+  ) !important;
+  border-color: rgba(255,255,255,.7) !important;
+}
+html[data-theme="night"] .home-redesign--ordered .top-seven-pitch::before,
+html[data-theme="night"] .home-redesign--ordered .top-seven-pitch::after {
+  border-color: rgba(255,255,255,.74) !important;
+  background-color: rgba(255,255,255,.74);
+}
+
+/* Keep POTM and Staff side by side, including on compact mobile widths. */
+.home-redesign--ordered .monthly-awards-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: clamp(8px, 2vw, 18px);
+}
+.home-redesign--ordered .monthly-award-column {
+  width: 100%;
+  min-width: 0;
+}
+@media (max-width: 680px) {
+  .home-redesign--ordered .monthly-award-card {
+    min-height: 330px;
+    padding: 12px;
+  }
+  .home-redesign--ordered .monthly-award-card__badge {
+    top: 10px;
+    left: 10px;
+    max-width: calc(100% - 20px);
+    padding: 5px 6px;
+    font-size: 7px;
+    letter-spacing: .06em;
+  }
+  .home-redesign--ordered .monthly-award-card__content {
+    gap: 7px;
+  }
+  .home-redesign--ordered .monthly-award-card__content h3 {
+    font-size: clamp(18px, 4.8vw, 31px);
+    line-height: .96;
+  }
+  .home-redesign--ordered .monthly-award-card__meta {
+    gap: 4px;
+  }
+  .home-redesign--ordered .monthly-award-card__meta span {
+    padding: 4px 5px;
+    font-size: 7px;
+  }
+  .home-redesign--ordered .monthly-award-card__content p {
+    font-size: 10px;
+    line-height: 1.45;
+  }
+  .home-redesign--ordered .monthly-award-card__cta {
+    gap: 5px;
+    padding-top: 8px;
+    font-size: 8px;
+    letter-spacing: .04em;
+  }
+}
+@media (max-width: 390px) {
+  .home-redesign--ordered .monthly-award-card {
+    min-height: 310px;
+    padding: 10px;
+  }
+  .home-redesign--ordered .monthly-award-card__content h3 {
+    font-size: clamp(16px, 4.7vw, 20px);
+  }
+  .home-redesign--ordered .monthly-award-card__badge {
+    font-size: 6px;
+  }
+}
