@@ -1829,10 +1829,11 @@ html[data-theme="night"] .home-redesign--ordered .top-seven-pitch {
   ) !important;
   border-color: rgba(255,255,255,.7) !important;
 }
-html[data-theme="night"] .home-redesign--ordered .top-seven-pitch::before,
+html[data-theme="night"] .home-redesign--ordered .top-seven-pitch::before {
+  background-color: rgba(255,255,255,.74) !important;
+}
 html[data-theme="night"] .home-redesign--ordered .top-seven-pitch::after {
   border-color: rgba(255,255,255,.74) !important;
-  background-color: rgba(255,255,255,.74);
 }
 
 /* Keep POTM and Staff side by side, including on compact mobile widths. */
