@@ -44,7 +44,7 @@ function getSeo(pathname: string): SeoConfig {
   };
   if (path === "/calciomercato") return {
     title: `Calcio mercato | ${SITE_NAME}`,
-    description: "Scopri i nuovi innesti e i trasferimenti delle squadre Street League, organizzati per competizione.",
+    description: "Scopri i nuovi innesti e i trasferimenti delle squadre Street League, con sei slot unici per squadra.",
   };
   if (path === "/competizioni" || path.startsWith("/competizioni/")) return {
     title: `Competizioni di calcio | ${SITE_NAME}`,
