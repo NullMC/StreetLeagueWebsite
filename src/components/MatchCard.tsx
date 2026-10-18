@@ -1,5 +1,7 @@
 import type { Match, Team } from "../types";
 import { day } from "../lib/format";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStadium } from "@fortawesome/free-solid-svg-icons";
 
 export function MatchCard({
   match,
@@ -73,14 +75,20 @@ export function MatchCard({
           </div>
         </div>
       </div>
-      <div className={`match-card__status status-${match.status}`}>
-        {match.status === "live"
-          ? "LIVE"
-          : match.status === "finished"
-            ? "TERMINATA"
-            : match.status === "postponed"
-              ? "RINVIATA"
-              : "PROGRAMMATA"}
+      <div className="match-card__footer">
+        <div className={`match-card__status status-${match.status}`}>
+          {match.status === "live"
+            ? "LIVE"
+            : match.status === "finished"
+              ? "TERMINATA"
+              : match.status === "postponed"
+                ? "RINVIATA"
+                : "PROGRAMMATA"}
+        </div>
+        <span className="match-card__venue" aria-label="Stadio Di Cagno Abbrescia">
+          <FontAwesomeIcon icon={faStadium} aria-hidden="true" />
+          <span>Di Cagno Abbrescia</span>
+        </span>
       </div>
     </a>
   );
