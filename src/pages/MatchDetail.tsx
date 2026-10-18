@@ -7,7 +7,6 @@ import {
   getMatch,
   getTeams,
   getMatchEvents,
-  getMatchLineups,
   getMatchMvp,
   getPlayers,
 } from "../lib/api";
@@ -15,7 +14,6 @@ import type {
   Match,
   Team,
   MatchEvent,
-  MatchLineup,
   MatchMvp,
   Player,
 } from "../types";
@@ -26,7 +24,6 @@ export default function MatchDetail() {
   const [home, setHome] = useState<Team | null>(null);
   const [away, setAway] = useState<Team | null>(null);
   const [events, setEvents] = useState<MatchEvent[]>([]);
-  const [lineups, setLineups] = useState<MatchLineup[]>([]);
   const [mvp, setMvp] = useState<MatchMvp | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
 
@@ -45,7 +42,6 @@ export default function MatchDetail() {
           await Promise.all([
             getTeams(),
             getMatchEvents(currentMatch.id),
-            getMatchLineups(currentMatch.id),
             getMatchMvp(currentMatch.id),
             getPlayers(),
           ]);
@@ -59,14 +55,12 @@ export default function MatchDetail() {
           teams.find((team) => team.id === currentMatch.away_team_id) ?? null,
         );
         setEvents(currentEvents);
-        setLineups(currentLineups);
         setMvp(currentMvp);
         setPlayers(allPlayers);
       } catch {
         if (mounted) {
           setMatch(null);
           setEvents([]);
-          setLineups([]);
           setMvp(null);
         }
       }
@@ -84,8 +78,6 @@ export default function MatchDetail() {
     return player ? `${player.first_name} ${player.last_name}` : "Giocatore";
   }
 
-  const homeLineups = lineups.filter((item) => item.team_id === home?.id);
-  const awayLineups = lineups.filter((item) => item.team_id === away?.id);
 
   return (
     <PageShell>
@@ -113,7 +105,7 @@ export default function MatchDetail() {
           </section>
 
           <div className="match-detail-score">
-            <div className="scoreboard">
+            <div className="scoreboard match-detail-scoreboard">
               <div className="score-team">
                 <div className="score-team__identity">
                   {home?.logo_url ? (
@@ -179,46 +171,8 @@ export default function MatchDetail() {
               />
             )}
 
-            <div className="section">
-              <SectionTitle eyebrow="" title="Formazioni"  variant="subsection" />
-
-              {!lineups.length ? (
-                <EmptyState
-                  title="Formazioni non disponibili"
-                  text="Non sono ancora state registrate formazioni per questa partita."
-                />
-              ) : (
-                <div className="cards-grid">
-                  <div className="stat-card">
-                    <span className="eyebrow">{home?.name ?? "Casa"}</span>
-                    <h3>Formazione</h3>
-                    <div className="rank-list">
-                      {homeLineups.map((item) => (
-                        <div className="rank-row" key={item.id}>
-                          <span>{item.starter ? "T" : "R"}</span>
-                          <span>{playerName(item.player_id)}</span>
-                          <strong>#{item.shirt_number ?? "—"}</strong>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="stat-card">
-                    <span className="eyebrow">{away?.name ?? "Ospite"}</span>
-                    <h3>Formazione</h3>
-                    <div className="rank-list">
-                      {awayLineups.map((item) => (
-                        <div className="rank-row" key={item.id}>
-                          <span>{item.starter ? "T" : "R"}</span>
-                          <span>{playerName(item.player_id)}</span>
-                          <strong>#{item.shirt_number ?? "—"}</strong>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
+            {mvp && (
+              <div className="section">
               {mvp && (
                 <div className="section">
                   <div className="stat-card">
