@@ -37,10 +37,7 @@ export function MatchCard({
 
         <strong className="match-card__score">
           {match.status === "scheduled" ? (
-            <>
-              <span className="match-card__score-vs">VS</span>
-              <span className="match-card__score-placeholder">— : —</span>
-            </>
+            <span className="match-card__score-vs">VS</span>
           ) : (
             `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`
           )}
