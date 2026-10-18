@@ -220,6 +220,10 @@ export default function HomeRedesigned() {
             </p>
           </div>
         </div>
+        <a className="home-hero__scroll" href="#home-matches" aria-label="Scorri alla sezione Partite">
+          <span className="home-hero__scroll-label">Scorri</span>
+          <span className="home-hero__scroll-icon" aria-hidden="true">↓</span>
+        </a>
       </section>
 
       {error ? <p className="admin-help-text home-load-error">{error}</p> : null}
