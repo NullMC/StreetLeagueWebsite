@@ -975,8 +975,7 @@ html[data-theme="night"] .home-redesign--ordered .home-hero__backdrop {
     url("/assets/nebula-vertical.webp") !important;
 }
 html[data-theme="night"] .home-redesign--ordered .home-about__logo img {
-  /* Keep the homepage logo PNG colors unchanged in dark mode too. */
-  filter: none;
+  filter: brightness(0) invert(1) drop-shadow(0 18px 38px rgba(0,0,0,.4));
 }
 @media (max-width: 760px) {
   .home-redesign--ordered .home-about.home-hero {
