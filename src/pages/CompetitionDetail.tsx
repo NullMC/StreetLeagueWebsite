@@ -74,7 +74,7 @@ function matchdayBuckets(matches: Match[]): MatchdayBucket[] {
 function MatchdayHeading({ competitionName }: { competitionName: string }) {
   return (
     <div className="competition-matchday-heading">
-      <SectionTitle title={`Partite`} variant="subsection" />
+      <SectionTitle title={``} variant="subsection" />
     </div>
   );
 }
