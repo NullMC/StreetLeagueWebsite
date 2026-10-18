@@ -1,7 +1,5 @@
 import type { Match, Team } from "../types";
 import { day } from "../lib/format";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStadium } from "@fortawesome/free-solid-svg-icons";
 
 export function MatchCard({
   match,
@@ -86,7 +84,20 @@ export function MatchCard({
                 : "PROGRAMMATA"}
         </div>
         <span className="match-card__venue" aria-label="Stadio Di Cagno Abbrescia">
-          <FontAwesomeIcon icon={faStadium} aria-hidden="true" />
+          <svg
+            className="match-card__stadium-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 9.5 12 5l9 4.5-9 4.5L3 9.5Z" />
+            <path d="M5 12v5l7 3 7-3v-5M8 12l-1 4M12 14v4M16 12l1 4" />
+            <path d="M2 20h20" />
+          </svg>
           <span>Di Cagno Abbrescia</span>
         </span>
       </div>
