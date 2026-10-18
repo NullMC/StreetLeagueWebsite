@@ -53,7 +53,6 @@ function TransferPlayerCard({
   destinationTeam: Team;
   competitionId: string;
   teamById: Map<string, Team>;
-  onPlatformMissing?: boolean;
 }) {
   if (!entry) {
     return (
