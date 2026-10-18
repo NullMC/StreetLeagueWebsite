@@ -35,7 +35,7 @@ export default function Partners() {
         <div className="section--edge sponsor-band__inner">
           <section className="home-sponsors" aria-label="Sponsor Street League" id="sponsor">
             <div className="home-section-head home-section-head--on-pink">
-              <SectionTitle title="Le nostre collaborazioni. " />
+              <SectionTitle title="Le nostre collaborazioni" />
             </div>
             <Typography component="p" className="home-sponsors__intro">
               Le attività che contribuiscono alla crescita della Street League:

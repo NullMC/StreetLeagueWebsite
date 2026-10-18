@@ -209,7 +209,7 @@ export default function HomeRedesigned() {
         <div className="home-hero__backdrop" aria-hidden="true" />
         <div className="home-hero__inner">
           <div className="home-about__logo">
-            <img src="/assets/favicon.png" alt="Logo Street League" />
+            <img src="/assets/logo.png" alt="Logo Street League" />
           </div>
           <div className="home-about__copy">
 
