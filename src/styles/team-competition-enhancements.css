@@ -250,8 +250,17 @@ html[data-theme="night"] .team-detail-shortcuts a:focus-visible {
   line-height: .95;
   overflow-wrap: anywhere;
 }
-.competition-list-card__content > p {
+.competition-list-card__season-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
   margin: auto 0 0;
+}
+.competition-list-card__season {
+  margin: 0 !important;
   color: var(--muted);
   font-size: 12px;
 }
@@ -272,14 +281,13 @@ html[data-theme="night"] .team-detail-shortcuts a:focus-visible {
   object-fit: contain;
 }
 .competition-list-card__hint {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
-  max-width: 160px;
-  margin: auto 0 0;
-  padding: 11px 13px;
+  justify-content: center;
+  gap: 9px;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 9px 11px;
   border: 1px solid var(--line);
   color: var(--pink);
   font-size: 10px;
@@ -297,7 +305,7 @@ html[data-theme="night"] .team-detail-shortcuts a:focus-visible {
   justify-content: center;
   padding: 10px 22px;
   border-top: 1px solid var(--line);
-  background: color-mix(in srgb, var(--ink) 96%, var(--white));
+  background: transparent !important;
   position: relative;
   z-index: 1;
 }
@@ -311,12 +319,19 @@ html[data-theme="night"] .team-detail-shortcuts a:focus-visible {
 }
 html[data-theme="night"] .competition-list-card__wordmark {
   border-top-color: rgba(245,247,246,.12);
-  background: #0c110f;
+  background: transparent !important;
 }
 
-/* Match the Home logo's theme-responsive treatment on competition cards. */
-html[data-theme="night"] .competition-list-card__logo,
+/* The wordmark is black in light mode and white in night mode. */
+html[data-theme="light"] .competition-list-card__wordmark img {
+  filter: brightness(0);
+}
 html[data-theme="night"] .competition-list-card__wordmark img {
+  filter: brightness(0) invert(1);
+}
+
+/* The full-color emblem switches to white only in night mode. */
+html[data-theme="night"] .competition-list-card__logo {
   filter: brightness(0) invert(1) drop-shadow(0 18px 38px rgba(0,0,0,.4));
 }
 @media (max-width: 760px) {
