@@ -2097,3 +2097,8 @@ html[data-theme="night"] .home-redesign--ordered .top-seven-pitch::after {
     scroll-behavior: auto !important;
   }
 }
+
+/* Match detail: use a white scoreboard canvas in light mode only. Keep team logos and score colours untouched. */
+html[data-theme="light"] .match-detail-scoreboard {
+  background: #fff !important;
+}
