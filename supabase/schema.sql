@@ -97,8 +97,7 @@ alter table public.players
 
 create table if not exists public.transfer_market_entries (
   id uuid primary key default gen_random_uuid(),
-  competition_id uuid not null,
-  team_id uuid not null,
+  team_id uuid not null references public.teams(id) on delete cascade,
   slot_number smallint not null check (slot_number between 1 and 6),
   player_id uuid references public.players(id) on delete cascade,
   external_first_name text,
@@ -108,8 +107,7 @@ create table if not exists public.transfer_market_entries (
   external_photo_url text,
   notes text,
   created_at timestamptz not null default now(),
-  constraint transfer_market_team_membership_fkey foreign key (competition_id, team_id) references public.competition_teams(competition_id, team_id) on delete cascade,
-  constraint transfer_market_one_entry_per_slot unique (competition_id, team_id, slot_number),
+  constraint transfer_market_one_entry_per_slot unique (team_id, slot_number),
   constraint transfer_market_player_source check (
     player_id is not null or (
       nullif(trim(external_first_name), '') is not null
@@ -117,8 +115,8 @@ create table if not exists public.transfer_market_entries (
     )
   )
 );
-create index if not exists idx_transfer_market_competition_team
-  on public.transfer_market_entries(competition_id, team_id, slot_number);
+create index if not exists idx_transfer_market_team_slot
+  on public.transfer_market_entries(team_id, slot_number);
 create table if not exists matches (
   id uuid primary key default gen_random_uuid(), competition_id uuid not null references competitions(id) on delete cascade,
   home_team_id uuid not null references teams(id), away_team_id uuid not null references teams(id),
