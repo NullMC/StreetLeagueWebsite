@@ -1,8 +1,8 @@
 -- Calcio mercato: six destination slots per team in each competition.
 create table if not exists public.transfer_market_entries (
   id uuid primary key default gen_random_uuid(),
-  competition_id uuid not null references public.competitions(id) on delete cascade,
-  team_id uuid not null references public.teams(id) on delete cascade,
+  competition_id uuid not null,
+  team_id uuid not null,
   slot_number smallint not null check (slot_number between 1 and 6),
   player_id uuid references public.players(id) on delete cascade,
   external_first_name text,
@@ -12,7 +12,7 @@ create table if not exists public.transfer_market_entries (
   external_photo_url text,
   notes text,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
+  constraint transfer_market_team_membership_fkey foreign key (competition_id, team_id) references public.competition_teams(competition_id, team_id) on delete cascade,
   constraint transfer_market_one_entry_per_slot unique (competition_id, team_id, slot_number),
   constraint transfer_market_player_source check (
     player_id is not null or (
