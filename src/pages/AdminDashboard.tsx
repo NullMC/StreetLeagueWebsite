@@ -6,7 +6,7 @@ import { ensureFreshAdminSession, getAuthenticatedAdmin, signInWithAccessCode, u
 import { getCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
 import type { Competition, Match, Player, Team } from "../types";
 
-type Resource = "competitions" | "teams" | "players" | "matches" | "events" | "lineups" | "mvp" | "player_of_month" | "partners" | "active_collaborations" | "social_contents";
+type Resource = "competitions" | "teams" | "players" | "matches" | "events" | "mvp" | "player_of_month" | "partners" | "active_collaborations" | "social_contents";
 type Row = Record<string, any>;
 type Lookups = { competitions: Competition[]; teams: Team[]; players: Player[]; matches: Match[] };
 
@@ -16,7 +16,6 @@ const nav: { key: Resource; label: string }[] = [
   { key: "players", label: "Giocatori" },
   { key: "matches", label: "Partite" },
   { key: "events", label: "Eventi" },
-  { key: "lineups", label: "Formazioni" },
   { key: "mvp", label: "MVP" },
   { key: "player_of_month", label: "POTM & Staff del mese" },
   { key: "partners", label: "Sponsor" },
@@ -26,16 +25,16 @@ const nav: { key: Resource; label: string }[] = [
 
 const labels: Record<Resource, string> = {
   competitions: "Competizioni", teams: "Squadre", players: "Giocatori", matches: "Partite",
-  events: "Eventi", lineups: "Formazioni", mvp: "MVP", player_of_month: "POTM & Staff del mese",
+  events: "Eventi", mvp: "MVP", player_of_month: "POTM & Staff del mese",
   partners: "Sponsor", active_collaborations: "Collab attive", social_contents: "Social / Video",
 };
 const tables: Record<Resource, string> = {
   competitions: "competitions", teams: "teams", players: "players", matches: "matches",
-  events: "match_events", lineups: "match_lineups", mvp: "match_mvp", player_of_month: "player_of_month",
+  events: "match_events", mvp: "match_mvp", player_of_month: "player_of_month",
   partners: "partners", active_collaborations: "active_collaborations", social_contents: "social_contents",
 };
 const keys: Record<Resource, string> = {
-  competitions: "id", teams: "id", players: "id", matches: "id", events: "id", lineups: "id", mvp: "match_id",
+  competitions: "id", teams: "id", players: "id", matches: "id", events: "id", mvp: "match_id",
   player_of_month: "id", partners: "id", active_collaborations: "id", social_contents: "id",
 };
 const fields: Record<Resource, string[]> = {
@@ -44,7 +43,6 @@ const fields: Record<Resource, string[]> = {
   players: ["team_id", "first_name", "last_name", "shirt_number", "position", "profile_image_url", "bg_less_image_url"],
   matches: ["competition_id", "home_team_id", "away_team_id", "matchday", "kickoff_at", "status", "home_score", "away_score", "venue"],
   events: ["match_id", "player_id", "related_player_id", "event_type", "minute", "note"],
-  lineups: ["match_id", "team_id", "player_id", "starter", "shirt_number"],
   mvp: ["match_id", "player_id"],
   player_of_month: ["award_type", "player_id", "card_image_url", "month_label", "note", "published_at"],
   partners: ["name", "logo_url", "activity_image_url", "description", "website_url", "sort_order"],
@@ -54,7 +52,7 @@ const fields: Record<Resource, string[]> = {
 const required: Record<Resource, string[]> = {
   competitions: ["name", "slug", "status"], teams: ["competition_ids", "name", "slug"], players: ["team_id", "first_name", "last_name"],
   matches: ["competition_id", "home_team_id", "away_team_id", "kickoff_at", "status"], events: ["match_id", "event_type"],
-  lineups: ["match_id", "team_id", "player_id"], mvp: ["match_id", "player_id"],
+  mvp: ["match_id", "player_id"],
   player_of_month: ["award_type", "player_id", "month_label", "published_at"], partners: ["name", "logo_url", "description", "website_url"],
   active_collaborations: ["title", "description"], social_contents: ["platform", "title", "content_url"],
 };
@@ -63,7 +61,7 @@ const fieldLabels: Record<string, string> = {
   logo_url: "Logo", competition_id: "Competizione", competition_ids: "Competizioni", accent_hex: "Colore accent",
   team_id: "Squadra", first_name: "Nome", last_name: "Cognome", shirt_number: "Numero", position: "Ruolo", profile_image_url: "Immagine profilo", bg_less_image_url: "Immagine sfondo",
   home_team_id: "Squadra casa", away_team_id: "Squadra ospite", matchday: "Giornata", kickoff_at: "Inizio", home_score: "Gol casa", away_score: "Gol ospite", venue: "Campo",
-  match_id: "Partita", player_id: "Giocatore", related_player_id: "Giocatore correlato", event_type: "Tipo evento", minute: "Minuto", note: "Nota", starter: "Titolare",
+  match_id: "Partita", player_id: "Giocatore", related_player_id: "Giocatore correlato", event_type: "Tipo evento", minute: "Minuto", note: "Nota",
   award_type: "Riconoscimento", card_image_url: "Foto di sfondo della card", activity_image_url: "Immagine attività / copertina sponsor", website_url: "Sito web", sort_order: "Ordine", platform: "Piattaforma", title: "Titolo", description: "Descrizione", thumbnail_url: "Anteprima", content_url: "URL contenuto", published_at: "Pubblicato", flyer_url: "Volantino", cta_url: "URL CTA", month_label: "Mese", statistics_group: "Gruppo competizioni (aggregazione)",
 };
 const options: Record<string, string[]> = {
@@ -81,8 +79,6 @@ function defaults(resource: Resource): Row {
           ? "player"
           : f === "sort_order"
             ? 0
-            : f === "starter"
-            ? true
             : f === "status"
               ? resource === "competitions"
                 ? "upcoming"
@@ -127,10 +123,10 @@ async function readRows(resource: Resource): Promise<Row[]> {
 }
 function relationOptions(field: string, resource: Resource, form: Row, l: Lookups) {
   if (field === "competition_id") return l.competitions.map((x) => ({ id: x.id, label: x.name }));
-  if (field === "team_id") { if (resource === "lineups" && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; return l.teams.filter((x) => ids.includes(x.id)).map((x) => ({ id: x.id, label: x.name })); } return l.teams.map((x) => ({ id: x.id, label: x.name })); }
+  if (field === "team_id") return l.teams.map((x) => ({ id: x.id, label: x.name }));
   if (field === "home_team_id" || field === "away_team_id") return l.teams.filter((x) => !form.competition_id || x.competition_ids?.includes(String(form.competition_id))).map((x) => ({ id: x.id, label: x.name }));
   if (field === "match_id") return l.matches.map((x) => ({ id: x.id, label: `${l.teams.find((t) => t.id === x.home_team_id)?.name ?? "Casa"} - ${l.teams.find((t) => t.id === x.away_team_id)?.name ?? "Ospite"} / ${x.matchday ?? "—"}` }));
-  if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (resource === "lineups" && form.team_id) ps = ps.filter((p) => p.team_id === form.team_id); if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } if (resource === "events" && field === "player_id" && form.event_type === "presidential_penalty") ps = ps.filter((p) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"); if (resource === "player_of_month" && field === "player_id") { const isStaff = (p: Player) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"; ps = ps.filter((p) => form.award_type === "staff" ? isStaff(p) : !isStaff(p)); } return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
+  if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } if (resource === "events" && field === "player_id" && form.event_type === "presidential_penalty") ps = ps.filter((p) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"); if (resource === "player_of_month" && field === "player_id") { const isStaff = (p: Player) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"; ps = ps.filter((p) => form.award_type === "staff" ? isStaff(p) : !isStaff(p)); } return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
   return [];
 }
 function sanitize(resource: Resource, source: Row) {
@@ -149,7 +145,7 @@ function sanitize(resource: Resource, source: Row) {
     ) {
       v = Number(v);
     }
-    out[f] = f === "starter" ? Boolean(v) : v;
+    out[f] = v;
   }
   return out;
 }
@@ -256,11 +252,11 @@ function searchableRowText(resource: Resource, row: Row, l: Lookups) {
 
 function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile }) {
   const [rows, setRows] = useState<Row[]>([]); const [form, setForm] = useState<Row>(() => defaults(resource)); const [editing, setEditing] = useState<string | null>(null); const [loading, setLoading] = useState(true); const [message, setMessage] = useState(""); const [searchTerm, setSearchTerm] = useState(""); const [uploadingField, setUploadingField] = useState<string | null>(null); const [lookups, setLookups] = useState<Lookups>({ competitions: [], teams: [], players: [], matches: [] });
-  const canWrite = profile.role === "super_admin" || profile.role === "admin" || (profile.role === "operator" && ["matches", "events", "lineups", "mvp"].includes(resource));
+  const canWrite = profile.role === "super_admin" || profile.role === "admin" || (profile.role === "operator" && ["matches", "events", "mvp"].includes(resource));
   const refresh = async () => { setLoading(true); try { setRows(await readRows(resource)); } catch (e) { setMessage(errorMessage(e, "Errore di caricamento.")); } finally { setLoading(false); } };
   useEffect(() => { setForm(defaults(resource)); setEditing(null); setMessage(""); setSearchTerm(""); void refresh(); }, [resource]);
   useEffect(() => { Promise.all([getCompetitions(), getTeams(), getPlayers(), getMatches()]).then(([competitions, teams, players, matches]) => setLookups({ competitions, teams, players, matches })).catch(() => undefined); }, [resource]);
-  const setField = (f: string, v: unknown) => setForm((p) => ({ ...p, [f]: v, ...(f === "award_type" && resource === "player_of_month" ? { player_id: "" } : {}), ...(f === "competition_id" ? { home_team_id: "", away_team_id: "" } : {}), ...(f === "match_id" ? { team_id: "", player_id: "", related_player_id: "" } : {}), ...(f === "team_id" && resource === "lineups" ? { player_id: "", related_player_id: "" } : {}) }));
+  const setField = (f: string, v: unknown) => setForm((p) => ({ ...p, [f]: v, ...(f === "award_type" && resource === "player_of_month" ? { player_id: "" } : {}), ...(f === "competition_id" ? { home_team_id: "", away_team_id: "" } : {}), ...(f === "match_id" ? { team_id: "", player_id: "", related_player_id: "" } : {}) }));
   const edit = (r: Row) => { const n = { ...r }; setEditing(String(r[keys[resource]])); if (n.kickoff_at) n.kickoff_at = localDate(n.kickoff_at); if (n.published_at) n.published_at = localDate(n.published_at); setForm(n); setMessage(""); window.scrollTo({ top: 120, behavior: "smooth" }); };
   const cancelEdit = () => { setEditing(null); setForm(defaults(resource)); setMessage(""); };
   const uploadFor = async (field: string, file: File) => { if (!canWrite || !file) return; setUploadingField(field); setMessage(""); try { const folder = field === "activity_image_url" ? "partners/activity" : field === "card_image_url" ? "awards" : field === "flyer_url" ? "collaborations" : field.includes("logo") ? "logos" : field.includes("bg_less") ? "players/bg-less" : field.includes("profile") ? "players/profile" : field.includes("thumbnail") ? "social" : "media"; const url = await uploadMedia(file, folder); setForm((p) => ({ ...p, [field]: url })); setMessage("File caricato. Salva il record per applicare l'URL."); } catch (e) { setMessage(errorMessage(e, "Upload non riuscito.")); } finally { setUploadingField(null); } };
@@ -332,7 +328,6 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
   const remove = async (r: Row) => { if (!supabase || !canWrite) return; const k = r[keys[resource]]; if (!k || !confirm(`Eliminare ${rowLabel(resource, r, lookups)}?`)) return; try { await ensureFreshAdminSession(); const { error } = await supabase.from(tables[resource]).delete().eq(keys[resource], k); if (error) throw error; setMessage("Record eliminato."); await refresh(); } catch (e) { setMessage(errorMessage(e, "Eliminazione non riuscita.")); } }; const normalizedSearch = normalizeSearch(searchTerm.trim()); const filteredRows = normalizedSearch ? rows.filter((r) => searchableRowText(resource, r, lookups).includes(normalizedSearch)) : rows;
   const render = (f: string) => {
     const v = form[f];
-    if (f === "starter") return <label className="check-field"><input type="checkbox" checked={Boolean(v)} onChange={(e) => setField(f, e.target.checked)} /> Titolare</label>;
     if (f === "competition_ids") {
       const selected = Array.isArray(v) ? v.map(String) : [];
       const size = Math.min(6, Math.max(3, lookups.competitions.length));
