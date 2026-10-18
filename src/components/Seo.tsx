@@ -42,6 +42,10 @@ function getSeo(pathname: string): SeoConfig {
     title: "Street League Bari | Torneo di calcio e classifiche",
     description: SITE_DESCRIPTION,
   };
+  if (path === "/calciomercato") return {
+    title: `Calcio mercato | ${SITE_NAME}`,
+    description: "Scopri i nuovi innesti e i trasferimenti delle squadre Street League, organizzati per competizione.",
+  };
   if (path === "/competizioni" || path.startsWith("/competizioni/")) return {
     title: `Competizioni di calcio | ${SITE_NAME}`,
     description: "Consulta competizioni, gironi, squadre partecipanti e risultati della Street League Bari.",
