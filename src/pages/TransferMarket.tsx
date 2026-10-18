@@ -53,7 +53,7 @@ function TransferPlayerCard({
   const position = player?.position || entry.external_position;
   const shirtNumber = player?.shirt_number ?? entry.external_shirt_number;
   const photo = player?.profile_image_url || player?.bg_less_image_url || entry.external_photo_url;
-  const imageClass = player?.profile_image_url
+  const imageClass = !player || player.profile_image_url
     ? "player-card__photo-image"
     : "player-card__photo-image player-card__photo-image--cutout";
 
