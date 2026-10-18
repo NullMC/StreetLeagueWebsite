@@ -94,6 +94,31 @@ create table if not exists players (
 alter table public.players
   add column if not exists profile_image_url text,
   add column if not exists bg_less_image_url text;
+
+create table if not exists public.transfer_market_entries (
+  id uuid primary key default gen_random_uuid(),
+  competition_id uuid not null,
+  team_id uuid not null,
+  slot_number smallint not null check (slot_number between 1 and 6),
+  player_id uuid references public.players(id) on delete cascade,
+  external_first_name text,
+  external_last_name text,
+  external_position text,
+  external_shirt_number integer check (external_shirt_number is null or external_shirt_number >= 0),
+  external_photo_url text,
+  notes text,
+  created_at timestamptz not null default now(),
+  constraint transfer_market_team_membership_fkey foreign key (competition_id, team_id) references public.competition_teams(competition_id, team_id) on delete cascade,
+  constraint transfer_market_one_entry_per_slot unique (competition_id, team_id, slot_number),
+  constraint transfer_market_player_source check (
+    player_id is not null or (
+      nullif(trim(external_first_name), '') is not null
+      and nullif(trim(external_last_name), '') is not null
+    )
+  )
+);
+create index if not exists idx_transfer_market_competition_team
+  on public.transfer_market_entries(competition_id, team_id, slot_number);
 create table if not exists matches (
   id uuid primary key default gen_random_uuid(), competition_id uuid not null references competitions(id) on delete cascade,
   home_team_id uuid not null references teams(id), away_team_id uuid not null references teams(id),
@@ -166,7 +191,7 @@ from players p left join match_events e on e.player_id=p.id group by p.id;
 alter table profiles enable row level security;
 alter table active_collaborations enable row level security;
 alter table player_of_month enable row level security; alter table competitions enable row level security; alter table teams enable row level security; alter table competition_teams enable row level security;
-alter table players enable row level security; alter table matches enable row level security; alter table match_lineups enable row level security;
+alter table players enable row level security; alter table public.transfer_market_entries enable row level security; alter table matches enable row level security; alter table match_lineups enable row level security;
 alter table match_events enable row level security; alter table match_mvp enable row level security; alter table partners enable row level security; alter table social_contents enable row level security;
 
 create or replace function is_staff(required_role app_role default 'operator') returns boolean language sql stable security definer set search_path=public as $$
@@ -182,6 +207,8 @@ create policy "public read teams" on teams for select using (true);
 create policy "public read competition teams" on competition_teams for select using (true);
 create policy "admin manage competition teams" on competition_teams for all using (is_staff('admin')) with check (is_staff('admin'));
 create policy "public read players" on players for select using (true);
+create policy "public read transfer market entries" on public.transfer_market_entries for select using (true);
+create policy "admin manage transfer market entries" on public.transfer_market_entries for all using (is_staff('admin')) with check (is_staff('admin'));
 create policy "public read matches" on matches for select using (true);
 create policy "public read lineups" on match_lineups for select using (true);
 create policy "public read events" on match_events for select using (true);
