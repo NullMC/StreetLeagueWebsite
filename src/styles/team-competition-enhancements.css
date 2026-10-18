@@ -313,6 +313,12 @@ html[data-theme="night"] .competition-list-card__wordmark {
   border-top-color: rgba(245,247,246,.12);
   background: #0c110f;
 }
+
+/* Match the Home logo's theme-responsive treatment on competition cards. */
+html[data-theme="night"] .competition-list-card__logo,
+html[data-theme="night"] .competition-list-card__wordmark img {
+  filter: brightness(0) invert(1) drop-shadow(0 18px 38px rgba(0,0,0,.4));
+}
 @media (max-width: 760px) {
   .team-detail-hero .detail-hero__team-heading {
     flex-direction: column;
