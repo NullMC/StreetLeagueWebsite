@@ -114,7 +114,7 @@ export default function MatchDetail() {
 
               <div className="score">
                 {match.status === "scheduled"
-                  ? "— : —"
+                  ? "VS"
                   : `${match.home_score ?? 0} : ${match.away_score ?? 0}`}
               </div>
 
