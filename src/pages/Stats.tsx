@@ -250,7 +250,7 @@ export default function Stats() {
           <EmptyState title="Nessuna statistica attiva" text="Le classifiche verranno mostrate quando ci saranno competizioni attive." />
         ) : (
           <div className="stats-groups-list">
-            {groupStats.map(({ group, players, staff, playersByCompetition }) => (
+            {groupStats.map(({ group, players, staff }) => (
               <section className="stats-competition-group" id={"stats-group-" + encodeURIComponent(group.id)} key={group.id}>
                 <SectionTitle eyebrow="Competizioni attive" title={group.name} variant="group" />
                 {group.competitions.length > 1 ? (
