@@ -45,7 +45,8 @@ function BestStatsCard({ group, players, staff, config }: {
   staff: StaffRankingEntry[];
   config: (typeof cards)[number];
 }) {
-  const staffLeader = staff[0];
+  const staffLeader =
+    staff[0] && staff[0].presidential_penalties > 0 ? staff[0] : undefined;
   const statKey = config.key === "staff" ? null : config.key;
   const ranked = statKey ? [...players]
     .filter((player) => statKey === "clean_sheets" ? isGoalkeeper(player) : true)
@@ -55,29 +56,61 @@ function BestStatsCard({ group, players, staff, config }: {
       (a.last_name + " " + a.first_name).localeCompare(b.last_name + " " + b.first_name, "it"),
     ) : [];
   const leader = config.key === "staff" ? staffLeader : ranked[0];
-  const name = leader
-    ? config.key === "staff"
-      ? (leader as StaffRankingEntry).player.first_name + " " + (leader as StaffRankingEntry).player.last_name
-      : (leader as RankedPlayer).first_name + " " + (leader as RankedPlayer).last_name
-    : "Nessun record";
+  const staffPlayer = config.key === "staff" && leader
+    ? (leader as StaffRankingEntry).player
+    : null;
+  const player = staffPlayer ?? (leader && config.key !== "staff"
+    ? leader as RankedPlayer
+    : null);
+  const name = player ? player.first_name + " " + player.last_name : "Nessun record";
   const value = leader
     ? config.key === "staff"
       ? (leader as StaffRankingEntry).presidential_penalties
       : (leader as RankedPlayer).stats[statKey!]
     : 0;
+  const profilePhoto = player?.profile_image_url?.trim();
 
-  return (
+  const cardContent = (
+    <>
+      <span className="eyebrow">{config.title}</span>
+      {leader ? (
+        <>
+          {profilePhoto ? (
+            <img
+              className="best-stats-card__photo"
+              src={profilePhoto}
+              alt={"Foto profilo di " + name}
+              loading="lazy"
+            />
+          ) : null}
+          <h3>{name}</h3>
+          <div className="stat-card__value">{String(value).padStart(2, "0")}</div>
+          <span className="best-stats-card__unit">{config.unit}</span>
+          <span className="best-stats-card__hint">Classifica completa <span aria-hidden="true">↗</span></span>
+        </>
+      ) : (
+        <div className="best-stats-card__empty-copy">
+          <h3>Nessun record</h3>
+          <p>{config.key === "staff"
+            ? "La classifica si attiverà quando sarà registrato almeno un gol dello staff."
+            : "Non sono ancora presenti statistiche registrate per questo riconoscimento."}</p>
+        </div>
+      )}
+    </>
+  );
+
+  return leader ? (
     <a
       className="stat-card best-stats-card"
       href={"/statistiche/" + encodeURIComponent(group.id) + "/" + config.key}
       aria-label={"Apri " + config.title + " per " + group.name}
     >
-      <span className="eyebrow">{config.title}</span>
-      <h3>{name}</h3>
-      <div className="stat-card__value">{String(value).padStart(2, "0")}</div>
-      <span className="best-stats-card__unit">{config.unit}</span>
-      <span className="best-stats-card__hint">Classifica completa <span aria-hidden="true">↗</span></span>
+      {cardContent}
     </a>
+  ) : (
+    <div className="stat-card best-stats-card best-stats-card--empty" aria-label={config.title + ": nessun record"}>
+      {cardContent}
+    </div>
   );
 }
 
@@ -163,16 +196,6 @@ export default function Stats() {
           <p>Record individuali e riconoscimenti, sempre riferiti alle competizioni attive.</p>
         </header>
 
-        {!loading && groupStats.length > 0 ? (
-          <nav className="stats-competition-nav" aria-label="Vai alla competizione">
-            {groupStats.map(({ group }) => (
-              <a href={"#stats-group-" + encodeURIComponent(group.id)} key={group.id}>
-                <span>{group.name}</span>
-              </a>
-            ))}
-          </nav>
-        ) : null}
-
         <div className="stats-tools">
           <label className="stats-player-search">
             <span>Cerca un giocatore</span>
@@ -241,44 +264,6 @@ export default function Stats() {
                   ))}
                 </div>
 
-                <div className="stats-player-lists">
-                  {group.competitions.map((competition) => {
-                    const competitionPlayers = [...(playersByCompetition[competition.id] ?? [])].sort(
-                      (a, b) => (a.last_name + " " + a.first_name).localeCompare(b.last_name + " " + b.first_name, "it"),
-                    );
-                    return (
-                      <section className="stats-player-list" id={"stats-competition-" + encodeURIComponent(competition.id)} key={competition.id}>
-                        <SectionTitle eyebrow="Giocatori" title={competition.name} variant="subsection" />
-                        {competitionPlayers.length ? (
-                          <div className="admin-table-wrap">
-                            <table className="admin-table">
-                              <thead>
-                                <tr>
-                                  <th>#</th><th>N° maglia</th><th>Giocatore</th><th>Squadra</th>
-                                  <th>Gol</th><th>Assist</th><th>Gialli</th><th>Rossi</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {competitionPlayers.map((player, index) => (
-                                  <tr key={player.id}>
-                                    <td>{String(index + 1).padStart(2, "0")}</td>
-                                    <td>{player.shirt_number ?? "—"}</td>
-                                    <td><a href={"/giocatori/" + player.id}>{player.first_name} {player.last_name}</a></td>
-                                    <td>{player.team_name}</td>
-                                    <td>{player.stats.goals}</td><td>{player.stats.assists}</td>
-                                    <td>{player.stats.yellow_cards}</td><td>{player.stats.red_cards}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        ) : (
-                          <EmptyState title="Nessun giocatore" text="I giocatori registrati per questa competizione verranno mostrati qui." />
-                        )}
-                      </section>
-                    );
-                  })}
-                </div>
               </section>
             ))}
           </div>
