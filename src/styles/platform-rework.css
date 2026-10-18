@@ -1895,3 +1895,68 @@ html[data-theme="night"] .home-redesign--ordered .top-seven-pitch::after {
     font-size: 6px;
   }
 }
+
+/* Match detail: keep both teams and the score in one horizontal row on mobile. */
+.match-detail-scoreboard {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: clamp(8px, 2.5vw, 28px) !important;
+}
+.match-detail-scoreboard .score-team {
+  min-width: 0;
+  width: 100%;
+}
+.match-detail-scoreboard .score-team__identity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(5px, 1.5vw, 12px);
+  min-width: 0;
+}
+.match-detail-scoreboard .score-team__identity h2 {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(11px, 2.8vw, 22px);
+  line-height: 1.1;
+}
+.match-detail-scoreboard .score-team__logo {
+  flex: 0 0 auto;
+  width: clamp(26px, 7vw, 56px);
+  height: clamp(26px, 7vw, 56px);
+  object-fit: contain;
+}
+.match-detail-scoreboard .score {
+  min-width: max-content;
+  white-space: nowrap;
+  font-size: clamp(21px, 5.5vw, 44px);
+  line-height: 1;
+}
+.match-detail-scoreboard .score-team.right .score-team__identity {
+  flex-direction: row;
+}
+@media (max-width: 520px) {
+  .match-detail-scoreboard {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+  .match-detail-scoreboard .score-team__identity {
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+  }
+  .match-detail-scoreboard .score-team.right .score-team__identity {
+    flex-direction: column;
+  }
+  .match-detail-scoreboard .score-team__identity h2 {
+    font-size: clamp(10px, 3vw, 14px);
+  }
+  .match-detail-scoreboard .score-team__logo {
+    width: clamp(24px, 8vw, 38px);
+    height: clamp(24px, 8vw, 38px);
+  }
+  .match-detail-scoreboard .score {
+    font-size: clamp(20px, 6vw, 30px);
+  }
+}
