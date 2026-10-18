@@ -394,3 +394,19 @@ html[data-theme="night"] .competition-list-card__logo {
     transition: none;
   }
 }
+
+
+/* Keep the kickoff time legible beside the date on all match cards. */
+.match-card__date-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.match-card__time {
+  color: var(--pink);
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
