@@ -249,7 +249,7 @@ export default function TeamDetail() {
                     </div>
                   </>
                 ) : (
-                  <EmptyState title="Nessuna performance disponibile" text="I risultati appariranno qui quando saranno registrati i punteggi delle partite disputate." />
+                  <EmptyState title="" text="I risultati appariranno qui quando saranno registrati i punteggi delle partite disputate." />
                 )}
               </section>
             )}
