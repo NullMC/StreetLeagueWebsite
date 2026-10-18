@@ -46,8 +46,7 @@ function TransferPlayerCard({
   entry,
   destinationTeam,
   competitionId,
-  teamById,
-  onPlatformMissing,
+  teamById
 }: {
   slotNumber: number;
   entry?: MarketEntry;
@@ -245,7 +244,7 @@ export default function TransferMarket() {
                               {Array.from({ length: 6 }, (_, index) => {
                                 const slotNumber = index + 1;
                                 const entry = entryBySlot.get(`${competition.id}:${team.id}:${slotNumber}`);
-                                return <TransferPlayerCard key={slotNumber} slotNumber={slotNumber} entry={entry} destinationTeam={team} competitionId={competition.id} teamById={teamById} onPlatformMissing={marketTableMissing} />;
+                                return <TransferPlayerCard key={slotNumber} slotNumber={slotNumber} entry={entry} destinationTeam={team} competitionId={competition.id} teamById={teamById} />;
                               })}
                             </div>
                           </section>
