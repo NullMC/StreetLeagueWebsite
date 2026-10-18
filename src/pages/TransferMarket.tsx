@@ -40,7 +40,7 @@ function TransferPlayerCard({
         aria-label={"Slot " + slotNumber + " disponibile"}
       >
         <div className="player-card__content">
-          <span className="eyebrow">{"Slot " + slotNumber + " / Disponibile"}</span>
+          <span className="eyebrow">{"Slot " + slotNumber + ""}</span>
           <h3>Slot<br />disponibile</h3>
         </div>
       </article>
@@ -170,7 +170,6 @@ export default function TransferMarket() {
         {marketTableMissing ? (
           <div className="transfer-market-alert">
             <strong>Calcio mercato da collegare al database</strong>
-            <p>Per una nuova installazione esegui <code>supabase/17_transfer_market.sql</code>. Se avevi già creato la tabella precedente, esegui <code>supabase/18_transfer_market_team_slots.sql</code>.</p>
           </div>
         ) : null}
 
@@ -196,7 +195,7 @@ export default function TransferMarket() {
         {selectedTeam ? (
           <section className="transfer-market-selected" aria-live="polite">
             <div className="transfer-market-selected__heading">
-              <div className="transfer-market-selected__identity">
+              <div className="transfer-market-selected__identity" style={{ borderRadius: selectedTeam.logo_url ? "50%" : "0" }}>
                 {selectedTeam.logo_url ? (
                   <img src={selectedTeam.logo_url} alt="" aria-hidden="true" />
                 ) : null}
