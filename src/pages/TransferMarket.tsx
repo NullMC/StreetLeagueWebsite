@@ -136,7 +136,7 @@ export default function TransferMarket() {
         if (mounted) setEntries((data ?? []) as unknown as MarketEntry[]);
       } catch (error) {
         console.error("Transfer market data error:", error);
-        if (mounted) setPageError("Non è stato possibile caricare i dati del calcio mercato.");
+        if (mounted) setPageError("Non è stato possibile caricare i dati del calciomercato.");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -162,13 +162,13 @@ export default function TransferMarket() {
     <PageShell>
       <div className="page transfer-market-page">
         <header className="transfer-market-hero">
-          <SectionTitle title="Calcio mercato" />
+          <SectionTitle title="Calciomercato" />
         </header>
 
         {pageError ? <p className="transfer-market-alert">{pageError}</p> : null}
         {marketTableMissing ? (
           <div className="transfer-market-alert">
-            <strong>Calcio mercato da collegare al database</strong>
+            <strong>Calciomercato da collegare al database</strong>
           </div>
         ) : null}
 
@@ -176,7 +176,8 @@ export default function TransferMarket() {
           <p className="transfer-market-state">Caricamento squadre…</p>
         ) : teams.length ? (
           <section className="transfer-market-team-picker" aria-label="Selezione squadra">
-            <SectionTitle title="Squadre" variant="subsection" />
+            <h1 className="transfer-market-team-picker__heading">Acquisti Squadre</h1>
+            <p>Cliccare sul logo di una squadra per visionare i relativi acquisti.</p>
             <TeamCarousel
               teams={teams}
               label="Seleziona una squadra per aprire il suo calcio mercato"
@@ -221,10 +222,6 @@ export default function TransferMarket() {
           </section>
         ) : (
           <div className="transfer-market-selection-empty">
-            <EmptyState
-              title="Seleziona una squadra"
-              text="Clicca sul logo di una squadra per aprire qui sotto i suoi sei slot di mercato."
-            />
           </div>
         )}
       </div>
