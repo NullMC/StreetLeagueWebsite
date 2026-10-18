@@ -499,3 +499,217 @@ html[data-theme="night"] .match-card__venue {
 .team-performance__result-date {
   font-size: 9px;
 }
+
+
+/* Match-card footer: status and venue share one aligned row. */
+.match-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 18px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.match-card .match-card__footer .match-card__status {
+  position: static !important;
+  inset: auto !important;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin: 0 !important;
+  line-height: 1.2;
+}
+.match-card__venue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .045em;
+  line-height: 1.25;
+  text-align: right;
+  text-transform: uppercase;
+}
+.match-card__venue svg {
+  flex: 0 0 auto;
+  color: var(--pink);
+  font-size: 13px;
+}
+
+/* Drawer navigation: keep each icon and label anchored on the left at mobile widths. */
+.mobile-menu--mui .mobile-menu__nav {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  text-align: left !important;
+}
+.mobile-menu--mui .mobile-menu__nav > a {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 13px !important;
+  width: 100% !important;
+  padding: 15px 18px !important;
+  text-align: left !important;
+}
+.mobile-menu--mui .mobile-menu__nav > a > .mobile-menu__nav-icon {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 24px !important;
+  width: 24px !important;
+  min-width: 24px !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+.mobile-menu--mui .mobile-menu__nav > a > .mobile-menu__nav-label {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  text-align: left !important;
+}
+.mobile-menu--mui .mobile-menu__nav > a > .mobile-menu__nav-arrow {
+  flex: 0 0 24px !important;
+  width: 24px !important;
+  min-width: 24px !important;
+  margin-left: auto !important;
+  text-align: right !important;
+}
+
+/* Larger right-hand emblem on competition cards while staying inside the card. */
+.competition-list-card__layout {
+  grid-template-columns: minmax(0, 1fr) minmax(155px, 42%);
+  min-height: 270px;
+}
+.competition-list-card__side {
+  min-width: 0;
+  padding-left: 16px;
+}
+.competition-list-card__logo {
+  width: 100%;
+  max-width: none;
+  height: clamp(175px, 22vw, 245px);
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Team pages use the same compact, centered layout on desktop and mobile. */
+.detail-hero.team-detail-hero {
+  padding: clamp(42px, 5vw, 62px) 18px clamp(24px, 3vw, 36px) !important;
+}
+.team-detail-hero .detail-hero__inner {
+  width: 100%;
+  max-width: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+.team-detail-hero .detail-hero__team-heading {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px;
+  width: 100%;
+  margin: 0 !important;
+  text-align: center !important;
+}
+.team-detail-hero .detail-hero__team-heading h1 {
+  margin: 0 !important;
+  font-size: clamp(38px, 5.5vw, 64px) !important;
+  line-height: .9 !important;
+  text-align: center !important;
+}
+.team-detail-hero .detail-hero__team-heading .detail-hero__team-logo {
+  width: clamp(108px, 13vw, 158px) !important;
+  height: clamp(108px, 13vw, 158px) !important;
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
+  border-radius: 50% !important;
+  object-fit: contain;
+  object-position: center;
+  overflow: hidden;
+}
+.team-detail-page {
+  padding-top: 0 !important;
+  padding-bottom: 28px;
+}
+.team-detail-page .team-detail-shortcuts {
+  justify-content: center;
+  margin-top: 0;
+}
+.team-detail-page .team-detail-shortcuts button {
+  flex: 0 0 auto;
+}
+.team-detail-page .team-detail-section {
+  padding-top: 12px;
+  padding-bottom: 24px;
+}
+
+/* Compact performance markers without enlarging their surrounding section. */
+.team-performance__results {
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.team-performance__result {
+  min-width: 48px;
+  gap: 3px;
+  padding: 5px 7px;
+  border-radius: 4px;
+}
+.team-performance__result-letter {
+  width: 22px;
+  height: 22px;
+  font-size: 13px;
+}
+.team-performance__result-score {
+  font-size: 11px;
+}
+.team-performance__result-date {
+  font-size: 8px;
+}
+
+@media (max-width: 760px) {
+  .competition-list-card__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(118px, 38%);
+    gap: 12px;
+    min-height: 225px;
+    padding: 16px;
+  }
+  .competition-list-card__side {
+    padding-left: 12px;
+    gap: 8px;
+  }
+  .competition-list-card__logo {
+    height: clamp(128px, 35vw, 185px);
+    max-width: 100%;
+  }
+  .team-detail-page .team-detail-shortcuts {
+    justify-content: flex-start;
+  }
+  .team-detail-hero .detail-hero__team-heading .detail-hero__team-logo {
+    width: clamp(108px, 33vw, 148px) !important;
+    height: clamp(108px, 33vw, 148px) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .match-card__footer {
+    align-items: flex-start;
+    gap: 7px 10px;
+  }
+  .match-card__venue {
+    font-size: 8px;
+    white-space: normal;
+  }
+}
