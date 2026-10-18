@@ -168,7 +168,7 @@ export default function TeamDetail() {
           <div className="page team-detail-page">
             <nav className="team-detail-shortcuts" aria-label="Sezioni della pagina squadra">
               <button type="button" aria-pressed={selectedSection === "players"} className={selectedSection === "players" ? "is-active" : ""} onClick={() => setSelectedSection("players")}><FontAwesomeIcon icon={faUsers} aria-hidden="true" /><span>Giocatori</span></button>
-              <button type="button" aria-pressed={selectedSection === "staff"} className={selectedSection === "staff" ? "is-active" : ""} onClick={() => setSelectedSection("staff")}><FontAwesomeIcon icon={faUserTie} aria-hidden="true" /><span>Membri staff</span></button>
+              <button type="button" aria-pressed={selectedSection === "staff"} className={selectedSection === "staff" ? "is-active" : ""} onClick={() => setSelectedSection("staff")}><FontAwesomeIcon icon={faUserTie} aria-hidden="true" /><span>staff</span></button>
               <button type="button" aria-pressed={selectedSection === "matches"} className={selectedSection === "matches" ? "is-active" : ""} onClick={() => setSelectedSection("matches")}><FontAwesomeIcon icon={faCalendarDays} aria-hidden="true" /><span>Partite</span></button>
               <button type="button" aria-pressed={selectedSection === "performance"} className={selectedSection === "performance" ? "is-active" : ""} onClick={() => setSelectedSection("performance")}><FontAwesomeIcon icon={faChartLine} aria-hidden="true" /><span>Performance</span></button>
             </nav>
@@ -184,7 +184,7 @@ export default function TeamDetail() {
 
             {selectedSection === "staff" && (
               <section className="section team-detail-section team-staff-section" id="team-staff">
-                <SectionTitle eyebrow="" title="Membri staff" variant="subsection" />
+                <SectionTitle eyebrow="" title="staff" variant="subsection" />
                 {staffMembers.length ? <RosterCards members={staffMembers} staff /> : (
                   <EmptyState title="Nessun membro staff" text="I membri con ruolo STAFF appariranno qui quando saranno registrati per questa squadra." />
                 )}
