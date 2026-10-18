@@ -217,18 +217,6 @@ export async function getMatchEvents(matchId: string): Promise<MatchEvent[]> {
   );
 }
 
-export async function getMatchLineups(matchId: string): Promise<MatchLineup[]> {
-  if (!supabase) return [];
-  return getRows<MatchLineup>(
-    supabase
-      .from("match_lineups")
-      .select("*")
-      .eq("match_id", matchId)
-      .order("team_id")
-      .order("starter", { ascending: false }),
-  );
-}
-
 export async function getMatchMvp(matchId: string): Promise<MatchMvp | null> {
   if (!supabase) return null;
   const { data, error } = await supabase
