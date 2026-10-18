@@ -713,3 +713,88 @@ html[data-theme="night"] .match-card__venue {
     white-space: normal;
   }
 }
+
+/* Match venue: keep the pitch pictogram the same visual scale as its label. */
+.match-card .match-card__venue .match-card__stadium-icon {
+  display: block;
+  width: 15px;
+  height: 10px;
+  min-width: 15px;
+  flex: 0 0 15px;
+  font-size: inherit;
+  stroke-width: 1.6;
+}
+
+/* Let the competition emblem occupy the right-hand panel, clipped to that panel
+   so it can never overlap the title, season, action, or card edge. */
+.competition-list-card__layout {
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 47%);
+  min-height: 300px;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.competition-list-card__side {
+  position: relative;
+  min-width: 0;
+  min-height: 280px;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  gap: 0;
+  padding: 0 0 0 14px;
+}
+
+.competition-list-card__side .competition-list-card__logo {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(1.3);
+  transform-origin: center;
+}
+
+@media (max-width: 760px) {
+  .competition-list-card__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(124px, 42%);
+    min-height: 235px;
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .competition-list-card__side {
+    min-height: 205px;
+    padding-left: 9px;
+  }
+
+  .competition-list-card__side .competition-list-card__logo {
+    min-height: 205px;
+    transform: scale(1.12);
+  }
+}
+
+@media (max-width: 420px) {
+  .competition-list-card__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(112px, 40%);
+    gap: 8px;
+    padding: 13px;
+  }
+
+  .competition-list-card__side {
+    min-height: 190px;
+    padding-left: 7px;
+  }
+
+  .competition-list-card__side .competition-list-card__logo {
+    min-height: 190px;
+    transform: scale(1.08);
+  }
+}
+
