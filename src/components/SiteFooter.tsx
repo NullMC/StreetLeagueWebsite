@@ -10,6 +10,7 @@ export function SiteFooter() {
         <div>
           <span>NAVIGAZIONE</span>
           <a href="/competizioni">Competizioni</a>
+          <a href="/calciomercato">Calcio mercato</a>
           <a href="/partite">Calendario</a>
           <a href="/classifica">Classifica</a>
           <a href="/#home-teams">Squadre</a>
