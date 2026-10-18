@@ -90,7 +90,7 @@ export default function Competitions() {
                   </div>
                   <div className="competition-list-card__wordmark" aria-hidden="true">
                     <img
-                      src="/assets/scritta.webp"
+                      src="/assets/scritta.png"
                       alt=""
                       onError={(event) => { event.currentTarget.style.opacity = "0"; }}
                     />
