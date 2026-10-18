@@ -1960,3 +1960,59 @@ html[data-theme="night"] .home-redesign--ordered .top-seven-pitch::after {
     font-size: clamp(20px, 6vw, 30px);
   }
 }
+
+/* Match detail mobile scoreboard: home, score and away always share one row. */
+@media (max-width: 640px) {
+  .match-detail-score .scoreboard.match-detail-scoreboard {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) clamp(54px, 18vw, 72px) minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 16px 8px !important;
+    text-align: center !important;
+  }
+  .match-detail-score .scoreboard.match-detail-scoreboard > .score-team {
+    display: block !important;
+    min-width: 0;
+    width: auto;
+  }
+  .match-detail-score .scoreboard.match-detail-scoreboard .score-team__identity,
+  .match-detail-score .scoreboard.match-detail-scoreboard .score-team.right .score-team__identity {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    min-width: 0;
+  }
+  .match-detail-score .scoreboard.match-detail-scoreboard .score-team__logo {
+    width: clamp(27px, 8vw, 36px) !important;
+    height: clamp(27px, 8vw, 36px) !important;
+    flex-basis: clamp(27px, 8vw, 36px) !important;
+  }
+  .match-detail-score .scoreboard.match-detail-scoreboard .score-team__identity h2 {
+    max-width: 100%;
+    margin: 0 !important;
+    font-size: clamp(10px, 3.4vw, 16px) !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+    overflow-wrap: anywhere;
+  }
+  .match-detail-score .scoreboard.match-detail-scoreboard > .score {
+    min-width: 0;
+    padding: 0;
+    font-size: clamp(25px, 8vw, 42px) !important;
+    line-height: 1 !important;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 360px) {
+  .match-detail-score .scoreboard.match-detail-scoreboard {
+    grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr) !important;
+    gap: 4px !important;
+    padding-inline: 5px !important;
+  }
+  .match-detail-score .scoreboard.match-detail-scoreboard > .score {
+    font-size: 25px !important;
+  }
+}
