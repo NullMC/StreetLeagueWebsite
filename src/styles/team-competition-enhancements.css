@@ -798,3 +798,109 @@ html[data-theme="night"] .match-card__venue {
   }
 }
 
+/* Compact competition cards: remove excess vertical space and give it to the emblem. */
+.competition-list-card__layout {
+  grid-template-columns: minmax(0, 1fr) minmax(175px, 47%);
+  min-height: 178px;
+  gap: 12px;
+  padding: 15px 18px;
+}
+
+.competition-list-card__content {
+  gap: 7px;
+}
+
+.competition-list-card__title h3 {
+  font-size: clamp(24px, 2.8vw, 36px);
+  line-height: 0.98;
+}
+
+.competition-list-card__season-row {
+  gap: 8px;
+}
+
+.competition-list-card__side {
+  min-height: 148px;
+  padding-left: 12px;
+}
+
+.competition-list-card__side .competition-list-card__logo {
+  height: 100%;
+  min-height: 148px;
+  max-height: none;
+  transform: scale(1.48);
+  object-fit: contain;
+}
+
+.competition-list-card__wordmark {
+  min-height: 56px;
+  padding: 5px 16px;
+}
+
+.competition-list-card__wordmark img {
+  height: 46px;
+}
+
+@media (max-width: 760px) {
+  .competition-list-card__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(125px, 42%);
+    min-height: 166px;
+    gap: 10px;
+    padding: 13px 14px;
+  }
+
+  .competition-list-card__content {
+    gap: 6px;
+  }
+
+  .competition-list-card__title h3 {
+    font-size: clamp(22px, 4vw, 30px);
+  }
+
+  .competition-list-card__side {
+    min-height: 136px;
+    padding-left: 9px;
+  }
+
+  .competition-list-card__side .competition-list-card__logo {
+    min-height: 136px;
+    transform: scale(1.28);
+  }
+
+  .competition-list-card__wordmark {
+    min-height: 50px;
+    padding: 4px 12px;
+  }
+
+  .competition-list-card__wordmark img {
+    height: 42px;
+  }
+}
+
+@media (max-width: 420px) {
+  .competition-list-card__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(108px, 40%);
+    min-height: 154px;
+    gap: 7px;
+    padding: 11px 12px;
+  }
+
+  .competition-list-card__side {
+    min-height: 126px;
+    padding-left: 7px;
+  }
+
+  .competition-list-card__side .competition-list-card__logo {
+    min-height: 126px;
+    transform: scale(1.18);
+  }
+
+  .competition-list-card__wordmark {
+    min-height: 46px;
+  }
+
+  .competition-list-card__wordmark img {
+    height: 38px;
+  }
+}
+
