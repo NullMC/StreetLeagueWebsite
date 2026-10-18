@@ -10,13 +10,7 @@ import {
   getMatchMvp,
   getPlayers,
 } from "../lib/api";
-import type {
-  Match,
-  Team,
-  MatchEvent,
-  MatchMvp,
-  Player,
-} from "../types";
+import type { Match, Team, MatchEvent, MatchMvp, Player } from "../types";
 
 export default function MatchDetail() {
   const { matchId = "" } = useParams();
@@ -36,38 +30,42 @@ export default function MatchDetail() {
         if (!mounted) return;
         setMatch(currentMatch);
 
-        if (!currentMatch) return;
+        if (!currentMatch) {
+          setHome(null);
+          setAway(null);
+          setEvents([]);
+          setMvp(null);
+          setPlayers([]);
+          return;
+        }
 
-        const [teams, currentEvents, currentLineups, currentMvp, allPlayers] =
-          await Promise.all([
-            getTeams(),
-            getMatchEvents(currentMatch.id),
-            getMatchMvp(currentMatch.id),
-            getPlayers(),
-          ]);
+        const [teams, currentEvents, currentMvp, allPlayers] = await Promise.all([
+          getTeams(),
+          getMatchEvents(currentMatch.id),
+          getMatchMvp(currentMatch.id),
+          getPlayers(),
+        ]);
 
         if (!mounted) return;
-
-        setHome(
-          teams.find((team) => team.id === currentMatch.home_team_id) ?? null,
-        );
-        setAway(
-          teams.find((team) => team.id === currentMatch.away_team_id) ?? null,
-        );
+        setHome(teams.find((team) => team.id === currentMatch.home_team_id) ?? null);
+        setAway(teams.find((team) => team.id === currentMatch.away_team_id) ?? null);
         setEvents(currentEvents);
         setMvp(currentMvp);
         setPlayers(allPlayers);
-      } catch {
+      } catch (error) {
+        console.error("Match detail load error:", error);
         if (mounted) {
           setMatch(null);
+          setHome(null);
+          setAway(null);
           setEvents([]);
           setMvp(null);
+          setPlayers([]);
         }
       }
     }
 
     void load();
-
     return () => {
       mounted = false;
     };
@@ -78,7 +76,6 @@ export default function MatchDetail() {
     return player ? `${player.first_name} ${player.last_name}` : "Giocatore";
   }
 
-
   return (
     <PageShell>
       {match ? (
@@ -88,17 +85,13 @@ export default function MatchDetail() {
               <span className="eyebrow">
                 {match.matchday || "Match"} / {match.status}
               </span>
-
               <h1>
                 {home?.name || "Home"}{" "}
                 <span style={{ color: "var(--pink)" }}>VS</span>{" "}
                 {away?.name || "Away"}
               </h1>
-
               <div className="detail-meta">
-                <span>
-                  {new Date(match.kickoff_at).toLocaleString("it-IT")}
-                </span>
+                <span>{new Date(match.kickoff_at).toLocaleString("it-IT")}</span>
                 <span>{match.venue || "Venue —"}</span>
               </div>
             </div>
@@ -141,7 +134,7 @@ export default function MatchDetail() {
           </div>
 
           <div className="page">
-            <SectionTitle eyebrow="" title="Eventi"  variant="subsection" />
+            <SectionTitle title="Eventi" variant="subsection" />
 
             {events.length ? (
               <div className="timeline">
@@ -167,22 +160,19 @@ export default function MatchDetail() {
             ) : (
               <EmptyState
                 title="Nessun evento"
-                text="Gol, cartellini, cambi, assist e falli appariranno quando saranno registrati."
+                text="Gol, cartellini, cambi e assist appariranno qui quando saranno registrati."
               />
             )}
 
-            {mvp && (
+            {mvp ? (
               <div className="section">
-              {mvp && (
-                <div className="section">
-                  <div className="stat-card">
-                    <span className="eyebrow">Player of the match</span>
-                    <h3>{playerName(mvp.player_id)}</h3>
-                    <div className="stat-card__value">MVP</div>
-                  </div>
+                <div className="stat-card">
+                  <span className="eyebrow">Player of the match</span>
+                  <h3>{playerName(mvp.player_id)}</h3>
+                  <div className="stat-card__value">MVP</div>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : null}
           </div>
         </>
       ) : (
