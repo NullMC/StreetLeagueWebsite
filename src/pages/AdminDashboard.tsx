@@ -6,7 +6,7 @@ import { ensureFreshAdminSession, getAuthenticatedAdmin, signInWithAccessCode, u
 import { getCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
 import type { Competition, Match, Player, Team } from "../types";
 
-type Resource = "competitions" | "teams" | "players" | "matches" | "events" | "mvp" | "player_of_month" | "partners" | "active_collaborations" | "social_contents";
+type Resource = "competitions" | "teams" | "players" | "matches" | "events" | "mvp" | "player_of_month" | "partners" | "active_collaborations" | "social_contents" | "transfer_market_entries";
 type Row = Record<string, any>;
 type Lookups = { competitions: Competition[]; teams: Team[]; players: Player[]; matches: Match[] };
 
@@ -21,21 +21,22 @@ const nav: { key: Resource; label: string }[] = [
   { key: "partners", label: "Sponsor" },
   { key: "active_collaborations", label: "Collab attive" },
   { key: "social_contents", label: "Social / Video" },
+  { key: "transfer_market_entries", label: "Calcio mercato" },
 ];
 
 const labels: Record<Resource, string> = {
   competitions: "Competizioni", teams: "Squadre", players: "Giocatori", matches: "Partite",
   events: "Eventi", mvp: "MVP", player_of_month: "POTM & Staff del mese",
-  partners: "Sponsor", active_collaborations: "Collab attive", social_contents: "Social / Video",
+  partners: "Sponsor", active_collaborations: "Collab attive", social_contents: "Social / Video", transfer_market_entries: "Calcio mercato",
 };
 const tables: Record<Resource, string> = {
   competitions: "competitions", teams: "teams", players: "players", matches: "matches",
   events: "match_events", mvp: "match_mvp", player_of_month: "player_of_month",
-  partners: "partners", active_collaborations: "active_collaborations", social_contents: "social_contents",
+  partners: "partners", active_collaborations: "active_collaborations", social_contents: "social_contents", transfer_market_entries: "transfer_market_entries",
 };
 const keys: Record<Resource, string> = {
   competitions: "id", teams: "id", players: "id", matches: "id", events: "id", mvp: "match_id",
-  player_of_month: "id", partners: "id", active_collaborations: "id", social_contents: "id",
+  player_of_month: "id", partners: "id", active_collaborations: "id", social_contents: "id", transfer_market_entries: "id",
 };
 const fields: Record<Resource, string[]> = {
   competitions: ["name", "slug", "status", "season_label", "start_date", "end_date", "statistics_group"],
@@ -48,6 +49,7 @@ const fields: Record<Resource, string[]> = {
   partners: ["name", "logo_url", "activity_image_url", "description", "website_url", "sort_order"],
   active_collaborations: ["title", "description", "flyer_url", "cta_url", "sort_order"],
   social_contents: ["platform", "title", "thumbnail_url", "content_url", "published_at"],
+  transfer_market_entries: ["competition_id", "team_id", "slot_number", "player_id", "external_first_name", "external_last_name", "external_position", "external_shirt_number", "external_photo_url", "notes"],
 };
 const required: Record<Resource, string[]> = {
   competitions: ["name", "slug", "status"], teams: ["competition_ids", "name", "slug"], players: ["team_id", "first_name", "last_name"],
@@ -55,6 +57,7 @@ const required: Record<Resource, string[]> = {
   mvp: ["match_id", "player_id"],
   player_of_month: ["award_type", "player_id", "month_label", "published_at"], partners: ["name", "logo_url", "description", "website_url"],
   active_collaborations: ["title", "description"], social_contents: ["platform", "title", "content_url"],
+  transfer_market_entries: ["competition_id", "team_id", "slot_number"],
 };
 const fieldLabels: Record<string, string> = {
   name: "Nome", slug: "Slug", status: "Stato", season_label: "Stagione", start_date: "Data inizio", end_date: "Data fine",
@@ -62,7 +65,7 @@ const fieldLabels: Record<string, string> = {
   team_id: "Squadra", first_name: "Nome", last_name: "Cognome", shirt_number: "Numero", position: "Ruolo", profile_image_url: "Immagine profilo", bg_less_image_url: "Immagine sfondo",
   home_team_id: "Squadra casa", away_team_id: "Squadra ospite", matchday: "Giornata", kickoff_at: "Inizio", home_score: "Gol casa", away_score: "Gol ospite", venue: "Campo",
   match_id: "Partita", player_id: "Giocatore", related_player_id: "Giocatore correlato", event_type: "Tipo evento", minute: "Minuto", note: "Nota",
-  award_type: "Riconoscimento", card_image_url: "Foto di sfondo della card", activity_image_url: "Immagine attività / copertina sponsor", website_url: "Sito web", sort_order: "Ordine", platform: "Piattaforma", title: "Titolo", description: "Descrizione", thumbnail_url: "Anteprima", content_url: "URL contenuto", published_at: "Pubblicato", flyer_url: "Volantino", cta_url: "URL CTA", month_label: "Mese", statistics_group: "Gruppo competizioni (aggregazione)",
+  award_type: "Riconoscimento", card_image_url: "Foto di sfondo della card", activity_image_url: "Immagine attività / copertina sponsor", website_url: "Sito web", sort_order: "Ordine", platform: "Piattaforma", title: "Titolo", description: "Descrizione", thumbnail_url: "Anteprima", content_url: "URL contenuto", published_at: "Pubblicato", flyer_url: "Volantino", cta_url: "URL CTA", month_label: "Mese", statistics_group: "Gruppo competizioni (aggregazione)", slot_number: "Slot (1-6)", external_first_name: "Nome giocatore esterno", external_last_name: "Cognome giocatore esterno", external_position: "Ruolo giocatore esterno", external_shirt_number: "Numero maglia", external_photo_url: "Foto giocatore esterno", notes: "Nota mercato",
 };
 const options: Record<string, string[]> = {
   competitionStatus: ["upcoming", "active", "finished"], matchStatus: ["scheduled", "live", "finished", "postponed"], platform: ["youtube", "instagram", "tiktok"], award_type: ["player", "staff"], event_type: ["goal", "assist", "yellow_card", "red_card", "substitution", "foul", "presidential_penalty", "other"],
@@ -75,7 +78,9 @@ function defaults(resource: Resource): Row {
       f,
       f === "competition_ids"
         ? []
-        : f === "award_type"
+        : f === "slot_number"
+          ? 1
+          : f === "award_type"
           ? "player"
           : f === "sort_order"
             ? 0
@@ -123,10 +128,10 @@ async function readRows(resource: Resource): Promise<Row[]> {
 }
 function relationOptions(field: string, resource: Resource, form: Row, l: Lookups) {
   if (field === "competition_id") return l.competitions.map((x) => ({ id: x.id, label: x.name }));
-  if (field === "team_id") return l.teams.map((x) => ({ id: x.id, label: x.name }));
+  if (field === "team_id") { const teams = resource === "transfer_market_entries" && form.competition_id ? l.teams.filter((x) => x.competition_ids?.includes(String(form.competition_id))) : l.teams; return teams.map((x) => ({ id: x.id, label: x.name })); }
   if (field === "home_team_id" || field === "away_team_id") return l.teams.filter((x) => !form.competition_id || x.competition_ids?.includes(String(form.competition_id))).map((x) => ({ id: x.id, label: x.name }));
   if (field === "match_id") return l.matches.map((x) => ({ id: x.id, label: `${l.teams.find((t) => t.id === x.home_team_id)?.name ?? "Casa"} - ${l.teams.find((t) => t.id === x.away_team_id)?.name ?? "Ospite"} / ${x.matchday ?? "—"}` }));
-  if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } if (resource === "events" && field === "player_id" && form.event_type === "presidential_penalty") ps = ps.filter((p) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"); if (resource === "player_of_month" && field === "player_id") { const isStaff = (p: Player) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"; ps = ps.filter((p) => form.award_type === "staff" ? isStaff(p) : !isStaff(p)); } return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
+  if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (resource === "transfer_market_entries") ps = ps.filter((p) => p.role?.trim().toUpperCase() !== "STAFF" && p.position?.trim().toUpperCase() !== "STAFF"); if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } if (resource === "events" && field === "player_id" && form.event_type === "presidential_penalty") ps = ps.filter((p) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"); if (resource === "player_of_month" && field === "player_id") { const isStaff = (p: Player) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"; ps = ps.filter((p) => form.award_type === "staff" ? isStaff(p) : !isStaff(p)); } return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
   return [];
 }
 function sanitize(resource: Resource, source: Row) {
@@ -140,7 +145,7 @@ function sanitize(resource: Resource, source: Row) {
       v = null;
     }
     if (
-      ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f) &&
+      ["shirt_number", "home_score", "away_score", "minute", "sort_order", "slot_number", "external_shirt_number"].includes(f) &&
       v != null
     ) {
       v = Number(v);
@@ -159,6 +164,19 @@ function validate(resource: Resource, payload: Row, l: Lookups) {
     }
     if (competitionIds.some((id) => !l.competitions.some((competition) => competition.id === id))) {
       throw new Error("Una o più competizioni selezionate non sono valide.");
+    }
+  }
+  if (resource === "transfer_market_entries") {
+    const competition = l.competitions.find((x) => x.id === payload.competition_id);
+    const team = l.teams.find((x) => x.id === payload.team_id);
+    if (!competition || !team || !team.competition_ids?.includes(competition.id)) throw new Error("La squadra selezionata non appartiene alla competizione scelta.");
+    const slot = Number(payload.slot_number);
+    if (!Number.isInteger(slot) || slot < 1 || slot > 6) throw new Error("Seleziona uno slot compreso tra 1 e 6.");
+    if (payload.player_id) {
+      const player = l.players.find((x) => x.id === payload.player_id);
+      if (!player || player.role?.trim().toUpperCase() === "STAFF" || player.position?.trim().toUpperCase() === "STAFF") throw new Error("Seleziona un giocatore valido, non un membro dello staff.");
+    } else if (!String(payload.external_first_name ?? "").trim() || !String(payload.external_last_name ?? "").trim()) {
+      throw new Error("Seleziona un giocatore registrato oppure inserisci nome e cognome del giocatore esterno.");
     }
   }
   if (resource === "matches") {
@@ -193,7 +211,9 @@ function displayCellValue(resource: Resource, field: string, row: Row, l: Lookup
   }
   if (field === "player_id") {
     const p = l.players.find((x) => x.id === row[field]);
-    return p ? `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` : "—";
+    if (p) return `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}`;
+    if (resource === "transfer_market_entries") return `${row.external_first_name ?? ""} ${row.external_last_name ?? ""}`.trim() || "Giocatore esterno";
+    return "—";
   }
   if (resource === "player_of_month" && field === "award_type") return row.award_type === "staff" ? "Staff del mese" : "POTM";
   if (field === "team_id") return l.teams.find((x) => x.id === row[field])?.name ?? "—";
@@ -201,7 +221,7 @@ function displayCellValue(resource: Resource, field: string, row: Row, l: Lookup
   return String(row[field] ?? "—");
 }
 
-function rowLabel(resource: Resource, row: Row, l: Lookups) { if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource); if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim(); if (resource === "player_of_month") { const p = l.players.find((x) => x.id === row.player_id); const kind = row.award_type === "staff" ? "Staff del mese" : "POTM"; return `${kind} · ${row.month_label ?? ""} / ${p ? `${p.first_name} ${p.last_name}` : "Profilo non disponibile"}`; } if (resource === "matches") return `${l.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa"} - ${l.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite"}`; if (resource === "active_collaborations") return String(row.title ?? "Collaborazione"); return String(row.title ?? row.name ?? resource); }
+function rowLabel(resource: Resource, row: Row, l: Lookups) { if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource); if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim(); if (resource === "player_of_month") { const p = l.players.find((x) => x.id === row.player_id); const kind = row.award_type === "staff" ? "Staff del mese" : "POTM"; return `${kind} · ${row.month_label ?? ""} / ${p ? `${p.first_name} ${p.last_name}` : "Profilo non disponibile"}`; } if (resource === "matches") return `${l.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa"} - ${l.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite"}`; if (resource === "transfer_market_entries") { const team = l.teams.find((x) => x.id === row.team_id); const player = l.players.find((x) => x.id === row.player_id); return `${team?.name ?? "Squadra"} · Slot ${row.slot_number} / ${player ? `${player.first_name} ${player.last_name}` : `${row.external_first_name ?? ""} ${row.external_last_name ?? ""}`.trim()}`; } if (resource === "active_collaborations") return String(row.title ?? "Collaborazione"); return String(row.title ?? row.name ?? resource); }
 
 function normalizeSearch(value: unknown) {
   return String(value ?? "")
@@ -256,10 +276,10 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
   const refresh = async () => { setLoading(true); try { setRows(await readRows(resource)); } catch (e) { setMessage(errorMessage(e, "Errore di caricamento.")); } finally { setLoading(false); } };
   useEffect(() => { setForm(defaults(resource)); setEditing(null); setMessage(""); setSearchTerm(""); void refresh(); }, [resource]);
   useEffect(() => { Promise.all([getCompetitions(), getTeams(), getPlayers(), getMatches()]).then(([competitions, teams, players, matches]) => setLookups({ competitions, teams, players, matches })).catch(() => undefined); }, [resource]);
-  const setField = (f: string, v: unknown) => setForm((p) => ({ ...p, [f]: v, ...(f === "award_type" && resource === "player_of_month" ? { player_id: "" } : {}), ...(f === "competition_id" ? { home_team_id: "", away_team_id: "" } : {}), ...(f === "match_id" ? { team_id: "", player_id: "", related_player_id: "" } : {}) }));
+  const setField = (f: string, v: unknown) => setForm((p) => ({ ...p, [f]: v, ...(f === "award_type" && resource === "player_of_month" ? { player_id: "" } : {}), ...(f === "competition_id" ? { home_team_id: "", away_team_id: "", ...(resource === "transfer_market_entries" ? { team_id: "" } : {}) } : {}), ...(resource === "transfer_market_entries" && f === "player_id" && v ? { external_first_name: "", external_last_name: "", external_position: "", external_shirt_number: "", external_photo_url: "" } : {}), ...(f === "match_id" ? { team_id: "", player_id: "", related_player_id: "" } : {}) }));
   const edit = (r: Row) => { const n = { ...r }; setEditing(String(r[keys[resource]])); if (n.kickoff_at) n.kickoff_at = localDate(n.kickoff_at); if (n.published_at) n.published_at = localDate(n.published_at); setForm(n); setMessage(""); window.scrollTo({ top: 120, behavior: "smooth" }); };
   const cancelEdit = () => { setEditing(null); setForm(defaults(resource)); setMessage(""); };
-  const uploadFor = async (field: string, file: File) => { if (!canWrite || !file) return; setUploadingField(field); setMessage(""); try { const folder = field === "activity_image_url" ? "partners/activity" : field === "card_image_url" ? "awards" : field === "flyer_url" ? "collaborations" : field.includes("logo") ? "logos" : field.includes("bg_less") ? "players/bg-less" : field.includes("profile") ? "players/profile" : field.includes("thumbnail") ? "social" : "media"; const url = await uploadMedia(file, folder); setForm((p) => ({ ...p, [field]: url })); setMessage("File caricato. Salva il record per applicare l'URL."); } catch (e) { setMessage(errorMessage(e, "Upload non riuscito.")); } finally { setUploadingField(null); } };
+  const uploadFor = async (field: string, file: File) => { if (!canWrite || !file) return; setUploadingField(field); setMessage(""); try { const folder = field === "activity_image_url" ? "partners/activity" : field === "card_image_url" ? "awards" : field === "external_photo_url" ? "players/market" : field === "flyer_url" ? "collaborations" : field.includes("logo") ? "logos" : field.includes("bg_less") ? "players/bg-less" : field.includes("profile") ? "players/profile" : field.includes("thumbnail") ? "social" : "media"; const url = await uploadMedia(file, folder); setForm((p) => ({ ...p, [field]: url })); setMessage("File caricato. Salva il record per applicare l'URL."); } catch (e) { setMessage(errorMessage(e, "Upload non riuscito.")); } finally { setUploadingField(null); } };
   const save = async (e: FormEvent) => {
     e.preventDefault();
     if (!supabase || !canWrite) return;
@@ -267,6 +287,13 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
     try {
       await ensureFreshAdminSession();
       const p = sanitize(resource, form);
+      if (resource === "transfer_market_entries") {
+        if (p.player_id) {
+          ["external_first_name", "external_last_name", "external_position", "external_shirt_number", "external_photo_url"].forEach((field) => { p[field] = null; });
+        } else {
+          p.player_id = null;
+        }
+      }
       if (resource === "partners" && !editing) p.tier = "gold";
       validate(resource, { ...p, ...(resource === "teams" ? { competition_ids: form.competition_ids } : {}) }, lookups);
 
@@ -353,7 +380,7 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
         </select>
       );
     }
-    const rel = ["competition_id", "team_id", "home_team_id", "away_team_id", "match_id", "player_id", "related_player_id"]; if (rel.includes(f)) { const opts = relationOptions(f, resource, form, lookups); return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>; } if (f === "status") { const opts = resource === "competitions" ? options.competitionStatus : options.matchStatus; return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required><option value="">Seleziona</option>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select>; } if (options[f]) return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{options[f].map((o) => <option key={o} value={o}>{f === "event_type" && o === "presidential_penalty" ? "Rigore presidenziale" : f === "award_type" && o === "player" ? "POTM" : f === "award_type" && o === "staff" ? "Staff del mese" : o}</option>)}</select>; if (f === "statistics_group") return <><input type="text" value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} placeholder="es. Street Cup" /><small className="admin-help-text">Inserisci lo stesso nome in tutte le competizioni da riunire. Saranno mostrate sotto un’unica voce pubblica e aggregate nelle statistiche. Lascia vuoto per mantenerla separata.</small></> ; if (f === "description") return <RichTextEditor value={String(v ?? "")} onChange={(x) => setField(f, x)} />; if (f === "note") return <textarea rows={5} value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} />; const dt = f === "kickoff_at" || f === "published_at"; const date = f === "start_date" || f === "end_date"; const num = ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f); const uploadable = isUploadableImage(f); const url = ["cta_url", "website_url", "content_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url", "card_image_url", "activity_image_url"].includes(f); const input = <input type={dt ? "datetime-local" : date ? "date" : num ? "number" : url ? "url" : "text"} value={dt ? localDate(v) : v == null ? "" : String(v)} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)} min={num ? 0 : undefined} placeholder={f === "month_label" ? "Settembre 2026" : undefined} />; if (!uploadable) return input; return <div className="admin-input-row">{input}<input className="file-input" type="file" accept="image/*" disabled={!canWrite || uploadingField === f} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadFor(f, file); e.currentTarget.value = ""; }} />{uploadingField === f && <small className="admin-help-text">Caricamento…</small>}</div>; };
+    const rel = ["competition_id", "team_id", "home_team_id", "away_team_id", "match_id", "player_id", "related_player_id"]; if (rel.includes(f)) { const opts = relationOptions(f, resource, form, lookups); return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>; } if (f === "status") { const opts = resource === "competitions" ? options.competitionStatus : options.matchStatus; return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required><option value="">Seleziona</option>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select>; } if (options[f]) return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{options[f].map((o) => <option key={o} value={o}>{f === "event_type" && o === "presidential_penalty" ? "Rigore presidenziale" : f === "award_type" && o === "player" ? "POTM" : f === "award_type" && o === "staff" ? "Staff del mese" : o}</option>)}</select>; if (f === "slot_number") return <select value={String(v ?? 1)} onChange={(e) => setField(f, e.target.value)} required><option value="1">Slot 1</option><option value="2">Slot 2</option><option value="3">Slot 3</option><option value="4">Slot 4</option><option value="5">Slot 5</option><option value="6">Slot 6</option></select>; if (f === "statistics_group") return <><input type="text" value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} placeholder="es. Street Cup" /><small className="admin-help-text">Inserisci lo stesso nome in tutte le competizioni da riunire. Saranno mostrate sotto un’unica voce pubblica e aggregate nelle statistiche. Lascia vuoto per mantenerla separata.</small></> ; if (f === "description") return <RichTextEditor value={String(v ?? "")} onChange={(x) => setField(f, x)} />; if (f === "note") return <textarea rows={5} value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} />; const dt = f === "kickoff_at" || f === "published_at"; const date = f === "start_date" || f === "end_date"; const num = ["shirt_number", "home_score", "away_score", "minute", "sort_order"].includes(f); const uploadable = isUploadableImage(f); const url = ["cta_url", "website_url", "content_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url", "card_image_url", "activity_image_url", "external_photo_url"].includes(f); const input = <input type={dt ? "datetime-local" : date ? "date" : num ? "number" : url ? "url" : "text"} value={dt ? localDate(v) : v == null ? "" : String(v)} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)} min={num ? 0 : undefined} placeholder={f === "month_label" ? "Settembre 2026" : undefined} />; if (!uploadable) return input; return <div className="admin-input-row">{input}<input className="file-input" type="file" accept="image/*" disabled={!canWrite || uploadingField === f} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadFor(f, file); e.currentTarget.value = ""; }} />{uploadingField === f && <small className="admin-help-text">Caricamento…</small>}</div>; };
   return <div className="admin-resource"><div className="admin-resource__head"><div><span className="eyebrow">CRUD / {labels[resource]}</span><h2>{editing ? "Modifica record" : "Nuovo record"}</h2></div>{editing && <button className="btn btn--ghost" type="button" onClick={cancelEdit}>Annulla</button>}</div>{canWrite ? <form className="admin-form" onSubmit={save}><div className="admin-form__grid">{fields[resource].map((f) => f === "competition_ids" ? <fieldset className="admin-fieldset" key={f}><legend>{labelize(f)}</legend><p className="admin-fieldset__help">Seleziona tutte le competizioni a cui partecipa la squadra.</p><div className="admin-checkbox-group">{lookups.competitions.map((competition) => { const selected = Array.isArray(form.competition_ids) && form.competition_ids.map(String).includes(competition.id); return <label className="admin-checkbox" key={competition.id}><input type="checkbox" checked={selected} onChange={() => { const current = Array.isArray(form.competition_ids) ? form.competition_ids.map(String) : []; setField("competition_ids", selected ? current.filter((id) => id !== competition.id) : [...current, competition.id]); }} /><span>{competition.name}</span></label>; })}</div></fieldset> : <label key={f}>{labelize(f)}{render(f)}</label>)}</div>{message && <p className="admin-message">{message}</p>}<button className="btn btn--primary" type="submit">{editing ? "Salva modifiche" : "Crea record"}</button></form> : <div className="empty-state"><div className="empty-state__mark">R</div><div><h3>Accesso in sola lettura</h3><p>Questo ruolo non può modificare questa sezione.</p></div></div>}<div className="admin-records">
   <div className="admin-search">
     <div className="admin-search__field">
@@ -403,7 +430,7 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
 </div></div>;
 }
 
-function isUploadableImage(field: string) { return field.includes("logo") || field.includes("image") || field.includes("thumbnail") || field === "flyer_url" || field === "card_image_url"; }
+function isUploadableImage(field: string) { return field.includes("logo") || field.includes("image") || field.includes("photo") || field.includes("thumbnail") || field === "flyer_url" || field === "card_image_url"; }
 
 function Login({ onLogin }: { onLogin: (p: AdminProfile) => void }) { const [u, setU] = useState(""); const [c, setC] = useState(""); const [m, setM] = useState(""); const [busy, setBusy] = useState(false); const submit = async (e: FormEvent) => { e.preventDefault(); setBusy(true); setM(""); try { const r = await signInWithAccessCode(u, c); if (r.error) throw r.error; const p = await getAuthenticatedAdmin(); if (!p) throw new Error("Profilo amministratore non valido."); onLogin(p); } catch (e) { setM(errorMessage(e, "Accesso non riuscito.")); } finally { setBusy(false); } }; return <div className="admin-login"><span className="eyebrow">Street League / Admin</span><h1>Back office</h1><p>Accedi con username e codice permanente per gestire la piattaforma.</p>{m && <p className="admin-error">{m}</p>}<form onSubmit={submit}><input value={u} onChange={(e) => setU(e.target.value)} placeholder="Username" /><input type="password" value={c} onChange={(e) => setC(e.target.value)} placeholder="Codice di accesso" /><button className="btn btn--primary" disabled={busy}>{busy ? "Accesso…" : "Accedi"}</button></form></div>; }
 
