@@ -85,6 +85,7 @@ export default function TeamDetail() {
 
   useEffect(() => {
     let mounted = true;
+    setSelectedSection(null);
     void (async () => {
       try {
         const teams = await getTeams();
