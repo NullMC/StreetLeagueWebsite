@@ -9,16 +9,26 @@ import {
   faYoutube,
   faTiktok,
 } from "@fortawesome/free-brands-svg-icons";
-import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowsRotate,
+  faChartLine,
+  faHandshake,
+  faHouse,
+  faListOl,
+  faLock,
+  faTrophy,
+  faMoon,
+  faSun,
+} from "@fortawesome/free-solid-svg-icons";
 
 const links = [
-  ["Home", "/"],
-  ["Competizioni", "/competizioni"],
-  ["Classifica", "/classifica"],
-  ["Statistiche", "/statistiche"],
-  ["Calciomercato", "/calciomercato"],
-  ["Sponsor & collabora", "/partner"],
-  ["Admin", "/admin"],
+  { label: "Home", to: "/", icon: faHouse },
+  { label: "Competizioni", to: "/competizioni", icon: faTrophy },
+  { label: "Classifica", to: "/classifica", icon: faListOl },
+  { label: "Statistiche", to: "/statistiche", icon: faChartLine },
+  { label: "Calciomercato", to: "/calciomercato", icon: faArrowsRotate },
+  { label: "Sponsor & collabora", to: "/partner", icon: faHandshake },
+  { label: "Admin", to: "/admin", icon: faLock },
 ];
 
 const socialLinks = [
@@ -135,9 +145,13 @@ export function SiteHeader() {
           <IconButton className="mobile-menu__close" type="button" aria-label="Chiudi menu" onClick={() => setOpen(false)} size="small">×</IconButton>
         </div>
         <nav className="mobile-menu__nav" aria-label="Navigazione principale">
-          {links.map(([label, to]) => (
+          {links.map(({ label, to, icon }) => (
             <NavLink key={to} to={to} end={to === "/"} onClick={() => setOpen(false)}>
-              <span>{label}</span><span aria-hidden="true">↗</span>
+              <span className="mobile-menu__nav-icon" aria-hidden="true">
+                <FontAwesomeIcon icon={icon} />
+              </span>
+              <span className="mobile-menu__nav-label">{label}</span>
+              <span className="mobile-menu__nav-arrow" aria-hidden="true">↗</span>
             </NavLink>
           ))}
         </nav>
