@@ -163,7 +163,6 @@ export default function TransferMarket() {
       <div className="page transfer-market-page">
         <header className="transfer-market-hero">
           <SectionTitle title="Calcio mercato" />
-          <p>Seleziona una squadra per visualizzare i sei slot disponibili per i nuovi innesti.</p>
         </header>
 
         {pageError ? <p className="transfer-market-alert">{pageError}</p> : null}
@@ -195,10 +194,7 @@ export default function TransferMarket() {
         {selectedTeam ? (
           <section className="transfer-market-selected" aria-live="polite">
             <div className="transfer-market-selected__heading">
-              <div className="transfer-market-selected__identity" style={{ borderRadius: selectedTeam.logo_url ? "50%" : "0" }}>
-                {selectedTeam.logo_url ? (
-                  <img src={selectedTeam.logo_url} alt="" aria-hidden="true" />
-                ) : null}
+              <div className="transfer-market-selected__identity">
                 <div>
                   <h2>{selectedTeam.name}</h2>
                 </div>
