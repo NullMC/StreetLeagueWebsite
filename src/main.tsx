@@ -19,6 +19,7 @@ import "./styles/night-mode.css";
 import "./styles/material-overhaul.css";
 import "./styles/platform-rework.css";
 import "./styles/transfer-market.css";
+import "./styles/team-competition-enhancements.css";
 import HomeRedesigned from "./pages/HomeRedesigned";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
