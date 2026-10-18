@@ -79,13 +79,15 @@ export default function Competitions() {
                       <div className="competition-list-card__title">
                         <h3>{listing.name}</h3>
                       </div>
-                      <p>{listing.competitions[0].season_label || "—"}</p>
+                      <div className="competition-list-card__season-row">
+                        <p className="competition-list-card__season">{listing.competitions[0].season_label || "—"}</p>
+                        <span className="competition-list-card__hint">
+                          Apri <span aria-hidden="true">↗</span>
+                        </span>
+                      </div>
                     </div>
                     <div className="competition-list-card__side">
                       <img className="competition-list-card__logo" src="/assets/logo.png" alt="Street League" />
-                      <span className="competition-list-card__hint">
-                        Apri <span aria-hidden="true">↗</span>
-                      </span>
                     </div>
                   </div>
                   <div className="competition-list-card__wordmark" aria-hidden="true">
