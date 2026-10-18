@@ -8,7 +8,7 @@ type Candidate = {
   player: Player; team: Team; role: Role | null; appearances: number; goals: number; assists: number;
   mvps: number; cleanSheets: number; yellowCards: number; redCards: number; points: number;
 };
-type Lineup = { goalkeeper: Candidate | null; defenders: Array<Candidate | null>; midfielders: Array<Candidate | null>; attacker: Candidate | null };
+type Lineup = { defenders: Array<Candidate | null>; midfielders: Array<Candidate | null>; attackers: Array<Candidate | null> };
 
 function roleFromPosition(value: string | null | undefined): Role | null {
   const p = (value || "")
@@ -102,7 +102,7 @@ function makeLineup(matches: Match[], teams: Team[], players: Player[], events: 
       usedTeams.add(selected.team.id);return selected;
     });
   }
-  return {goalkeeper:pick("goalkeeper",1)[0]||null,defenders:pick("defender",3),midfielders:pick("midfielder",2),attacker:pick("attacker",1)[0]||null};
+  return {defenders:pick("defender",2),midfielders:pick("midfielder",2),attackers:pick("attacker",2)};
 }
 
 function PlayerSlot({candidate,label}:{candidate:Candidate|null;label:string}){
@@ -145,7 +145,7 @@ export function TopSevenOfMonth(){
       unsubscribe();
     };
   },[]);
-  const empty:Lineup={goalkeeper:null,defenders:[null,null,null],midfielders:[null,null],attacker:null};
+  const empty:Lineup={defenders:[null,null],midfielders:[null,null],attackers:[null,null]};
   const current=lineup||empty;
   return <Paper component="section" variant="outlined" className="top-seven-section" elevation={0}>
     <div className="top-seven-heading"><div><Typography component="h2" variant="h2">Top 7 del mese</Typography>
@@ -153,10 +153,9 @@ export function TopSevenOfMonth(){
     </div>
     <Typography component="p" className="top-seven-method">Selezione mensile per squadra basata su presenze, gol, assist, MVP, clean sheet e cartellini registrati.</Typography>
     {loading?<div className="top-seven-loading"><CircularProgress size={30}/></div>:<div className="top-seven-pitch">
-      <div className="top-seven-row top-seven-row--attack"><PlayerSlot candidate={current.attacker} label="Attaccante"/></div>
+      <div className="top-seven-row top-seven-row--attack">{current.attackers.map((candidate,index)=><PlayerSlot key={candidate?.player.id||"att-"+index} candidate={candidate} label="Attaccante"/>)}</div>
       <div className="top-seven-row top-seven-row--midfield">{current.midfielders.map((candidate,index)=><PlayerSlot key={candidate?.player.id||"mid-"+index} candidate={candidate} label="Centrocampista"/>)}</div>
       <div className="top-seven-row top-seven-row--defence">{current.defenders.map((candidate,index)=><PlayerSlot key={candidate?.player.id||"def-"+index} candidate={candidate} label="Difensore"/>)}</div>
-      <div className="top-seven-row top-seven-row--keeper"><PlayerSlot candidate={current.goalkeeper} label="Portiere"/></div>
     </div>}
   </Paper>;
 }
