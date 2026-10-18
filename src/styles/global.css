@@ -2595,14 +2595,6 @@ section,
   font-weight: 900;
   letter-spacing: 0.1em;
 }
-.match-card__score-placeholder {
-  display: block;
-  color: var(--muted);
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
 @media (max-width: 640px) {
   .match-card__teams {
     grid-template-columns: minmax(0, 1fr) 62px minmax(0, 1fr);
@@ -2626,9 +2618,6 @@ section,
   }
   .match-card__teams > .match-card__score {
     font-size: 20px;
-  }
-  .match-card__score-placeholder {
-    font-size: 8px;
   }
 }
 
