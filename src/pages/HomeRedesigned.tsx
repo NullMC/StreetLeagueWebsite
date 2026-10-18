@@ -215,8 +215,8 @@ export default function HomeRedesigned() {
 
             <h1 id="home-about-title">La Street League raccontata da vicino.</h1>
             <p>
-              Questa è la piattaforma dedicata alla community della Street League, dove puoi seguire le competizioni e restare aggiornato sulle ultime novità.
-              Squadre, partite, classifiche e statistiche aggiornate.
+              Questa è la piattaforma dedicata alla community della Street League, dove puoi seguire le competizioni e restare aggiornato sulle ultime novità,
+              squadre, partite, classifiche e statistiche aggiornate.
             </p>
           </div>
         </div>

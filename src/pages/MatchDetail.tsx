@@ -134,7 +134,7 @@ export default function MatchDetail() {
           </div>
 
           <div className="page">
-            <SectionTitle title="Eventi" variant="subsection" />
+            <SectionTitle title="Storico partita" variant="subsection" />
 
             {events.length ? (
               <div className="timeline">
