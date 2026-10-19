@@ -1078,3 +1078,62 @@ html[data-theme="night"] .match-card__venue {
   }
 }
 
+/* Tighten the team-section button grid: keep two intrinsic-width columns
+   centered together instead of stretching them across the whole page. */
+.team-detail-page .team-detail-shortcuts {
+  grid-template-columns: max-content max-content;
+  justify-content: center !important;
+  justify-items: center;
+  width: min(100%, 100%);
+  column-gap: 28px;
+  row-gap: 10px;
+}
+
+.team-detail-page .team-detail-shortcuts button:nth-child(1),
+.team-detail-page .team-detail-shortcuts button:nth-child(2) {
+  justify-self: center;
+  transform: none;
+}
+
+.team-detail-page .team-detail-shortcuts button:nth-child(3) {
+  transform: translateX(10px);
+}
+
+.team-detail-page .team-detail-shortcuts button:nth-child(4) {
+  transform: translateX(-10px);
+}
+
+@media (max-width: 480px) {
+  .team-detail-page .team-detail-shortcuts {
+    column-gap: 20px;
+    row-gap: 9px;
+  }
+
+  .team-detail-page .team-detail-shortcuts button:nth-child(3) {
+    transform: translateX(7px);
+  }
+
+  .team-detail-page .team-detail-shortcuts button:nth-child(4) {
+    transform: translateX(-7px);
+  }
+}
+
+@media (max-width: 360px) {
+  .team-detail-page .team-detail-shortcuts {
+    column-gap: 13px;
+  }
+
+  .team-detail-page .team-detail-shortcuts button {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .team-detail-page .team-detail-shortcuts button:nth-child(3) {
+    transform: translateX(3px);
+  }
+
+  .team-detail-page .team-detail-shortcuts button:nth-child(4) {
+    transform: translateX(-3px);
+  }
+}
+
