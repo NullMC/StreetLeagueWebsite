@@ -1137,3 +1137,50 @@ html[data-theme="night"] .match-card__venue {
   }
 }
 
+/* Equal-width team navigation buttons, sized as the widest label and kept compact. */
+.team-detail-page .team-detail-shortcuts {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  width: min(100%, 320px) !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  justify-content: center !important;
+  justify-items: stretch !important;
+  column-gap: 8px !important;
+  row-gap: 9px !important;
+}
+
+.team-detail-page .team-detail-shortcuts button {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  justify-self: stretch !important;
+  padding: 10px 8px !important;
+  gap: 7px !important;
+  white-space: nowrap;
+}
+
+.team-detail-page .team-detail-shortcuts button:nth-child(1),
+.team-detail-page .team-detail-shortcuts button:nth-child(2),
+.team-detail-page .team-detail-shortcuts button:nth-child(3),
+.team-detail-page .team-detail-shortcuts button:nth-child(4) {
+  justify-self: stretch !important;
+  transform: none !important;
+}
+
+@media (max-width: 480px) {
+  .team-detail-page .team-detail-shortcuts {
+    width: min(100%, 320px) !important;
+    column-gap: 8px !important;
+    row-gap: 8px !important;
+  }
+
+  .team-detail-page .team-detail-shortcuts button {
+    padding: 9px 6px !important;
+    gap: 6px !important;
+    font-size: 9px !important;
+    letter-spacing: .025em !important;
+  }
+}
+
