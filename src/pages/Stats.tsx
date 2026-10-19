@@ -196,6 +196,21 @@ export default function Stats() {
           <p>Record individuali e riconoscimenti, sempre riferiti alle competizioni attive.</p>
         </header>
 
+
+
+        <div className="stats-tools">
+          <label className="stats-player-search">
+            <span>Cerca un giocatore</span>
+            <input
+              type="search"
+              value={playerSearch}
+              onChange={(event) => setPlayerSearch(event.target.value)}
+              placeholder="Scrivi nome o cognome…"
+              aria-label="Cerca giocatore per nome o cognome"
+            />
+          </label>
+        </div>
+
         {!loading && groupStats.length > 0 ? (
           <nav className="stats-competition-nav" aria-label="Navigazione rapida alle competizioni attive">
             <span className="stats-competition-nav__label">Vai alla competizione</span>
@@ -212,19 +227,6 @@ export default function Stats() {
             </div>
           </nav>
         ) : null}
-
-        <div className="stats-tools">
-          <label className="stats-player-search">
-            <span>Cerca un giocatore</span>
-            <input
-              type="search"
-              value={playerSearch}
-              onChange={(event) => setPlayerSearch(event.target.value)}
-              placeholder="Scrivi nome o cognome…"
-              aria-label="Cerca giocatore per nome o cognome"
-            />
-          </label>
-        </div>
 
         {normalizedSearch && !loading ? (
           <section className="stats-search-results" aria-live="polite">
