@@ -196,6 +196,23 @@ export default function Stats() {
           <p>Record individuali e riconoscimenti, sempre riferiti alle competizioni attive.</p>
         </header>
 
+        {!loading && groupStats.length > 0 ? (
+          <nav className="stats-competition-nav" aria-label="Navigazione rapida alle competizioni attive">
+            <span className="stats-competition-nav__label">Vai alla competizione</span>
+            <div className="stats-competition-nav__links">
+              {groupStats.map(({ group }) => (
+                <a
+                  className="stats-competition-nav__link"
+                  href={"#stats-group-" + encodeURIComponent(group.id)}
+                  key={group.id}
+                >
+                  {group.name}
+                </a>
+              ))}
+            </div>
+          </nav>
+        ) : null}
+
         <div className="stats-tools">
           <label className="stats-player-search">
             <span>Cerca un giocatore</span>
