@@ -25,7 +25,7 @@ const links = [
   { label: "Home", to: "/", icon: faHouse },
   { label: "Competizioni", to: "/competizioni", icon: faTrophy },
   { label: "Classifica", to: "/classifica", icon: faListOl },
-  { label: "Statistiche", to: "/statistiche", icon: faChartLine },
+  { label: "Statistiche Giocatori", to: "/statistiche", icon: faChartLine },
   { label: "Calciomercato", to: "/calciomercato", icon: faArrowsRotate },
   { label: "Sponsor & collabora", to: "/partner", icon: faHandshake },
   { label: "Admin", to: "/admin", icon: faLock },
