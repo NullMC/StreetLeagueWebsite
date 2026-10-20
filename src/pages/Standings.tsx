@@ -83,7 +83,7 @@ export default function Standings() {
                       <span title="Differenza reti">DR</span>
                     </div>
                     {competition.rows.map((row, index) => (
-                      <a className="table-row" href={"/squadre/" + row.team.id} key={row.team.id}>
+                      <a className={`table-row${index < 4 ? " table-row--qualified" : ""}`} href={"/squadre/" + row.team.id} key={row.team.id}>
                         <span className="position">{String(index + 1).padStart(2, "0")}</span>
                         <span className="standings-team">
                           {row.team.logo_url ? (

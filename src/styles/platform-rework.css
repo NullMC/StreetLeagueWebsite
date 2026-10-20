@@ -470,6 +470,17 @@
   gap: 7px;
   padding-inline: 12px;
 }
+.standings-table .table-row--qualified {
+  position: relative;
+}
+.standings-table .table-row--qualified::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: limegreen;
+  content: "";
+  pointer-events: none;
+}
 .standings-table .standings-team {
   display: flex;
   align-items: center;
