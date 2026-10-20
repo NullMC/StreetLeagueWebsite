@@ -56,7 +56,7 @@ export default function Standings() {
       <div className="page standings-page">
         <header className="platform-page-heading">
           <SectionTitle title="Classifiche" />
-          <p>La situazione aggiornata delle competizioni attive.</p>
+          <p>Le prime quattro squadre classificate accedono alle fasi finali</p>
         </header>
 
         {error ? <p className="admin-error">{error}</p> : null}
