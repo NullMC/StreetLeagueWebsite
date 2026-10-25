@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { PageShell } from "../components/PageShell";
 import { RichTextEditor } from "../components/RichTextEditor";
+import { AdminMatchAwards } from "../components/AdminMatchAwards";
 import { supabase, supabaseConfigured } from "../lib/supabase";
 import { ensureFreshAdminSession, getAuthenticatedAdmin, signInWithAccessCode, uploadMedia, type AdminProfile } from "../lib/admin";
 import { getCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
@@ -10,13 +11,16 @@ type Resource = "competitions" | "teams" | "players" | "matches" | "events" | "m
 type Row = Record<string, any>;
 type Lookups = { competitions: Competition[]; teams: Team[]; players: Player[]; matches: Match[] };
 
-const nav: { key: Resource; label: string }[] = [
+type AdminSection = Resource | "match_awards";
+
+const nav: { key: AdminSection; label: string }[] = [
   { key: "competitions", label: "Competizioni" },
   { key: "teams", label: "Squadre" },
   { key: "players", label: "Giocatori" },
   { key: "matches", label: "Partite" },
   { key: "events", label: "Eventi" },
-  { key: "mvp", label: "MVP" },
+  { key: "match_awards", label: "Voti portieri e MVP giornata" },
+  { key: "mvp", label: "MVP singola partita" },
   { key: "player_of_month", label: "POTM & Staff del mese" },
   { key: "partners", label: "Sponsor" },
   { key: "active_collaborations", label: "Collab attive" },
@@ -436,10 +440,10 @@ function Login({ onLogin }: { onLogin: (p: AdminProfile) => void }) { const [u, 
 
 
 export default function AdminDashboard() {
-  const [profile, setProfile] = useState<AdminProfile | null>(null); const [resource, setResource] = useState<Resource>("competitions"); const [booting, setBooting] = useState(true);
+  const [profile, setProfile] = useState<AdminProfile | null>(null); const [resource, setResource] = useState<AdminSection>("competitions"); const [booting, setBooting] = useState(true);
   useEffect(() => { void getAuthenticatedAdmin().then(setProfile).catch(() => setProfile(null)).finally(() => setBooting(false)); }, []);
   const logout = async () => { await supabase?.auth.signOut(); setProfile(null); setResource("competitions"); };
   if (!supabaseConfigured || booting) return <PageShell title="Admin" eyebrow="Street League"><div className="admin-help"><h3>Configurazione</h3><p>Verifica le variabili Supabase prima di accedere al back office.</p></div></PageShell>;
   if (!profile) return <PageShell title="Admin" eyebrow="Street League"><Login onLogin={setProfile} /></PageShell>;
-  return <PageShell title="Back office" eyebrow={profile.role}><div className="admin-layout"><aside className="admin-sidebar"><span className="eyebrow">Street League</span><h2>Back office</h2><p className="admin-user">{profile.full_name ?? profile.username ?? profile.email}</p><nav>{nav.map((item) => <button key={item.key} type="button" className={resource === item.key ? "active" : ""} onClick={() => setResource(item.key)}>{item.label}</button>)}</nav><button className="btn btn--ghost" type="button" onClick={() => void logout()}>Esci</button></aside><main className="admin-main"><Crud resource={resource} profile={profile} /></main></div></PageShell>;
+  return <PageShell title="Back office" eyebrow={profile.role}><div className="admin-layout"><aside className="admin-sidebar"><span className="eyebrow">Street League</span><h2>Back office</h2><p className="admin-user">{profile.full_name ?? profile.username ?? profile.email}</p><nav>{nav.map((item) => <button key={item.key} type="button" className={resource === item.key ? "active" : ""} onClick={() => setResource(item.key)}>{item.label}</button>)}</nav><button className="btn btn--ghost" type="button" onClick={() => void logout()}>Esci</button></aside><main className="admin-main">{resource === "match_awards" ? <AdminMatchAwards /> : <Crud resource={resource} profile={profile} />}</main></div></PageShell>;
 }
