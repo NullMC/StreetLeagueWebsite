@@ -11,20 +11,22 @@ import {
   getTeams,
 } from "../lib/api";
 import type { Player, PlayerStats, StaffRankingEntry, StatisticsGroup, Team } from "../types";
+import { getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
 
-type StatCategory = "goals" | "mvps" | "clean_sheets" | "staff";
+type StatCategory = "goals" | "mvps" | "goalkeepers" | "staff";
 type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
 type GroupStats = {
   group: StatisticsGroup;
   players: RankedPlayer[];
   staff: StaffRankingEntry[];
+  awards: CompetitionAwardScores;
   playersByCompetition: Record<string, RankedPlayer[]>;
 };
 
 const cards: Array<{ key: StatCategory; title: string; unit: string }> = [
   { key: "goals", title: "Miglior marcatore", unit: "gol" },
-  { key: "mvps", title: "Miglior giocatore (MVP)", unit: "record MVP" },
-  { key: "clean_sheets", title: "Miglior portiere", unit: "clean sheet" },
+  { key: "mvps", title: "Miglior giocatore (MVP)", unit: "nomination MVP" },
+  { key: "goalkeepers", title: "Miglior portiere", unit: "media voto / 5" },
   { key: "staff", title: "Miglior membro staff", unit: "gol staff" },
 ];
 
@@ -33,28 +35,29 @@ function isStaff(player: Pick<Player, "position" | "role">) {
     player.position?.trim().toUpperCase() === "STAFF";
 }
 
-function isGoalkeeper(player: RankedPlayer) {
-  const position = (player.position || "").trim().toLocaleLowerCase("it");
-  return position.includes("portier") || position.includes("goalkeeper") ||
-    position.includes("goalie") || position === "gk" || position === "por";
-}
-
-function BestStatsCard({ group, players, staff, config }: {
+function BestStatsCard({ group, players, staff, awards, config }: {
   group: StatisticsGroup;
   players: RankedPlayer[];
   staff: StaffRankingEntry[];
+  awards: CompetitionAwardScores;
   config: (typeof cards)[number];
 }) {
   const staffLeader =
     staff[0] && staff[0].presidential_penalties > 0 ? staff[0] : undefined;
-  const statKey = config.key === "staff" ? null : config.key;
-  const ranked = statKey ? [...players]
-    .filter((player) => statKey === "clean_sheets" ? isGoalkeeper(player) : true)
-    .filter((player) => player.stats[statKey] > 0)
+  const sortValue = (player: RankedPlayer): number =>
+    config.key === "goals" ? player.stats.goals :
+    config.key === "mvps" ? awards.mvpCounts[player.id] ?? 0 :
+    config.key === "goalkeepers" ? awards.goalkeepers[player.id]?.average ?? 0 : 0;
+  const ranked = config.key === "staff" ? [] : [...players]
+    .filter((player) => config.key !== "goalkeepers" || isGoalkeeperPosition(player.position))
+    .filter((player) => sortValue(player) > 0)
     .sort((a, b) =>
-      b.stats[statKey] - a.stats[statKey] ||
+      sortValue(b) - sortValue(a) ||
+      (config.key === "goalkeepers"
+        ? (awards.goalkeepers[b.id]?.count ?? 0) - (awards.goalkeepers[a.id]?.count ?? 0)
+        : 0) ||
       (a.last_name + " " + a.first_name).localeCompare(b.last_name + " " + b.first_name, "it"),
-    ) : [];
+    );
   const leader = config.key === "staff" ? staffLeader : ranked[0];
   const staffPlayer = config.key === "staff" && leader
     ? (leader as StaffRankingEntry).player
@@ -66,7 +69,13 @@ function BestStatsCard({ group, players, staff, config }: {
   const value = leader
     ? config.key === "staff"
       ? (leader as StaffRankingEntry).presidential_penalties
-      : (leader as RankedPlayer).stats[statKey!]
+      : sortValue(leader as RankedPlayer)
+    : 0;
+  const displayValue = config.key === "goalkeepers"
+    ? value.toLocaleString("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+    : String(value).padStart(2, "0");
+  const voteCount = config.key === "goalkeepers" && player
+    ? awards.goalkeepers[player.id]?.count ?? 0
     : 0;
   const profilePhoto = player?.profile_image_url?.trim();
 
@@ -84,8 +93,8 @@ function BestStatsCard({ group, players, staff, config }: {
             />
           ) : null}
           <h3>{name}</h3>
-          <div className="stat-card__value">{String(value).padStart(2, "0")}</div>
-          <span className="best-stats-card__unit">{config.unit}</span>
+          <div className="stat-card__value">{displayValue}</div>
+          <span className="best-stats-card__unit">{config.unit}{config.key === "goalkeepers" ? " · " + voteCount + (voteCount === 1 ? " partita valutata" : " partite valutate") : ""}</span>
           <span className="best-stats-card__hint">Classifica completa <span aria-hidden="true">↗</span></span>
         </>
       ) : (
@@ -129,9 +138,10 @@ export default function Stats() {
         const activeCompetitions = await getActiveCompetitions();
         const groups = await getStatisticsGroups(activeCompetitions);
         const result = await Promise.all(groups.map(async (group) => {
-          const [playerRows, staff, individualSets] = await Promise.all([
+          const [playerRows, staff, awards, individualSets] = await Promise.all([
             getPlayerStatsForCompetitions(group.competition_ids),
             getStaffRankingForCompetitions(group.competition_ids),
+            getCompetitionAwardScores(group.competition_ids),
             Promise.all(group.competitions.map(async (competition) => {
               const [players, teams] = await Promise.all([
                 getPlayerStatsForCompetitions([competition.id]),
@@ -152,6 +162,7 @@ export default function Stats() {
             group,
             players: withTeams(playerRows),
             staff,
+            awards,
             playersByCompetition: Object.fromEntries(
               individualSets.map((entry) => [entry.competitionId, withTeams(entry.players)]),
             ),
@@ -269,7 +280,7 @@ export default function Stats() {
           <EmptyState title="Nessuna statistica attiva" text="Le classifiche verranno mostrate quando ci saranno competizioni attive." />
         ) : (
           <div className="stats-groups-list">
-            {groupStats.map(({ group, players, staff }) => (
+            {groupStats.map(({ group, players, staff, awards }) => (
               <section className="stats-competition-group" id={"stats-group-" + encodeURIComponent(group.id)} key={group.id}>
                 <SectionTitle eyebrow="Competizioni attive" title={group.name} variant="group" />
                 {group.competitions.length > 1 ? (
@@ -279,7 +290,7 @@ export default function Stats() {
                 ) : null}
                 <div className="leaders stats-best-cards-grid">
                   {cards.map((config) => (
-                    <BestStatsCard key={config.key} group={group} players={players} staff={staff} config={config} />
+                    <BestStatsCard key={config.key} group={group} players={players} staff={staff} awards={awards} config={config} />
                   ))}
                 </div>
 
