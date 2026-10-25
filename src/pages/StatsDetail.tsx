@@ -12,19 +12,22 @@ import {
   getTeams,
 } from "../lib/api";
 import type { Player, PlayerStats, StaffRankingEntry, StatisticsGroup, Team } from "../types";
+import { getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
 
-type DetailKey = "goals" | "mvps" | "clean_sheets" | "staff";
+type DetailKey = "goals" | "mvps" | "goalkeepers" | "clean_sheets" | "staff";
 type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
 type DetailData = {
   group: StatisticsGroup;
   players: RankedPlayer[];
   staff: StaffRankingEntry[];
+  awards: CompetitionAwardScores;
 };
 
 const config: Record<DetailKey, { title: string; unit: string }> = {
   goals: { title: "Miglior marcatore", unit: "gol" },
-  mvps: { title: "Storico MVP", unit: "record MVP" },
-  clean_sheets: { title: "Miglior portiere", unit: "clean sheet" },
+  mvps: { title: "Classifica MVP", unit: "nomination MVP" },
+  goalkeepers: { title: "Miglior portiere", unit: "media voto / 5" },
+  clean_sheets: { title: "Miglior portiere", unit: "media voto / 5" },
   staff: { title: "Classifica staff", unit: "gol" },
 };
 
@@ -33,16 +36,10 @@ function isStaff(player: Pick<Player, "position" | "role">) {
     player.position?.trim().toUpperCase() === "STAFF";
 }
 
-function isGoalkeeper(player: RankedPlayer) {
-  const position = (player.position || "").trim().toLocaleLowerCase("it");
-  return position.includes("portier") || position.includes("goalkeeper") ||
-    position.includes("goalie") || position === "gk" || position === "por";
-}
-
 export default function StatsDetail() {
   const { groupId = "", statKey = "" } = useParams();
   const key = statKey as DetailKey;
-  const validKey = key === "goals" || key === "mvps" || key === "clean_sheets" || key === "staff";
+  const validKey = key === "goals" || key === "mvps" || key === "goalkeepers" || key === "clean_sheets" || key === "staff";
   const [data, setData] = useState<DetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -65,9 +62,10 @@ export default function StatsDetail() {
           if (mounted) setError("La competizione selezionata non è attiva o non esiste.");
           return;
         }
-        const [playerRows, staff, allTeams] = await Promise.all([
+        const [playerRows, staff, awards, allTeams] = await Promise.all([
           getPlayerStatsForCompetitions(group.competition_ids),
           getStaffRankingForCompetitions(group.competition_ids),
+          getCompetitionAwardScores(group.competition_ids),
           getTeams(),
         ]);
         const teamById = new Map<string, Team>(allTeams.map((team) => [team.id, team]));
@@ -79,6 +77,7 @@ export default function StatsDetail() {
             group,
             players: players,
             staff: staff,
+            awards,
           });
           setError("");
         }
@@ -93,13 +92,26 @@ export default function StatsDetail() {
   }, [groupId, validKey]);
 
   const players = data?.players ?? [];
+  const awards = data?.awards;
+  const isKeeperRanking = key === "goalkeepers" || key === "clean_sheets";
+  const score = (player: RankedPlayer): number =>
+    key === "goals" ? player.stats.goals :
+    key === "mvps" ? awards?.mvpCounts[player.id] ?? 0 :
+    isKeeperRanking ? awards?.goalkeepers[player.id]?.average ?? 0 : 0;
   const playerRanking = validKey && key !== "staff" ? [...players]
-    .filter((player) => key === "clean_sheets" ? isGoalkeeper(player) : true)
-    .filter((player) => player.stats[key] > 0)
+    .filter((player) => !isKeeperRanking || isGoalkeeperPosition(player.position))
+    .filter((player) => score(player) > 0)
     .sort((a, b) =>
-      b.stats[key] - a.stats[key] ||
+      score(b) - score(a) ||
+      (isKeeperRanking
+        ? (awards?.goalkeepers[b.id]?.count ?? 0) - (awards?.goalkeepers[a.id]?.count ?? 0)
+        : 0) ||
       (a.last_name + " " + a.first_name).localeCompare(b.last_name + " " + b.first_name, "it"),
     ) : [];
+  const displayScore = (player: RankedPlayer): string =>
+    isKeeperRanking
+      ? score(player).toLocaleString("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+      : String(score(player));
   const staffRanking = [...(data?.staff ?? [])].sort((a, b) =>
     b.presidential_penalties - a.presidential_penalties ||
     (a.player.last_name + " " + a.player.first_name).localeCompare(b.player.last_name + " " + b.player.first_name, "it"),
@@ -112,8 +124,10 @@ export default function StatsDetail() {
           <SectionTitle eyebrow={data?.group.name ?? "Statistiche"} title={validKey ? config[key].title : "Classifica"} />
           <p>
             {key === "mvps"
-              ? "Storico dei giocatori con il maggior numero di riconoscimenti MVP nelle competizioni attive selezionate."
-              : "Classifica completa della statistica, calcolata sui dati registrati per le competizioni attive selezionate."}
+              ? "Numero di nomination MVP ricevute nelle giornate delle competizioni attive selezionate."
+              : isKeeperRanking
+                ? "Media dei voti assegnati da 1 a 5 ai portieri nelle partite delle competizioni selezionate."
+                : "Classifica completa della statistica, calcolata sui dati registrati per le competizioni attive selezionate."}
           </p>
           <a className="stats-detail-back" href="/statistiche">← Torna alle statistiche</a>
         </header>
@@ -172,7 +186,7 @@ export default function StatsDetail() {
                     <span><strong>{player.first_name} {player.last_name}</strong><small>{player.position || "Giocatore"}</small></span>
                   </span>
                   <span className="stats-detail-team">{player.team_name}</span>
-                  <strong>{player.stats[key]}</strong>
+                  <strong>{displayScore(player)}{isKeeperRanking && <small className="stats-detail-rating-count"> · {awards?.goalkeepers[player.id]?.count ?? 0} voti</small>}</strong>
                 </a>
               );
             })}
