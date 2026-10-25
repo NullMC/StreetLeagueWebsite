@@ -25,9 +25,9 @@ type GroupStats = {
 
 const cards: Array<{ key: StatCategory; title: string; unit: string }> = [
   { key: "goals", title: "Miglior marcatore", unit: "gol" },
-  { key: "mvps", title: "Miglior giocatore (MVP)", unit: "MVP partita" },
+  { key: "mvps", title: "Miglior giocatore (MVP)", unit: "MVP totali" },
   { key: "goalkeepers", title: "Miglior portiere", unit: "media voto / 5" },
-  { key: "staff", title: "Miglior membro staff", unit: "gol staff" },
+  { key: "staff", title: "Miglior membro staff", unit: "gol presidenziali" },
 ];
 
 function isStaff(player: Pick<Player, "position" | "role">) {
@@ -103,6 +103,7 @@ function BestStatsCard({ group, players, staff, awards, config }: {
           </div>
           {keeperRecord ? (
             <span className="best-stats-card__keeper-meta">
+              Ultima partita: {keeperRecord.votes[0]?.rating ?? "—"}/5 ·
               {keeperRecord.count} {keeperRecord.count === 1 ? "voto" : "voti"} ·
               GS/partita: {keeperRecord.goalsConcededPerMatch === null
                 ? "n/d"
