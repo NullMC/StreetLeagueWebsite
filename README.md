@@ -143,3 +143,32 @@ La Home e le pagine pubbliche non inventano dati. Quando Supabase è vuoto vengo
 ## Note
 
 L'Admin UI presente in questa prima codebase è lo scheletro operativo e l'area di controllo. Il modello dati, i ruoli e le policy RLS sono già predisposti per una successiva estensione CRUD completa senza cambiare la struttura delle route.
+
+
+## Voti portieri e MVP per giornata
+
+Prima di utilizzare **Admin → Voti portieri e MVP giornata**, apri il SQL Editor
+del progetto Supabase già collegato a Street League ed esegui **una volta**:
+
+`supabase/19_goalkeeper_votes_and_matchday_mvp.sql`
+
+Il file introduce due tabelle con lettura pubblica e scrittura riservata agli
+amministratori, vincoli e controlli sul server:
+
+- `goalkeeper_match_ratings`: un voto intero da 1 a 5 per portiere e partita
+  terminata, aggiornabile senza duplicati. La classifica mostra la **media**
+  dei voti e il numero di partite valutate; a parità di media precede chi ha
+  ricevuto più valutazioni.
+- `competition_matchday_mvp`: **un solo MVP per competizione e giornata** con
+  almeno una partita terminata. Assegnare un nuovo nominativo alla stessa
+  giornata sostituisce quello precedente. La classifica somma le giornate
+  vinte da ciascun giocatore.
+
+Le classifiche di marcatori (gol) e staff (rigori presidenziali) rimangono
+invariate. Le precedenti assegnazioni nella tabella `match_mvp` restano
+disponibili per la singola partita, ma **non vengono automaticamente convertite**
+in MVP di giornata: potrebbero essercene più d'una nella stessa giornata.
+Inserisci le nomination storiche dal nuovo pannello, se desideri includerle.
+
+Se il frontend mostra un errore di tabella non trovata, verifica di aver
+eseguito la migrazione nel progetto Supabase corretto e riavvia l'app.
