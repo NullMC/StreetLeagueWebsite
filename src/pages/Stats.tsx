@@ -11,7 +11,7 @@ import {
   getTeams,
 } from "../lib/api";
 import type { Player, PlayerStats, StaffRankingEntry, StatisticsGroup, Team } from "../types";
-import { getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
+import { compareGoalkeeperScores, formatKeeperAverage, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
 
 type StatCategory = "goals" | "mvps" | "goalkeepers" | "staff";
 type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
@@ -54,7 +54,7 @@ function BestStatsCard({ group, players, staff, awards, config }: {
     .sort((a, b) =>
       sortValue(b) - sortValue(a) ||
       (config.key === "goalkeepers"
-        ? (awards.goalkeepers[b.id]?.count ?? 0) - (awards.goalkeepers[a.id]?.count ?? 0)
+        ? compareGoalkeeperScores(awards.goalkeepers[a.id], awards.goalkeepers[b.id])
         : 0) ||
       (a.last_name + " " + a.first_name).localeCompare(b.last_name + " " + b.first_name, "it"),
     );
@@ -72,11 +72,11 @@ function BestStatsCard({ group, players, staff, awards, config }: {
       : sortValue(leader as RankedPlayer)
     : 0;
   const displayValue = config.key === "goalkeepers"
-    ? value.toLocaleString("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-    : String(value).padStart(2, "0");
-  const voteCount = config.key === "goalkeepers" && player
-    ? awards.goalkeepers[player.id]?.count ?? 0
-    : 0;
+    ? formatKeeperAverage(value)
+    : String(value);
+  const keeperRecord = config.key === "goalkeepers" && player
+    ? awards.goalkeepers[player.id]
+    : undefined;
   const profilePhoto = player?.profile_image_url?.trim();
 
   const cardContent = (
@@ -84,17 +84,31 @@ function BestStatsCard({ group, players, staff, awards, config }: {
       <span className="eyebrow">{config.title}</span>
       {leader ? (
         <>
-          {profilePhoto ? (
-            <img
-              className="best-stats-card__photo"
-              src={profilePhoto}
-              alt={"Foto profilo di " + name}
-              loading="lazy"
-            />
+          <div className="best-stats-card__leader">
+            {profilePhoto ? (
+              <img
+                className="best-stats-card__photo"
+                src={profilePhoto}
+                alt={"Foto profilo di " + name}
+                loading="lazy"
+              />
+            ) : null}
+            <div className="best-stats-card__leader-data">
+              <h3>{name}</h3>
+              <div className="best-stats-card__record">
+                <strong className="stat-card__value">{displayValue}</strong>
+                <span className="best-stats-card__unit">{config.unit}</span>
+              </div>
+            </div>
+          </div>
+          {keeperRecord ? (
+            <span className="best-stats-card__keeper-meta">
+              {keeperRecord.count} {keeperRecord.count === 1 ? "voto" : "voti"} ·
+              GS/partita: {keeperRecord.goalsConcededPerMatch === null
+                ? "n/d"
+                : keeperRecord.goalsConcededPerMatch.toLocaleString("it-IT", { maximumFractionDigits: 2 })}
+            </span>
           ) : null}
-          <h3>{name}</h3>
-          <div className="stat-card__value">{displayValue}</div>
-          <span className="best-stats-card__unit">{config.unit}{config.key === "goalkeepers" ? " · " + voteCount + (voteCount === 1 ? " partita valutata" : " partite valutate") : ""}</span>
           <span className="best-stats-card__hint">Classifica completa <span aria-hidden="true">↗</span></span>
         </>
       ) : (

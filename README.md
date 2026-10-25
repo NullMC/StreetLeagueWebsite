@@ -173,3 +173,19 @@ il riconoscimento. Per recuperarle, attribuiscile manualmente alle rispettive
 partite dal pannello aggiornato.
 
 Le classifiche dei marcatori e dello staff non cambiano.
+
+## Criteri per i portieri nelle statistiche
+
+Ogni portiere riceve un voto da 1 a 5 per ciascuna partita conclusa. Il voto
+non viene sommato: la graduatoria confronta la **media dei voti per partita**
+(calcolata sulle partite votate). A parità di media, precede il portiere
+con **meno gol subiti in media per partita valutata**. Il dato dei gol
+subiti proviene dal risultato finale della squadra nella relativa partita;
+si usa la squadra della formazione storica, se disponibile, altrimenti la
+squadra associata al portiere. Le partite senza un risultato numerico completo
+non vengono considerate come se fossero terminate 0–0. Se permane la parità,
+si confrontano il totale dei gol subiti e poi il numero di valutazioni.
+
+Nella card viene mostrato il primo classificato accanto al record. La
+classifica dettagliata presenta i voti per ciascun incontro e i gol subiti;
+per gli MVP viene mantenuto il conteggio cumulativo degli MVP partita.

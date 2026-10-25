@@ -12,7 +12,7 @@ import {
   getTeams,
 } from "../lib/api";
 import type { Player, PlayerStats, StaffRankingEntry, StatisticsGroup, Team } from "../types";
-import { getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
+import { compareGoalkeeperScores, formatKeeperAverage, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
 
 type DetailKey = "goals" | "mvps" | "goalkeepers" | "clean_sheets" | "staff";
 type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
@@ -21,6 +21,7 @@ type DetailData = {
   players: RankedPlayer[];
   staff: StaffRankingEntry[];
   awards: CompetitionAwardScores;
+  teamNames: Record<string, string>;
 };
 
 const config: Record<DetailKey, { title: string; unit: string }> = {
@@ -78,6 +79,7 @@ export default function StatsDetail() {
             players: players,
             staff: staff,
             awards,
+            teamNames: Object.fromEntries(allTeams.map((team) => [team.id, team.name])),
           });
           setError("");
         }
@@ -104,13 +106,13 @@ export default function StatsDetail() {
     .sort((a, b) =>
       score(b) - score(a) ||
       (isKeeperRanking
-        ? (awards?.goalkeepers[b.id]?.count ?? 0) - (awards?.goalkeepers[a.id]?.count ?? 0)
+        ? compareGoalkeeperScores(awards?.goalkeepers[a.id], awards?.goalkeepers[b.id])
         : 0) ||
       (a.last_name + " " + a.first_name).localeCompare(b.last_name + " " + b.first_name, "it"),
     ) : [];
   const displayScore = (player: RankedPlayer): string =>
     isKeeperRanking
-      ? score(player).toLocaleString("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+      ? formatKeeperAverage(score(player))
       : String(score(player));
   const staffRanking = [...(data?.staff ?? [])].sort((a, b) =>
     b.presidential_penalties - a.presidential_penalties ||
@@ -126,7 +128,7 @@ export default function StatsDetail() {
             {key === "mvps"
               ? "Numero di riconoscimenti MVP ottenuti nelle singole partite delle competizioni attive selezionate."
               : isKeeperRanking
-                ? "Media dei voti assegnati da 1 a 5 ai portieri nelle partite delle competizioni selezionate."
+                ? "Media dei voti da 1 a 5 ricevuti per partita, non somma. A parità di media voto, prevale chi ha subito meno gol per partita nelle gare valutate; i risultati mancanti non vengono contati come zero."
                 : "Classifica completa della statistica, calcolata sui dati registrati per le competizioni attive selezionate."}
           </p>
           <a className="stats-detail-back" href="/statistiche">← Torna alle statistiche</a>
@@ -179,15 +181,37 @@ export default function StatsDetail() {
             {playerRanking.map((player, index) => {
               const photo = player.profile_image_url || player.bg_less_image_url;
               return (
-                <a className="table-row" href={"/giocatori/" + player.id} key={player.id}>
-                  <span className="position">{String(index + 1).padStart(2, "0")}</span>
-                  <span className="stats-detail-player">
+                <div className="stats-detail-ranking-entry" key={player.id}>
+                  <a className="table-row" href={"/giocatori/" + player.id}>
+                    <span className="position">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="stats-detail-player">
                     {photo ? <img src={photo} alt="" /> : <span className="stats-detail-player__placeholder">{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</span>}
                     <span><strong>{player.first_name} {player.last_name}</strong><small>{player.position || "Giocatore"}</small></span>
                   </span>
                   <span className="stats-detail-team">{player.team_name}</span>
-                  <strong>{displayScore(player)}{isKeeperRanking && <small className="stats-detail-rating-count"> · {awards?.goalkeepers[player.id]?.count ?? 0} voti</small>}</strong>
-                </a>
+                  <strong className="stats-detail-keeper-score">{displayScore(player)}{isKeeperRanking && (
+                    <small className="stats-detail-rating-count">
+                      {awards?.goalkeepers[player.id]?.count ?? 0} voti · GS/gara: {awards?.goalkeepers[player.id]?.goalsConcededPerMatch === null
+                        ? "n/d"
+                        : (awards?.goalkeepers[player.id]?.goalsConcededPerMatch ?? 0).toLocaleString("it-IT", { maximumFractionDigits: 2 })}
+                    </small>
+                  )}</strong>
+                  </a>
+                  {isKeeperRanking && (awards?.goalkeepers[player.id]?.votes.length ?? 0) > 0 ? (
+                    <details className="stats-keeper-match-history">
+                      <summary>Voti per partita · {awards?.goalkeepers[player.id]?.count ?? 0} gare valutate</summary>
+                      <div className="stats-keeper-match-history__list">
+                        {awards?.goalkeepers[player.id]?.votes.map((vote) => (
+                          <div className="stats-keeper-match-history__match" key={vote.matchId}>
+                            <span>{vote.matchday ? vote.matchday + " · " : ""}{vote.opponentTeamId ? "vs " + (data?.teamNames[vote.opponentTeamId] ?? "Avversario") : "Partita"} · {new Date(vote.kickoffAt).toLocaleDateString("it-IT")}</span>
+                            <strong>{vote.rating}/5</strong>
+                            <small>GS: {vote.goalsConceded ?? "n/d"}</small>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  ) : null}
+                </div>
               );
             })}
           </div>
