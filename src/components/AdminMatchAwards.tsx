@@ -351,7 +351,7 @@ export function AdminMatchAwards() {
                 })}
                 {!keeperPlayers.length && <p className="admin-help-text">Nessun portiere trovato per questa partita.</p>}
               </div>
-            )}
+            ) : null}
           </section>
 
           <section className="admin-awards__panel">
@@ -402,7 +402,7 @@ export function AdminMatchAwards() {
                 ))}
                 {!mvpPlayers.length && <p className="admin-help-text">Nessun giocatore trovato in questa competizione.</p>}
               </div>
-            )}
+            ) : null}
           </section>
         </div>
       )}
