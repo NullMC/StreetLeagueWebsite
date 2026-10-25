@@ -25,7 +25,7 @@ type GroupStats = {
 
 const cards: Array<{ key: StatCategory; title: string; unit: string }> = [
   { key: "goals", title: "Miglior marcatore", unit: "gol" },
-  { key: "mvps", title: "Miglior giocatore (MVP)", unit: "nomination MVP" },
+  { key: "mvps", title: "Miglior giocatore (MVP)", unit: "MVP partita" },
   { key: "goalkeepers", title: "Miglior portiere", unit: "media voto / 5" },
   { key: "staff", title: "Miglior membro staff", unit: "gol staff" },
 ];

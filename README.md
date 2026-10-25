@@ -145,30 +145,31 @@ La Home e le pagine pubbliche non inventano dati. Quando Supabase è vuoto vengo
 L'Admin UI presente in questa prima codebase è lo scheletro operativo e l'area di controllo. Il modello dati, i ruoli e le policy RLS sono già predisposti per una successiva estensione CRUD completa senza cambiare la struttura delle route.
 
 
-## Voti portieri e MVP per giornata
+## Voti portieri e MVP per partita
 
-Prima di utilizzare **Admin → Voti portieri e MVP giornata**, apri il SQL Editor
-del progetto Supabase già collegato a Street League ed esegui **una volta**:
+Nell'area **Admin → Voti portieri e MVP partita** è possibile selezionare la
+competizione attiva, filtrare per numero di giornata e scegliere la singola partita.
+Le due sezioni hanno selettori e ricerche indipendenti.
 
-`supabase/19_goalkeeper_votes_and_matchday_mvp.sql`
+- **Portieri:** la tabella `goalkeeper_match_ratings` registra un voto intero da
+  1 a 5 per portiere e partita terminata. La classifica usa la media dei voti,
+  con precedenza al maggior numero di partite valutate in caso di parità.
+- **MVP:** la tabella **già esistente** `match_mvp` registra un singolo vincitore
+  per ciascuna partita terminata (`match_id` è la chiave primaria). Modificare
+  il vincitore sostituisce il record precedente anziché crearne un secondo.
+  Solo i giocatori delle due squadre, escluso lo staff, possono essere selezionati
+  dall'interfaccia. La classifica MVP conteggia le **partite vinte come MVP**,
+  non le giornate.
 
-Il file introduce due tabelle con lettura pubblica e scrittura riservata agli
-amministratori, vincoli e controlli sul server:
+Per aggiungere i voti ai portieri, se non è già stata eseguita, applica **una
+sola volta** la migrazione `supabase/19_goalkeeper_votes_and_matchday_mvp.sql`
+nel SQL Editor Supabase. **Non serve una nuova migrazione per gli MVP partita**:
+si usa `match_mvp`, compresi i suoi dati storici.
 
-- `goalkeeper_match_ratings`: un voto intero da 1 a 5 per portiere e partita
-  terminata, aggiornabile senza duplicati. La classifica mostra la **media**
-  dei voti e il numero di partite valutate; a parità di media precede chi ha
-  ricevuto più valutazioni.
-- `competition_matchday_mvp`: **un solo MVP per competizione e giornata** con
-  almeno una partita terminata. Assegnare un nuovo nominativo alla stessa
-  giornata sostituisce quello precedente. La classifica somma le giornate
-  vinte da ciascun giocatore.
+Le eventuali vecchie nomination inserite in `competition_matchday_mvp`
+non vengono eliminate né convertite automaticamente perché una giornata può
+includere più partite e non è possibile sapere a quale incontro associare
+il riconoscimento. Per recuperarle, attribuiscile manualmente alle rispettive
+partite dal pannello aggiornato.
 
-Le classifiche di marcatori (gol) e staff (rigori presidenziali) rimangono
-invariate. Le precedenti assegnazioni nella tabella `match_mvp` restano
-disponibili per la singola partita, ma **non vengono automaticamente convertite**
-in MVP di giornata: potrebbero essercene più d'una nella stessa giornata.
-Inserisci le nomination storiche dal nuovo pannello, se desideri includerle.
-
-Se il frontend mostra un errore di tabella non trovata, verifica di aver
-eseguito la migrazione nel progetto Supabase corretto e riavvia l'app.
+Le classifiche dei marcatori e dello staff non cambiano.

@@ -25,7 +25,7 @@ type DetailData = {
 
 const config: Record<DetailKey, { title: string; unit: string }> = {
   goals: { title: "Miglior marcatore", unit: "gol" },
-  mvps: { title: "Classifica MVP", unit: "nomination MVP" },
+  mvps: { title: "Classifica MVP", unit: "MVP partita" },
   goalkeepers: { title: "Miglior portiere", unit: "media voto / 5" },
   clean_sheets: { title: "Miglior portiere", unit: "media voto / 5" },
   staff: { title: "Classifica staff", unit: "gol" },
@@ -124,7 +124,7 @@ export default function StatsDetail() {
           <SectionTitle eyebrow={data?.group.name ?? "Statistiche"} title={validKey ? config[key].title : "Classifica"} />
           <p>
             {key === "mvps"
-              ? "Numero di nomination MVP ricevute nelle giornate delle competizioni attive selezionate."
+              ? "Numero di riconoscimenti MVP ottenuti nelle singole partite delle competizioni attive selezionate."
               : isKeeperRanking
                 ? "Media dei voti assegnati da 1 a 5 ai portieri nelle partite delle competizioni selezionate."
                 : "Classifica completa della statistica, calcolata sui dati registrati per le competizioni attive selezionate."}
