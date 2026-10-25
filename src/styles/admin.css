@@ -320,3 +320,164 @@
   .admin-search__count { text-align: right; }
   .admin-cta-manager__row { grid-template-columns: 1fr; align-items: stretch; }
 }
+
+
+/* Voti portieri / MVP giornata: two searchable, independent award lists. */
+.admin-awards {
+  min-width: 0;
+  width: 100%;
+}
+.admin-awards__heading {
+  margin-bottom: 22px;
+}
+.admin-awards__heading h2 {
+  margin: 0 0 10px;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 1.05;
+}
+.admin-awards__heading p,
+.admin-awards__panel > .admin-help-text {
+  max-width: 75ch;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.admin-awards__field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  margin-bottom: 16px;
+}
+.admin-awards__field > span {
+  font-size: 11px;
+  font-weight: 800;
+}
+.admin-awards__field input,
+.admin-awards__field select,
+.admin-awards__actions select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #d9dddf);
+  border-radius: 8px;
+  background: var(--surface, #fff);
+  color: var(--ink, #010a08);
+  font: inherit;
+  font-size: 14px;
+}
+.admin-awards__panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+.admin-awards__panel {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--line, #d9dddf);
+  border-radius: 12px;
+  background: var(--surface, #fff);
+}
+.admin-awards__panel h3 {
+  margin: 0 0 10px;
+  font-size: clamp(19px, 2vw, 26px);
+  line-height: 1.15;
+}
+.admin-awards__players {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.admin-awards__player {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--line, #d9dddf);
+  border-radius: 10px;
+}
+.admin-awards__player-info {
+  display: flex;
+  flex: 1 1 155px;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+}
+.admin-awards__player-info > strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.admin-awards__player-info small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.admin-awards__actions {
+  display: inline-flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.admin-awards__actions select {
+  width: auto;
+  min-width: 74px;
+  max-width: 90px;
+}
+.admin-awards__actions .btn,
+.admin-awards__current .btn {
+  min-height: 38px;
+  padding: 9px 12px;
+  font-size: 10px;
+  border-radius: 8px;
+}
+.admin-awards__actions .btn:disabled { opacity: .58; cursor: not-allowed; }
+.admin-awards__current {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 14px;
+  border: 1px solid var(--pink);
+  border-radius: 9px;
+  font-size: 12px;
+}
+.admin-awards__current button {
+  margin-left: auto;
+}
+.stats-detail-rating-count {
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+html[data-theme="night"] .admin-awards__panel,
+html[data-theme="night"] .admin-awards__field input,
+html[data-theme="night"] .admin-awards__field select,
+html[data-theme="night"] .admin-awards__actions select {
+  background: #121a17;
+  color: #f5f7f6;
+  border-color: rgba(245,247,246,.18);
+}
+html[data-theme="night"] .admin-awards__player {
+  border-color: rgba(245,247,246,.15);
+}
+@media (max-width: 1100px) {
+  .admin-awards__panels { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .admin-awards__panel { padding: 14px; }
+  .admin-awards__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .admin-awards__actions .btn { flex: 1 1 auto; }
+}
