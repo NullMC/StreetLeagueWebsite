@@ -9,10 +9,17 @@ type AwardData = {
   competitions: Competition[];
   teams: Team[];
   players: Player[];
-  matches: Match[];
 };
 
 const playerName = (player: Player) => player.first_name + " " + player.last_name;
+const dayFor = (match: Match) => match.matchday?.trim() ?? "";
+const dayLabel = (day: string) => /^\\d+$/.test(day) ? "Giornata " + day : day;
+const matchStatus: Record<Match["status"], string> = {
+  scheduled: "Programmata",
+  live: "In corso",
+  finished: "Terminata",
+  postponed: "Rinviata",
+};
 const playerSearchable = (player: Player) =>
   (playerName(player) + " " + player.last_name + " " + player.first_name).toLocaleLowerCase("it");
 
@@ -32,8 +39,11 @@ export function AdminMatchAwards() {
   const [data, setData] = useState<AwardData | null>(null);
   const [ratings, setRatings] = useState<GoalkeeperMatchRating[]>([]);
   const [mvps, setMvps] = useState<MatchdayMvpVote[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(false);
   const [competitionId, setCompetitionId] = useState("");
   const [matchId, setMatchId] = useState("");
+  const [keeperMatchday, setKeeperMatchday] = useState("");
   const [matchday, setMatchday] = useState("");
   const [keeperSearch, setKeeperSearch] = useState("");
   const [mvpSearch, setMvpSearch] = useState("");
@@ -60,14 +70,13 @@ export function AdminMatchAwards() {
     async function load() {
       try {
         await ensureFreshAdminSession();
-        const [competitions, teams, players, matches] = await Promise.all([
+        const [competitions, teams, players] = await Promise.all([
           getActiveCompetitions(),
           getTeams(),
           getPlayers(),
-          getMatches(),
         ]);
         if (!mounted) return;
-        setData({ competitions, teams, players, matches });
+        setData({ competitions, teams, players });
         await refreshAwards();
         if (mounted) setError("");
       } catch (caught) {
@@ -82,18 +91,46 @@ export function AdminMatchAwards() {
 
   const selectedCompetition = data?.competitions.find((entry) => entry.id === competitionId)
     ?? data?.competitions[0];
-  const scopedMatches = useMemo(() =>
-    (data?.matches ?? [])
-      .filter((match) => match.competition_id === selectedCompetition?.id && match.status === "finished")
+  // Query the selected competition directly; include all fixture statuses so
+  // scheduled and live matches still contribute their recorded matchday.
+  useEffect(() => {
+    const id = selectedCompetition?.id;
+    if (!id) {
+      setMatches([]);
+      setMatchesLoading(false);
+      return;
+    }
+    let active = true;
+    setMatches([]);
+    setMatchesLoading(true);
+    void getMatches(id)
+      .then((rows) => { if (active) setMatches(rows); })
+      .catch((caught) => { if (active) setError(errorText(caught)); })
+      .finally(() => { if (active) setMatchesLoading(false); });
+    return () => { active = false; };
+  }, [selectedCompetition?.id]);
+
+  const competitionMatches = useMemo(() =>
+    matches
+      .filter((match) => match.competition_id === selectedCompetition?.id)
       .sort((a, b) => new Date(b.kickoff_at).getTime() - new Date(a.kickoff_at).getTime()),
-    [data, selectedCompetition?.id],
+    [matches, selectedCompetition?.id],
+  );
+  const matchdays = useMemo(() => Array.from(new Set(
+    competitionMatches.map(dayFor).filter(Boolean),
+  )).sort((a, b) => a.localeCompare(b, "it", { numeric: true, sensitivity: "base" })),
+    [competitionMatches],
+  );
+  const scopedMatches = useMemo(() =>
+    competitionMatches.filter((match) => !keeperMatchday || dayFor(match) === keeperMatchday),
+    [competitionMatches, keeperMatchday],
   );
   const selectedMatch = scopedMatches.find((match) => match.id === matchId) ?? scopedMatches[0];
-
-  const matchdays = useMemo(() => Array.from(new Set(
-    scopedMatches.map((match) => match.matchday?.trim()).filter((day): day is string => Boolean(day)),
-  )), [scopedMatches]);
-  const selectedMatchday = matchdays.includes(matchday) ? matchday : matchdays[0];
+  const canRateMatch = selectedMatch?.status === "finished";
+  const selectedMatchday = matchdays.includes(matchday) ? matchday : (matchdays[0] ?? "");
+  const canNominateMvp = Boolean(selectedMatchday && competitionMatches.some(
+    (match) => dayFor(match) === selectedMatchday && match.status === "finished",
+  ));
 
   const registeredTeams = useMemo(
     () => (data?.teams ?? []).filter((team) => team.competition_ids?.includes(selectedCompetition?.id ?? "")),
@@ -120,7 +157,7 @@ export function AdminMatchAwards() {
   });
 
   async function persistRating(player: Player) {
-    if (!supabase || !selectedMatch) return;
+    if (!supabase || !selectedMatch || !canRateMatch) return;
     const draftKey = selectedMatch.id + ":" + player.id;
     const existing = ratings.find((row) => row.match_id === selectedMatch.id && row.player_id === player.id);
     const value = Number(draftRatings[draftKey] ?? existing?.rating ?? 0);
@@ -170,7 +207,7 @@ export function AdminMatchAwards() {
   }
 
   async function nominateMvp(player: Player) {
-    if (!supabase || !selectedCompetition || !selectedMatchday) return;
+    if (!supabase || !selectedCompetition || !selectedMatchday || !canNominateMvp) return;
     setBusyKey("mvp");
     setError(""); setMessage("");
     try {
@@ -223,7 +260,7 @@ export function AdminMatchAwards() {
           value={selectedCompetition?.id ?? ""}
           onChange={(event) => {
             setCompetitionId(event.target.value);
-            setMatchId(""); setMatchday("");
+            setMatchId(""); setMatchday(""); setKeeperMatchday("");
             setKeeperSearch(""); setMvpSearch("");
             setError(""); setMessage("");
           }}
@@ -242,16 +279,27 @@ export function AdminMatchAwards() {
         <div className="admin-awards__panels">
           <section className="admin-awards__panel">
             <h3>Voti portieri · 1–5</h3>
-            <p className="admin-help-text">Seleziona una partita terminata e assegna un voto a ciascun portiere delle due squadre. Una nuova assegnazione aggiorna il voto precedente, senza duplicarlo.</p>
+            <p className="admin-help-text">Seleziona una giornata e una partita della competizione. Per registrare voti da 1 a 5, la partita deve essere terminata.</p>
+            <label className="admin-awards__field">
+              <span>Filtra per numero di giornata</span>
+              <select value={keeperMatchday} disabled={matchesLoading} onChange={(event) => {
+                setKeeperMatchday(event.target.value);
+                setMatchId("");
+                setKeeperSearch("");
+              }}>
+                <option value="">Tutte le giornate</option>
+                {matchdays.map((day) => <option key={day} value={day}>{dayLabel(day)}</option>)}
+              </select>
+            </label>
             <label className="admin-awards__field">
               <span>Partita</span>
-              <select value={selectedMatch?.id ?? ""} onChange={(event) => {
+              <select value={selectedMatch?.id ?? ""} disabled={matchesLoading || !scopedMatches.length} onChange={(event) => {
                 setMatchId(event.target.value);
                 setKeeperSearch("");
               }}>
                 {scopedMatches.map((match) => (
                   <option value={match.id} key={match.id}>
-                    {teamNames.get(match.home_team_id) ?? "Casa"} – {teamNames.get(match.away_team_id) ?? "Ospiti"} · {match.matchday ?? "Senza giornata"}
+                    {teamNames.get(match.home_team_id) ?? "Casa"} – {teamNames.get(match.away_team_id) ?? "Ospiti"} · {dayFor(match) ? dayLabel(dayFor(match)) : "Senza giornata"} · {matchStatus[match.status]}
                   </option>
                 ))}
               </select>
@@ -260,14 +308,19 @@ export function AdminMatchAwards() {
               <span>Cerca portiere</span>
               <input type="search" value={keeperSearch} onChange={(event) => setKeeperSearch(event.target.value)} placeholder="Nome o cognome…" />
             </label>
-            {!selectedMatch ? <p className="admin-help-text">Nessuna partita terminata disponibile.</p> : (
+            {matchesLoading ? <p className="admin-help-text">Caricamento partite della competizione…</p> : null}
+            {!matchesLoading && !selectedMatch ? <p className="admin-help-text">Nessuna partita trovata per questa competizione e giornata.</p> : null}
+            {selectedMatch && !canRateMatch ? (
+              <p className="admin-help-text" role="status">Partita {matchStatus[selectedMatch.status].toLowerCase()}: per inserire voti, imposta prima lo stato “Terminata” nella sezione Partite.</p>
+            ) : null}
+            {selectedMatch ? (
               <div className="admin-awards__players">
                 {keeperPlayers.map((player) => {
                   const ratingKey = selectedMatch.id + ":" + player.id;
                   const existing = ratings.find((entry) => entry.match_id === selectedMatch.id && entry.player_id === player.id);
                   const playerScores = ratings.filter((entry) =>
                     entry.player_id === player.id &&
-                    scopedMatches.some((match) => match.id === entry.match_id),
+                    competitionMatches.some((match) => match.id === entry.match_id),
                   );
                   const average = playerScores.length
                     ? (playerScores.reduce((sum, row) => sum + Number(row.rating), 0) / playerScores.length).toFixed(1)
@@ -283,11 +336,12 @@ export function AdminMatchAwards() {
                           aria-label={"Voto per " + playerName(player)}
                           value={draftRatings[ratingKey] ?? String(existing?.rating ?? "")}
                           onChange={(event) => setDraftRatings((current) => ({ ...current, [ratingKey]: event.target.value }))}
+                          disabled={!canRateMatch || Boolean(busyKey)}
                         >
                           <option value="">Voto</option>
                           {[1, 2, 3, 4, 5].map((vote) => <option key={vote} value={vote}>{vote}/5</option>)}
                         </select>
-                        <button className="btn btn--primary" type="button" onClick={() => void persistRating(player)} disabled={Boolean(busyKey)}>
+                        <button className="btn btn--primary" type="button" onClick={() => void persistRating(player)} disabled={Boolean(busyKey) || !canRateMatch}>
                           {existing ? "Aggiorna" : "Salva"}
                         </button>
                         {existing && <button className="btn btn--ghost" type="button" disabled={Boolean(busyKey)} onClick={() => void removeRating(player)}>Rimuovi</button>}
@@ -302,13 +356,13 @@ export function AdminMatchAwards() {
 
           <section className="admin-awards__panel">
             <h3>Nomination MVP · per giornata</h3>
-            <p className="admin-help-text">Scegli un giocatore tra gli iscritti alla competizione. Ogni giornata terminata assegna una sola nomination; puoi correggerla senza aumentarne il conteggio.</p>
+            <p className="admin-help-text">Il menu include tutti i numeri di giornata registrati nelle partite della competizione, anche quelle ancora programmate. Puoi assegnare una nomination quando almeno una partita della giornata risulta terminata.</p>
             <label className="admin-awards__field">
               <span>Giornata della competizione</span>
-              <select value={selectedMatchday ?? ""} onChange={(event) => {
+              <select value={selectedMatchday} disabled={matchesLoading || !matchdays.length} onChange={(event) => {
                 setMatchday(event.target.value); setMvpSearch("");
               }}>
-                {matchdays.map((day) => <option key={day} value={day}>{day}</option>)}
+                {matchdays.map((day) => <option key={day} value={day}>{dayLabel(day)}</option>)}
               </select>
             </label>
             <label className="admin-awards__field">
@@ -324,7 +378,9 @@ export function AdminMatchAwards() {
                 <button className="btn btn--ghost" type="button" disabled={Boolean(busyKey)} onClick={() => void removeMvp()}>Rimuovi</button>
               </div>
             )}
-            {!selectedMatchday ? <p className="admin-help-text">Nessuna giornata con partite terminate disponibile.</p> : (
+            {!matchesLoading && !selectedMatchday ? <p className="admin-help-text">Nessuna giornata registrata nelle partite della competizione. Compila il campo “Giornata” nella sezione Partite.</p> : null}
+            {selectedMatchday && !canNominateMvp ? <p className="admin-help-text" role="status">Nessuna partita terminata in questa giornata: potrai assegnare l'MVP dopo aver concluso almeno un incontro.</p> : null}
+            {selectedMatchday ? (
               <div className="admin-awards__players">
                 {mvpPlayers.map((player) => (
                   <div className="admin-awards__player" key={player.id}>
@@ -336,7 +392,7 @@ export function AdminMatchAwards() {
                       <button
                         className="btn btn--primary"
                         type="button"
-                        disabled={Boolean(busyKey) || currentMvp?.player_id === player.id}
+                        disabled={Boolean(busyKey) || !canNominateMvp || currentMvp?.player_id === player.id}
                         onClick={() => void nominateMvp(player)}
                       >
                         {currentMvp?.player_id === player.id ? "MVP della giornata ✓" : "Assegna MVP"}

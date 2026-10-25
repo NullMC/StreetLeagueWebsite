@@ -481,3 +481,13 @@ html[data-theme="night"] .admin-awards__player {
   }
   .admin-awards__actions .btn { flex: 1 1 auto; }
 }
+
+/* Light-mode award dropdowns remain readable independently of global theme tokens. */
+html:not([data-theme="night"]) .admin-layout .admin-awards__field select,
+html:not([data-theme="night"]) .admin-layout .admin-awards__field select option,
+html:not([data-theme="night"]) .admin-layout .admin-awards__actions select,
+html:not([data-theme="night"]) .admin-layout .admin-awards__actions select option {
+  color: #010a08 !important;
+  background-color: #fff !important;
+  color-scheme: light;
+}
