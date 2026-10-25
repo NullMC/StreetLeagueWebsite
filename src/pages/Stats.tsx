@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
@@ -113,28 +114,29 @@ function BestStatsCard({ group, players, staff, awards, config }: {
           <span className="best-stats-card__hint">Classifica completa <span aria-hidden="true">↗</span></span>
         </>
       ) : (
-        <div className="best-stats-card__empty-copy">
-          <h3>Nessun record</h3>
-          <p>{config.key === "staff"
-            ? "La classifica si attiverà quando sarà registrato almeno un gol dello staff."
-            : "Non sono ancora presenti statistiche registrate per questo riconoscimento."}</p>
-        </div>
+        <>
+          <div className="best-stats-card__empty-copy">
+            <h3>Nessun record</h3>
+            <p>{config.key === "staff"
+              ? "La classifica si attiverà quando sarà registrato almeno un gol dello staff."
+              : "Non sono ancora presenti statistiche registrate per questo riconoscimento."}</p>
+          </div>
+          <span className="best-stats-card__hint">Apri la classifica <span aria-hidden="true">↗</span></span>
+        </>
       )}
     </>
   );
 
-  return leader ? (
-    <a
-      className="stat-card best-stats-card"
-      href={"/statistiche/" + encodeURIComponent(group.id) + "/" + config.key}
-      aria-label={"Apri " + config.title + " per " + group.name}
+  // All four category cards remain navigable even before results are recorded.
+  // The same competition/group and category route displays the full ranking.
+  return (
+    <Link
+      className={"stat-card best-stats-card" + (leader ? "" : " best-stats-card--empty")}
+      to={"/statistiche/" + encodeURIComponent(group.id) + "/" + config.key}
+      aria-label={"Apri la classifica completa " + config.title + " per " + group.name}
     >
       {cardContent}
-    </a>
-  ) : (
-    <div className="stat-card best-stats-card best-stats-card--empty" aria-label={config.title + ": nessun record"}>
-      {cardContent}
-    </div>
+    </Link>
   );
 }
 
