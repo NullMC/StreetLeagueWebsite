@@ -134,3 +134,21 @@ export interface StaffRankingEntry {
   player: Player;
   presidential_penalties: number;
 }
+
+/** Rating given to one goalkeeper for one completed match (1–5). */
+export interface GoalkeeperMatchRating {
+  match_id: string;
+  player_id: string;
+  rating: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/** One MVP nomination per competition and matchday. */
+export interface MatchdayMvpVote {
+  competition_id: string;
+  matchday: string;
+  player_id: string;
+  created_at?: string;
+  updated_at?: string;
+}
