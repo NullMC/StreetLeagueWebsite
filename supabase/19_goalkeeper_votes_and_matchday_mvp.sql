@@ -37,7 +37,7 @@ declare
 begin
   select id, status, home_team_id, away_team_id into v_match
     from public.matches where id = new.match_id;
-  select id, team_id, position, role into v_player
+  select id, team_id, position into v_player
     from public.players where id = new.player_id;
 
   if v_match.id is null or v_player.id is null then
@@ -49,8 +49,7 @@ begin
   if v_player.team_id not in (v_match.home_team_id, v_match.away_team_id) then
     raise exception 'Il portiere deve appartenere a una squadra della partita';
   end if;
-  if upper(coalesce(v_player.role, '')) = 'STAFF'
-    or not (
+  if not (
       lower(coalesce(v_player.position, '')) like '%portier%'
       or lower(coalesce(v_player.position, '')) like '%goalkeeper%'
       or lower(coalesce(v_player.position, '')) like '%goalie%'
@@ -92,11 +91,10 @@ begin
   ) then
     raise exception 'La giornata selezionata non comprende partite terminate';
   end if;
-  select id, team_id, position, role into v_player
+  select id, team_id, position into v_player
     from public.players where id = new.player_id;
   if v_player.id is null or
-    upper(coalesce(v_player.position, '')) = 'STAFF' or
-    upper(coalesce(v_player.role, '')) = 'STAFF' then
+    upper(coalesce(v_player.position, '')) = 'STAFF' then
     raise exception 'Seleziona un giocatore valido, non un membro staff';
   end if;
   if not exists (
