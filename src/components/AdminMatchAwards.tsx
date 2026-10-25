@@ -13,7 +13,7 @@ type AwardData = {
 
 const playerName = (player: Player) => player.first_name + " " + player.last_name;
 const dayFor = (match: Match) => match.matchday?.trim() ?? "";
-const dayLabel = (day: string) => /^\\d+$/.test(day) ? "Giornata " + day : day;
+const dayLabel = (day: string) => /^\d+$/.test(day) ? "Giornata " + day : day;
 const matchStatus: Record<Match["status"], string> = {
   scheduled: "Programmata",
   live: "In corso",
