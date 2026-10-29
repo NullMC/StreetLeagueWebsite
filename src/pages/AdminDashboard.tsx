@@ -134,7 +134,10 @@ function relationOptions(field: string, resource: Resource, form: Row, l: Lookup
   if (field === "competition_id") return l.competitions.map((x) => ({ id: x.id, label: x.name }));
   if (field === "team_id") return l.teams.map((x) => ({ id: x.id, label: x.name }));
   if (field === "home_team_id" || field === "away_team_id") return l.teams.filter((x) => !form.competition_id || x.competition_ids?.includes(String(form.competition_id))).map((x) => ({ id: x.id, label: x.name }));
-  if (field === "match_id") return l.matches.map((x) => ({ id: x.id, label: `${l.teams.find((t) => t.id === x.home_team_id)?.name ?? "Casa"} - ${l.teams.find((t) => t.id === x.away_team_id)?.name ?? "Ospite"} / ${x.matchday ?? "—"}` }));
+  if (field === "match_id") return l.matches.map((match) => ({
+    id: match.id,
+    label: readableMatchLabel(match, l),
+  }));
   if (field === "player_id" || field === "related_player_id") { let ps = l.players; if (resource === "transfer_market_entries") ps = ps.filter((p) => p.role?.trim().toUpperCase() !== "STAFF" && p.position?.trim().toUpperCase() !== "STAFF"); if (["events", "mvp"].includes(resource) && form.match_id) { const m = l.matches.find((x) => x.id === form.match_id); const ids = m ? [m.home_team_id, m.away_team_id] : []; ps = ps.filter((p) => ids.includes(p.team_id)); } if (resource === "events" && field === "player_id" && form.event_type === "presidential_penalty") ps = ps.filter((p) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"); if (resource === "player_of_month" && field === "player_id") { const isStaff = (p: Player) => p.role?.trim().toUpperCase() === "STAFF" || p.position?.trim().toUpperCase() === "STAFF"; ps = ps.filter((p) => form.award_type === "staff" ? isStaff(p) : !isStaff(p)); } return ps.map((p) => ({ id: p.id, label: `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}` })); }
   return [];
 }
@@ -214,27 +217,96 @@ function validate(resource: Resource, payload: Row, l: Lookups) {
   for (const field of ["website_url", "content_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url", "cta_url", "card_image_url", "activity_image_url", "external_photo_url"]) { const value = payload[field]; if (value) { try { const parsed = new URL(String(value)); if (!/^https?:$/.test(parsed.protocol)) throw new Error(); } catch { throw new Error(`${labelize(field)} non valido: usa un link http:// o https://.`); } } }
   if (resource === "teams" && payload.accent_hex) { if (!/^#[0-9a-f]{6}$/i.test(String(payload.accent_hex))) throw new Error("Colore accent non valido: usa il formato #RRGGBB."); }
 }
-function displayCellValue(resource: Resource, field: string, row: Row, l: Lookups) {
-  if (field === "competition_ids") {
-    const ids = Array.isArray(row[field]) ? row[field] as string[] : [];
-    const names = ids
-      .map((id) => l.competitions.find((competition) => competition.id === id)?.name)
-      .filter((name): name is string => Boolean(name));
-    return names.length ? names.join(", ") : "—";
-  }
-  if (field === "player_id") {
-    const p = l.players.find((x) => x.id === row[field]);
-    if (p) return `#${p.shirt_number ?? "—"} ${p.first_name} ${p.last_name}`;
-    if (resource === "transfer_market_entries") return `${row.external_first_name ?? ""} ${row.external_last_name ?? ""}`.trim() || "Giocatore esterno";
-    return "—";
-  }
-  if (resource === "player_of_month" && field === "award_type") return row.award_type === "staff" ? "Staff del mese" : "POTM";
-  if (field === "team_id") return l.teams.find((x) => x.id === row[field])?.name ?? "—";
-  if (field === "competition_id") return l.competitions.find((x) => x.id === row[field])?.name ?? "—";
-  return String(row[field] ?? "—");
+/** Display human-readable names while keeping database UUIDs as the actual field values.
+ * This resolver is shared by the table, confirmation dialogs, search and selectors.
+ */
+function readableTeamName(id: unknown, lookups: Lookups): string {
+  if (!id) return "—";
+  return lookups.teams.find((team) => team.id === id)?.name || "Squadra non disponibile";
 }
 
-function rowLabel(resource: Resource, row: Row, l: Lookups) { if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource); if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim(); if (resource === "player_of_month") { const p = l.players.find((x) => x.id === row.player_id); const kind = row.award_type === "staff" ? "Staff del mese" : "POTM"; return `${kind} · ${row.month_label ?? ""} / ${p ? `${p.first_name} ${p.last_name}` : "Profilo non disponibile"}`; } if (resource === "matches") return `${l.teams.find((x) => x.id === row.home_team_id)?.name ?? "Casa"} - ${l.teams.find((x) => x.id === row.away_team_id)?.name ?? "Ospite"}`; if (resource === "transfer_market_entries") { const team = l.teams.find((x) => x.id === row.team_id); const player = l.players.find((x) => x.id === row.player_id); return `${team?.name ?? "Squadra"} · Slot ${row.slot_number} / ${player ? `${player.first_name} ${player.last_name}` : `${row.external_first_name ?? ""} ${row.external_last_name ?? ""}`.trim()}`; } if (resource === "active_collaborations") return String(row.title ?? "Collaborazione"); return String(row.title ?? row.name ?? resource); }
+function readableCompetitionName(id: unknown, lookups: Lookups): string {
+  if (!id) return "—";
+  return lookups.competitions.find((competition) => competition.id === id)?.name || "Competizione non disponibile";
+}
+
+function readablePlayerName(id: unknown, lookups: Lookups): string {
+  if (!id) return "—";
+  const player = lookups.players.find((entry) => entry.id === id);
+  return player ? `#${player.shirt_number ?? "—"} ${player.first_name} ${player.last_name}` : "Giocatore non disponibile";
+}
+
+function readableMatchLabel(match: Match, lookups: Lookups): string {
+  const fixture = `${readableTeamName(match.home_team_id, lookups)} – ${readableTeamName(match.away_team_id, lookups)}`;
+  const competition = readableCompetitionName(match.competition_id, lookups);
+  const matchday = match.matchday?.trim() || "Giornata non assegnata";
+  const matchTime = match.kickoff_at && !Number.isNaN(Date.parse(match.kickoff_at))
+    ? new Date(match.kickoff_at).toLocaleDateString("it-IT")
+    : "";
+  return [fixture, competition, matchday, matchTime].filter(Boolean).join(" · ");
+}
+
+function readableRelation(field: string, id: unknown, lookups: Lookups): string | null {
+  switch (field) {
+    case "team_id":
+    case "home_team_id":
+    case "away_team_id":
+      return readableTeamName(id, lookups);
+    case "competition_id":
+      return readableCompetitionName(id, lookups);
+    case "player_id":
+    case "related_player_id":
+      return readablePlayerName(id, lookups);
+    case "match_id": {
+      if (!id) return "—";
+      const match = lookups.matches.find((entry) => entry.id === id);
+      return match ? readableMatchLabel(match, lookups) : "Partita non disponibile";
+    }
+    default:
+      return null;
+  }
+}
+
+function displayCellValue(resource: Resource, field: string, row: Row, lookups: Lookups): string {
+  if (field === "competition_ids") {
+    const ids = Array.isArray(row[field]) ? row[field] as string[] : [];
+    return ids.length
+      ? ids.map((id) => readableCompetitionName(id, lookups)).join(", ")
+      : "—";
+  }
+  if (resource === "player_of_month" && field === "award_type") {
+    return row.award_type === "staff" ? "Staff del mese" : "POTM";
+  }
+  if (resource === "transfer_market_entries" && field === "player_id" && !row.player_id) {
+    return [row.external_first_name, row.external_last_name].filter(Boolean).join(" ") || "Giocatore esterno";
+  }
+  return readableRelation(field, row[field], lookups) ?? String(row[field] ?? "—");
+}
+
+function rowLabel(resource: Resource, row: Row, lookups: Lookups): string {
+  if (["competitions", "teams"].includes(resource)) return String(row.name ?? resource);
+  if (resource === "players") return `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim();
+  if (resource === "matches") {
+    const match = lookups.matches.find((item) => item.id === row.id);
+    return match
+      ? readableMatchLabel(match, lookups)
+      : `${readableTeamName(row.home_team_id, lookups)} – ${readableTeamName(row.away_team_id, lookups)}`;
+  }
+  if (resource === "events") return `${readableRelation("match_id", row.match_id, lookups)} / ${readablePlayerName(row.player_id, lookups)}`;
+  if (resource === "mvp") return `MVP · ${readableRelation("match_id", row.match_id, lookups)} / ${readablePlayerName(row.player_id, lookups)}`;
+  if (resource === "player_of_month") {
+    const kind = row.award_type === "staff" ? "Staff del mese" : "POTM";
+    return `${kind} · ${row.month_label ?? ""} / ${readablePlayerName(row.player_id, lookups)}`;
+  }
+  if (resource === "transfer_market_entries") {
+    const name = row.player_id
+      ? readablePlayerName(row.player_id, lookups)
+      : [row.external_first_name, row.external_last_name].filter(Boolean).join(" ");
+    return `${readableTeamName(row.team_id, lookups)} · Slot ${row.slot_number} / ${name || "Giocatore esterno"}`;
+  }
+  if (resource === "active_collaborations") return String(row.title ?? "Collaborazione");
+  return String(row.title ?? row.name ?? resource);
+}
 
 function normalizeSearch(value: unknown) {
   return String(value ?? "")
@@ -243,7 +315,11 @@ function normalizeSearch(value: unknown) {
     .toLocaleLowerCase("it-IT");
 }
 function searchableRowText(resource: Resource, row: Row, l: Lookups) {
-  const values = fields[resource].map((f) => String(row[f] ?? ""));
+  const values = fields[resource].flatMap((field) => [
+    String(row[field] ?? ""),
+    displayCellValue(resource, field, row, l),
+  ]);
+  values.push(rowLabel(resource, row, l));
   const extras: string[] = [];
   const team = row.team_id ? l.teams.find((x) => x.id === row.team_id) : undefined;
   const competition = row.competition_id ? l.competitions.find((x) => x.id === row.competition_id) : undefined;
@@ -264,9 +340,14 @@ function searchableRowText(resource: Resource, row: Row, l: Lookups) {
   if (match) {
     const home = l.teams.find((x) => x.id === match.home_team_id);
     const away = l.teams.find((x) => x.id === match.away_team_id);
+    const relatedCompetition = l.competitions.find((x) => x.id === match.competition_id);
     extras.push(
       home?.name ?? "",
+      home?.slug ?? "",
       away?.name ?? "",
+      away?.slug ?? "",
+      relatedCompetition?.name ?? "",
+      relatedCompetition?.slug ?? "",
       String(match.matchday ?? ""),
       String(match.venue ?? ""),
     );
@@ -284,11 +365,28 @@ function searchableRowText(resource: Resource, row: Row, l: Lookups) {
 }
 
 function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile }) {
-  const [rows, setRows] = useState<Row[]>([]); const [form, setForm] = useState<Row>(() => defaults(resource)); const [editing, setEditing] = useState<string | null>(null); const [loading, setLoading] = useState(true); const [message, setMessage] = useState(""); const [searchTerm, setSearchTerm] = useState(""); const [uploadingField, setUploadingField] = useState<string | null>(null); const [lookups, setLookups] = useState<Lookups>({ competitions: [], teams: [], players: [], matches: [] });
+  const [rows, setRows] = useState<Row[]>([]); const [form, setForm] = useState<Row>(() => defaults(resource)); const [editing, setEditing] = useState<string | null>(null); const [loading, setLoading] = useState(true); const [message, setMessage] = useState(""); const [searchTerm, setSearchTerm] = useState(""); const [uploadingField, setUploadingField] = useState<string | null>(null); const [lookups, setLookups] = useState<Lookups>({ competitions: [], teams: [], players: [], matches: [] }); const [lookupsLoading, setLookupsLoading] = useState(true); const [lookupsError, setLookupsError] = useState("");
   const canWrite = profile.role === "super_admin" || profile.role === "admin" || (profile.role === "operator" && ["matches", "events", "mvp"].includes(resource));
   const refresh = async () => { setLoading(true); try { setRows(await readRows(resource)); } catch (e) { setMessage(errorMessage(e, "Errore di caricamento.")); } finally { setLoading(false); } };
   useEffect(() => { setForm(defaults(resource)); setEditing(null); setMessage(""); setSearchTerm(""); void refresh(); }, [resource]);
-  useEffect(() => { Promise.all([getCompetitions(), getTeams(), getPlayers(), getMatches()]).then(([competitions, teams, players, matches]) => setLookups({ competitions, teams, players, matches })).catch(() => undefined); }, [resource]);
+  const refreshLookups = async () => {
+    const [competitions, teams, players, matches] = await Promise.all([
+      getCompetitions(), getTeams(), getPlayers(), getMatches(),
+    ]);
+    setLookups({ competitions, teams, players, matches });
+  };
+  useEffect(() => {
+    let active = true;
+    setLookupsLoading(true);
+    setLookupsError("");
+    void Promise.all([getCompetitions(), getTeams(), getPlayers(), getMatches()])
+      .then(([competitions, teams, players, matches]) => {
+        if (active) setLookups({ competitions, teams, players, matches });
+      })
+      .catch((cause) => { if (active) setLookupsError(errorMessage(cause, "Impossibile caricare i nomi collegati.")); })
+      .finally(() => { if (active) setLookupsLoading(false); });
+    return () => { active = false; };
+  }, [resource]);
   const setField = (f: string, v: unknown) => setForm((p) => ({ ...p, [f]: v, ...(f === "award_type" && resource === "player_of_month" ? { player_id: "" } : {}), ...(f === "competition_id" ? { home_team_id: "", away_team_id: "", ...(resource === "transfer_market_entries" ? { team_id: "" } : {}) } : {}), ...(resource === "transfer_market_entries" && f === "player_id" && v ? { external_first_name: "", external_last_name: "", external_position: "", external_shirt_number: "", external_photo_url: "" } : {}), ...(f === "match_id" ? { team_id: "", player_id: "", related_player_id: "" } : {}) }));
   const edit = (r: Row) => { const n = { ...r }; setEditing(String(r[keys[resource]])); if (n.kickoff_at) n.kickoff_at = localDate(n.kickoff_at); if (n.published_at) n.published_at = localDate(n.published_at); setForm(n); setMessage(""); window.scrollTo({ top: 120, behavior: "smooth" }); };
   const cancelEdit = () => { setEditing(null); setForm(defaults(resource)); setMessage(""); };
@@ -361,11 +459,13 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
       setEditing(null);
       setForm(defaults(resource));
       await refresh();
+      try { await refreshLookups(); }
+      catch (cause) { setLookupsError(errorMessage(cause, "Impossibile aggiornare i nomi collegati.")); }
     } catch (e) {
       setMessage(errorMessage(e, "Operazione non riuscita."));
     }
   };
-  const remove = async (r: Row) => { if (!supabase || !canWrite) return; const k = r[keys[resource]]; if (!k || !confirm(`Eliminare ${rowLabel(resource, r, lookups)}?`)) return; try { await ensureFreshAdminSession(); const { error } = await supabase.from(tables[resource]).delete().eq(keys[resource], k); if (error) throw error; setMessage("Record eliminato."); await refresh(); } catch (e) { setMessage(errorMessage(e, "Eliminazione non riuscita.")); } }; const normalizedSearch = normalizeSearch(searchTerm.trim()); const filteredRows = normalizedSearch ? rows.filter((r) => searchableRowText(resource, r, lookups).includes(normalizedSearch)) : rows;
+  const remove = async (r: Row) => { if (!supabase || !canWrite) return; const k = r[keys[resource]]; if (!k || !confirm(`Eliminare ${rowLabel(resource, r, lookups)}?`)) return; try { await ensureFreshAdminSession(); const { error } = await supabase.from(tables[resource]).delete().eq(keys[resource], k); if (error) throw error; setMessage("Record eliminato."); await refresh(); try { await refreshLookups(); } catch (cause) { setLookupsError(errorMessage(cause, "Impossibile aggiornare i nomi collegati.")); } } catch (e) { setMessage(errorMessage(e, "Eliminazione non riuscita.")); } }; const normalizedSearch = normalizeSearch(searchTerm.trim()); const filteredRows = normalizedSearch ? rows.filter((r) => searchableRowText(resource, r, lookups).includes(normalizedSearch)) : rows;
   const render = (f: string) => {
     const v = form[f];
     if (f === "competition_ids") {
@@ -409,9 +509,10 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
     </div>
     <span className="admin-search__count">{normalizedSearch ? `${filteredRows.length} di ${rows.length}` : `${rows.length} record`}</span>
   </div>
+  {lookupsError && <p className="admin-error" role="alert">{lookupsError} I nomi non disponibili verranno segnalati senza mostrare gli UUID.</p>}
   <div className="admin-table-wrap">
-    {loading ? (
-      <p className="admin-message">Caricamento…</p>
+    {loading || lookupsLoading ? (
+      <p className="admin-message">Caricamento record e nomi collegati…</p>
     ) : !rows.length ? (
       <p className="admin-message">Nessun record presente.</p>
     ) : !filteredRows.length ? (
