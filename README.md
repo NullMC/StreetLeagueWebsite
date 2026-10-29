@@ -189,3 +189,34 @@ si confrontano il totale dei gol subiti e poi il numero di valutazioni.
 Nella card viene mostrato il primo classificato accanto al record. La
 classifica dettagliata presenta i voti per ciascun incontro e i gol subiti;
 per gli MVP viene mantenuto il conteggio cumulativo degli MVP partita.
+
+## Formazioni, referti, Drive e articoli (migrazione 20)
+
+**Prima di distribuire il nuovo frontend**, esegui una volta nel **Supabase SQL Editor**:
+
+`supabase/20_match_reports_drive_articles.sql`
+
+La migrazione aggiunge `matches.photo_drive_url`, il corpo dell'articolo
+`social_contents.article_body` e i campi editoriali mancanti, se necessari.
+Aggiunge controlli per nuovi eventi e formazioni: gli eventi sono limitati a
+**gol, rigori presidenziali e cartellini gialli/rossi**, minuto intero da
+**1 a 60**, partita **terminata**, entrambe le formazioni presenti,
+giocatore appartenente a una delle due squadre e (salvo rigore presidenziale)
+registrato nella formazione. Lo storico precedente resta consultabile.
+
+Il backoffice contiene **Formazioni e referti**, con filtri per competizione
+attiva, giornata e partita. Si selezionano i titolari e le riserve di ciascuna
+squadra e si salvano separatamente; solo dopo la conferma di entrambe e il
+termine dell'incontro si possono creare, modificare e cancellare gli eventi.
+
+Nella scheda **Partite** il campo `photo_drive_url` deve contenere un link
+pubblico e condivisibile `https://drive.google.com/...`. Nella pagina partita
+ci sono tre tab: Riepilogo, Formazioni e Foto (apre Drive in una nuova scheda).
+Il collegamento alla galleria è inattivo finché non viene compilato l'URL.
+
+In **Social / Video** si impostano piattaforma, titolo, estratto facoltativo,
+**corpo dell'articolo** con editor formattato, banner/thumbnail e URL del post.
+La home mantiene lo stesso carosello di card, ma il click apre la pagina
+`/articoli/:articleId`, con banner, testo e link esterno al media originale.
+I contenuti storici senza `article_body` mostrano la descrizione esistente,
+quando disponibile.

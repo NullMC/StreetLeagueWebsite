@@ -54,6 +54,7 @@ export interface Match {
   home_score: number | null;
   away_score: number | null;
   venue: string | null;
+  photo_drive_url?: string | null;
 }
 
 export interface MatchLineup {
@@ -98,6 +99,7 @@ export interface SocialContent {
   thumbnail_url: string | null;
   image_url?: string | null;
   description?: string | null;
+  article_body?: string | null;
   content_url: string;
   published_at: string | null;
 }

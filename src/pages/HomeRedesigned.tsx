@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { TeamCarousel } from "../components/TeamCarousel";
@@ -113,20 +114,20 @@ function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
         {items.map((item) => {
           const imageUrl = item.thumbnail_url || item.image_url;
           return (
-            <article className="home-feature-card" key={item.id}>
-              <a className="home-feature-card__media-link" href={item.content_url} target="_blank" rel="noopener noreferrer" aria-label={`Apri ${item.title}`}>
+            <Link className="home-feature-card" key={item.id} to={"/articoli/" + item.id} aria-label={"Leggi articolo: " + item.title}>
+              <div className="home-feature-card__media-link">
                 <div className="home-feature-card__media">
                   {imageUrl ? <img src={imageUrl} alt="" loading="lazy" /> : <div className="home-feature-card__fallback" aria-hidden="true" />}
                 </div>
-              </a>
+              </div>
               <div className="home-feature-card__content">
                 <h3>{item.title}</h3>
                 {item.description ? <p>{item.description}</p> : null}
-                <a className="home-feature-card__cta" href={item.content_url} target="_blank" rel="noopener noreferrer">
-                  <span>Apri contenuto</span><span aria-hidden="true">↗</span>
-                </a>
+                <span className="home-feature-card__cta">
+                  <span>Leggi articolo</span><span aria-hidden="true">↗</span>
+                </span>
               </div>
-            </article>
+            </Link>
           );
         })}
       </div>

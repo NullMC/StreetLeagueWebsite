@@ -184,6 +184,19 @@ export async function getActiveCollaborations(): Promise<
   );
 }
 
+export async function getSocialContentById(id: string): Promise<SocialContent | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase.from("social_contents").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data as SocialContent | null;
+}
+
+export async function getMatchLineups(matchId: string): Promise<MatchLineup[]> {
+  if (!supabase) return [];
+  return getRows<MatchLineup>(supabase.from("match_lineups").select("*")
+    .eq("match_id", matchId).order("starter", { ascending: false }));
+}
+
 export async function getSocialContent(): Promise<SocialContent[]> {
   if (!supabase) return [];
   return getRows<SocialContent>(

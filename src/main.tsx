@@ -20,6 +20,7 @@ import "./styles/material-overhaul.css";
 import "./styles/platform-rework.css";
 import "./styles/transfer-market.css";
 import "./styles/team-competition-enhancements.css";
+import "./styles/match-editorial.css";
 import HomeRedesigned from "./pages/HomeRedesigned";
 import Competitions from "./pages/Competitions";
 import Standings from "./pages/Standings";
@@ -29,6 +30,7 @@ import PlayerDetail from "./pages/PlayerDetail";
 import CompetitionDetail from "./pages/CompetitionDetail";
 import Stats from "./pages/Stats";
 import MatchDetail from "./pages/MatchDetail";
+import ArticleDetail from "./pages/ArticleDetail";
 import TransferMarket from "./pages/TransferMarket";
 import Partners from "./pages/Partners";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -55,6 +57,7 @@ function App() {
         <Route path="/statistiche" element={<Stats />} />
         <Route path="/statistiche/:groupId/:statKey" element={<StatsDetail />} />
         <Route path="/partite/:matchId" element={<MatchDetail />} />
+        <Route path="/articoli/:articleId" element={<ArticleDetail />} />
         <Route path="/partner" element={<Partners />} />
         <Route path="/collabora" element={<Navigate to="/partner#collabora" replace />} />
         <Route path="/admin" element={<AdminDashboard />} />
