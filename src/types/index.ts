@@ -100,6 +100,7 @@ export interface SocialContent {
   image_url?: string | null;
   description?: string | null;
   article_body?: string | null;
+  sort_order?: number;
   content_url: string;
   published_at: string | null;
 }

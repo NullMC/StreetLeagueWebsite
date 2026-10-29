@@ -199,13 +199,23 @@ export async function getMatchLineups(matchId: string): Promise<MatchLineup[]> {
 
 export async function getSocialContent(): Promise<SocialContent[]> {
   if (!supabase) return [];
-  return getRows<SocialContent>(
-    supabase
-      .from("social_contents")
-      .select("*")
-      .order("published_at", { ascending: false, nullsFirst: false })
-      .limit(18),
-  );
+  const ordered = await supabase.from("social_contents").select("*")
+    .order("sort_order", { ascending: true })
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(18);
+  if (ordered.error) {
+    // Keep the public carousel operational until migration 23 is applied.
+    if (ordered.error.code === "42703" || /sort_order.*(?:does not exist|not found)/i.test(ordered.error.message)) {
+      return getRows<SocialContent>(
+        supabase.from("social_contents").select("*")
+          .order("published_at", { ascending: false, nullsFirst: false })
+          .limit(18),
+      );
+    }
+    throw ordered.error;
+  }
+  return (ordered.data ?? []) as SocialContent[];
 }
 
 export async function getMatch(id: string): Promise<Match | null> {

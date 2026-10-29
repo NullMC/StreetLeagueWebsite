@@ -260,3 +260,22 @@ Rimuove esclusivamente il vincolo
 `matches_photo_drive_url_valid` che bloccava i collegamenti non-Drive.
 Su nuove installazioni la versione aggiornata della migrazione 20 non
 introduce più quel vincolo.
+
+## Ordinamento degli articoli in evidenza (migrazione 23)
+
+Nella sezione **Admin → Social / Video**, durante creazione e modifica degli
+articoli, è disponibile il campo **Ordine di visualizzazione**. Il valore
+deve essere un intero non negativo: **0 è la prima posizione**, seguono 1,
+2, 3 e così via. Articoli con lo stesso numero vengono ordinati per data
+di pubblicazione decrescente e, in caso di ulteriore parità, per data di
+creazione. La tabella amministrativa e il carosello pubblico utilizzano
+la stessa sequenza. Il layout delle card non cambia.
+
+Per i database esistenti, applicare nel **Supabase SQL Editor** la migrazione
+`supabase/23_social_article_sort_order.sql`. Alla **prima esecuzione**,
+assegna ai record già presenti numeri 0, 1, 2... mantenendo il precedente
+ordine per data; non elimina né sostituisce articoli. La migrazione è
+ripetibile: se la colonna esiste già, non cambia gli ordini configurati
+manualmente. **Prima di eseguire la migrazione**, la homepage continua
+a ordinare per data come in precedenza, ma il nuovo campo non può ancora
+essere salvato nel backoffice.

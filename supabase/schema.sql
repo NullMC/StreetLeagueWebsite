@@ -145,8 +145,12 @@ create table if not exists partners (
 );
 create table if not exists social_contents (
   id uuid primary key default gen_random_uuid(), platform social_platform not null, title text not null,
-  thumbnail_url text, content_url text not null, published_at timestamptz, created_at timestamptz not null default now()
+  thumbnail_url text, content_url text not null, published_at timestamptz,
+  sort_order integer not null default 0 check (sort_order >= 0),
+  created_at timestamptz not null default now()
 );
+create index if not exists idx_social_contents_sort_order
+  on social_contents(sort_order asc, published_at desc nulls last, created_at desc);
 
 create index if not exists idx_matches_competition_kickoff on matches(competition_id,kickoff_at);
 create index if not exists idx_events_match on match_events(match_id);
