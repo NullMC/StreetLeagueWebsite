@@ -225,3 +225,16 @@ html[data-theme="night"] .match-report-admin select option {
 html[data-theme="night"] .match-report-admin label {
   color: #b4c4c9 !important;
 }
+
+/* Featured cards now route to full articles; retain their previous appearance. */
+a.home-feature-card, a.home-feature-card:visited {
+  text-decoration: none !important;
+  color: var(--home-ink) !important;
+}
+a.home-feature-card:focus-visible {
+  outline: 3px solid var(--pink);
+  outline-offset: 4px;
+}
+a.home-feature-card:hover .home-feature-card__cta {
+  color: var(--pink) !important;
+}
