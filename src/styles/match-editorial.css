@@ -155,7 +155,7 @@ html[data-theme="night"] .match-experience__tabs button.active { background: var
 .editorial-article__body p { margin: 0 0 1.2em; }
 .editorial-article__body ul, .editorial-article__body ol { padding-left: 1.4em; margin: 0 0 1.3em; }
 .editorial-article__placeholder { padding: 12px 25px 35px; text-align: center; color: var(--report-muted); }
-.editorial-article__footer { display: flex; justify-content: space-between; gap: 20px; align-items: center; flex-wrap: wrap; margin: 10px clamp(20px,4vw,50px) 32px; padding-top: 24px; border-top: 1px solid var(--report-line); }
+.editorial-article__footer { display: flex; justify-content: flex-end; gap: 20px; align-items: center; flex-wrap: wrap; margin: 10px clamp(20px,4vw,50px) 32px; padding-top: 24px; border-top: 1px solid var(--report-line); }
 .editorial-article__footer p { margin: 8px 0 0; font-size: 12px; color: var(--report-muted); }
 
 /* Administrative match management, deliberately readable in both theme modes. */
