@@ -1436,30 +1436,39 @@ html:not([data-theme="night"]) .partners-sponsors-band .partner-editorial-card__
 .home-feature-card__media-link {
   display: block;
   flex: 0 0 auto;
-  height: clamp(118px, 13vw, 164px);
+  height: auto;
+  min-height: 0;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(228,34,120,.25), #111312);
+  background: transparent;
 }
 .home-feature-card__media,
 .home-feature-card__shade {
   position: relative !important;
   inset: auto !important;
 }
+/* Use the image's intrinsic aspect ratio (portrait posters: 2:3), not a
+   cropped landscape thumbnail. No letterboxing or artificial side gutters. */
 .home-feature-card__media {
-  height: 100%;
+  width: 100%;
+  height: auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
-.home-feature-card__media img,
+.home-feature-card__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  aspect-ratio: auto 2 / 3;
+  object-fit: contain;
+  transform: none;
+}
+.home-feature-card:hover .home-feature-card__media img { transform: none; }
 .home-feature-card__fallback {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.home-feature-card__media img { transition: transform .28s ease; }
-.home-feature-card:hover .home-feature-card__media img { transform: scale(1.035); }
-.home-feature-card__fallback {
+  height: auto;
+  aspect-ratio: 2 / 3;
   background: radial-gradient(circle at 75% 20%, rgba(228,34,120,.5), transparent 45%), linear-gradient(135deg, #111312, #3a1025);
 }
 .home-feature-card__shade { display: none !important; }
@@ -1514,7 +1523,7 @@ html[data-theme="night"] .home-feature-card__cta { color: #f5f7f6 !important; }
 html[data-theme="night"] .home-feature-card__content p { color: rgba(245,247,246,.68) !important; }
 @media (max-width: 600px) {
   .home-feature-card { flex-basis: min(78vw, 275px) !important; }
-  .home-feature-card__media-link { height: 128px; }
+  .home-feature-card__media-link { height: auto; }
   .home-feature-card__content { padding: 14px !important; }
 }
 
