@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { sanitizeRichTextHtml } from "../lib/richText";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { TeamCarousel } from "../components/TeamCarousel";
@@ -122,7 +123,14 @@ function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
               </div>
               <div className="home-feature-card__content">
                 <h3>{item.title}</h3>
-                {item.description ? <p>{item.description}</p> : null}
+                {item.description ? (
+                  <div
+                    className="home-feature-card__description"
+                    dangerouslySetInnerHTML={{
+                      __html: sanitizeRichTextHtml(item.description, { allowLinks: false }),
+                    }}
+                  />
+                ) : null}
                 <span className="home-feature-card__cta">
                   <span>Leggi articolo</span><span aria-hidden="true">↗</span>
                 </span>

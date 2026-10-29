@@ -1,6 +1,9 @@
 const allowedTags = new Set(["B", "STRONG", "I", "EM", "U", "S", "BR", "P", "DIV", "UL", "OL", "LI", "A"]);
 
-export function sanitizeRichTextHtml(html: string) {
+export function sanitizeRichTextHtml(
+  html: string,
+  options: { allowLinks?: boolean } = {},
+) {
   if (typeof document === "undefined") return html;
 
   const doc = new DOMParser().parseFromString(html || "", "text/html");
@@ -13,7 +16,8 @@ export function sanitizeRichTextHtml(html: string) {
   }
 
   elements.forEach((element) => {
-    if (!allowedTags.has(element.tagName)) {
+    // Cards are wrapped in a React Router link: do not put nested links inside them.
+    if (!allowedTags.has(element.tagName) || (element.tagName === "A" && options.allowLinks === false)) {
       const parent = element.parentNode;
       if (!parent) return;
       while (element.firstChild) parent.insertBefore(element.firstChild, element);

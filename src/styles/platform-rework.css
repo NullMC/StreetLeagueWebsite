@@ -1527,6 +1527,28 @@ html[data-theme="night"] .home-feature-card__content p { color: rgba(245,247,246
   .home-feature-card__content { padding: 14px !important; }
 }
 
+/* Formatted excerpts from the admin rich-text editor, rendered as safe HTML. */
+.home-feature-card__description {
+  margin: 0;
+  color: var(--home-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.home-feature-card__description :is(p, div, ul, ol) {
+  margin: 0 0 7px !important;
+  color: inherit !important;
+  font-size: inherit;
+  line-height: inherit;
+}
+.home-feature-card__description :is(p, div, ul, ol):last-child { margin-bottom: 0 !important; }
+.home-feature-card__description :is(ul, ol) { padding-left: 18px; }
+.home-feature-card__description li { margin-block: 3px; }
+.home-feature-card__description :is(b, strong) { font-weight: 800; }
+html[data-theme="night"] .home-feature-card__description {
+  color: rgba(245, 247, 246, .68) !important;
+}
+
 /* POTM and Staff of the Month share one full-photo, clickable card design. */
 .monthly-awards-grid { align-items: stretch; }
 .monthly-award-column { display: flex; min-width: 0; }
