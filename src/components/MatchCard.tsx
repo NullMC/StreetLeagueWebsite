@@ -114,7 +114,7 @@ export function MatchCard({
             href={match.photo_drive_url}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`Photo Gallery: ${home?.name ?? "Casa"} - ${away?.name ?? "Ospiti"} (Google Drive)`}
+            aria-label={`Photo Gallery: ${home?.name ?? "Casa"} - ${away?.name ?? "Ospiti"}`}
           >
             <span aria-hidden="true">▧</span> Photo Gallery <span aria-hidden="true">↗</span>
           </a>

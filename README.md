@@ -209,9 +209,14 @@ attiva, giornata e partita. Si selezionano i titolari e le riserve di ciascuna
 squadra e si salvano separatamente; solo dopo la conferma di entrambe e il
 termine dell'incontro si possono creare, modificare e cancellare gli eventi.
 
-Nella scheda **Partite** il campo `photo_drive_url` deve contenere un link
-pubblico e condivisibile `https://drive.google.com/...`. Nella pagina partita
-sono presenti due schede: **Riepilogo** e **Formazioni**. Il pulsante **Photo Gallery** compare invece nelle card delle partite (home e competizioni) e apre Drive in una nuova scheda.
+Nella scheda **Partite**, il campo `photo_drive_url` è un semplice campo
+testuale per incollare un link pubblico e condivisibile alla galleria,
+da **qualsiasi piattaforma** (Google Drive, Dropbox, Google Foto e altre).
+Non è previsto alcun upload per questo campo, né un controllo sul dominio
+o sulla struttura del link al salvataggio. Nella pagina partita sono presenti
+due schede: **Riepilogo** e **Formazioni**. Il pulsante **Photo Gallery**
+compare nelle card delle partite (home e competizioni) e apre il link in
+una nuova scheda.
 Il collegamento alla galleria è inattivo finché non viene compilato l'URL.
 
 In **Social / Video** si impostano piattaforma, titolo, estratto facoltativo,
@@ -236,7 +241,22 @@ migrazione 21 aggiorna la funzione di validazione lato database senza
 modificare i referti esistenti. Per una nuova installazione eseguire
 prima la migrazione 20 e poi la 21.
 
-Il link Drive continua a essere gestito nella sezione Partite, ma il
-pulsante **Photo Gallery** ora appare direttamente in ogni **card della
+Il link della galleria continua a essere gestito nella sezione Partite,
+ma il pulsante **Photo Gallery** appare direttamente in ogni **card della
 partita**, separato dal collegamento ai dettagli. La pagina dedicata
 contiene solo le schede Riepilogo e Formazioni.
+
+## Photo Gallery: link esterni senza vincolo di piattaforma (migrazione 22)
+
+Il campo **Link Photo Gallery** delle partite accetta un link di condivisione
+proveniente da **qualsiasi servizio**. È un campo di testo, senza pulsante
+di caricamento: il contenuto è salvato nella colonna esistente
+`matches.photo_drive_url`, così i link già registrati restano invariati.
+Per la navigazione pubblica usa un link condivisibile completo.
+
+**Se hai già applicato la migrazione 20**, esegui nel SQL Editor Supabase
+la migrazione `supabase/22_photo_gallery_any_provider.sql`.
+Rimuove esclusivamente il vincolo
+`matches_photo_drive_url_valid` che bloccava i collegamenti non-Drive.
+Su nuove installazioni la versione aggiornata della migrazione 20 non
+introduce più quel vincolo.

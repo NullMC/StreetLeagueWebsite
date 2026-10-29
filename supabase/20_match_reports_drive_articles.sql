@@ -10,12 +10,7 @@ alter table public.social_contents
   add column if not exists description text,
   add column if not exists image_url text;
 
-alter table public.matches
-  drop constraint if exists matches_photo_drive_url_valid;
-alter table public.matches
-  add constraint matches_photo_drive_url_valid
-  check (photo_drive_url is null or photo_drive_url like 'https://drive.google.com/%')
-  not valid;
+-- Photo Gallery accepts share links from any provider (no provider-specific CHECK).
 
 -- Allow old events to remain readable; validate new/edited reports on the server.
 create or replace function public.validate_street_match_report_event()
