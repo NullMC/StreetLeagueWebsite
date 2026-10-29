@@ -180,3 +180,48 @@ html[data-theme="night"] .match-experience__tabs button.active { background: #32
   .match-report-admin__event-form { grid-template-columns: 1fr; }
   .match-report-admin__roster-row { flex-wrap: wrap; }
 }
+
+/* The legacy admin chrome stays light, but this report editor honors the
+   currently selected theme without relying on inverted --white tokens. */
+html[data-theme="night"] .match-report-admin {
+  --editor-paper: #131e22;
+  --editor-text: #f2f7f8;
+  --editor-muted: #b4c4c9;
+  --editor-line: #3a4b50;
+  color: var(--editor-text);
+}
+html[data-theme="night"] .match-report-admin .admin-resource__head h2,
+html[data-theme="night"] .match-report-admin__section-head h3 {
+  color: #f2f7f8 !important;
+}
+html[data-theme="night"] .match-report-admin__section-head p,
+html[data-theme="night"] .match-report-admin__team-title span {
+  color: #b4c4c9;
+}
+html[data-theme="night"] .match-report-admin__team,
+html[data-theme="night"] .match-report-admin__events,
+html[data-theme="night"] .match-report-admin__filters {
+  background: var(--editor-paper);
+  color: var(--editor-text);
+  border-color: var(--editor-line);
+}
+html[data-theme="night"] .match-report-admin__roster-row {
+  background: #1c2a2f;
+}
+html[data-theme="night"] .match-report-admin__event-item {
+  border-color: var(--editor-line);
+}
+html[data-theme="night"] .match-report-admin select,
+html[data-theme="night"] .match-report-admin input {
+  background: #17252a !important;
+  color: #f2f7f8 !important;
+  border-color: var(--editor-line) !important;
+  color-scheme: dark;
+}
+html[data-theme="night"] .match-report-admin select option {
+  background: #17252a;
+  color: #f2f7f8;
+}
+html[data-theme="night"] .match-report-admin label {
+  color: #b4c4c9 !important;
+}
