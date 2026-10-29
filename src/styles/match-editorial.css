@@ -144,10 +144,38 @@ html[data-theme="night"] .match-experience__tabs button.active { background: var
 .editorial-article__top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; color: var(--report-muted); font-size: 12px; }
 .editorial-article__back { color: var(--report-accent); text-decoration: none; font-weight: 800; }
 .editorial-article__platform { text-transform: uppercase; letter-spacing: .07em; }
-.editorial-article__content { background: var(--report-paper); border: 1px solid var(--report-line); border-radius: 20px; overflow: hidden; }
-.editorial-article__banner { width: 100%; aspect-ratio: 16 / 7; overflow: hidden; }
-.editorial-article__banner img, .editorial-article__banner-fallback { display: block; width: 100%; height: 100%; object-fit: cover; }
-.editorial-article__banner-fallback { background: linear-gradient(135deg, #17263a, #861a4a); }
+/* Portrait editorial layout: the content is as wide as the poster itself,
+   rather than a full-width box with unused strips around a narrow image. */
+.editorial-article__content {
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+  background: var(--report-paper);
+  border: 1px solid var(--report-line);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.editorial-article__banner {
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+  overflow: visible;
+}
+.editorial-article__banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  aspect-ratio: auto 2 / 3;
+  object-fit: contain;
+}
+.editorial-article__banner-fallback {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  background: linear-gradient(135deg, #111312, #861a4a);
+}
 .editorial-article__header { max-width: 830px; margin: 0 auto; padding: 30px clamp(20px,4vw,50px) 18px; }
 .editorial-article__header h1 { margin: 10px 0 15px; color: var(--report-ink); font-size: clamp(31px, 5vw, 64px); line-height: 1.06; overflow-wrap: anywhere; }
 .editorial-article__header time { color: var(--report-muted); font-size: 12px; }
