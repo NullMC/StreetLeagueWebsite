@@ -200,7 +200,7 @@ La migrazione aggiunge `matches.photo_drive_url`, il corpo dell'articolo
 `social_contents.article_body` e i campi editoriali mancanti, se necessari.
 Aggiunge controlli per nuovi eventi e formazioni: gli eventi sono limitati a
 **gol, rigori presidenziali e cartellini gialli/rossi**, minuto intero da
-**1 a 60**, partita **terminata**, entrambe le formazioni presenti,
+**1 a 50**, partita **terminata**, entrambe le formazioni presenti,
 giocatore appartenente a una delle due squadre e (salvo rigore presidenziale)
 registrato nella formazione. Lo storico precedente resta consultabile.
 
@@ -211,7 +211,7 @@ termine dell'incontro si possono creare, modificare e cancellare gli eventi.
 
 Nella scheda **Partite** il campo `photo_drive_url` deve contenere un link
 pubblico e condivisibile `https://drive.google.com/...`. Nella pagina partita
-ci sono tre tab: Riepilogo, Formazioni e Foto (apre Drive in una nuova scheda).
+sono presenti due schede: **Riepilogo** e **Formazioni**. Il pulsante **Photo Gallery** compare invece nelle card delle partite (home e competizioni) e apre Drive in una nuova scheda.
 Il collegamento alla galleria è inattivo finché non viene compilato l'URL.
 
 In **Social / Video** si impostano piattaforma, titolo, estratto facoltativo,
@@ -220,3 +220,23 @@ La home mantiene lo stesso carosello di card, ma il click apre la pagina
 `/articoli/:articleId`, con banner, testo e link esterno al media originale.
 I contenuti storici senza `article_body` mostrano la descrizione esistente,
 quando disponibile.
+
+## Durata delle partite e Photo Gallery (migrazione 21)
+
+Le partite Street League durano **50 minuti**. Gli eventi del referto
+(gol, rigori presidenziali, cartellini) devono avere un minuto intero tra
+**1 e 50**. Il backoffice rifiuta i minuti fuori intervallo; le timeline
+pubbliche mostrano solo gli eventi con un minutaggio valido e le schede
+Formazioni e referti segnalano eventuali record storici da correggere.
+I record storici non vengono cancellati o modificati automaticamente.
+
+**Per i database già aggiornati alla migrazione 20**, eseguire ora
+`supabase/21_match_event_minutes_50.sql` nel SQL Editor Supabase. La
+migrazione 21 aggiorna la funzione di validazione lato database senza
+modificare i referti esistenti. Per una nuova installazione eseguire
+prima la migrazione 20 e poi la 21.
+
+Il link Drive continua a essere gestito nella sezione Partite, ma il
+pulsante **Photo Gallery** ora appare direttamente in ogni **card della
+partita**, separato dal collegamento ai dettagli. La pagina dedicata
+contiene solo le schede Riepilogo e Formazioni.

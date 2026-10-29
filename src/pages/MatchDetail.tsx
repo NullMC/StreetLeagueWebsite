@@ -6,6 +6,7 @@ import {
   getMatch, getTeams, getMatchEvents, getMatchMvp, getPlayers, getMatchLineups,
 } from "../lib/api";
 import type { Match, Team, MatchEvent, MatchMvp, MatchLineup, Player } from "../types";
+import { MATCH_DURATION_MINUTES, isValidMatchMinute } from "../lib/matchDuration";
 
 type DetailTab = "summary" | "lineups";
 const eventTitles: Record<string, string> = {
@@ -65,11 +66,11 @@ export default function MatchDetail() {
     const player = findPlayer(id);
     return player ? player.first_name + " " + player.last_name : "Giocatore";
   };
-  const photoUrl = match?.photo_drive_url;
   const hasReport = match?.status === "finished";
-  const timelineEvents = events.filter((event) => [
-    "goal", "presidential_penalty", "yellow_card", "red_card",
-  ].includes(event.event_type)).sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
+  const timelineEvents = events.filter((event) =>
+    ["goal", "presidential_penalty", "yellow_card", "red_card"].includes(event.event_type) &&
+    isValidMatchMinute(event.minute),
+  ).sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
 
   return (
     <PageShell>
@@ -122,25 +123,17 @@ export default function MatchDetail() {
                 aria-current={tab === "lineups" ? "page" : undefined} onClick={() => setTab("lineups")}>
                 <span aria-hidden="true">♟</span> Formazioni
               </button>
-              {photoUrl ? (
-                <a className="match-experience__photo-tab" href={photoUrl} target="_blank" rel="noopener noreferrer"
-                  aria-label="Apri la cartella Google Drive con le foto della partita">
-                  <span aria-hidden="true">▧</span> Foto <span aria-hidden="true">↗</span>
-                </a>
-              ) : (
-                <span className="match-experience__photo-tab match-experience__photo-tab--disabled"
-                  title="La galleria sarà disponibile quando verrà pubblicata">▧ Foto</span>
-              )}
             </nav>
 
             {tab === "summary" && (
               <section className="match-experience__panel">
                 <div className="match-experience__panel-title">
                   <h2>Riepilogo partita</h2>
-                  <p>Gol, rigori presidenziali e provvedimenti disciplinari · 1'–60'</p>
+                  <p>Gol, rigori presidenziali e provvedimenti disciplinari · 1′–{MATCH_DURATION_MINUTES}′</p>
                 </div>
                 {hasReport && timelineEvents.length ? (
-                  <div className="match-experience__timeline">
+                  <div className="match-experience__timeline" aria-label={`Cronologia degli eventi dal 1° al ${MATCH_DURATION_MINUTES}° minuto`}>
+                    <span className="match-experience__timeline-boundary">1′ · Inizio partita</span>
                     {timelineEvents.map((event) => {
                       const player = findPlayer(event.player_id);
                       const side = player?.team_id === match.away_team_id ? "away" : "home";
@@ -161,6 +154,7 @@ export default function MatchDetail() {
                         </div>
                       );
                     })}
+                    <span className="match-experience__timeline-boundary">Fine partita · {MATCH_DURATION_MINUTES}′</span>
                   </div>
                 ) : (
                   <div className="match-experience__empty">

@@ -4,6 +4,7 @@ import { ensureFreshAdminSession } from "../lib/admin";
 import { isStaffPosition } from "../lib/awards";
 import { supabase } from "../lib/supabase";
 import type { Competition, Match, MatchEvent, MatchLineup, Player, Team } from "../types";
+import { MATCH_DURATION_MINUTES, isValidMatchMinute } from "../lib/matchDuration";
 
 type EventKind = "goal" | "presidential_penalty" | "yellow_card" | "red_card";
 const kinds: { value: EventKind; label: string }[] = [
@@ -173,8 +174,8 @@ export function AdminMatchReports() {
     event.preventDefault();
     if (!supabase || !selectedMatch || !canRecordEvents) return;
     const numericMinute = Number(minute);
-    if (!Number.isInteger(numericMinute) || numericMinute < 1 || numericMinute > 60) {
-      setError("Il minuto deve essere un intero compreso tra 1 e 60."); return;
+    if (!isValidMatchMinute(numericMinute)) {
+      setError(`Il minuto deve essere un intero compreso tra 1 e ${MATCH_DURATION_MINUTES}.`); return;
     }
     if (!resolvedPlayerId) { setError("Seleziona un giocatore valido per l'evento."); return; }
     setBusy("event"); setMessage(""); setError("");
@@ -216,7 +217,7 @@ export function AdminMatchReports() {
       <header className="admin-resource__head">
         <div><span className="eyebrow">Gestione partite</span><h2>Formazioni e referti</h2></div>
       </header>
-      <p className="admin-help-text">Prepara le formazioni delle due squadre. Dopo la partita, inserisci dal referto arbitrale gol, rigori presidenziali e cartellini (minuti 1–60).</p>
+      <p className="admin-help-text">Prepara le formazioni delle due squadre. Dopo la partita, inserisci dal referto arbitrale gol, rigori presidenziali e cartellini (minuti 1–{MATCH_DURATION_MINUTES}).</p>
       {error && <p className="admin-error" role="alert">{error}</p>}
       {message && <p className="admin-message" role="status">{message}</p>}
       {!competitions.length && <p className="admin-help">Non ci sono competizioni attive.</p>}
@@ -291,7 +292,7 @@ export function AdminMatchReports() {
           <section className="match-report-admin__events">
             <div className="match-report-admin__section-head">
               <h3>Riepilogo · referto arbitrale</h3>
-              <p>{events.length} eventi registrati · minuto 1–60</p>
+              <p>{events.length} eventi registrati · minuto 1–{MATCH_DURATION_MINUTES}</p>
             </div>
             {!bothLineups && <p className="admin-help-text" role="status">Per inserire gli eventi, salva prima la formazione di entrambe le squadre.</p>}
             {selectedMatch.status !== "finished" && <p className="admin-help-text" role="status">Il referto è inseribile soltanto quando la partita è impostata come terminata nella sezione Partite.</p>}
@@ -302,7 +303,7 @@ export function AdminMatchReports() {
                 </select>
               </label>
               <label>Minuto
-                <input type="number" min={1} max={60} step={1} required value={minute}
+                <input type="number" min={1} max={MATCH_DURATION_MINUTES} step={1} required value={minute}
                   disabled={!canRecordEvents} onChange={(e) => setMinute(e.target.value)} />
               </label>
               <label>Giocatore
@@ -329,10 +330,17 @@ export function AdminMatchReports() {
             </form>
             {matchLoading ? <p>Caricamento eventi…</p> : events.length ? (
               <div className="match-report-admin__event-list">
-                {events.map((entry) => (
-                  <div className="match-report-admin__event-item" key={entry.id}>
+                {events.some((entry) => !isValidMatchMinute(entry.minute)) ? (
+                  <p className="admin-error" role="status">
+                    Alcuni eventi salvati in precedenza hanno un minuto fuori dall'intervallo
+                    1–{MATCH_DURATION_MINUTES}. Correggili dal referto: non vengono mostrati
+                    nella timeline pubblica finché il minutaggio non è valido.
+                  </p>
+                ) : null}
+                {[...events].sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0)).map((entry) => (
+                  <div className={"match-report-admin__event-item" + (!isValidMatchMinute(entry.minute) ? " match-report-admin__event-item--invalid" : "")} key={entry.id}>
                     <strong>{entry.minute ?? "—"}'</strong>
-                    <span>{kinds.find((option) => option.value === entry.event_type)?.label ?? entry.event_type}</span>
+                    <span>{kinds.find((option) => option.value === entry.event_type)?.label ?? entry.event_type}{!isValidMatchMinute(entry.minute) ? " · Minuto da correggere" : ""}</span>
                     <span>{players.find((player) => player.id === entry.player_id) ? nameOf(players.find((player) => player.id === entry.player_id)!) : "—"}</span>
                     <button type="button" className="btn btn--ghost btn--small" disabled={Boolean(busy)} onClick={() => {
                       setEventId(entry.id); setKind(entry.event_type as EventKind);

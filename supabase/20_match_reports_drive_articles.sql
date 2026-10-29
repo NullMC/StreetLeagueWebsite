@@ -30,8 +30,8 @@ begin
   if new.event_type::text not in ('goal', 'presidential_penalty', 'yellow_card', 'red_card') then
     raise exception 'Sono ammessi soltanto gol, rigori presidenziali e cartellini';
   end if;
-  if new.minute is null or new.minute not between 1 and 60 then
-    raise exception 'Il minuto deve essere compreso tra 1 e 60';
+  if new.minute is null or new.minute not between 1 and 50 then
+    raise exception 'Il minuto deve essere compreso tra 1 e 50';
   end if;
   select id, status, home_team_id, away_team_id into v_match
   from public.matches where id = new.match_id;

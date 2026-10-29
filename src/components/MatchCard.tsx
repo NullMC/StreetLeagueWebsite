@@ -16,7 +16,12 @@ export function MatchCard({
       : null;
 
   return (
-    <a href={`/partite/${match.id}`} className="match-card">
+    <article className="match-card">
+      <a
+        className="match-card__primary-link"
+        href={`/partite/${match.id}`}
+        aria-label={`Apri la partita ${home?.name ?? "Casa"} - ${away?.name ?? "Ospiti"}`}
+      />
       <div className="match-card__meta">
         <span className="match-card__date-time">
           <span>{day(match.kickoff_at)}</span>
@@ -103,7 +108,18 @@ export function MatchCard({
           </svg>
           <span>Di Cagno Abbrescia</span>
         </span>
+        {match.photo_drive_url ? (
+          <a
+            className="match-card__photo-gallery"
+            href={match.photo_drive_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Photo Gallery: ${home?.name ?? "Casa"} - ${away?.name ?? "Ospiti"} (Google Drive)`}
+          >
+            <span aria-hidden="true">▧</span> Photo Gallery <span aria-hidden="true">↗</span>
+          </a>
+        ) : null}
       </div>
-    </a>
+    </article>
   );
 }
