@@ -75,7 +75,7 @@ export function AdminMatchReports() {
   const selectedMatch = availableMatches.find((match) => match.id === matchId) ?? availableMatches[0];
   const selectedMatchId = selectedMatch?.id ?? "";
 
-  async function refreshMatch(id: string) {
+  async function refreshMatch(id: string, savedTeamId?: string) {
     if (!supabase) return;
     const [l, e] = await Promise.all([
       supabase.from("match_lineups").select("*").eq("match_id", id),
@@ -85,9 +85,18 @@ export function AdminMatchReports() {
     if (e.error) throw e.error;
     const updated = (l.data ?? []) as MatchLineup[];
     setLineups(updated);
-    setDraft(Object.fromEntries(updated.map((item) => [
-      item.player_id, { selected: true, starter: item.starter },
-    ])));
+    setDraft((previous) => {
+      const fresh: Record<string, { selected: boolean; starter: boolean }> = Object.fromEntries(
+        updated.map((item) => [item.player_id, { selected: true, starter: item.starter }]),
+      );
+      // Saving one team must not discard pending selections in the opposite roster.
+      if (savedTeamId) {
+        players.filter((player) => player.team_id !== savedTeamId).forEach((player) => {
+          if (previous[player.id]) fresh[player.id] = previous[player.id];
+        });
+      }
+      return fresh;
+    });
     setEvents((e.data ?? []) as MatchEvent[]);
   }
 
@@ -151,7 +160,7 @@ export function AdminMatchReports() {
           starter: draft[player.id]?.starter ?? true, shirt_number: player.shirt_number,
         })), { onConflict: "match_id,player_id" });
       if (saveError) throw saveError;
-      await refreshMatch(selectedMatch.id);
+      await refreshMatch(selectedMatch.id, teamId);
       setMessage("Formazione " + (teams.find((team) => team.id === teamId)?.name ?? "") + " salvata.");
     } catch (cause) { setError(describeError(cause)); }
     finally { setBusy(""); }
