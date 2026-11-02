@@ -80,6 +80,8 @@ export default function MatchDetail() {
       ) : (
         <div className="match-experience">
           <div className="match-experience__hero">
+            {/* Titolo della pagina per motori di ricerca e lettori di schermo; i nomi restano visibili nel tabellone. */}
+            <h1 className="sl-visually-hidden">{(home?.name ?? "Casa") + " – " + (away?.name ?? "Ospiti")}</h1>
             <div className="match-experience__breadcrumb">
               <a href="/competizioni">← Competizioni</a>
               <span>{match.matchday ? "Giornata " + match.matchday.replace(/^giornata\s*/i, "") : "Partita"}</span>

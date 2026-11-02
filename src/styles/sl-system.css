@@ -698,7 +698,12 @@ html[data-theme="night"] .sl-hero::before {
   .sl-hero__side { justify-content: center; }
   .sl-hero__logo { width: clamp(230px, 66vw, 400px); margin-inline: auto; }
   .sl-hero__match { display: none; }
-  #root .sl-hero__title { max-width: 12ch; }
+  /* Mobile: tutto il contenuto dell'hero sull'asse verticale centrale */
+  .sl-hero__inner { justify-items: center; text-align: center; }
+  .sl-hero__copy { display: flex; flex-direction: column; align-items: center; margin-inline: auto; }
+  #root .sl-hero__title { max-width: 12ch; margin-inline: auto; text-align: center; }
+  #root .sl-hero__lead { margin-inline: auto; text-align: center; }
+  .sl-hero__actions { justify-content: center; padding-left: 0; }
 }
 @media (max-width: 520px) {
   #root .sl-hero__title { font-size: clamp(46px, 13.6vw, 64px) !important; }
@@ -709,10 +714,10 @@ html[data-theme="night"] .sl-hero::before {
 /* --------------------------------------------------------------------------
    7. Titoli di sezione e intestazioni di pagina
    -------------------------------------------------------------------------- */
-#root .section-head h2,
+#root .section-head :is(h1, h2),
 #root .section-head .MuiTypography-h2,
-#root .platform-page-heading h2,
-#root .home-section-head h2 {
+#root .platform-page-heading :is(h1, h2),
+#root .home-section-head :is(h1, h2) {
   font-family: var(--font-display) !important;
   font-style: italic !important;
   font-weight: 900 !important;
@@ -721,14 +726,14 @@ html[data-theme="night"] .sl-hero::before {
   line-height: 0.9 !important;
   color: var(--sl-fg) !important;
 }
-#root .section-head--primary h2,
-#root .home-section-head .section-head h2 {
+#root .section-head--primary :is(h1, h2),
+#root .home-section-head .section-head :is(h1, h2) {
   font-size: clamp(42px, 5.6vw, 76px) !important;
 }
-#root .section-head--group h2 {
+#root .section-head--group :is(h1, h2) {
   font-size: clamp(28px, 3.2vw, 40px) !important;
 }
-#root .section-head--subsection h2 {
+#root .section-head--subsection :is(h1, h2) {
   font-size: clamp(26px, 2.8vw, 34px) !important;
 }
 
@@ -780,7 +785,7 @@ html[data-theme="night"] .sl-hero::before {
   padding-top: clamp(28px, 4vw, 56px) !important;
 }
 #root .platform-page-heading .section-head { justify-content: flex-start !important; }
-#root .platform-page-heading h2 {
+#root .platform-page-heading :is(h1, h2) {
   font-size: clamp(48px, 7vw, 104px) !important;
 }
 #root .platform-page-heading p {

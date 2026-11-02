@@ -27,7 +27,7 @@ export default function ArticleDetail() {
   const articleText = article?.article_body?.trim() || article?.description?.trim() || "";
   return (
     <PageShell>
-      <main className="editorial-article">
+      <div className="editorial-article">
         <div className="editorial-article__top">
           <Link to="/#home-featured" className="editorial-article__back">← Torna ai contenuti in evidenza</Link>
         </div>
@@ -36,7 +36,7 @@ export default function ArticleDetail() {
         ) : (
           <article className="editorial-article__content">
             <div className="editorial-article__banner">
-              {heroImage ? <img src={heroImage} alt="" /> : <div className="editorial-article__banner-fallback" aria-hidden="true" />}
+              {heroImage ? <img src={heroImage} alt={article.title} /> : <div className="editorial-article__banner-fallback" aria-hidden="true" />}
             </div>
             <header className="editorial-article__header">
               <h1>{article.title}</h1>
@@ -57,7 +57,7 @@ export default function ArticleDetail() {
             </div>
           </article>
         )}
-      </main>
+      </div>
     </PageShell>
   );
 }

@@ -220,7 +220,7 @@ export default function Stats() {
     <PageShell>
       <div className="page platform-stats-page">
         <header className="platform-page-heading">
-          <SectionTitle title="Statistiche" />
+          <SectionTitle as="h1" title="Statistiche" />
           <p>Record individuali e riconoscimenti, sempre riferiti alle competizioni attive.</p>
         </header>
 

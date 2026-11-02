@@ -392,3 +392,12 @@ html.sl-cine #root :is(.home-section-head, .section-head--group)[data-reveal="in
   html.sl-cine #root :is(.home-section-head, .section-head--group)[data-reveal="in"]::after { animation: none !important; }
   #root .sl-comp-card:hover .sl-comp-card__logo { transform: rotateY(-20deg) rotateX(7deg); }
 }
+
+/* Calciomercato: "Acquisti Squadre" è ora un h2 (l'h1 è il titolo della pagina), stessa dimensione di prima */
+#root .transfer-market-team-picker__heading {
+  font-size: clamp(28px, 3.2vw, 44px) !important;
+  font-style: italic;
+  font-weight: 800 !important;
+  line-height: 0.95 !important;
+  text-transform: uppercase;
+}

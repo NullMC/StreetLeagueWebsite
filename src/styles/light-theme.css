@@ -53,7 +53,7 @@ body {
   color: var(--white);
 }
 .section-title h2,
-.section-head h2,
+.section-head :is(h1, h2),
 .stat-card h3,
 .team-card h3,
 .video-card h3,

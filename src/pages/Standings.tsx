@@ -55,7 +55,7 @@ export default function Standings() {
     <PageShell>
       <div className="page standings-page">
         <header className="platform-page-heading">
-          <SectionTitle title="Classifiche" />
+          <SectionTitle as="h1" title="Classifiche" />
           <p>Le prime quattro squadre classificate accedono alle fasi finali</p>
         </header>
 

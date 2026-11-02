@@ -169,7 +169,7 @@ html[data-theme="night"] .section-head {
 }
 
 html[data-theme="night"] .section-title h2,
-html[data-theme="night"] .section-head h2,
+html[data-theme="night"] .section-head :is(h1, h2),
 html[data-theme="night"] .detail-hero h1,
 html[data-theme="night"] .stat-card h3,
 html[data-theme="night"] .team-card h3,
@@ -409,7 +409,7 @@ html[data-theme="night"] .sponsor-band--redesign {
 }
 
 html[data-theme="night"] .sponsor-band--redesign .section-head,
-html[data-theme="night"] .sponsor-band--redesign .section-head h2,
+html[data-theme="night"] .sponsor-band--redesign .section-head :is(h1, h2),
 html[data-theme="night"] .sponsor-band--redesign .sponsor-tier__heading h3,
 html[data-theme="night"] .sponsor-band--redesign .sponsor-tier__heading p {
   color: #fff !important;
@@ -560,7 +560,7 @@ html[data-theme="night"] .home-redesign .team-carousel__logo {
 
 html[data-theme="night"] .home-section-head--on-pink,
 html[data-theme="night"] .home-section-head--on-pink .section-head,
-html[data-theme="night"] .home-section-head--on-pink .section-head h2,
+html[data-theme="night"] .home-section-head--on-pink .section-head :is(h1, h2),
 html[data-theme="night"] .home-section-head--on-pink .section-head .eyebrow {
   color: #fff !important;
 }

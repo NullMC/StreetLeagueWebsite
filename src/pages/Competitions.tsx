@@ -63,7 +63,7 @@ export default function Competitions() {
     <PageShell>
       <div className="page competitions-page">
         <header className="platform-page-heading">
-          <SectionTitle title="Competizioni" />
+          <SectionTitle as="h1" title="Competizioni" />
         </header>
         {items.length ? (
           <div className="sl-comp-grid">

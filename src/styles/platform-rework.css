@@ -13,7 +13,7 @@
   justify-content: center !important;
   text-align: center !important;
 }
-.platform-page-heading .section-head h2 {
+.platform-page-heading .section-head :is(h1, h2) {
   text-align: center !important;
 }
 .platform-page-heading > p {
@@ -581,7 +581,7 @@
 .partners-sponsors-band::after { display: none !important; content: none !important; }
 .partners-sponsors-band .home-section-head--on-pink,
 .partners-sponsors-band .home-section-head--on-pink .section-head,
-.partners-sponsors-band .home-section-head--on-pink .section-head h2,
+.partners-sponsors-band .home-section-head--on-pink .section-head :is(h1, h2),
 .partners-sponsors-band .home-sponsors__intro,
 .partners-sponsors-band .home-collab-proposal,
 .partners-sponsors-band .home-collab-proposal h2,
@@ -700,7 +700,7 @@
   width: auto;
   margin: 0 !important;
 }
-.competition-matchday-heading .section-head h2 {
+.competition-matchday-heading .section-head :is(h1, h2) {
   margin: 0 !important;
 }
 .competition-matchday-heading > span {
@@ -754,7 +754,7 @@ html[data-theme="night"] .home-redesign--ordered .home-top-seven {
 }
 html[data-theme="night"] .home-redesign--ordered .home-about__copy h1,
 html[data-theme="night"] .home-redesign--ordered .home-section-head .section-head,
-html[data-theme="night"] .home-redesign--ordered .home-section-head .section-head h2,
+html[data-theme="night"] .home-redesign--ordered .home-section-head .section-head :is(h1, h2),
 html[data-theme="night"] .home-redesign--ordered .monthly-award-column__head h3,
 html[data-theme="night"] .home-redesign--ordered .top-seven-section h2,
 html[data-theme="night"] .home-redesign--ordered .top-seven-player strong {
@@ -833,9 +833,9 @@ html[data-theme="night"] .competition-list-card__hint {
 }
 html[data-theme="night"] .platform-page-heading,
 html[data-theme="night"] .platform-page-heading .section-head,
-html[data-theme="night"] .platform-page-heading .section-head h2,
+html[data-theme="night"] .platform-page-heading .section-head :is(h1, h2),
 html[data-theme="night"] .platform-page-heading > p,
-html[data-theme="night"] .competition-matchday-heading .section-head h2 {
+html[data-theme="night"] .competition-matchday-heading .section-head :is(h1, h2) {
   color: #f5f7f6 !important;
 }
 html[data-theme="night"] .standings-page .standings-team strong {
@@ -1062,7 +1062,7 @@ html[data-theme="night"] .home-redesign--ordered .home-about__logo img {
 }
 .partners-sponsors-band .home-section-head--on-pink,
 .partners-sponsors-band .home-section-head--on-pink .section-head,
-.partners-sponsors-band .home-section-head--on-pink .section-head h2,
+.partners-sponsors-band .home-section-head--on-pink .section-head :is(h1, h2),
 .partners-sponsors-band .home-section-head--on-pink .section-head .eyebrow,
 .partners-sponsors-band .home-sponsors__intro,
 .partners-sponsors-band .home-sponsors__loading,
@@ -1273,7 +1273,7 @@ html[data-theme="night"] .home-redesign--ordered .home-matches {
   color: #f5f7f6 !important;
   border-color: rgba(245,247,246,.12) !important;
 }
-html[data-theme="night"] .home-redesign--ordered .home-matches .home-section-head .section-head h2,
+html[data-theme="night"] .home-redesign--ordered .home-matches .home-section-head .section-head :is(h1, h2),
 html[data-theme="night"] .home-redesign--ordered .home-matchdays__summary h3 {
   color: #f5f7f6 !important;
 }
@@ -1307,7 +1307,7 @@ html[data-theme="night"] .home-match-carousel .match-card {
 /* Competition name is part of the "Partite" heading, so both use one type style. */
 .competition-matchday-heading > span { display: none; }
 .competition-matchday-heading .section-head { width: 100%; }
-.competition-matchday-heading .section-head h2 { color: var(--white); }
+.competition-matchday-heading .section-head :is(h1, h2) { color: var(--white); }
 
 /* Sponsor heading and content contrast: keep the title centered and override legacy CTA specificity. */
 .partners-sponsors-band .home-section-head.home-section-head--on-pink {
@@ -1328,7 +1328,7 @@ html[data-theme="night"] .home-match-carousel .match-card {
   width: 100%;
   text-align: center !important;
 }
-.partners-sponsors-band .home-section-head.home-section-head--on-pink .section-head h2 {
+.partners-sponsors-band .home-section-head.home-section-head--on-pink .section-head :is(h1, h2) {
   width: 100%;
   text-align: center !important;
 }

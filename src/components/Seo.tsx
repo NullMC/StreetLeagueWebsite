@@ -1,14 +1,19 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { getCompetitions, getMatches, getPlayers, getTeams } from "../lib/api";
+import {
+  getActiveCompetitions, getCompetitions, getMatches, getPlayers, getSocialContentById, getStatisticsGroups, getTeams,
+} from "../lib/api";
 
 const SITE_URL = "https://streetleaguebari.it";
 const SITE_NAME = "Street League Bari";
 const BRAND_NAME = "Street League";
 const SITE_DESCRIPTION =
   "Street League Bari: torneo di calcio, competizioni, calendario partite, risultati, squadre e statistiche aggiornate.";
-const SOCIAL_IMAGE = `${SITE_URL}/assets/nebula-landscape.webp`;
-const LOGO_IMAGE = `${SITE_URL}/assets/pittogrammaBlack.webp`;
+// JPEG 1920×1080 con estensione corretta: i crawler social leggono tipo e dimensioni senza indovinare.
+const SOCIAL_IMAGE = `${SITE_URL}/assets/og-street-league.jpg`;
+const SOCIAL_IMAGE_WIDTH = "1920";
+const SOCIAL_IMAGE_HEIGHT = "1080";
+const LOGO_IMAGE = `${SITE_URL}/assets/logo.png`;
 const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
 const SOCIAL_PROFILES = [
@@ -17,7 +22,14 @@ const SOCIAL_PROFILES = [
   "https://www.tiktok.com/@_streetleague_?lang=en",
 ];
 
-type SeoConfig = { title: string; description: string; indexable?: boolean };
+type SeoConfig = {
+  title: string;
+  description: string;
+  indexable?: boolean;
+  /** og:type: "article" per gli articoli, "profile" per i giocatori, altrimenti "website". */
+  type?: "website" | "article" | "profile";
+  publishedTime?: string;
+};
 type Breadcrumb = { name: string; url: string };
 type ResolvedSeo = {
   config: SeoConfig;
@@ -35,6 +47,34 @@ function decodeSegment(value: string | undefined): string {
   if (!value) return "";
   try { return decodeURIComponent(value); } catch { return value; }
 }
+
+/** Testo semplice da HTML formattato (articoli), con spazi normalizzati. */
+function plainText(value: string | null | undefined): string {
+  return String(value ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Taglia sul confine di parola: descrizioni entro ~155 caratteri, titoli entro il limite dato. */
+function clip(value: string, max = 155): string {
+  if (value.length <= max) return value;
+  const cut = value.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[\s,.;:–-]+$/, "")}…`;
+}
+
+const STAT_TITLES: Record<string, string> = {
+  goals: "Classifica marcatori",
+  mvps: "Classifica MVP",
+  goalkeepers: "Classifica portieri",
+  clean_sheets: "Classifica portieri",
+  staff: "Classifica staff",
+};
 
 function getSeo(pathname: string): SeoConfig {
   const path = normalizePath(pathname);
@@ -69,13 +109,7 @@ function getSeo(pathname: string): SeoConfig {
   };
   if (path.startsWith("/statistiche/")) {
     const statKey = decodeSegment(path.split("/").filter(Boolean).at(-1));
-    const statTitles: Record<string, string> = {
-      goals: "Classifica marcatori",
-      mvps: "Storico MVP",
-      clean_sheets: "Classifica portieri",
-      staff: "Classifica staff",
-    };
-    const statTitle = statTitles[statKey] ?? "Classifica statistiche";
+    const statTitle = STAT_TITLES[statKey] ?? "Classifica statistiche";
     return {
       title: `${statTitle} | ${SITE_NAME}`,
       description: `Consulta la ${statTitle.toLocaleLowerCase("it")} delle competizioni attive Street League Bari.`,
@@ -88,6 +122,11 @@ function getSeo(pathname: string): SeoConfig {
   if (path.startsWith("/partite/")) return {
     title: `Partita | ${SITE_NAME}`,
     description: "Dettagli della partita Street League: risultato, squadre, eventi e formazioni.",
+  };
+  if (path.startsWith("/articoli/")) return {
+    title: `Articolo | ${SITE_NAME}`,
+    description: "Racconti, risultati e protagonisti della Street League Bari.",
+    type: "article",
   };
   if (path === "/partner") return {
     title: `Sponsor e collaborazioni | ${SITE_NAME}`,
@@ -120,6 +159,10 @@ function upsertMeta(name: string, content: string) {
   node.content = content;
 }
 
+function removeMeta(selector: string) {
+  document.querySelectorAll(selector).forEach((node) => node.remove());
+}
+
 function upsertProperty(property: string, content: string) {
   let node = document.querySelector<HTMLMetaElement>(`meta[property="${property}"]`);
   if (!node) {
@@ -145,7 +188,8 @@ function isDynamicEntityPath(pathname: string): boolean {
   if (parts[0] === "competizioni") {
     return parts.length === 2 || (parts[1] === "gruppo" && parts.length >= 3);
   }
-  return ["squadre", "giocatori", "partite"].includes(parts[0]) && parts.length === 2;
+  if (parts[0] === "statistiche") return parts.length === 3;
+  return ["squadre", "giocatori", "partite", "articoli"].includes(parts[0]) && parts.length === 2;
 }
 
 function canonicalFor(pathname: string): string {
@@ -170,7 +214,7 @@ function organizationSchema() {
     alternateName: SITE_NAME,
     url: `${SITE_URL}/`,
     description: SITE_DESCRIPTION,
-    logo: { "@type": "ImageObject", url: LOGO_IMAGE },
+    logo: { "@type": "ImageObject", url: LOGO_IMAGE, width: 581, height: 430 },
     image: SOCIAL_IMAGE,
     sport: "Association football",
     areaServed: {
@@ -242,10 +286,10 @@ function upsertStructuredData(data: Record<string, unknown>) {
 function breadcrumbsFor(pathname: string, config: SeoConfig, canonical: string): Breadcrumb[] {
   const path = normalizePath(pathname);
   if (path === "/") return [{ name: "Home", url: `${SITE_URL}/` }];
+  // Solo genitori indicizzabili: /squadre reindirizza alla home e non compare nelle briciole.
   let parent: Breadcrumb | undefined;
-  if (path.startsWith("/competizioni/")) parent = { name: "Competizioni", url: `${SITE_URL}/competizioni` };
-  else if (path.startsWith("/squadre/") || path.startsWith("/giocatori/")) parent = { name: "Squadre", url: `${SITE_URL}/squadre` };
-  else if (path.startsWith("/partite/")) parent = { name: "Competizioni", url: `${SITE_URL}/competizioni` };
+  if (path.startsWith("/competizioni/") || path.startsWith("/partite/")) parent = { name: "Competizioni", url: `${SITE_URL}/competizioni` };
+  else if (path.startsWith("/statistiche/")) parent = { name: "Statistiche", url: `${SITE_URL}/statistiche` };
   return [
     { name: "Home", url: `${SITE_URL}/` },
     ...(parent ? [parent] : []),
@@ -262,36 +306,49 @@ function applySeo(pathname: string, resolved: ResolvedSeo) {
   const shareImageAlt = hasCustomShareImage
     ? `${config.title.split(" | ")[0]} — Street League`
     : "Street League Bari — calcio, competizioni e community";
+  const description = clip(config.description);
   const robots = config.indexable === false
     ? "noindex,nofollow"
     : "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1";
 
   document.title = config.title;
-  upsertMeta("description", config.description);
+  upsertMeta("description", description);
   upsertMeta("robots", robots);
   upsertMeta("googlebot", robots);
-  upsertMeta("theme-color", "#010A08");
   upsertMeta("author", BRAND_NAME);
 
   upsertProperty("og:site_name", BRAND_NAME);
   upsertProperty("og:locale", "it_IT");
   upsertProperty("og:title", config.title);
-  upsertProperty("og:description", config.description);
-  upsertProperty("og:type", "website");
+  upsertProperty("og:description", description);
+  upsertProperty("og:type", config.type ?? "website");
   upsertProperty("og:url", canonical);
   upsertProperty("og:image", shareImage);
   upsertProperty("og:image:alt", shareImageAlt);
+  if (hasCustomShareImage) {
+    removeMeta('meta[property="og:image:width"], meta[property="og:image:height"], meta[property="og:image:type"]');
+  } else {
+    upsertProperty("og:image:width", SOCIAL_IMAGE_WIDTH);
+    upsertProperty("og:image:height", SOCIAL_IMAGE_HEIGHT);
+    upsertProperty("og:image:type", "image/jpeg");
+  }
+  if (config.type === "article" && config.publishedTime) {
+    upsertProperty("article:published_time", config.publishedTime);
+    upsertProperty("article:section", "Street League");
+  } else {
+    removeMeta('meta[property^="article:"]');
+  }
 
   upsertMeta("twitter:card", "summary_large_image");
   upsertMeta("twitter:title", config.title);
-  upsertMeta("twitter:description", config.description);
+  upsertMeta("twitter:description", description);
   upsertMeta("twitter:image", shareImage);
   upsertMeta("twitter:image:alt", shareImageAlt);
   upsertCanonical(canonical);
   upsertStructuredData(
     createStructuredData(
       canonical,
-      config,
+      { ...config, description },
       resolved.breadcrumbs ?? breadcrumbsFor(path, config, canonical),
       resolved.mainEntity,
     ),
@@ -304,6 +361,13 @@ function isoDate(value: string | null | undefined): string | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
+/** " · 4 nov 2026": rende univoci i titoli di andata e ritorno tra le stesse squadre (uguale al prerender). */
+function matchDateLabel(value: string | null | undefined): string {
+  const iso = isoDate(value);
+  if (!iso) return "";
+  return " · " + new Date(iso).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Rome" });
+}
+
 async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise<ResolvedSeo> {
   const path = normalizePath(pathname);
   const parts = path.split("/").filter(Boolean).map(decodeSegment);
@@ -311,8 +375,9 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
   if (parts[0] === "competizioni" && parts[1] === "gruppo" && parts[2]) {
     const groupName = parts.slice(2).join("/");
     const competitions = await getCompetitions();
+    // Stesso criterio della pagina: solo competizioni attive del gruppo (le altre mostrano "non trovata").
     const members = competitions.filter((item) =>
-      item.statistics_group?.trim().toLocaleLowerCase("it") === groupName.trim().toLocaleLowerCase("it"),
+      item.status === "active" && item.statistics_group?.trim() === groupName.trim(),
     );
     if (!members.length) return { config: { ...fallback, indexable: false } };
     const name = members[0].statistics_group?.trim() || groupName;
@@ -334,7 +399,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
 
   if (parts[0] === "competizioni" && parts.length === 2) {
     const competitions = await getCompetitions();
-    const competition = competitions.find((item) => item.id === parts[1] || item.slug === parts[1]);
+    const competition = competitions.find((item) => item.id === parts[1] && item.status === "active");
     if (!competition) return { config: { ...fallback, indexable: false } };
     const season = competition.season_label ? ` — stagione ${competition.season_label}` : "";
     const config = {
@@ -379,7 +444,6 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
       },
       breadcrumbs: [
         { name: "Home", url: `${SITE_URL}/` },
-        { name: "Squadre", url: `${SITE_URL}/squadre` },
         { name: team.name, url: canonical },
       ],
     };
@@ -393,9 +457,10 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
     const name = `${player.first_name} ${player.last_name}`.trim();
     const canonical = canonicalFor(path);
     const image = player.profile_image_url || player.bg_less_image_url;
-    const config = {
-      title: `${name} | Giocatori | ${SITE_NAME}`,
+    const config: SeoConfig = {
+      title: team ? `${name} – ${team.name} | ${SITE_NAME}` : `${name} | Giocatori | ${SITE_NAME}`,
       description: `Profilo e statistiche di ${name}${team ? ` della squadra ${team.name}` : ""}, nella Street League Bari.`,
+      type: "profile",
     };
     return {
       config,
@@ -406,7 +471,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
       },
       breadcrumbs: [
         { name: "Home", url: `${SITE_URL}/` },
-        { name: "Squadre", url: `${SITE_URL}/squadre` },
+        ...(team ? [{ name: team.name, url: `${SITE_URL}/squadre/${encodeURIComponent(team.id)}` }] : []),
         { name, url: canonical },
       ],
     };
@@ -425,7 +490,7 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
     const result = match.status === "finished" && match.home_score !== null && match.away_score !== null
       ? ` Risultato: ${match.home_score}-${match.away_score}.` : "";
     const config = {
-      title: `${name} | Partita | ${SITE_NAME}`,
+      title: `${name}${matchDateLabel(match.kickoff_at)} | Partita | ${SITE_NAME}`,
       description: `${name}.${result} Dettagli, eventi e formazioni della Street League Bari${competition ? ` — ${competition.name}` : ""}.`,
     };
     const canonical = canonicalFor(path);
@@ -451,6 +516,62 @@ async function resolveDynamicSeo(pathname: string, fallback: SeoConfig): Promise
         { name: "Home", url: `${SITE_URL}/` },
         { name: "Competizioni", url: `${SITE_URL}/competizioni` },
         { name, url: canonical },
+      ],
+    };
+  }
+
+  if (parts[0] === "statistiche" && parts.length === 3) {
+    const statTitle = STAT_TITLES[parts[2]];
+    if (!statTitle) return { config: { ...fallback, indexable: false } };
+    const groups = await getStatisticsGroups(await getActiveCompetitions());
+    const group = groups.find((item) => item.id === parts[1]);
+    if (!group) return { config: { ...fallback, indexable: false } };
+    const canonical = canonicalFor(path);
+    const label = `${statTitle} ${group.name}`;
+    return {
+      config: {
+        title: `${label} | ${SITE_NAME}`,
+        description: `${label}: la graduatoria aggiornata dei giocatori della Street League Bari, partita dopo partita.`,
+      },
+      breadcrumbs: [
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Statistiche", url: `${SITE_URL}/statistiche` },
+        { name: label, url: canonical },
+      ],
+    };
+  }
+
+  if (parts[0] === "articoli" && parts.length === 2) {
+    const article = await getSocialContentById(parts[1]);
+    if (!article?.title) return { config: { ...fallback, indexable: false } };
+    const canonical = canonicalFor(path);
+    const body = plainText(article.article_body) || plainText(article.description);
+    const image = article.thumbnail_url || article.image_url || undefined;
+    const published = isoDate(article.published_at);
+    const config: SeoConfig = {
+      title: `${clip(article.title, 70)} | ${SITE_NAME}`,
+      description: body || `${article.title}: il racconto della Street League Bari.`,
+      type: "article",
+      publishedTime: published,
+    };
+    return {
+      config,
+      shareImage: image,
+      mainEntity: {
+        "@type": "NewsArticle",
+        headline: clip(article.title, 110),
+        url: canonical,
+        mainEntityOfPage: { "@id": `${canonical}#webpage` },
+        ...(body ? { description: clip(body), articleBody: body } : {}),
+        image: [image ? absoluteImageUrl(image) : SOCIAL_IMAGE],
+        ...(published ? { datePublished: published, dateModified: published } : {}),
+        inLanguage: "it-IT",
+        author: { "@id": ORGANIZATION_ID },
+        publisher: { "@id": ORGANIZATION_ID },
+      },
+      breadcrumbs: [
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: clip(article.title, 70), url: canonical },
       ],
     };
   }

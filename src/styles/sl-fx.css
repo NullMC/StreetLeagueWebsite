@@ -263,8 +263,8 @@ html[data-theme="night"] #root .home-matchday-tab[aria-pressed="true"] {
 
 /* Luce d'accento: titoli e LIVE in tema notte */
 html[data-theme="night"] #root .sl-hero__title,
-html[data-theme="night"] #root .home-section-head h2,
-html[data-theme="night"] #root .platform-page-heading h2 {
+html[data-theme="night"] #root .home-section-head :is(h1, h2),
+html[data-theme="night"] #root .platform-page-heading :is(h1, h2) {
   text-shadow: 0 0 42px rgba(228, 34, 120, 0.35), 0 0 2px rgba(255, 255, 255, 0.2);
 }
 .slm--live .slm__score { text-shadow: 0 0 22px color-mix(in srgb, var(--sl-accent) 60%, transparent); }

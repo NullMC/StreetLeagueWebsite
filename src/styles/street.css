@@ -505,7 +505,7 @@ main:focus {
   flex-direction: column;
   align-items: center;
 }
-.sponsor-band--redesign > .sponsor-band__inner > .section-head h2 {
+.sponsor-band--redesign > .sponsor-band__inner > .section-head :is(h1, h2) {
   margin-top: 8px;
   margin-bottom: 0;
   transform: none;
@@ -1193,13 +1193,13 @@ main:focus {
   .section {
     padding-block: 50px;
   }
-  .section-head h2 {
+  .section-head :is(h1, h2) {
     font-size: 52px;
   }
-  .section-head--group h2 {
+  .section-head--group :is(h1, h2) {
     font-size: 42px;
   }
-  .section-head--subsection h2 {
+  .section-head--subsection :is(h1, h2) {
     font-size: 36px;
   }
   .cards-grid,

@@ -71,10 +71,11 @@ function matchdayBuckets(matches: Match[]): MatchdayBucket[] {
     : bucket);
 }
 
+/** Titolo di sezione per motori di ricerca e lettori di schermo; il layout visivo resta invariato. */
 function MatchdayHeading({ competitionName }: { competitionName: string }) {
   return (
     <div className="competition-matchday-heading">
-      <SectionTitle title={``} variant="subsection" />
+      <h2 className="sl-visually-hidden">Calendario partite {competitionName}</h2>
     </div>
   );
 }
@@ -193,6 +194,9 @@ export default function CompetitionDetail() {
       ) : competition ? (
         <>
           <div className="page competition-detail-page">
+            <h1 className="sl-visually-hidden">
+              {aggregated ? competition.statistics_group?.trim() || competition.name : competition.name}
+            </h1>
             {aggregated ? (
               sections.map((section) => (
                 <section className="competition-detail-stage" key={section.competition.id}>

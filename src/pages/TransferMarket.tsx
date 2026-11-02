@@ -162,7 +162,7 @@ export default function TransferMarket() {
     <PageShell>
       <div className="page transfer-market-page">
         <header className="transfer-market-hero">
-          <SectionTitle title="Calciomercato" />
+          <SectionTitle as="h1" title="Calciomercato" />
         </header>
 
         {pageError ? <p className="transfer-market-alert">{pageError}</p> : null}
@@ -176,7 +176,7 @@ export default function TransferMarket() {
           <p className="transfer-market-state">Caricamento squadre…</p>
         ) : teams.length ? (
           <section className="transfer-market-team-picker" aria-label="Selezione squadra">
-            <h1 className="transfer-market-team-picker__heading">Acquisti Squadre</h1>
+            <h2 className="transfer-market-team-picker__heading">Acquisti Squadre</h2>
             <p>Cliccare sul logo di una squadra per visionare i relativi acquisti.</p>
             <TeamCarousel
               teams={teams}

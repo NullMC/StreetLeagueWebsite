@@ -123,7 +123,7 @@ export default function StatsDetail() {
     <PageShell>
       <div className="page platform-stats-detail">
         <header className="platform-page-heading">
-          <SectionTitle eyebrow={data?.group.name ?? "Statistiche"} title={validKey ? config[key].title : "Classifica"} />
+          <SectionTitle as="h1" eyebrow={data?.group.name ?? "Statistiche"} title={validKey ? config[key].title : "Classifica"} />
           <p>
             {key === "mvps"
               ? "Numero di riconoscimenti MVP ottenuti nelle singole partite delle competizioni attive selezionate."

@@ -11,7 +11,7 @@
 .transfer-market-hero .section-head {
   margin: 0 0 14px;
 }
-.transfer-market-hero .section-head h2 {
+.transfer-market-hero .section-head :is(h1, h2) {
   font-size: clamp(54px, 8vw, 96px);
   line-height: .88;
 }
@@ -159,7 +159,7 @@
 }
 @media (max-width: 760px) {
   .transfer-market-page { padding-inline: 16px; }
-  .transfer-market-hero .section-head h2 { font-size: clamp(46px, 13vw, 68px); }
+  .transfer-market-hero .section-head :is(h1, h2) { font-size: clamp(46px, 13vw, 68px); }
   .transfer-market-selected__heading { align-items: flex-start; flex-direction: column; gap: 12px; }
   .transfer-market-selected__identity > img { width: 48px; height: 48px; flex-basis: 48px; }
   .transfer-market-slots { gap: 12px; }

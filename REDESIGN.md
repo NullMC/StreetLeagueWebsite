@@ -80,3 +80,19 @@ Tutti gli stili nuovi sono in `src/styles/sl-system.css`, importato per ultimo i
 npm install
 npm run build
 ```
+
+## SEO
+
+| Intervento | File |
+| --- | --- |
+| Pagine articolo indicizzabili (prima: "Pagina non trovata" + `noindex`): titolo, descrizione dal testo, `og:type=article`, `article:published_time`, immagine, `NewsArticle` JSON-LD, prerender e sitemap con `lastmod` | `Seo.tsx`, `scripts/generate-seo-pages.mjs` |
+| Classifiche statistiche per gruppo (marcatori, MVP, portieri, staff): titolo univoco per competizione, prerender e sitemap | idem |
+| Un solo `h1` per pagina (Competizioni, Classifiche, Statistiche, Calciomercato, Partner, dettaglio competizione e partita); rimosso l'`h2` vuoto del dettaglio competizione | `SectionTitle` prop `as`, pagine |
+| Titoli univoci: giocatori con la squadra, partite con la data (0 duplicati su 473 pagine) | `Seo.tsx`, prerender |
+| Briciole solo verso pagine indicizzabili (non più `/squadre`, che reindirizza); giocatore → squadra → giocatore | idem |
+| Competizioni non attive escluse da sitemap e indicizzazione (la pagina mostrerebbe "non trovata": soft 404) | idem |
+| Immagine social JPEG reale 1920×1080 (`og-street-league.jpg`) con `og:image:width/height/type`; logo dell'organizzazione in PNG reale | `index.html`, `public/assets` |
+| Contenuto `noscript` (h1, descrizione, link interni) per i crawler senza JavaScript | prerender |
+| Sitemap con estensione immagini (loghi squadre, foto giocatori, copertine articoli) | prerender |
+| Descrizioni tagliate a ~155 caratteri sul confine di parola; `theme-color` non più forzato scuro | `Seo.tsx`, prerender |
+| Favicon con tipo corretto e `apple-touch-icon`; articolo senza `<main>` annidato e copertina con `alt` | `index.html`, `ArticleDetail.tsx` |

@@ -1,44 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url><loc>https://streetleaguebari.it/</loc></url>
   <url><loc>https://streetleaguebari.it/competizioni</loc></url>
   <url><loc>https://streetleaguebari.it/calciomercato</loc></url>
   <url><loc>https://streetleaguebari.it/classifica</loc></url>
   <url><loc>https://streetleaguebari.it/statistiche</loc></url>
   <url><loc>https://streetleaguebari.it/partner</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/1a95ba77-fa64-4082-af9e-64dfea0d299e</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/e0e756cc-8d9e-42cc-be57-3d9b6ef0388e</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/b6a53102-28e5-4f41-aff6-407301818944</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/4bcfc797-3ef0-4a76-8810-619104adbe6a</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/3380bd91-6fc8-4228-9186-27006980c117</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/acadeb57-ae94-43d9-a713-1d2fe78ca741</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/6ee395a3-0c75-4a7f-9c0b-ea0d4d717e64</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/01896e93-2a1b-43e5-aabd-de17b814e730</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/5adaa325-6bce-4e49-841c-c383db0616a1</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/a9c1ecb6-20df-4511-b8fe-89719cf838f2</loc></url>
   <url><loc>https://streetleaguebari.it/competizioni/7a18b11b-6eaf-45b0-94ad-f2805283f833</loc></url>
   <url><loc>https://streetleaguebari.it/competizioni/796724c4-6dc7-4222-ab52-28dfa817804b</loc></url>
   <url><loc>https://streetleaguebari.it/competizioni/f74f47ba-20c1-4518-954c-29e4eba61093</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/ba94c5c1-0aeb-463e-8831-0e844ffe522e</loc></url>
-  <url><loc>https://streetleaguebari.it/competizioni/gruppo/Street%20Cup</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/e45c77f6-6fa7-4e4d-b41f-38994ba39726</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/35d92eb6-1739-4ef0-ac3f-59f4fc69237e</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/87429ea9-8c29-44df-829c-e8acbc92c767</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/3606caf6-5c38-4852-a204-11e4237dbcef</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/5add9970-2a1d-4e6b-ac22-8f7c589b133f</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/4478e042-f824-41ed-b969-eb55989436d9</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/c2a675b1-b41a-4b86-8dc6-148c2f546bd6</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/6f46d9f4-a9a9-44b6-9287-a388d388e4d1</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/b0e063c0-758a-4ebf-a439-96d725f305e6</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/63d93245-ead0-46de-bc33-d187c7d018f8</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/2e5577ef-ff06-4033-90fa-2673c9f084ac</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/a0b5c325-1c04-4b11-920c-67741866ddee</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/4125cb2c-9384-466c-a7a3-f363c810873f</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/2af236a3-52d7-4326-95b0-4800aa557663</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/e68c3bde-e401-4607-94c9-e718722eeae7</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/eef98d59-10a8-4ce7-b7de-41b1dbf26a77</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/ae85e29f-3adb-4701-8876-e5d0ba259056</loc></url>
-  <url><loc>https://streetleaguebari.it/squadre/a9cd619c-103d-438c-b543-29fff484b03a</loc></url>
+  <url><loc>https://streetleaguebari.it/squadre/e45c77f6-6fa7-4e4d-b41f-38994ba39726</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/0f7c3078-2459-4e1f-923c-170314e1af83.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/35d92eb6-1739-4ef0-ac3f-59f4fc69237e</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/ddb0c194-6d13-4c5f-9c2f-a38f029189aa.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/87429ea9-8c29-44df-829c-e8acbc92c767</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/1387c39f-e70c-4c1e-bee5-0c7183d9b44a.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/3606caf6-5c38-4852-a204-11e4237dbcef</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/bd89a824-cc96-4cdc-b486-724cbd4f8390.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/5add9970-2a1d-4e6b-ac22-8f7c589b133f</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/c4ca4fab-115a-4761-b07f-739f59792dcf.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/4478e042-f824-41ed-b969-eb55989436d9</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/9671f47f-46c8-4a90-bf86-30af65848615.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/c2a675b1-b41a-4b86-8dc6-148c2f546bd6</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/0225a7c1-c8d6-4251-ba74-3470ed518825.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/6f46d9f4-a9a9-44b6-9287-a388d388e4d1</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/cc97457f-ef3d-48f0-8019-a6d9a900655b.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/b0e063c0-758a-4ebf-a439-96d725f305e6</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/75f0c9fa-18cb-43e4-ae24-dd1947d94efa.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/63d93245-ead0-46de-bc33-d187c7d018f8</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/0186ac07-c791-4d69-b126-e292b2153f61.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/2e5577ef-ff06-4033-90fa-2673c9f084ac</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/19dd1fb3-c80c-46e8-a9e6-9207f4fde22f.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/a0b5c325-1c04-4b11-920c-67741866ddee</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/0ab5f5b6-29e0-4a11-8b52-3f9fa711dd51.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/4125cb2c-9384-466c-a7a3-f363c810873f</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/32ff4660-33f6-41e0-889d-9174881af5ad.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/2af236a3-52d7-4326-95b0-4800aa557663</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/b5787c21-22ed-41bc-b3ef-c75b16886c2d.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/e68c3bde-e401-4607-94c9-e718722eeae7</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/0b1ce08e-91f1-427e-83b5-2dcc93889ecd.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/eef98d59-10a8-4ce7-b7de-41b1dbf26a77</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/f65375e4-d640-4fb2-8bf8-a495a6665da4.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/ae85e29f-3adb-4701-8876-e5d0ba259056</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/e20842d7-d73c-400f-8fe6-93c243c8c4d1.webp</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/squadre/a9cd619c-103d-438c-b543-29fff484b03a</loc><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/logos/e4548bb8-3067-4efe-ad9a-1c86c9a3d7bf.webp</image:loc></image:image></url>
   <url><loc>https://streetleaguebari.it/giocatori/399d054e-1e3f-41e4-81fe-a880730e7a7f</loc></url>
   <url><loc>https://streetleaguebari.it/giocatori/8ddfcbf3-b0aa-49f0-a17f-c1642fce042f</loc></url>
   <url><loc>https://streetleaguebari.it/giocatori/3ea3e6a7-5d1b-4aa2-8337-8fa76577413a</loc></url>
@@ -468,4 +456,21 @@
   <url><loc>https://streetleaguebari.it/partite/87567a1f-8aee-4a5b-a2ff-6118e3d9497d</loc></url>
   <url><loc>https://streetleaguebari.it/partite/d10c6826-ba93-4b93-afbe-a9930ea30f94</loc></url>
   <url><loc>https://streetleaguebari.it/partite/57e2df09-f2d1-42eb-8544-7cbdc7cdae90</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/7a18b11b-6eaf-45b0-94ad-f2805283f833/goals</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/7a18b11b-6eaf-45b0-94ad-f2805283f833/mvps</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/7a18b11b-6eaf-45b0-94ad-f2805283f833/goalkeepers</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/7a18b11b-6eaf-45b0-94ad-f2805283f833/staff</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/796724c4-6dc7-4222-ab52-28dfa817804b/goals</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/796724c4-6dc7-4222-ab52-28dfa817804b/mvps</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/796724c4-6dc7-4222-ab52-28dfa817804b/goalkeepers</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/796724c4-6dc7-4222-ab52-28dfa817804b/staff</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/f74f47ba-20c1-4518-954c-29e4eba61093/goals</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/f74f47ba-20c1-4518-954c-29e4eba61093/mvps</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/f74f47ba-20c1-4518-954c-29e4eba61093/goalkeepers</loc></url>
+  <url><loc>https://streetleaguebari.it/statistiche/f74f47ba-20c1-4518-954c-29e4eba61093/staff</loc></url>
+  <url><loc>https://streetleaguebari.it/articoli/aff29fc7-beb8-48d6-8cc9-045d462c4323</loc><lastmod>2026-02-18</lastmod><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/social/cf23ae42-fc4b-4d05-a691-fa8031dd75be.jpeg</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/articoli/985f8364-c654-46b3-bc5a-b61cc909ff94</loc><lastmod>2026-02-16</lastmod><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/social/6939cb83-2e01-49e8-9eff-7b59ecca86b2.jpeg</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/articoli/17817cb5-43fd-4813-bfea-c12985a07d8a</loc><lastmod>2026-03-20</lastmod><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/social/e71ac1e3-0d4b-46c3-a3d6-10fd7befd6eb.jpeg</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/articoli/feedf004-f86b-4470-ae93-f028fd26374b</loc><lastmod>2026-04-22</lastmod><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/social/039cf590-a052-4ff9-ba6d-176d5013f643.jpeg</image:loc></image:image></url>
+  <url><loc>https://streetleaguebari.it/articoli/68da124a-abc8-45db-b63e-f77b209d0d0b</loc><lastmod>2026-10-17</lastmod><image:image><image:loc>https://jwlmfkhevrekggkvnqps.supabase.co/storage/v1/object/public/street-league-media/social/50c8efff-de73-4d0e-ab8a-804baea3e892.jpeg</image:loc></image:image></url>
 </urlset>
