@@ -1,0 +1,497 @@
+/* ==========================================================================
+   Street League — livello effetti (cinematismo, shader, liquid glass, glow)
+   Caricato dopo sl-system.css. Ogni effetto ha un fallback e rispetta
+   prefers-reduced-motion / prefers-reduced-transparency.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Shader WebGL
+   -------------------------------------------------------------------------- */
+.sl-shader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 1.4s var(--sl-ease);
+}
+.sl-shader[data-state="ready"] { opacity: 1; }
+.sl-shader[data-state="unsupported"] { display: none; }
+
+.sl-liquid-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Hero: shader Paper (mesh gradient + raggi di luce) sopra l'immagine,
+   che resta come fallback e per il primo paint */
+.sl-hero-fx {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  overflow: hidden;
+  pointer-events: none;
+}
+.sl-hero-fx__shaders {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.6s var(--sl-ease);
+}
+.sl-hero-fx.is-ready .sl-hero-fx__shaders { opacity: 1; }
+.sl-hero-fx__layer {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.sl-hero-fx__layer--rays { mix-blend-mode: screen; opacity: 0.85; }
+html:not([data-theme="night"]) .sl-hero-fx__layer--rays { mix-blend-mode: soft-light; opacity: 0.9; }
+/* Punti luce che salgono e svaniscono */
+.sl-hero-fx__glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.sl-hero-fx__glow i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s, 6px);
+  height: var(--s, 6px);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, var(--sl-pink-2, #ed7bab) 38%, transparent 70%);
+  box-shadow: 0 0 calc(var(--s, 6px) * 4) calc(var(--s, 6px) * 0.8) rgba(228, 34, 120, 0.55);
+  opacity: 0;
+  animation: sl-glow-drift var(--d, 9s) var(--delay, 0s) ease-in-out infinite;
+}
+html:not([data-theme="night"]) .sl-hero-fx__glow i {
+  box-shadow: 0 0 calc(var(--s, 6px) * 3) calc(var(--s, 6px) * 0.6) rgba(228, 34, 120, 0.35);
+}
+@keyframes sl-glow-drift {
+  0%, 100% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.6); }
+  30% { opacity: 0.95; }
+  50% { opacity: 0.8; transform: translate3d(var(--dx, 18px), var(--dy, -26px), 0) scale(1); }
+  75% { opacity: 0.35; }
+}
+/* Grana cinematografica */
+.sl-hero-fx__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+}
+html[data-theme="night"] .sl-hero-fx__grain { opacity: 0.08; }
+/* Velatura più decisa dietro al testo per mantenere il contrasto sopra lo shader animato */
+.sl-hero::before {
+  background:
+    radial-gradient(58% 80% at 14% 52%, color-mix(in srgb, var(--sl-bg) 84%, transparent) 0%, color-mix(in srgb, var(--sl-bg) 38%, transparent) 55%, transparent 76%),
+    linear-gradient(to bottom, transparent 55%, var(--sl-bg) 100%) !important;
+}
+html[data-theme="night"] .sl-hero::before {
+  background:
+    radial-gradient(60% 70% at 80% 40%, rgba(228, 34, 120, 0.18), transparent 70%),
+    radial-gradient(62% 85% at 14% 52%, rgba(1, 10, 8, 0.86) 0%, rgba(1, 10, 8, 0.45) 55%, transparent 78%),
+    linear-gradient(to bottom, transparent 50%, var(--sl-bg) 100%) !important;
+}
+@media (max-width: 959px) {
+  .sl-hero::before { background: linear-gradient(to bottom, color-mix(in srgb, var(--sl-bg) 30%, transparent), color-mix(in srgb, var(--sl-bg) 82%, transparent) 55%, var(--sl-bg) 100%) !important; }
+  html[data-theme="night"] .sl-hero::before { background: linear-gradient(to bottom, rgba(1, 10, 8, 0.35), rgba(1, 10, 8, 0.8) 55%, var(--sl-bg) 100%) !important; }
+}
+
+/* Atmosfera in testa alle pagine interne */
+#main-content {
+  position: relative;
+  isolation: isolate;
+}
+.sl-ambient {
+  position: absolute;
+  top: calc(-1 * var(--site-header-total-height));
+  left: 0;
+  right: 0;
+  height: min(76vh, 680px);
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 50%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 50%, transparent 100%);
+}
+.sl-ambient .sl-shader[data-state="ready"] { opacity: 0.55; }
+html[data-theme="night"] .sl-ambient .sl-shader[data-state="ready"] { opacity: 0.85; }
+.sl-ambient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--sl-bg) 25%, transparent), color-mix(in srgb, var(--sl-bg) 70%, transparent));
+}
+
+/* Footer: nebula sempre scura */
+.sl-footer__glow { overflow: hidden; }
+.sl-footer__glow .sl-shader[data-state="ready"] { opacity: 0.8; }
+.sl-footer__glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(1, 10, 8, 0.92) 0%, rgba(1, 10, 8, 0.5) 55%, rgba(1, 10, 8, 0.35) 100%);
+}
+
+/* --------------------------------------------------------------------------
+   2. Liquid glass
+   Vetro con riflesso speculare; nei browser Chromium (`html.sl-liquid`)
+   il contenuto dietro viene anche rifratto tramite filtro SVG.
+   -------------------------------------------------------------------------- */
+:root {
+  --glass-tint: rgba(255, 255, 255, 0.46);
+  --glass-edge: rgba(255, 255, 255, 0.85);
+  --glass-rim: rgba(255, 255, 255, 0.35);
+  --glass-shadow: 0 14px 36px -16px rgba(1, 10, 8, 0.35);
+  --glass-sheen: linear-gradient(135deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.08) 38%, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.16) 100%);
+}
+html[data-theme="night"] {
+  --glass-tint: rgba(16, 24, 21, 0.42);
+  --glass-edge: rgba(255, 255, 255, 0.28);
+  --glass-rim: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+  --glass-sheen: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 40%, rgba(255, 255, 255, 0) 60%, rgba(237, 123, 171, 0.1) 100%);
+}
+
+.sl-header.is-scrolled,
+.sl-dock,
+.MuiDrawer-paper.sl-drawer,
+.sl-hero__match .slm,
+#root .team-carousel__controls button,
+#root .home-matchdays__tabs,
+.sl-btn--ghost::before {
+  background: var(--glass-sheen), var(--glass-tint) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    inset 0 -1px 0 var(--glass-rim),
+    inset 0 0 0 1px var(--glass-rim),
+    var(--glass-shadow) !important;
+  border-color: transparent !important;
+}
+.sl-header.is-scrolled {
+  box-shadow: inset 0 -1px 0 var(--glass-rim), 0 10px 30px -18px rgba(1, 10, 8, 0.4) !important;
+}
+html.sl-liquid .sl-header.is-scrolled,
+html.sl-liquid .sl-dock,
+html.sl-liquid .sl-hero__match .slm,
+html.sl-liquid .sl-btn--ghost::before {
+  -webkit-backdrop-filter: url(#sl-liquid-glass) blur(8px) saturate(190%) brightness(1.04) !important;
+  backdrop-filter: url(#sl-liquid-glass) blur(8px) saturate(190%) brightness(1.04) !important;
+}
+.MuiDrawer-paper.sl-drawer {
+  background:
+    var(--glass-sheen),
+    radial-gradient(120% 60% at 100% 0%, color-mix(in srgb, var(--sl-accent) 18%, transparent), transparent 60%),
+    color-mix(in srgb, var(--sl-bg) 72%, transparent) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(180%) !important;
+  backdrop-filter: blur(26px) saturate(180%) !important;
+}
+
+/* Barra giornate come controllo segmentato in vetro */
+#root .home-matchdays__tabs {
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px !important;
+  border-radius: var(--sl-r-pill) !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+#root .home-matchday-tab {
+  border-color: transparent !important;
+  background: transparent !important;
+}
+#root .home-matchday-tab[aria-pressed="true"] {
+  background: var(--sl-fg) !important;
+  color: var(--sl-bg) !important;
+  box-shadow: 0 6px 18px -6px rgba(1, 10, 8, 0.45), 0 0 0 1px color-mix(in srgb, var(--sl-accent) 30%, transparent);
+}
+html[data-theme="night"] #root .home-matchday-tab[aria-pressed="true"] {
+  box-shadow: 0 0 24px -4px rgba(228, 34, 120, 0.55);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .sl-header.is-scrolled,
+  .sl-dock,
+  .MuiDrawer-paper.sl-drawer,
+  .sl-hero__match .slm,
+  #root .team-carousel__controls button,
+  #root .home-matchdays__tabs,
+  .sl-btn--ghost::before {
+    background: var(--sl-surface) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Glow: bordo luminoso che segue il puntatore (Glowing Effect)
+   -------------------------------------------------------------------------- */
+#root .slm:not(.slm--live):not(.slm--compact):hover,
+#root .home-feature-card:hover,
+#root .standings-table:hover {
+  border-color: transparent !important;
+  background:
+    linear-gradient(var(--sl-surface), var(--sl-surface)) padding-box,
+    radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), var(--sl-accent), color-mix(in srgb, var(--sl-accent) 30%, var(--sl-line)) 45%, var(--sl-line-strong) 80%) border-box !important;
+}
+#root .team-carousel__item:hover,
+#root .team-carousel__item.is-selected {
+  border-color: transparent !important;
+  background:
+    radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--team-accent) 22%, transparent), transparent 70%) padding-box,
+    linear-gradient(var(--sl-surface), var(--sl-surface)) padding-box,
+    radial-gradient(200px circle at var(--mx, 50%) var(--my, 0%), var(--team-accent), color-mix(in srgb, var(--team-accent) 30%, var(--sl-line)) 50%, var(--sl-line-strong) 85%) border-box !important;
+}
+/* Card legacy: alone esterno e sollevamento */
+#root :is(.stat-card, .best-stats-card, .partner-editorial-card, .competition-list-card, .player-card, .match-experience__panel) {
+  transition: transform 300ms var(--sl-ease), box-shadow 300ms var(--sl-ease) !important;
+}
+#root :is(.stat-card, .best-stats-card, .partner-editorial-card, .competition-list-card, .player-card):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sl-accent) 45%, transparent), 0 24px 50px -22px rgba(228, 34, 120, 0.55) !important;
+}
+
+/* Luce d'accento: titoli e LIVE in tema notte */
+html[data-theme="night"] #root .sl-hero__title,
+html[data-theme="night"] #root .home-section-head h2,
+html[data-theme="night"] #root .platform-page-heading h2 {
+  text-shadow: 0 0 42px rgba(228, 34, 120, 0.35), 0 0 2px rgba(255, 255, 255, 0.2);
+}
+.slm--live .slm__score { text-shadow: 0 0 22px color-mix(in srgb, var(--sl-accent) 60%, transparent); }
+.sl-nav__limelight::before { animation: sl-lamp 3.6s ease-in-out infinite; }
+@keyframes sl-lamp {
+  0%, 100% { box-shadow: 0 0 14px 2px color-mix(in srgb, var(--sl-accent) 70%, transparent); }
+  50% { box-shadow: 0 0 22px 5px color-mix(in srgb, var(--sl-accent) 85%, transparent); }
+}
+
+/* Pulsante primario: riflesso che attraversa il parallelogramma */
+.sl-btn--primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--sl-r-xs);
+  transform: skewX(-12deg);
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%) no-repeat;
+  background-size: 250% 100%;
+  background-position: 160% 0;
+  pointer-events: none;
+}
+.sl-btn--primary:hover::after {
+  transition: background-position 900ms var(--sl-ease);
+  background-position: -60% 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. Cinematismo
+   -------------------------------------------------------------------------- */
+
+/* Titolo hero: parole che emergono dalla maschera, una dopo l'altra */
+#root .sl-hero__title { animation: none !important; }
+.sl-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0.04em 0.08em 0.06em;
+  margin: -0.04em -0.08em -0.06em;
+}
+.sl-word__inner {
+  display: inline-block;
+  animation: sl-word-in 1.15s var(--sl-ease) calc(var(--i, 0) * 95ms + 120ms) backwards;
+}
+@keyframes sl-word-in {
+  from {
+    transform: translate3d(0, 110%, 0) skewY(7deg);
+    opacity: 0;
+    filter: blur(6px);
+  }
+}
+.sl-hero__lead { animation-delay: 620ms !important; }
+.sl-hero__actions { animation-delay: 760ms !important; }
+
+/* Logo 3D: inquadratura laterale, oscillazione lenta, inclinazione col puntatore */
+.sl-logo3d {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 581 / 430;
+  perspective: 1300px;
+  perspective-origin: 50% 35%;
+  --logo-side-a: #5c1233;
+  --logo-side-b: #e42278;
+}
+html[data-theme="night"] .sl-logo3d {
+  --logo-side-a: #f6bdd3;
+  --logo-side-b: #7a1446;
+}
+.sl-logo3d__stage,
+.sl-logo3d__object {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.sl-logo3d__stage {
+  transform: rotateY(calc(var(--tilt-x, 0) * 22deg)) rotateX(calc(var(--tilt-y, 0) * -14deg));
+  transition: transform 700ms var(--sl-ease);
+}
+.sl-logo3d__object {
+  transform: rotateY(-30deg) rotateX(8deg);
+  animation: sl-logo-orbit 10s ease-in-out infinite;
+}
+@keyframes sl-logo-orbit {
+  0%, 100% { transform: translate3d(0, 0, 0) rotateY(-38deg) rotateX(10deg) rotateZ(-1deg); }
+  50% { transform: translate3d(0, -18px, 24px) rotateY(-22deg) rotateX(4deg) rotateZ(1.5deg); }
+}
+/* Il PNG ha molto margine trasparente: gli strati escono dal contenitore così il badge lo riempie */
+.sl-logo3d__face,
+.sl-logo3d__slice,
+.sl-logo3d__sheen {
+  position: absolute;
+  inset: -30% -26%;
+  width: 152%;
+  height: 160%;
+}
+.sl-logo3d__face {
+  display: block;
+  object-fit: contain;
+  transform: translateZ(1px);
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.35));
+}
+html[data-theme="night"] .sl-logo3d__face { filter: invert(1); }
+/* Spessore: la sagoma del logo ripetuta in profondità, sfumata dal nero al rosa */
+.sl-logo3d__slice {
+  -webkit-mask: url("/assets/logo.png") center / contain no-repeat;
+  mask: url("/assets/logo.png") center / contain no-repeat;
+  background: color-mix(in srgb, var(--logo-side-b) calc(var(--z) * 4.5%), var(--logo-side-a));
+  transform: translateZ(calc(var(--z) * -2.2px));
+}
+/* Riflesso speculare che attraversa la faccia */
+.sl-logo3d__sheen {
+  -webkit-mask: url("/assets/logo.png") center / contain no-repeat;
+  mask: url("/assets/logo.png") center / contain no-repeat;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.5) 47%, rgba(255, 214, 231, 0.75) 50%, transparent 60%) no-repeat;
+  background-size: 300% 100%;
+  background-position: 130% 0;
+  transform: translateZ(2px);
+  mix-blend-mode: screen;
+  animation: sl-logo-sheen 7s ease-in-out 1.6s infinite;
+}
+html[data-theme="night"] .sl-logo3d__sheen { mix-blend-mode: overlay; }
+@keyframes sl-logo-sheen {
+  0%, 55% { background-position: 130% 0; }
+  100% { background-position: -30% 0; }
+}
+/* Alone dietro al logo e ombra a terra, sincronizzati con l'oscillazione */
+.sl-logo3d__halo {
+  position: absolute;
+  inset: 4% 10%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(228, 34, 120, 0.45), rgba(237, 123, 171, 0.18) 55%, transparent 75%);
+  filter: blur(26px);
+  animation: sl-logo-halo 10s ease-in-out infinite;
+}
+@keyframes sl-logo-halo {
+  0%, 100% { opacity: 0.65; transform: scale(0.94); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+.sl-logo3d__shadow {
+  position: absolute;
+  left: 24%;
+  right: 24%;
+  bottom: 2%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(1, 10, 8, 0.38), transparent);
+  filter: blur(6px);
+  animation: sl-logo-shadow 10s ease-in-out infinite;
+}
+html[data-theme="night"] .sl-logo3d__shadow { background: radial-gradient(closest-side, rgba(228, 34, 120, 0.45), transparent); }
+@keyframes sl-logo-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 1; }
+  50% { transform: scaleX(0.82); opacity: 0.6; }
+}
+
+/* Parallasse dell'hero guidata dallo scroll (browser che la supportano) */
+@supports (animation-timeline: scroll()) {
+  .sl-hero__copy {
+    animation: sl-par-copy linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 85vh;
+  }
+  .sl-hero__side {
+    animation: sl-par-side linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 85vh;
+  }
+  .sl-hero-fx,
+  .sl-hero__bg {
+    animation: sl-par-bg linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 100vh;
+  }
+  @keyframes sl-par-copy { to { transform: translate3d(0, -90px, 0); opacity: 0.1; filter: blur(5px); } }
+  @keyframes sl-par-side { to { transform: translate3d(0, -170px, 0) scale(0.92); opacity: 0.15; } }
+  @keyframes sl-par-bg { to { transform: scale(1.14) translate3d(0, 50px, 0); } }
+}
+
+/* Rivelazioni allo scroll (attivate da JS solo se il movimento è consentito) */
+html.sl-cine [data-reveal="pending"] { opacity: 0; }
+html.sl-cine [data-reveal="in"] {
+  animation: sl-reveal-in 0.95s var(--sl-ease) var(--sl-delay, 0ms) backwards;
+}
+@keyframes sl-reveal-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 34px, 0) scale(0.985);
+    filter: blur(8px);
+  }
+}
+html.sl-cine .table-row[data-reveal="in"] { animation-name: sl-row-in; animation-duration: 0.6s; }
+@keyframes sl-row-in {
+  from { opacity: 0; transform: translate3d(-18px, 0, 0); }
+}
+
+/* Transizioni di pagina (View Transitions: SPA tramite React Router, MPA via @view-transition) */
+@view-transition { navigation: auto; }
+.sl-header { view-transition-name: sl-header; }
+.sl-dock { view-transition-name: sl-dock; }
+::view-transition-old(root) { animation: sl-page-out 260ms var(--sl-ease) both; }
+::view-transition-new(root) { animation: sl-page-in 560ms var(--sl-ease) both; }
+@keyframes sl-page-out { to { opacity: 0; transform: scale(0.985); filter: blur(6px); } }
+@keyframes sl-page-in { from { opacity: 0; transform: translate3d(0, 22px, 0) scale(1.01); filter: blur(10px); } }
+/* Durante il cambio tema: rivelazione circolare su tutta la pagina, header incluso */
+html.sl-vt-theme .sl-header,
+html.sl-vt-theme .sl-dock { view-transition-name: none; }
+html.sl-vt-theme::view-transition-old(root) { animation: none; }
+html.sl-vt-theme::view-transition-new(root) { animation: sl-theme-reveal 680ms var(--sl-ease); }
+
+/* --------------------------------------------------------------------------
+   5. Movimento ridotto
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .sl-word__inner,
+  .sl-logo3d__object,
+  .sl-logo3d__sheen,
+  .sl-logo3d__halo,
+  .sl-logo3d__shadow,
+  .sl-hero__copy,
+  .sl-hero__side,
+  .sl-hero-fx,
+  .sl-hero-fx__glow i,
+  .sl-hero__bg,
+  .sl-nav__limelight::before,
+  html.sl-cine [data-reveal="in"] {
+    animation: none !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none !important; }
+}

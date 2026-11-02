@@ -10,10 +10,10 @@ export default function NotFound() {
         <h1>Pagina non trovata</h1>
         <p>Il percorso richiesto non corrisponde a una pagina disponibile.</p>
         <div className="error-page__actions">
-          <Link className="btn btn--primary" to="/">
+          <Link className="btn btn--primary sl-btn sl-btn--primary" to="/">
             Torna alla home
           </Link>
-          <Link className="btn btn--ghost" to="/partite">
+          <Link className="btn btn--ghost sl-btn sl-btn--ghost" to="/#home-matches">
             Vai alle partite
           </Link>
         </div>

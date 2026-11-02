@@ -1,7 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&display=swap");
 
 :root {
-  --display: "Teko", "Arial Narrow", Impact, sans-serif;
+  --display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
   --street-grid: rgba(249, 249, 249, 0.055);
   --street-glass: rgba(1, 10, 8, 0.72);
   --street-pink-soft: rgba(228, 34, 120, 0.18);

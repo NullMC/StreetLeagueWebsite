@@ -1,0 +1,404 @@
+/* ==========================================================================
+   Street League — sistema tipografico e rifiniture di piattaforma
+   Caricato per ultimo. I font "display" valgono SOLO per titoli e intestazioni;
+   paragrafi, etichette, dati, pulsanti, navigazione e tabelle usano Archivo.
+   Voci dei titoli (pairing ispirato a ItalFUT):
+   - Unbounded (wide, geometrico): hero, titoli di pagina e di sezione
+   - Instrument Serif corsivo: una parola d'accento dentro il titolo
+   - Barlow Condensed corsivo (la voce del logo): titoli di card e sottotitoli
+   ========================================================================== */
+
+:root {
+  --font-headline: "Unbounded Variable", "Unbounded", "Archivo Variable", system-ui, sans-serif;
+  --font-serif: "Instrument Serif", "Times New Roman", Georgia, serif;
+  --font-sport: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   0. Regola tipografica
+   Cascade layer: le sue dichiarazioni !important prevalgono su quelle dei
+   fogli legacy non stratificati, qualunque sia la specificità. Così nessun
+   corpo di testo può ricevere un font da titolo.
+   -------------------------------------------------------------------------- */
+@layer sl-typography {
+  /* Corpo: tutto ciò che non è un titolo */
+  body *:not(
+    :is(h1, h2, h3, h4, h5, h6, [role="heading"], .MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3, .MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6, .slm__name, .team-carousel__name, .match-experience__team strong),
+    :is(h1, h2, h3, h4, h5, h6, [role="heading"], .MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3, .MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6, .slm__name, .team-carousel__name, .match-experience__team strong) *,
+    svg, svg *, code, pre, kbd, samp
+  ) {
+    font-family: var(--font-body) !important;
+  }
+  /* Il corsivo resta solo dove lo vuole il contenuto (enfasi, citazioni, testo formattato) */
+  body *:not(
+    :is(h1, h2, h3, h4, h5, h6, [role="heading"], .MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3, .MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6, .slm__name, .team-carousel__name, .match-experience__team strong),
+    :is(h1, h2, h3, h4, h5, h6, [role="heading"], .MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3, .MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6, .slm__name, .team-carousel__name, .match-experience__team strong) *,
+    em, i, cite, blockquote, address, em *, i *, cite *, blockquote *, [contenteditable] *
+  ) {
+    font-style: normal !important;
+  }
+
+  /* Titoli di card, sottotitoli e nomi squadra: Barlow Condensed */
+  body :is(h1, h2, h3, h4, h5, h6, [role="heading"], .MuiTypography-h1, .MuiTypography-h2, .MuiTypography-h3, .MuiTypography-h4, .MuiTypography-h5, .MuiTypography-h6, .slm__name, .team-carousel__name, .match-experience__team strong) {
+    font-family: var(--font-sport) !important;
+  }
+
+  /* Titoli di pagina e di sezione: Unbounded */
+  body :is(
+    .sl-hero__title,
+    .section-head h2,
+    .platform-page-heading h2,
+    .home-section-head h2,
+    .top-seven-heading h2,
+    .error-page__inner > h1,
+    .admin-login h1,
+    .editorial-article__header h1,
+    .match-experience__panel-title h2,
+    .match-experience__panel h2,
+    .detail-hero h1,
+    .detail-hero h2,
+    .sl-comp-card__title,
+    .collab-carousel__heading h2
+  ) {
+    font-family: var(--font-headline) !important;
+    font-style: normal !important;
+  }
+
+  /* Accento editoriale dentro un titolo: Instrument Serif corsivo */
+  body :is(h1, h2, h3, h4, h5, h6) :is(.sl-word--accent, .sl-accent),
+  body :is(h1, h2, h3, h4, h5, h6) :is(.sl-word--accent, .sl-accent) * {
+    font-family: var(--font-serif) !important;
+    font-style: italic !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   1. Titoli di pagina e di sezione (Unbounded)
+   -------------------------------------------------------------------------- */
+#root .section-head h2,
+#root .section-head .MuiTypography-h2,
+#root .platform-page-heading h2,
+#root .home-section-head h2,
+#root .top-seven-heading .MuiTypography-h2,
+#root .error-page__inner > h1,
+#root .admin-login h1,
+#root .editorial-article__header h1,
+#root .match-experience__panel-title h2,
+#root .match-experience__panel h2,
+#root .detail-hero h1,
+#root .detail-hero h2,
+#root .sl-comp-card__title,
+#root .collab-carousel__heading h2 {
+  font-weight: 800 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 0.95 !important;
+  text-transform: uppercase;
+}
+#root .section-head--primary h2,
+#root .home-section-head .section-head h2,
+#root .top-seven-heading .MuiTypography-h2 {
+  font-size: clamp(30px, 4.4vw, 60px) !important;
+}
+#root .section-head--group h2 { font-size: clamp(22px, 2.4vw, 32px) !important; }
+#root .section-head--subsection h2 { font-size: clamp(20px, 2.1vw, 28px) !important; }
+#root .platform-page-heading h2 { font-size: clamp(32px, 6.4vw, 92px) !important; }
+#root .editorial-article__header h1 { font-size: clamp(28px, 3.6vw, 48px) !important; line-height: 1.02 !important; }
+#root .admin-login h1 { font-size: clamp(30px, 3.2vw, 42px) !important; }
+#root .detail-hero h1,
+#root .detail-hero h2 { font-size: clamp(34px, 5.2vw, 72px) !important; }
+#root .match-experience__panel-title h2,
+#root .match-experience__panel h2 { font-size: clamp(20px, 2vw, 28px) !important; }
+
+/* Accento serif nei titoli: minuscolo, leggermente più grande, rosa */
+#root :is(h1, h2, h3) .sl-accent {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: 1.16em;
+  line-height: 0.8;
+  color: var(--sl-accent);
+  padding-right: 0.08em;
+}
+html[data-theme="night"] #root :is(h1, h2, h3) .sl-accent {
+  color: var(--sl-pink-2);
+  text-shadow: 0 0 30px rgba(228, 34, 120, 0.5);
+}
+
+/* Hero: "La Street League" in Unbounded, "raccontata da vicino" in serif corsivo rosa */
+#root .sl-hero__title {
+  font-weight: 800 !important;
+  font-size: clamp(38px, 6.6vw, 104px) !important;
+  line-height: 0.92 !important;
+  letter-spacing: -0.045em !important;
+  max-width: 10.5ch;
+}
+#root .sl-word--accent {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: 1.18em;
+  line-height: 0.8;
+  color: var(--sl-accent);
+  padding-right: 0.12em;
+}
+html[data-theme="night"] #root .sl-word--accent {
+  color: var(--sl-pink-2);
+  text-shadow: 0 0 34px rgba(228, 34, 120, 0.55);
+}
+/* Testo con riflesso che scorre sull'accento (Text Shimmer) */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  #root .sl-word--accent .sl-word__inner {
+    background: linear-gradient(100deg, currentColor 0%, currentColor 40%, color-mix(in srgb, currentColor 30%, #fff) 50%, currentColor 60%, currentColor 100%);
+    background-size: 260% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation:
+      sl-word-in 1.15s var(--sl-ease) calc(var(--i, 0) * 95ms + 120ms) backwards,
+      sl-shimmer-text 6s ease-in-out 2.4s infinite;
+  }
+}
+@keyframes sl-shimmer-text {
+  0%, 60% { background-position: 100% 0; }
+  100% { background-position: -60% 0; }
+}
+@media (max-width: 520px) {
+  #root .sl-hero__title { font-size: clamp(34px, 10.4vw, 52px) !important; }
+}
+
+/* Testo introduttivo dell'hero: corpo del testo, non un titolo */
+#root .sl-hero__lead {
+  font-size: clamp(16px, 1.3vw, 18.5px);
+  line-height: 1.6;
+  color: var(--sl-fg-muted);
+  max-width: 46ch;
+}
+
+/* --------------------------------------------------------------------------
+   2. Titoli di card e sottotitoli (Barlow Condensed corsivo)
+   -------------------------------------------------------------------------- */
+.slm__name,
+#root .team-carousel__name,
+#root .home-feature-card__content h3,
+#root .home-matchdays__summary h3,
+#root .stat-card h3,
+#root .monthly-award-card h3,
+#root .match-experience__team strong {
+  font-style: italic !important;
+  font-weight: 800 !important;
+}
+#root .home-feature-card__content h3 { font-size: 25px !important; letter-spacing: 0 !important; }
+
+/* --------------------------------------------------------------------------
+   3. Etichette, dati e azioni in Archivo (stessa gerarchia, nessun font da titolo)
+   -------------------------------------------------------------------------- */
+.slm__meta,
+.slm__venue { font-size: 11.5px; letter-spacing: 0.01em; }
+.slm__status { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; }
+.slm__score,
+#root .standings-table .table-row > strong,
+#root .standings-table .position,
+#root .stat-card__value {
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em !important;
+}
+#root .home-matchday-tab strong { font-size: 12.5px !important; font-weight: 700 !important; letter-spacing: 0.01em !important; }
+#root .home-section-head__link,
+#root .home-feature-card__cta { font-size: 12px !important; font-weight: 700 !important; letter-spacing: 0.06em !important; text-transform: uppercase !important; }
+#root .standings-team strong { font-size: 15px !important; font-weight: 700 !important; }
+#root .standings-table .table-row.head { font-size: 11px !important; letter-spacing: 0.08em !important; }
+.sl-dock__item span { font-size: 10px; letter-spacing: 0.01em; }
+
+/* Navigazione: Archivo stretto, maiuscole leggere */
+.sl-nav__list a {
+  font-size: 12.5px;
+  font-weight: 600;
+  font-stretch: 85%;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+/* Pulsanti: Archivo semi-condensato, deciso */
+.sl-btn {
+  font-weight: 800;
+  font-stretch: 88%;
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------------------------------------------------
+   4. Loghi delle squadre: riempiono il contenitore rotondo
+   -------------------------------------------------------------------------- */
+#root :is(img.slm__logo, .top-seven-player__team-logo, .standings-team__logo, .match-experience__logo, .match-experience__formation-logo, .detail-hero__team-logo, .team-card__logo, .team-carousel__logo img) {
+  object-fit: cover !important;
+  object-position: center !important;
+  object-view-box: inset(4%);
+  border-radius: 50% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+#root .team-carousel__logo {
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+#root .team-carousel__logo img { width: 100% !important; height: 100% !important; }
+#root .team-carousel__item:hover .team-carousel__logo img { transform: scale(1.06) !important; }
+#root .team-card__visual { overflow: hidden; }
+#root .team-card__visual .team-card__logo { width: 100%; height: 100%; }
+/* Card partite: loghi puliti, senza anelli colorati */
+#root :is(.slm__logo, img.slm__logo) { box-shadow: none !important; border: 0 !important; outline: 0 !important; }
+
+/* --------------------------------------------------------------------------
+   5. Contenuti in evidenza: l'immagine detta l'altezza, nessun ritaglio
+   -------------------------------------------------------------------------- */
+#root .home-feature-carousel__track { align-items: stretch; }
+#root .home-feature-card__media-link,
+#root .home-feature-card__media {
+  display: block !important;
+  aspect-ratio: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: hidden;
+  background: var(--sl-surface-2);
+}
+#root .home-feature-card__media img {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  aspect-ratio: auto !important;
+}
+/* Stesso criterio per il banner della pagina articolo */
+#root .editorial-article__banner {
+  aspect-ratio: auto !important;
+  height: auto !important;
+  max-height: none !important;
+}
+#root .editorial-article__banner img {
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. Footer: wordmark sfumato visibile per intero
+   -------------------------------------------------------------------------- */
+.sl-footer__wordmark {
+  height: auto !important;
+  overflow: visible !important;
+  margin-bottom: clamp(16px, 2vw, 28px) !important;
+}
+.sl-footer__wordmark img {
+  opacity: 0.12 !important;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.35) 100%) !important;
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.35) 100%) !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. Componenti di piattaforma (tabs, input, sign-in, timeline, avatar)
+   -------------------------------------------------------------------------- */
+
+/* Tabs della pagina partita: controllo segmentato in vetro */
+#root .match-experience__tabs {
+  display: inline-flex !important;
+  gap: 6px !important;
+  padding: 6px !important;
+  border-radius: var(--sl-r-pill) !important;
+  border: 0 !important;
+  background: var(--glass-sheen), var(--glass-tint) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: inset 0 1px 0 var(--glass-edge), inset 0 0 0 1px var(--glass-rim), var(--glass-shadow) !important;
+}
+#root .match-experience__tabs button {
+  min-height: 42px !important;
+  padding: 0 22px !important;
+  border: 0 !important;
+  border-radius: var(--sl-r-pill) !important;
+  background: transparent !important;
+  color: var(--sl-fg-muted) !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+  transition: background-color 220ms var(--sl-ease), color 220ms var(--sl-ease);
+}
+#root .match-experience__tabs button.active {
+  background: var(--sl-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px -8px rgba(228, 34, 120, 0.7) !important;
+}
+
+/* Input: ricerca giocatori, login admin */
+#root .stats-player-search input,
+#root .admin-login input {
+  min-height: 48px !important;
+  padding: 0 18px !important;
+  border-radius: var(--sl-r-sm) !important;
+  border: 1px solid var(--sl-line-strong) !important;
+  background: var(--sl-surface) !important;
+  color: var(--sl-fg) !important;
+  font: 500 15px/1.2 var(--font-body) !important;
+  box-shadow: inset 0 1px 2px rgba(1, 10, 8, 0.06) !important;
+  transition: border-color 200ms var(--sl-ease), box-shadow 200ms var(--sl-ease);
+}
+#root .stats-player-search input:focus,
+#root .admin-login input:focus {
+  outline: none !important;
+  border-color: var(--sl-accent) !important;
+  box-shadow: 0 0 0 4px var(--sl-accent-soft), 0 0 24px -6px rgba(228, 34, 120, 0.55) !important;
+}
+#root .stats-player-search input::placeholder,
+#root .admin-login input::placeholder { color: var(--sl-fg-subtle); }
+
+/* Sign-in admin: card in vetro con bordo luminoso */
+#root .admin-login {
+  position: relative;
+  border-radius: var(--sl-r-lg) !important;
+  border: 1px solid transparent !important;
+  background:
+    linear-gradient(var(--sl-surface), var(--sl-surface)) padding-box,
+    linear-gradient(140deg, color-mix(in srgb, var(--sl-accent) 70%, transparent), var(--sl-line) 40%, var(--sl-line) 70%, color-mix(in srgb, var(--sl-accent-2) 60%, transparent)) border-box !important;
+  box-shadow: 0 40px 90px -40px rgba(228, 34, 120, 0.45), var(--sl-shadow-md) !important;
+}
+#root .admin-login .eyebrow { color: var(--sl-accent-ink) !important; }
+#root .admin-login .btn--primary {
+  min-height: 50px !important;
+  border-radius: var(--sl-r-sm) !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 14px 30px -12px rgba(228, 34, 120, 0.7) !important;
+}
+
+/* Timeline eventi partita: linea con nodi luminosi */
+#root .match-experience__timeline { position: relative; }
+#root .match-experience__timeline-entry {
+  border-radius: var(--sl-r-sm);
+  transition: background-color 200ms var(--sl-ease);
+}
+#root .match-experience__timeline-entry:hover { background: var(--sl-accent-soft); }
+
+/* Avatar: anello sfumato brand */
+#root .top-seven-player__avatar.MuiAvatar-root,
+#root .match-experience__avatar {
+  box-shadow: 0 0 0 2px var(--sl-bg), 0 0 0 4px var(--sl-accent), 0 10px 26px -10px rgba(228, 34, 120, 0.7) !important;
+}
+
+/* Tabella classifica: righe più ariose */
+#root .standings-table .table-row:not(.head) { min-height: 56px; }
+#root .standings-table .standings-team__logo { width: 30px !important; height: 30px !important; }
+
+/* Pagina partita e squadra: loghi grandi */
+#root .match-experience__logo,
+#root .detail-hero__team-logo {
+  box-shadow: 0 0 0 3px var(--sl-surface), 0 0 0 5px color-mix(in srgb, var(--sl-accent) 50%, transparent), 0 24px 50px -20px rgba(228, 34, 120, 0.6) !important;
+}

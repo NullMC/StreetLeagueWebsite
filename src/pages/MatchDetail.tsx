@@ -183,7 +183,7 @@ export default function MatchDetail() {
                     return (
                       <section className="match-experience__formation" key={teamId}>
                         <div className="match-experience__formation-head">
-                          {team?.logo_url && <img src={team.logo_url} alt="" />}
+                          {team?.logo_url && <img className="match-experience__formation-logo" src={team.logo_url} alt="" />}
                           <h3>{team?.name ?? "Squadra"}</h3>
                         </div>
                         {teamLineup.length ? (

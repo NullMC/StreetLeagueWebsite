@@ -40,10 +40,10 @@ async function getLegacyPlayerOfMonth(): Promise<PlayerOfMonth | null> {
       .limit(1)
       .maybeSingle();
     if (fallback.error) throw fallback.error;
-    return fallback.data ? ({ ...fallback.data, award_type: "player", card_image_url: null } as PlayerOfMonth) : null;
+    return fallback.data ? ({ ...fallback.data, award_type: "player", card_image_url: null } as unknown as PlayerOfMonth) : null;
   }
 
-  return withGraphic.data ? ({ ...withGraphic.data, award_type: "player" } as PlayerOfMonth) : null;
+  return withGraphic.data ? ({ ...withGraphic.data, award_type: "player" } as unknown as PlayerOfMonth) : null;
 }
 
 async function getMonthlyAward(type: "player" | "staff"): Promise<MonthlyAward | null> {
@@ -70,7 +70,7 @@ async function getMonthlyAward(type: "player" | "staff"): Promise<MonthlyAward |
         .limit(1)
         .maybeSingle();
       if (withoutGraphic.error) throw withoutGraphic.error;
-      return withoutGraphic.data ? ({ ...withoutGraphic.data, card_image_url: null } as MonthlyAward) : null;
+      return withoutGraphic.data ? ({ ...withoutGraphic.data, card_image_url: null } as unknown as MonthlyAward) : null;
     }
     throw result.error;
   }

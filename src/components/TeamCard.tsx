@@ -4,7 +4,7 @@ export function TeamCard({ team }: { team: Team }) {
     <a href={`/squadre/${team.id}`} className="team-card">
       <div className="team-card__visual">
         {team.logo_url ? (
-          <img src={team.logo_url} alt="" />
+          <img className="team-card__logo" src={team.logo_url} alt="" />
         ) : (
           <span>{team.name.slice(0, 3).toUpperCase()}</span>
         )}

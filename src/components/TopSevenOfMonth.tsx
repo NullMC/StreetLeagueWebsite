@@ -148,7 +148,7 @@ export function TopSevenOfMonth(){
   const empty:Lineup={goalkeeper:null,defenders:[null,null],midfielders:[null,null],attackers:[null,null]};
   const current=lineup||empty;
   return <Paper component="section" variant="outlined" className="top-seven-section" elevation={0}>
-    <div className="top-seven-heading"><div><Typography component="h2" variant="h2">Top 7 del mese</Typography>
+    <div className="top-seven-heading"><div><Typography component="h2" variant="h2">Top 7 <span className="sl-accent">del mese</span></Typography>
       <Typography component="p" className="top-seven-subtitle">I migliori interpreti tra le competizioni attive · {monthLabel}</Typography></div>
     </div>
     <Typography component="p" className="top-seven-method">Selezione mensile per squadra basata su presenze, gol, assist, MVP, clean sheet e cartellini registrati.</Typography>

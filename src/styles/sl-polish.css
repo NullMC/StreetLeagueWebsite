@@ -1,0 +1,394 @@
+/* ==========================================================================
+   Street League — livello di dettaglio uniforme (pattern di 21st.dev)
+   Caricato per ultimo. Stesso trattamento per card, griglie, classifiche,
+   pulsanti, sfondi, scroll e micro-interazioni in tutta la piattaforma.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Sfondo ambientale: griglia di punti in testa alla pagina e aloni tra le sezioni
+   -------------------------------------------------------------------------- */
+#main-content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 520px at -4% 32%, color-mix(in srgb, var(--sl-accent) 11%, transparent), transparent 70%),
+    radial-gradient(34% 480px at 104% 58%, color-mix(in srgb, var(--sl-accent-2) 13%, transparent), transparent 70%),
+    radial-gradient(40% 520px at 10% 86%, color-mix(in srgb, var(--sl-accent) 8%, transparent), transparent 70%);
+}
+#main-content::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 760px;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in srgb, var(--sl-fg) 10%, transparent) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(90% 100% at 50% 0%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(90% 100% at 50% 0%, #000 0%, transparent 75%);
+}
+html[data-theme="night"] #main-content::before {
+  background:
+    radial-gradient(38% 520px at -4% 32%, rgba(228, 34, 120, 0.16), transparent 70%),
+    radial-gradient(34% 480px at 104% 58%, rgba(122, 20, 70, 0.28), transparent 70%),
+    radial-gradient(40% 520px at 10% 86%, rgba(228, 34, 120, 0.1), transparent 70%);
+}
+
+/* --------------------------------------------------------------------------
+   2. Scroll: barra di avanzamento, scrollbar sottili, ancore sotto l'header, rail con bordi sfumati
+   -------------------------------------------------------------------------- */
+html {
+  scroll-padding-top: calc(var(--site-header-total-height, 72px) + 16px);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--sl-accent) 50%, transparent) transparent;
+}
+::selection { background: color-mix(in srgb, var(--sl-accent) 26%, transparent); }
+
+@supports (animation-timeline: scroll()) {
+  .sl-scroll-progress {
+    position: fixed;
+    inset: 0 0 auto;
+    height: 2px;
+    z-index: 1400;
+    pointer-events: none;
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--sl-accent), var(--sl-accent-2));
+    box-shadow: 0 0 12px rgba(228, 34, 120, 0.6);
+    animation: sl-scroll-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+  @keyframes sl-scroll-progress {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  .sl-scroll-progress { display: none; }
+}
+
+/* Rail orizzontali: il contenuto sfuma ai bordi invece di essere tagliato */
+#root :is(.sl-match-rail, .home-matchdays__tabs) {
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+#root :is(.sl-match-rail, .home-matchdays__tabs)::-webkit-scrollbar { display: none; }
+@media (max-width: 959px) {
+  #root .sl-match-rail {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 28px), transparent 100%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Card: stesso bordo, stessa luce, stesso sollevamento e bordo luminoso che segue il puntatore
+   -------------------------------------------------------------------------- */
+#root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card, .monthly-award-card, .player-card, .best-stats-card, .partner-editorial-card, .match-experience__panel, .standings-table) {
+  position: relative;
+}
+#root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card, .monthly-award-card, .player-card, .best-stats-card, .partner-editorial-card, .standings-table)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%), var(--sl-accent), color-mix(in srgb, var(--sl-accent-2) 40%, transparent) 40%, transparent 72%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 320ms var(--sl-ease);
+}
+#root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card, .monthly-award-card, .player-card, .best-stats-card, .partner-editorial-card, .standings-table):hover::after { opacity: 1; }
+
+/* Stessa geometria per tutte le card informative */
+#root :is(.player-card, .best-stats-card, .stat-card, .team-card, .potm-card, .staff-month-card, .monthly-award-card, .partner-editorial-card, .match-experience__panel) {
+  border-radius: 20px !important;
+  border-color: var(--sl-line) !important;
+}
+#root :is(.player-card, .best-stats-card, .stat-card, .team-card) {
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), var(--sl-shadow-sm) !important;
+}
+html[data-theme="night"] #root :is(.player-card, .best-stats-card, .stat-card, .team-card) {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), var(--sl-shadow-sm) !important;
+}
+
+#root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card, .player-card, .best-stats-card) {
+  transition: transform 320ms var(--sl-ease), box-shadow 320ms var(--sl-ease), border-color 320ms var(--sl-ease) !important;
+}
+#root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 50px -24px rgba(228, 34, 120, 0.5), var(--sl-shadow-sm) !important;
+}
+/* Immagini dentro le card: zoom lento al passaggio */
+#root :is(.home-feature-card__media img, .partner-editorial-card img:not([class*="logo"]), .player-card img) {
+  transition: transform 700ms var(--sl-ease) !important;
+}
+#root :is(.home-feature-card:hover .home-feature-card__media img, .partner-editorial-card:hover img:not([class*="logo"]), .player-card:hover img) {
+  transform: scale(1.04);
+}
+
+/* --------------------------------------------------------------------------
+   4. Competizioni: card bento con pannello media incassato (Feature card 21st.dev)
+   -------------------------------------------------------------------------- */
+#root .sl-comp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+  gap: clamp(14px, 1.6vw, 22px);
+}
+#root .sl-comp-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 22px;
+  border: 1px solid var(--sl-line);
+  background: var(--sl-surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), var(--sl-shadow-sm);
+  color: var(--sl-fg) !important;
+  text-decoration: none !important;
+}
+html[data-theme="night"] #root .sl-comp-card { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--sl-shadow-sm); }
+#root .sl-comp-card:focus-visible {
+  outline: 2px solid var(--sl-accent);
+  outline-offset: 3px;
+}
+
+#root .sl-comp-card__media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 15px;
+  perspective: 900px;
+  isolation: isolate;
+  background:
+    radial-gradient(70% 90% at 86% 6%, rgba(228, 34, 120, 0.5), transparent 62%),
+    radial-gradient(60% 80% at 4% 100%, rgba(237, 123, 171, 0.55), transparent 62%),
+    linear-gradient(160deg, #fff6f9, #ffe3ee);
+  box-shadow: inset 0 0 0 1px rgba(1, 10, 8, 0.05);
+}
+html[data-theme="night"] #root .sl-comp-card__media {
+  background:
+    radial-gradient(70% 90% at 86% 6%, rgba(228, 34, 120, 0.45), transparent 62%),
+    radial-gradient(60% 80% at 4% 100%, rgba(122, 20, 70, 0.7), transparent 62%),
+    linear-gradient(160deg, #14030c, #071511);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+#root .sl-comp-card__media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(color-mix(in srgb, var(--sl-fg) 14%, transparent) 1px, transparent 1.4px);
+  background-size: 16px 16px;
+  -webkit-mask-image: radial-gradient(75% 75% at 50% 50%, #000, transparent);
+  mask-image: radial-gradient(75% 75% at 50% 50%, #000, transparent);
+}
+#root .sl-comp-card__logo {
+  position: relative;
+  z-index: 1;
+  width: 92%;
+  max-width: none;
+  height: auto;
+  margin: -4% 0;
+  transform: rotateY(-20deg) rotateX(7deg);
+  filter: drop-shadow(0 18px 22px rgba(1, 10, 8, 0.28));
+  transition: transform 700ms var(--sl-ease);
+}
+html[data-theme="night"] #root .sl-comp-card__logo { filter: invert(1) drop-shadow(0 0 26px rgba(228, 34, 120, 0.55)); }
+#root .sl-comp-card:hover .sl-comp-card__logo { transform: rotateY(-4deg) rotateX(2deg) scale(1.06); }
+#root .sl-comp-card__wordmark {
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  z-index: 0;
+  width: 84%;
+  height: auto;
+  transform: translateX(-50%);
+  opacity: 0.16;
+  pointer-events: none;
+}
+html[data-theme="night"] #root .sl-comp-card__wordmark { filter: invert(1); opacity: 0.12; }
+
+#root .sl-comp-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 10px 8px;
+}
+#root .sl-comp-card__status {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 7px;
+  padding: 5px 11px 5px 9px;
+  border-radius: var(--sl-r-pill);
+  background: var(--sl-accent-soft);
+  color: var(--sl-accent-ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#root .sl-comp-card__status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent);
+}
+#root .sl-comp-card[data-status="active"] .sl-comp-card__status::before { animation: sl-live-dot 1.8s ease-in-out infinite; }
+#root .sl-comp-card[data-status="upcoming"] .sl-comp-card__status {
+  background: color-mix(in srgb, #f5a524 16%, transparent);
+  color: #a96400;
+}
+html[data-theme="night"] #root .sl-comp-card[data-status="upcoming"] .sl-comp-card__status { color: #f5c463; }
+#root .sl-comp-card[data-status="finished"] .sl-comp-card__status {
+  background: var(--sl-surface-2);
+  color: var(--sl-fg-muted);
+}
+@keyframes sl-live-dot {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, currentColor 0%, transparent); }
+}
+#root .sl-comp-card__title {
+  margin: 0;
+  font-size: clamp(22px, 2vw, 28px) !important;
+  line-height: 1.02 !important;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  text-wrap: balance;
+}
+#root .sl-comp-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--sl-line);
+}
+#root .sl-comp-card__season {
+  margin: 0;
+  color: var(--sl-fg-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   5. Azioni secondarie: pillola con freccia che scorre (stesso stile ovunque)
+   -------------------------------------------------------------------------- */
+#root :is(.sl-comp-card__cta, .home-section-head__link) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: var(--sl-r-pill) !important;
+  border: 1px solid var(--sl-line-strong) !important;
+  background: var(--sl-surface) !important;
+  color: var(--sl-fg) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap;
+  transition: background-color 220ms var(--sl-ease), color 220ms var(--sl-ease), border-color 220ms var(--sl-ease), box-shadow 220ms var(--sl-ease) !important;
+}
+#root .sl-comp-card__cta span { display: inline-block; transition: transform 260ms var(--sl-ease); }
+#root :is(.sl-comp-card:hover .sl-comp-card__cta, .home-section-head__link:hover) {
+  background: var(--sl-accent) !important;
+  border-color: var(--sl-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 24px -10px rgba(228, 34, 120, 0.7) !important;
+}
+#root .sl-comp-card:hover .sl-comp-card__cta span { transform: translate(2px, -2px); }
+
+/* Focus da tastiera uniforme */
+#root :is(a, button, select, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--sl-accent);
+  outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   6. Classifiche: card tabella con righe interattive e punti in evidenza
+   -------------------------------------------------------------------------- */
+#root .standings-table {
+  border-radius: 20px !important;
+  border: 1px solid var(--sl-line) !important;
+  background: var(--sl-surface) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), var(--sl-shadow-sm) !important;
+  overflow: hidden;
+}
+html[data-theme="night"] #root .standings-table { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), var(--sl-shadow-sm) !important; }
+#root .standings-table .table-row.head {
+  background: color-mix(in srgb, var(--sl-surface-2) 70%, transparent) !important;
+  color: var(--sl-fg-muted) !important;
+}
+#root .standings-table a.table-row {
+  transition: background-color 200ms var(--sl-ease), padding 260ms var(--sl-ease) !important;
+}
+#root .standings-table a.table-row:hover {
+  background: linear-gradient(90deg, var(--sl-accent-soft), transparent 70%) !important;
+}
+#root .standings-table a.table-row:last-child { border-bottom: 0 !important; }
+#root .standings-table .standings-team__logo { transition: transform 300ms var(--sl-ease); }
+#root .standings-table a.table-row:hover .standings-team__logo { transform: scale(1.12) rotate(-4deg); }
+#root .standings-table .table-row:not(.head) > strong {
+  justify-self: center;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 36px;
+  height: 30px !important;
+  padding: 0 8px !important;
+  line-height: 1 !important;
+  border-radius: 9px;
+  background: var(--sl-accent-soft);
+  color: var(--sl-accent-ink) !important;
+  font-size: 16px !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. Intestazioni di sezione: filo con luce d'accento che si accende alla comparsa
+   -------------------------------------------------------------------------- */
+#root :is(.home-section-head, .section-head--primary, .section-head--group) {
+  position: relative;
+}
+#root :is(.home-section-head, .section-head--group)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 72px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--sl-accent), var(--sl-accent-2));
+  transform-origin: 0 50%;
+}
+html.sl-cine #root :is(.home-section-head, .section-head--group)[data-reveal="in"]::after {
+  animation: sl-line-draw 900ms var(--sl-ease) 200ms backwards;
+}
+@keyframes sl-line-draw { from { transform: scaleX(0); } }
+
+/* --------------------------------------------------------------------------
+   8. Movimento ridotto
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .sl-scroll-progress { display: none; }
+  #root .sl-comp-card[data-status="active"] .sl-comp-card__status::before,
+  html.sl-cine #root :is(.home-section-head, .section-head--group)[data-reveal="in"]::after { animation: none !important; }
+  #root .sl-comp-card:hover .sl-comp-card__logo { transform: rotateY(-20deg) rotateX(7deg); }
+}

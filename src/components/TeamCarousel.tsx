@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, type CSSProperties } from "react";
 import type { Team } from "../types";
 
 export function TeamCarousel({
@@ -33,11 +33,12 @@ export function TeamCarousel({
       </div>
       <div className="team-carousel__viewport" ref={trackRef} tabIndex={0}>
         {teams.map((team) => {
+          const accentStyle = { "--team-accent": team.accent_hex || "var(--sl-accent)" } as CSSProperties;
           const content = (
             <>
               <span className="team-carousel__logo">
                 {team.logo_url ? (
-                  <img src={team.logo_url} alt="" aria-hidden="true" />
+                  <img src={team.logo_url} alt="" aria-hidden="true" loading="lazy" decoding="async" />
                 ) : (
                   <span aria-hidden="true">{team.name.slice(0, 3).toUpperCase()}</span>
                 )}
@@ -54,13 +55,14 @@ export function TeamCarousel({
               }
               type="button"
               key={team.id}
+              style={accentStyle}
               aria-pressed={selectedTeamId === team.id}
               onClick={() => onSelect(team)}
             >
               {content}
             </button>
           ) : (
-            <a className="team-carousel__item" href={"/squadre/" + team.id} key={team.id}>
+            <a className="team-carousel__item" href={"/squadre/" + team.id} key={team.id} style={accentStyle}>
               {content}
             </a>
           );

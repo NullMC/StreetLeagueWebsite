@@ -1,8 +1,18 @@
 // Cloudflare rebuild trigger: latest main includes TypeScript compatibility fixes.
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MaterialUiProvider } from "./components/MaterialUiProvider";
+// Font self-hosted (nessuna richiesta bloccante a Google Fonts).
+import "@fontsource/barlow-condensed/600.css";
+import "@fontsource/barlow-condensed/700.css";
+import "@fontsource/barlow-condensed/800.css";
+import "@fontsource/barlow-condensed/900.css";
+import "@fontsource/barlow-condensed/800-italic.css";
+import "@fontsource/barlow-condensed/900-italic.css";
+import "@fontsource-variable/archivo/wdth.css";
+import "@fontsource-variable/unbounded/wght.css";
+import "@fontsource/instrument-serif/400-italic.css";
 import "./styles/global.css";
 import "./styles/street.css";
 import "./styles/app-layout.css";
@@ -21,29 +31,56 @@ import "./styles/platform-rework.css";
 import "./styles/transfer-market.css";
 import "./styles/team-competition-enhancements.css";
 import "./styles/match-editorial.css";
+// Design system Street League: caricato per ultimo, definisce token e componenti condivisi.
+import "./styles/sl-system.css";
+// Effetti: shader, liquid glass, glow e cinematismo.
+import "./styles/sl-fx.css";
+// Tipografia: font display (Unbounded, Instrument Serif, Barlow Condensed) solo sui titoli, Archivo per il testo.
+import "./styles/sl-type.css";
+// Livello di dettaglio uniforme: card, classifiche, azioni, sfondi e scroll.
+import "./styles/sl-polish.css";
 import HomeRedesigned from "./pages/HomeRedesigned";
-import Competitions from "./pages/Competitions";
-import Standings from "./pages/Standings";
-import StatsDetail from "./pages/StatsDetail";
-import TeamDetail from "./pages/TeamDetail";
-import PlayerDetail from "./pages/PlayerDetail";
-import CompetitionDetail from "./pages/CompetitionDetail";
-import Stats from "./pages/Stats";
-import MatchDetail from "./pages/MatchDetail";
-import ArticleDetail from "./pages/ArticleDetail";
-import TransferMarket from "./pages/TransferMarket";
-import Partners from "./pages/Partners";
-import AdminDashboard from "./pages/AdminDashboard";
-import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/AppLayout";
+import { SkeletonCards } from "./components/ui/Skeleton";
 
-const initialTheme = window.localStorage.getItem("street-league-theme");
-document.documentElement.dataset.theme =
-  initialTheme === "night" ? "night" : "light";
+// Code splitting per pagina: la home resta nel bundle iniziale, il resto si scarica on demand.
+const Competitions = lazy(() => import("./pages/Competitions"));
+const Standings = lazy(() => import("./pages/Standings"));
+const StatsDetail = lazy(() => import("./pages/StatsDetail"));
+const TeamDetail = lazy(() => import("./pages/TeamDetail"));
+const PlayerDetail = lazy(() => import("./pages/PlayerDetail"));
+const CompetitionDetail = lazy(() => import("./pages/CompetitionDetail"));
+const Stats = lazy(() => import("./pages/Stats"));
+const MatchDetail = lazy(() => import("./pages/MatchDetail"));
+const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
+const TransferMarket = lazy(() => import("./pages/TransferMarket"));
+const Partners = lazy(() => import("./pages/Partners"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+function PageFallback() {
+  return (
+    <div className="sl-page-fallback">
+      <SkeletonCards label="Caricamento pagina…" count={3} />
+    </div>
+  );
+}
+
+// Il tema viene già impostato in index.html prima del rendering (niente flash); qui resta come fallback.
+if (!document.documentElement.dataset.theme) {
+  let initialTheme: string | null = null;
+  try {
+    initialTheme = window.localStorage.getItem("street-league-theme");
+  } catch {
+    initialTheme = null;
+  }
+  document.documentElement.dataset.theme = initialTheme === "night" ? "night" : "light";
+}
 
 function App() {
   return (
     <AppLayout>
+      <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route path="/" element={<HomeRedesigned />} />
         <Route path="/competizioni" element={<Competitions />} />
@@ -63,6 +100,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
     </AppLayout>
   );
 }

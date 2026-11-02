@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { Link } from "react-router-dom";
 import { sanitizeRichTextHtml } from "../lib/richText";
 import { SectionTitle } from "../components/SectionTitle";
@@ -9,6 +9,9 @@ import { PlayerOfMonthCard } from "../components/PlayerOfMonth";
 import { StaffOfMonthCard } from "../components/StaffOfMonth";
 import { TopSevenOfMonth } from "../components/TopSevenOfMonth";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
+import { HeroBackdrop } from "../components/fx/HeroBackdrop";
+import { HeroLogo3D } from "../components/fx/HeroLogo3D";
+import { SkeletonCards } from "../components/ui/Skeleton";
 import {
   getActiveCompetitions,
   getMatches,
@@ -18,6 +21,10 @@ import {
 } from "../lib/api";
 import { getPlayerOfMonth, getStaffOfMonth, subscribeToPlayerOfMonth } from "../lib/playerOfMonth";
 import type { Competition, Match, SocialContent, Team } from "../types";
+
+const HERO_TITLE_WORDS = "La Street League raccontata da vicino".split(" ");
+/** Da "raccontata" in poi il titolo passa al serif corsivo d'accento. */
+const HERO_ACCENT_FROM = 3;
 
 type HomeMatchday = {
   key: string;
@@ -81,6 +88,20 @@ function groupMatchesByMatchday(
     .sort((a, b) => a.firstKickoff - b.firstKickoff);
 }
 
+/** Giornata da mostrare di default: quella con una partita LIVE, poi la prossima in programma, altrimenti l'ultima. */
+function pickCurrentMatchday(matchdays: HomeMatchday[]): HomeMatchday | undefined {
+  if (!matchdays.length) return undefined;
+  const live = matchdays.find((matchday) => matchday.matches.some((match) => match.status === "live"));
+  if (live) return live;
+  const now = Date.now();
+  const upcoming = matchdays.find((matchday) =>
+    matchday.matches.some(
+      (match) => match.status === "scheduled" && new Date(match.kickoff_at).getTime() >= now - 3 * 60 * 60 * 1000,
+    ),
+  );
+  return upcoming ?? matchdays[matchdays.length - 1];
+}
+
 type HomeData = {
   competitions: Competition[];
   teams: Team[];
@@ -115,10 +136,10 @@ function FeaturedContentCarousel({ items }: { items: SocialContent[] }) {
         {items.map((item) => {
           const imageUrl = item.thumbnail_url || item.image_url;
           return (
-            <Link className="home-feature-card" key={item.id} to={"/articoli/" + item.id} aria-label={"Leggi articolo: " + item.title}>
+            <Link className="home-feature-card" key={item.id} to={"/articoli/" + item.id} aria-label={"Leggi articolo: " + item.title} data-spotlight>
               <div className="home-feature-card__media-link">
                 <div className="home-feature-card__media">
-                  {imageUrl ? <img src={imageUrl} alt="" loading="lazy" /> : <div className="home-feature-card__fallback" aria-hidden="true" />}
+                  {imageUrl ? <img src={imageUrl} alt="" loading="lazy" decoding="async" /> : <div className="home-feature-card__fallback" aria-hidden="true" />}
                 </div>
               </div>
               <div className="home-feature-card__content">
@@ -149,6 +170,7 @@ export default function HomeRedesigned() {
   const [error, setError] = useState("");
   const [selectedCompetitionId, setSelectedCompetitionId] = useState("");
   const [selectedMatchdayKey, setSelectedMatchdayKey] = useState("");
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -210,28 +232,65 @@ export default function HomeRedesigned() {
     : [];
   const selectedMatchday =
     competitionMatchdays.find((matchday) => matchday.key === selectedMatchdayKey) ??
-    competitionMatchdays[0];
+    pickCurrentMatchday(competitionMatchdays);
+
+  // Mantiene visibile la giornata selezionata nella barra delle giornate.
+  useEffect(() => {
+    const active = tabsRef.current?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    const rail = tabsRef.current;
+    if (!active || !rail) return;
+    rail.scrollTo({ left: active.offsetLeft - rail.clientWidth / 2 + active.clientWidth / 2, behavior: "smooth" });
+  }, [selectedMatchday?.key]);
+
+  // Leggera inclinazione 3D del logo nell'hero che segue il puntatore (solo dispositivi con mouse).
+  const onHeroPointerMove = (event: ReactPointerEvent<HTMLElement>) => {
+    if (event.pointerType !== "mouse") return;
+    const box = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty("--tilt-x", ((event.clientX - box.left) / box.width - 0.5).toFixed(3));
+    event.currentTarget.style.setProperty("--tilt-y", ((event.clientY - box.top) / box.height - 0.5).toFixed(3));
+  };
 
   return (
     <div className="home-redesign home-redesign--ordered">
-      <section className="home-about home-hero section--edge" id="home-about" aria-labelledby="home-about-title">
-        <div className="home-hero__backdrop" aria-hidden="true" />
-        <div className="home-hero__inner">
-          <div className="home-about__logo">
-            <img src="/assets/logo.png" alt="Logo Street League" />
-          </div>
-          <div className="home-about__copy">
-
-            <h1 id="home-about-title">La Street League raccontata da vicino</h1>
-            <p>
+      <section
+        className="sl-hero"
+        id="home-about"
+        aria-labelledby="home-about-title"
+        onPointerMove={onHeroPointerMove}
+      >
+        <div className="sl-hero__bg" aria-hidden="true" />
+        <HeroBackdrop />
+        <div className="sl-hero__inner">
+          <div className="sl-hero__copy">
+            <h1 id="home-about-title" className="sl-hero__title">
+              {HERO_TITLE_WORDS.map((word, index) => (
+                <Fragment key={word + index}>
+                  <span className={`sl-word${index >= HERO_ACCENT_FROM ? " sl-word--accent" : ""}`} style={{ "--i": index } as CSSProperties}>
+                    <span className="sl-word__inner">{word}</span>
+                  </span>
+                  {index < HERO_TITLE_WORDS.length - 1 ? " " : null}
+                </Fragment>
+              ))}
+            </h1>
+            <p className="sl-hero__lead">
               Questa è la piattaforma dedicata alla community della Street League, dove puoi seguire le competizioni e restare aggiornato sulle ultime novità,
               squadre, partite, classifiche e statistiche aggiornate.
             </p>
+            <div className="sl-hero__actions">
+              <a className="sl-btn sl-btn--primary" href="#home-matches">Partite</a>
+              <Link className="sl-btn sl-btn--ghost" to="/classifica">Classifica</Link>
+            </div>
+          </div>
+
+          <div className="sl-hero__side">
+            <div className="sl-hero__logo">
+              <HeroLogo3D />
+            </div>
           </div>
         </div>
-        <a className="home-hero__scroll" href="#home-matches" aria-label="Scorri alla sezione Partite">
-          <span className="home-hero__scroll-label">Scorri</span>
-          <span className="home-hero__scroll-icon" aria-hidden="true">↓</span>
+        <a className="sl-hero__scroll" href="#home-matches" aria-label="Scorri alla sezione Partite">
+          <span>Scorri</span>
+          <span className="sl-hero__scroll-icon" aria-hidden="true">↓</span>
         </a>
       </section>
 
@@ -240,10 +299,10 @@ export default function HomeRedesigned() {
       <section className="home-matches section--edge" id="home-matches">
         <div className="home-section-head">
           <SectionTitle eyebrow="Calendario" title="Partite" />
-          <a className="home-section-head__link" href="/competizioni">Tutte le competizioni ↗</a>
+          <Link className="home-section-head__link" to="/competizioni">Tutte le competizioni ↗</Link>
         </div>
         {loading ? (
-          <p className="admin-message">Caricamento partite…</p>
+          <SkeletonCards label="Caricamento partite…" count={3} />
         ) : data.competitions.length ? (
           <div className="home-matchdays">
             <div className="home-matchdays__competition">
@@ -265,7 +324,7 @@ export default function HomeRedesigned() {
             </div>
             {selectedMatchday ? (
               <>
-                <div className="home-matchdays__tabs" aria-label="Seleziona giornata">
+                <div className="home-matchdays__tabs" aria-label="Seleziona giornata" ref={tabsRef}>
                   {competitionMatchdays.map((matchday) => (
                     <button
                       type="button"
@@ -282,7 +341,7 @@ export default function HomeRedesigned() {
                   <h3>{selectedCompetition?.name} · {selectedMatchday.label}</h3>
                   <span>{selectedMatchday.matches.length} {selectedMatchday.matches.length === 1 ? "partita" : "partite"}</span>
                 </div>
-                <div className="home-match-carousel" aria-label={"Partite " + selectedCompetition?.name + " " + selectedMatchday.label}>
+                <div className="sl-match-rail" aria-label={"Partite " + selectedCompetition?.name + " " + selectedMatchday.label}>
                   {selectedMatchday.matches.map((match) => (
                     <MatchCard
                       key={match.id}
@@ -311,10 +370,10 @@ export default function HomeRedesigned() {
       <section className="section--edge home-teams" id="home-teams">
         <div className="home-section-head">
           <SectionTitle eyebrow="Le protagoniste" title="Squadre" />
-          <a className="home-section-head__link" href="/competizioni">Esplora le competizioni ↗</a>
+          <Link className="home-section-head__link" to="/competizioni">Esplora le competizioni ↗</Link>
         </div>
         {loading ? (
-          <p className="admin-message">Caricamento squadre…</p>
+          <SkeletonCards label="Caricamento squadre…" count={6} variant="tile" />
         ) : data.teams.length ? (
           <TeamCarousel teams={data.teams} label="Tutte le squadre della piattaforma" />
         ) : (
@@ -324,16 +383,16 @@ export default function HomeRedesigned() {
 
       <section className="home-featured section--edge" id="home-featured">
         <div className="home-section-head">
-          <SectionTitle eyebrow="Dalla community" title="Contenuti in evidenza" />
+          <SectionTitle eyebrow="Dalla community" title="Contenuti in evidenza" accent="in evidenza" />
         </div>
-        {loading ? <p className="admin-message">Caricamento contenuti…</p> : <FeaturedContentCarousel items={data.social} />}
+        {loading ? <SkeletonCards label="Caricamento contenuti…" count={4} /> : <FeaturedContentCarousel items={data.social} />}
       </section>
 
       <div className="home-top-seven" id="home-top-seven"><TopSevenOfMonth /></div>
 
       <section className="section--edge potm-section" id="home-potm">
         <div className="home-section-head">
-          <SectionTitle eyebrow="I protagonisti del mese" title="POTM & Staff" />
+          <SectionTitle eyebrow="I protagonisti del mese" title="POTM & Staff" accent="& Staff" />
         </div>
         <div className="monthly-awards-grid">
           <div className="monthly-award-column">

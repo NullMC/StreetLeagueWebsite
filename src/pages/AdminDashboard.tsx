@@ -119,7 +119,7 @@ async function readRows(resource: Resource): Promise<Row[]> {
     return (data ?? []).map((team) => ({
       ...team,
       competition_ids: Array.isArray(team.competition_teams)
-        ? team.competition_teams.map((membership) => membership.competition_id)
+        ? team.competition_teams.map((membership: { competition_id: string }) => membership.competition_id)
         : [],
     }));
   }

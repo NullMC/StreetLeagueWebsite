@@ -56,7 +56,7 @@
   background: #fff;
   box-shadow: 0 7px 20px rgba(1, 10, 8, 0.07);
   overflow: hidden;
-  font-family: "Teko", sans-serif;
+  font-family: var(--display);
   font-size: 32px;
   color: var(--pink, #e42278);
 }
@@ -125,7 +125,7 @@
   place-items: center;
   background: #fff;
   color: #010a08;
-  font-family: "Teko", sans-serif;
+  font-family: var(--display);
   font-size: 78px;
   line-height: 1;
   box-shadow: 0 14px 34px rgba(1, 10, 8, 0.12);
@@ -140,7 +140,7 @@
 
 .potm-card__content h3 {
   margin: 8px 0 14px;
-  font-family: "Teko", sans-serif;
+  font-family: var(--display);
   font-size: clamp(44px, 5vw, 70px);
   line-height: 0.92;
   text-transform: uppercase;
@@ -385,7 +385,7 @@
   place-items: center;
   background: #fff;
   color: #010a08;
-  font-family: "Teko", sans-serif;
+  font-family: var(--display);
   font-size: 60px;
   line-height: 1;
   box-shadow: 0 14px 34px rgba(1, 10, 8, .12);
@@ -399,13 +399,13 @@
 }
 .staff-month-card__content h3 {
   margin: 7px 0 10px;
-  font-family: "Teko", sans-serif;
+  font-family: var(--display);
   font-size: clamp(38px, 4.2vw, 58px);
   line-height: .92;
   text-transform: uppercase;
 }
 .staff-month-card__stat {
-  font-family: "Teko", sans-serif;
+  font-family: var(--display);
   font-size: 58px;
   line-height: .88;
   color: var(--pink, #e42278);
@@ -431,7 +431,7 @@
 }
 .staff-month-empty h3 {
   margin: 8px 0;
-  font-family: "Teko", sans-serif;
+  font-family: var(--display);
   font-size: clamp(38px, 4vw, 54px);
   line-height: .9;
   text-transform: uppercase;

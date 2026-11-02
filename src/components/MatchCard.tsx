@@ -1,85 +1,135 @@
+import type { CSSProperties } from "react";
 import type { Match, Team } from "../types";
 import { day } from "../lib/format";
+
+function TeamSide({
+  team,
+  side,
+  outcome,
+}: {
+  team?: Team;
+  side: "home" | "away";
+  outcome: "win" | "loss" | "draw" | null;
+}) {
+  return (
+    <div
+      className={`slm__team slm__team--${side}${outcome ? ` is-${outcome}` : ""}`}
+    >
+      {team?.logo_url ? (
+        <img
+          className="slm__logo"
+          src={team.logo_url}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <span className="slm__logo slm__logo--placeholder" aria-hidden="true">
+          {team?.name?.slice(0, 1).toUpperCase() ?? "?"}
+        </span>
+      )}
+      <b className="slm__name">{team?.name || "—"}</b>
+    </div>
+  );
+}
 
 export function MatchCard({
   match,
   home,
   away,
+  compact = false,
 }: {
   match: Match;
   home?: Team;
   away?: Team;
+  compact?: boolean;
 }) {
   const kickoffTime =
-    match.kickoff_at && /T\d{2}:\d{2}/.test(match.kickoff_at) && !Number.isNaN(new Date(match.kickoff_at).getTime())
-      ? new Intl.DateTimeFormat("it-IT", { hour: "2-digit", minute: "2-digit" }).format(new Date(match.kickoff_at))
+    match.kickoff_at &&
+    /T\d{2}:\d{2}/.test(match.kickoff_at) &&
+    !Number.isNaN(new Date(match.kickoff_at).getTime())
+      ? new Intl.DateTimeFormat("it-IT", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(new Date(match.kickoff_at))
       : null;
 
+  const hasScore = match.status !== "scheduled";
+  const homeScore = match.home_score;
+  const awayScore = match.away_score;
+  const decided =
+    match.status === "finished" && homeScore != null && awayScore != null;
+  const homeOutcome = decided
+    ? homeScore! > awayScore!
+      ? "win"
+      : homeScore! < awayScore!
+        ? "loss"
+        : "draw"
+    : null;
+  const awayOutcome = decided
+    ? awayScore! > homeScore!
+      ? "win"
+      : awayScore! < homeScore!
+        ? "loss"
+        : "draw"
+    : null;
+
+  const style = {
+    "--home-accent": home?.accent_hex || "var(--sl-accent)",
+    "--away-accent": away?.accent_hex || "var(--sl-accent-2)",
+  } as CSSProperties;
+
   return (
-    <article className="match-card">
+    <article
+      className={`slm slm--${match.status}${compact ? " slm--compact" : ""}`}
+      data-spotlight
+      style={style}
+    >
       <a
-        className="match-card__primary-link"
+        className="slm__link"
         href={`/partite/${match.id}`}
         aria-label={`Apri la partita ${home?.name ?? "Casa"} - ${away?.name ?? "Ospiti"}`}
       />
-      <div className="match-card__meta">
-        <span className="match-card__date-time">
+      {match.status === "live" ? (
+        <span className="slm__beam" aria-hidden="true" />
+      ) : null}
+      <div className="slm__meta">
+        <span className="slm__when">
           <span>{day(match.kickoff_at)}</span>
           {kickoffTime && (
-            <time className="match-card__time" dateTime={match.kickoff_at ?? undefined}>
+            <time
+              className="slm__time"
+              dateTime={match.kickoff_at ?? undefined}
+            >
               {kickoffTime}
             </time>
           )}
         </span>
-        <span>{match.matchday || "CALENDARIO"}</span>
+        <span className="slm__round">{match.matchday || "CALENDARIO"}</span>
       </div>
-      <div className="match-card__teams">
-        <div className="match-card__team match-card__team--home">
-          {home?.logo_url ? (
-            <img
-              className="match-card__team-logo"
-              src={home.logo_url}
-              alt=""
-              aria-hidden="true"
-            />
-          ) : (
-            <span className="match-card__team-logo match-card__team-logo--placeholder" aria-hidden="true">
-              {home?.name?.slice(0, 1).toUpperCase() ?? "?"}
-            </span>
-          )}
-          <div className="match-card__team-copy">
-            <b>{home?.name || "—"}</b>
-          </div>
-        </div>
 
-        <strong className="match-card__score">
-          {match.status === "scheduled" ? (
-            <span className="match-card__score-vs">VS</span>
+      <div className="slm__teams">
+        <TeamSide team={home} side="home" outcome={homeOutcome} />
+        <strong className={`slm__score${hasScore ? "" : " slm__score--vs"}`}>
+          {hasScore ? (
+            <>
+              <span>{homeScore ?? "—"}</span>
+              <span className="slm__sep"> : </span>
+              <span>{awayScore ?? "—"}</span>
+            </>
           ) : (
-            `${match.home_score ?? "—"} : ${match.away_score ?? "—"}`
+            <span className="slm__vs">VS</span>
           )}
         </strong>
-
-        <div className="match-card__team match-card__team--away right">
-          {away?.logo_url ? (
-            <img
-              className="match-card__team-logo"
-              src={away.logo_url}
-              alt=""
-              aria-hidden="true"
-            />
-          ) : (
-            <span className="match-card__team-logo match-card__team-logo--placeholder" aria-hidden="true">
-              {away?.name?.slice(0, 1).toUpperCase() ?? "?"}
-            </span>
-          )}
-          <div className="match-card__team-copy">
-            <b>{away?.name || "—"}</b>
-          </div>
-        </div>
+        <TeamSide team={away} side="away" outcome={awayOutcome} />
       </div>
-      <div className="match-card__footer">
-        <div className={`match-card__status status-${match.status}`}>
+
+      <div className="slm__foot">
+        <span className={`slm__status slm__status--${match.status}`}>
+          {match.status === "live" ? (
+            <span className="slm__pulse" aria-hidden="true" />
+          ) : null}
           {match.status === "live"
             ? "LIVE"
             : match.status === "finished"
@@ -87,10 +137,10 @@ export function MatchCard({
               : match.status === "postponed"
                 ? "RINVIATA"
                 : "PROGRAMMATA"}
-        </div>
-        <span className="match-card__venue" aria-label="Stadio Di Cagno Abbrescia">
+        </span>
+        <span className="slm__venue" aria-label="Stadio Di Cagno Abbrescia">
           <svg
-            className="match-card__stadium-icon"
+            className="slm__venue-icon"
             viewBox="0 0 32 20"
             width="15"
             height="10"
@@ -108,15 +158,16 @@ export function MatchCard({
           </svg>
           <span>Di Cagno Abbrescia</span>
         </span>
-        {match.photo_drive_url ? (
+        {match.photo_drive_url && !compact ? (
           <a
-            className="match-card__photo-gallery"
+            className="slm__gallery"
             href={match.photo_drive_url}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Photo Gallery: ${home?.name ?? "Casa"} - ${away?.name ?? "Ospiti"}`}
           >
-            <span aria-hidden="true">▧</span> Photo Gallery <span aria-hidden="true">↗</span>
+            <span aria-hidden="true">▧</span> Photo Gallery{" "}
+            <span aria-hidden="true">↗</span>
           </a>
         ) : null}
       </div>

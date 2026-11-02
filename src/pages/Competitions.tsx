@@ -66,36 +66,26 @@ export default function Competitions() {
           <SectionTitle title="Competizioni" />
         </header>
         {items.length ? (
-          <div className="cards-grid">
+          <div className="sl-comp-grid">
             {items.map((listing) => {
               const href = listing.groupName
                 ? `/competizioni/gruppo/${encodeURIComponent(listing.groupName)}`
                 : `/competizioni/${listing.competitions[0].id}`;
               return (
-                <a className="stat-card competition-list-card" key={listing.key} href={href}>
-                  <div className="competition-list-card__layout">
-                    <div className="competition-list-card__content">
-                      <span className="eyebrow">{listing.status}</span>
-                      <div className="competition-list-card__title">
-                        <h3>{listing.name}</h3>
-                      </div>
-                      <div className="competition-list-card__season-row">
-                        <p className="competition-list-card__season">{listing.competitions[0].season_label || "—"}</p>
-                        <span className="competition-list-card__hint">
-                          Apri <span aria-hidden="true">↗</span>
-                        </span>
-                      </div>
-                    </div>
-                    <div className="competition-list-card__side">
-                      <img className="competition-list-card__logo" src="/assets/logo.png" alt="Street League" />
-                    </div>
+                <a className="sl-comp-card" key={listing.key} href={href} data-status={listing.status}>
+                  <div className="sl-comp-card__media" aria-hidden="true">
+                    <img className="sl-comp-card__wordmark" src="/assets/scritta.png" alt="" onError={(event) => { event.currentTarget.style.opacity = "0"; }} />
+                    <img className="sl-comp-card__logo" src="/assets/logo.png" alt="" />
                   </div>
-                  <div className="competition-list-card__wordmark" aria-hidden="true">
-                    <img
-                      src="/assets/scritta.png"
-                      alt=""
-                      onError={(event) => { event.currentTarget.style.opacity = "0"; }}
-                    />
+                  <div className="sl-comp-card__body">
+                    <span className="sl-comp-card__status">{listing.status}</span>
+                    <h3 className="sl-comp-card__title">{listing.name}</h3>
+                    <div className="sl-comp-card__footer">
+                      <p className="sl-comp-card__season">{listing.competitions[0].season_label || "—"}</p>
+                      <span className="sl-comp-card__cta">
+                        Apri <span aria-hidden="true">↗</span>
+                      </span>
+                    </div>
                   </div>
                 </a>
               );

@@ -22,7 +22,7 @@ export function MaterialUiProvider({ children }: { children: ReactNode }) {
       // Use concrete CSS color values here, not CSS variables such as var(--white).
       background: {
         default: mode === "dark" ? "#010a08" : "#f9f9f9",
-        paper: mode === "dark" ? "#07100d" : "#ffffff",
+        paper: mode === "dark" ? "#0b1512" : "#ffffff",
       },
       text: {
         primary: mode === "dark" ? "#f9f9f9" : "#010a08",
@@ -31,13 +31,13 @@ export function MaterialUiProvider({ children }: { children: ReactNode }) {
       divider: mode === "dark" ? "rgba(249, 249, 249, 0.14)" : "rgba(1, 10, 8, 0.12)",
     },
     typography: {
-      fontFamily: "Inter, system-ui, sans-serif",
+      fontFamily: '"Archivo Variable", system-ui, sans-serif',
       h1: { fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800 },
       h2: { fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800 },
       h3: { fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700 },
       h4: { fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700 },
       h5: { fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700 },
-      button: { fontFamily: "Inter, system-ui, sans-serif", fontWeight: 700, textTransform: "none" },
+      button: { fontFamily: '"Archivo Variable", system-ui, sans-serif', fontWeight: 700, textTransform: "none" },
     },
     shape: { borderRadius: 5 },
     components: {

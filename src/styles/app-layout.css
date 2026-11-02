@@ -129,7 +129,7 @@
   white-space: nowrap;
 }
 .mobile-menu__nav a > span:first-child { min-width: 0; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
-.mobile-menu__nav a > span:last-child { flex: 0 0 auto; color: var(--pink); font-family: Inter, system-ui, sans-serif; font-size: 16px; }
+.mobile-menu__nav a > span:last-child { flex: 0 0 auto; color: var(--pink); font-family: var(--font-body, "Archivo Variable", system-ui, sans-serif); font-size: 16px; }
 .mobile-menu__nav a:hover,
 .mobile-menu__nav a.active,
 .mobile-menu__nav a[aria-current="page"] { color: var(--pink); }

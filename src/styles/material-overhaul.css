@@ -1,5 +1,5 @@
 
-.MuiTypography-root,.MuiButton-root,.MuiChip-root{font-family:Inter,system-ui,sans-serif}
+.MuiTypography-root,.MuiButton-root,.MuiChip-root{font-family:var(--font-body,"Archivo Variable",system-ui,sans-serif)}
 .MuiTypography-h1,.MuiTypography-h2,.MuiTypography-h3,.MuiTypography-h4,.MuiTypography-h5,.MuiTypography-h6{font-family:"Barlow Condensed",sans-serif;font-weight:800;letter-spacing:-.025em}
 .MuiButton-root{text-transform:none;font-weight:800;letter-spacing:.01em}.MuiPaper-root{background-image:none}
 .section-head .eyebrow,.detail-hero__inner>.eyebrow,.partners-tier-heading .eyebrow,.admin-resource__head .eyebrow,.admin-login>.eyebrow,.admin-sidebar>.eyebrow,.admin-hero .eyebrow,.potm-card__content>.eyebrow,.potm-empty>.eyebrow{display:none!important}

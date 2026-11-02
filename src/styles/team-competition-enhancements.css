@@ -40,7 +40,7 @@
   margin-left: auto;
   text-align: right !important;
   color: var(--pink) !important;
-  font-family: Inter, system-ui, sans-serif;
+  font-family: var(--font-body, "Archivo Variable", system-ui, sans-serif);
   font-size: 14px !important;
 }
 
