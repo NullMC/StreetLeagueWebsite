@@ -160,6 +160,18 @@ export async function getMatches(competitionId?: string): Promise<Match[]> {
   return getRows<Match>(query);
 }
 
+/** Tutte le partite di una squadra (casa o trasferta), filtrate lato database: nessun limite di righe sul calendario completo. */
+export async function getTeamMatches(teamId: string): Promise<Match[]> {
+  if (!supabase) return [];
+  return getRows<Match>(
+    supabase
+      .from("matches")
+      .select("*")
+      .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
+      .order("kickoff_at", { ascending: true }),
+  );
+}
+
 export async function getPartners(): Promise<Partner[]> {
   if (!supabase) return [];
   return getRows<Partner>(

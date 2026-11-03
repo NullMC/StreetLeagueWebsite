@@ -11,7 +11,7 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { MatchCard } from "../components/MatchCard";
-import { getActiveCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
+import { getActiveCompetitions, getTeams, getPlayers, getTeamMatches } from "../lib/api";
 import type { Team, Player, Match } from "../types";
 
 type PerformanceOutcome = "win" | "loss" | "draw";
@@ -95,20 +95,14 @@ export default function TeamDetail() {
         setTeam(selectedTeam);
 
         if (selectedTeam) {
-          const [teamPlayers, allMatches, activeCompetitions] = await Promise.all([
+          const [teamPlayers, teamMatches, activeCompetitions] = await Promise.all([
             getPlayers(selectedTeam.id),
-            getMatches(),
+            getTeamMatches(selectedTeam.id),
             getActiveCompetitions(),
           ]);
           if (!mounted) return;
 
           setPlayers(teamPlayers);
-
-          const teamMatches = allMatches
-            .filter((match) =>
-              match.home_team_id === selectedTeam.id ||
-              match.away_team_id === selectedTeam.id
-            );
 
           const activeCompetitionIds = new Set(
             activeCompetitions.map((competition) => competition.id),
@@ -116,8 +110,7 @@ export default function TeamDetail() {
           setMatches(
             teamMatches
               .filter((match) => activeCompetitionIds.has(match.competition_id))
-              .sort((a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime())
-              .slice(0, 6),
+              .sort((a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()),
           );
 
           setPerformanceMatches(

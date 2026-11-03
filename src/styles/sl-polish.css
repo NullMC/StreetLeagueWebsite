@@ -401,3 +401,55 @@ html.sl-cine #root :is(.home-section-head, .section-head--group)[data-reveal="in
   line-height: 0.95 !important;
   text-transform: uppercase;
 }
+
+/* --------------------------------------------------------------------------
+   9. Pagina squadra: fascia di testata integrata nello sfondo
+   La fascia stacca logo e nome dallo shader, ma sfuma sopra e sotto invece di tagliarlo.
+   -------------------------------------------------------------------------- */
+#root .detail-hero.team-detail-hero {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+  padding-bottom: clamp(34px, 4vw, 48px) !important;
+}
+#root .team-detail-hero::before,
+#root .team-detail-hero::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+/* Velo con sfocatura: pieno al centro, trasparente ai bordi superiore e inferiore */
+#root .team-detail-hero::before {
+  inset: -28px 0 -28px;
+  background: color-mix(in srgb, var(--sl-bg) 78%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%);
+}
+/* Alone d'accento dietro al logo */
+#root .team-detail-hero::after {
+  left: 50%;
+  top: 8%;
+  width: min(520px, 90vw);
+  height: 70%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--sl-accent) 22%, transparent), transparent 75%);
+  filter: blur(18px);
+}
+html[data-theme="night"] #root .team-detail-hero::after {
+  background: radial-gradient(closest-side, rgba(228, 34, 120, 0.32), transparent 75%);
+}
+/* Più respiro tra la fascia e i quattro pulsanti delle sezioni */
+#root .team-detail-page .team-detail-shortcuts {
+  margin-top: clamp(30px, 4.5vw, 52px) !important;
+}
+@media (prefers-reduced-transparency: reduce) {
+  #root .team-detail-hero::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--sl-bg);
+  }
+}
