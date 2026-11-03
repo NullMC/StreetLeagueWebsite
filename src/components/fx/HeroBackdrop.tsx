@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState, type CSSProperties } from "react";
 
 const HeroShaderLayers = lazy(() => import("./HeroShaderLayers"));
 
-function webglAvailable() {
+export function webglAvailable() {
   try {
     const canvas = document.createElement("canvas");
     return Boolean(canvas.getContext("webgl2") || canvas.getContext("webgl"));
@@ -14,7 +14,7 @@ function webglAvailable() {
 const isNightTheme = () => document.documentElement.dataset.theme === "night";
 
 /** Segue il tema (data-theme su <html>) per ricolorare gli shader al cambio. */
-function useNightTheme() {
+export function useNightTheme() {
   const [night, setNight] = useState(isNightTheme);
   useEffect(() => {
     const observer = new MutationObserver(() => setNight(isNightTheme()));

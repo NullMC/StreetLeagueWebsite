@@ -7,18 +7,6 @@
 /* --------------------------------------------------------------------------
    1. Shader WebGL
    -------------------------------------------------------------------------- */
-.sl-shader {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  opacity: 0;
-  transition: opacity 1.4s var(--sl-ease);
-}
-.sl-shader[data-state="ready"] { opacity: 1; }
-.sl-shader[data-state="unsupported"] { display: none; }
-
 .sl-liquid-defs {
   position: absolute;
   width: 0;
@@ -105,7 +93,7 @@ html[data-theme="night"] .sl-hero::before {
   html[data-theme="night"] .sl-hero::before { background: linear-gradient(to bottom, rgba(1, 10, 8, 0.35), rgba(1, 10, 8, 0.8) 55%, var(--sl-bg) 100%) !important; }
 }
 
-/* Atmosfera in testa alle pagine interne */
+/* Atmosfera morbida in testa alle pagine indice (mesh gradient lento, vedi AmbientBackdrop) */
 #main-content {
   position: relative;
   isolation: isolate;
@@ -119,26 +107,24 @@ html[data-theme="night"] .sl-hero::before {
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 50%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 50%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
+  opacity: 0;
+  transition: opacity 1.6s var(--sl-ease);
 }
-.sl-ambient .sl-shader[data-state="ready"] { opacity: 0.55; }
-html[data-theme="night"] .sl-ambient .sl-shader[data-state="ready"] { opacity: 0.85; }
+.sl-ambient.is-ready { opacity: 0.8; }
+html[data-theme="night"] .sl-ambient.is-ready { opacity: 0.9; }
+.sl-ambient__layer {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
 .sl-ambient::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, color-mix(in srgb, var(--sl-bg) 25%, transparent), color-mix(in srgb, var(--sl-bg) 70%, transparent));
-}
-
-/* Footer: nebula sempre scura */
-.sl-footer__glow { overflow: hidden; }
-.sl-footer__glow .sl-shader[data-state="ready"] { opacity: 0.8; }
-.sl-footer__glow::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(1, 10, 8, 0.92) 0%, rgba(1, 10, 8, 0.5) 55%, rgba(1, 10, 8, 0.35) 100%);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--sl-bg) 20%, transparent), color-mix(in srgb, var(--sl-bg) 65%, transparent));
 }
 
 /* --------------------------------------------------------------------------

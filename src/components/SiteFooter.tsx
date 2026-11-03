@@ -1,13 +1,10 @@
 import { Link } from "react-router-dom";
 import { Logo } from "./Logo";
-import { ShaderCanvas } from "./fx/ShaderCanvas";
 
 export function SiteFooter() {
   return (
     <footer className="sl-footer" id="site-footer" tabIndex={-1}>
-      <div className="sl-footer__glow" aria-hidden="true">
-        <ShaderCanvas forceNight intensity={0.7} />
-      </div>
+      <div className="sl-footer__glow" aria-hidden="true" />
       <div className="sl-footer__inner">
         <div className="sl-footer__brand">
           <Logo compact />

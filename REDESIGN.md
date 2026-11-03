@@ -34,7 +34,7 @@ Tutti i font sono ospitati nel progetto (`@fontsource`), senza richieste esterne
 | Effetto | Dove | Implementazione |
 | --- | --- | --- |
 | Shader WebGL animati a livelli: mesh gradient brand + god rays, punti luce, grana | Hero della home | `HeroBackdrop.tsx` + `HeroShaderLayers.tsx` (`@paper-design/shaders-react`, il motore degli shader di 21st.dev; caricato in lazy, immagine statica come fallback) |
-| Shader WebGL "nebula / marmo liquido" | Testata di tutte le pagine interne, footer | `ShaderCanvas.tsx`: WebGL puro (nessuna libreria), colori brand, reagisce al mouse e al tema |
+| Mesh gradient d'atmosfera (soft) | Testata delle pagine indice: competizioni, classifica, statistiche, calciomercato, partner | `AmbientBackdrop.tsx` + `AmbientShaderLayer.tsx`: stesso motore Paper dell'hero, palette a basso contrasto e movimento lento; assente su home, dettagli e admin. Il footer usa solo un bagliore statico |
 | Liquid glass | Header (allo scroll), dock mobile, menu laterale, card LIVE nell'hero, pulsanti ghost, frecce carosello, barra giornate | Vetro con riflesso speculare; rifrazione SVG (`LiquidGlassDefs.tsx`) nei browser Chromium |
 | Glowing Effect | Card partita, articoli, squadre, classifiche (bordo luminoso che segue il puntatore); alone sulle card statistiche, partner, giocatori | `useCinematics.ts` + CSS |
 | Logo 3D cinematico | Hero della home | `HeroLogo3D.tsx`: faccia + 18 strati estrusi (sagoma via CSS mask), inquadratura laterale, oscillazione, riflesso speculare, alone e ombra; inclinazione col puntatore |

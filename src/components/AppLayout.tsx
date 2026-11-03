@@ -3,20 +3,9 @@ import { useLocation } from "react-router-dom";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { Seo } from "./Seo";
-import { ShaderCanvas } from "./fx/ShaderCanvas";
+import { AmbientBackdrop } from "./fx/AmbientBackdrop";
 import { LiquidGlassDefs } from "./fx/LiquidGlassDefs";
 import { useCinematics } from "./fx/useCinematics";
-
-/** Atmosfera shader in testa alle pagine interne (la home ha il suo hero, l'admin resta sobrio). */
-function AmbientShader() {
-  const { pathname } = useLocation();
-  if (pathname === "/" || pathname.startsWith("/admin")) return null;
-  return (
-    <div className="sl-ambient" aria-hidden="true">
-      <ShaderCanvas intensity={0.85} />
-    </div>
-  );
-}
 
 /** Riporta in cima a ogni cambio pagina e gestisce gli anchor (#sezione) nelle navigazioni SPA. */
 function ScrollManager() {
@@ -67,7 +56,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <SiteHeader />
       <Seo />
       <main id="main-content" tabIndex={-1}>
-        <AmbientShader />
+        <AmbientBackdrop />
         {children}
       </main>
       <SiteFooter />
