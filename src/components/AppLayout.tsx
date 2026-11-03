@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { Seo } from "./Seo";
-import { AmbientBackdrop } from "./fx/AmbientBackdrop";
+import { SiteAura } from "./fx/SiteAura";
 import { LiquidGlassDefs } from "./fx/LiquidGlassDefs";
 import { useCinematics } from "./fx/useCinematics";
 
@@ -51,12 +51,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </a>
 
       <LiquidGlassDefs />
+      <SiteAura />
       <div className="sl-scroll-progress" aria-hidden="true" />
       <ScrollManager />
       <SiteHeader />
       <Seo />
       <main id="main-content" tabIndex={-1}>
-        <AmbientBackdrop />
         {children}
       </main>
       <SiteFooter />

@@ -5,36 +5,83 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. Sfondo ambientale: griglia di punti in testa alla pagina e aloni tra le sezioni
+   1. Sfondo unico "aura" (gradienti aura / Silk Blend / Grained di 21st.dev)
+   Fisso dietro a tutte le pagine: due aure che respirano, una luce setosa
+   sul fondo e grana. Si muove solo con transform, lentissimo.
    -------------------------------------------------------------------------- */
-#main-content::before {
-  content: "";
-  position: absolute;
+.app { isolation: isolate; }
+.sl-aura {
+  position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(38% 520px at -4% 32%, color-mix(in srgb, var(--sl-accent) 11%, transparent), transparent 70%),
-    radial-gradient(34% 480px at 104% 58%, color-mix(in srgb, var(--sl-accent-2) 13%, transparent), transparent 70%),
-    radial-gradient(40% 520px at 10% 86%, color-mix(in srgb, var(--sl-accent) 8%, transparent), transparent 70%);
+  overflow: hidden;
+  --aura-a: rgba(228, 34, 120, 0.13);
+  --aura-b: rgba(245, 211, 221, 0.75);
+  --aura-silk: rgba(237, 123, 171, 0.16);
+  --aura-grain: 0.035;
 }
-#main-content::after {
-  content: "";
+html[data-theme="night"] .sl-aura {
+  --aura-a: rgba(228, 34, 120, 0.17);
+  --aura-b: rgba(122, 20, 70, 0.34);
+  --aura-silk: rgba(237, 123, 171, 0.1);
+  --aura-grain: 0.06;
+}
+.sl-aura__orb,
+.sl-aura__silk,
+.sl-aura__grain {
   position: absolute;
-  inset: 0 0 auto;
-  height: 760px;
-  z-index: -1;
-  pointer-events: none;
-  background-image: radial-gradient(color-mix(in srgb, var(--sl-fg) 10%, transparent) 1px, transparent 1.4px);
-  background-size: 22px 22px;
-  -webkit-mask-image: radial-gradient(90% 100% at 50% 0%, #000 0%, transparent 75%);
-  mask-image: radial-gradient(90% 100% at 50% 0%, #000 0%, transparent 75%);
+  display: block;
+  will-change: transform;
 }
-html[data-theme="night"] #main-content::before {
+.sl-aura__orb { border-radius: 50%; }
+.sl-aura__orb--a {
+  width: 78vmax;
+  height: 64vmax;
+  top: -30vmax;
+  right: -22vmax;
+  background: radial-gradient(closest-side, var(--aura-a), transparent);
+  animation: sl-aura-a 46s ease-in-out infinite alternate;
+}
+.sl-aura__orb--b {
+  width: 84vmax;
+  height: 70vmax;
+  bottom: -34vmax;
+  left: -30vmax;
+  background: radial-gradient(closest-side, var(--aura-b), transparent);
+  animation: sl-aura-b 58s ease-in-out infinite alternate;
+}
+/* Luce setosa: un velo diagonale che scorre piano sul fondo della pagina */
+.sl-aura__silk {
+  left: -25%;
+  right: -25%;
+  bottom: -18vh;
+  height: 62vh;
   background:
-    radial-gradient(38% 520px at -4% 32%, rgba(228, 34, 120, 0.16), transparent 70%),
-    radial-gradient(34% 480px at 104% 58%, rgba(122, 20, 70, 0.28), transparent 70%),
-    radial-gradient(40% 520px at 10% 86%, rgba(228, 34, 120, 0.1), transparent 70%);
+    linear-gradient(100deg, transparent 18%, var(--aura-silk) 42%, transparent 58%, var(--aura-silk) 74%, transparent 90%);
+  -webkit-mask-image: radial-gradient(70% 100% at 50% 100%, #000, transparent 78%);
+  mask-image: radial-gradient(70% 100% at 50% 100%, #000, transparent 78%);
+  filter: blur(28px);
+  animation: sl-aura-silk 34s ease-in-out infinite alternate;
+}
+.sl-aura__grain {
+  inset: 0;
+  opacity: var(--aura-grain);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  will-change: auto;
+}
+@keyframes sl-aura-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-9vmax, 7vmax, 0) scale(1.12); }
+}
+@keyframes sl-aura-b {
+  from { transform: translate3d(0, 0, 0) scale(1.05); }
+  to { transform: translate3d(10vmax, -6vmax, 0) scale(0.94); }
+}
+@keyframes sl-aura-silk {
+  from { transform: translate3d(-6%, 0, 0); }
+  to { transform: translate3d(6%, -2vh, 0); }
 }
 
 /* --------------------------------------------------------------------------
@@ -181,16 +228,6 @@ html[data-theme="night"] #root .sl-comp-card__media {
     radial-gradient(60% 80% at 4% 100%, rgba(122, 20, 70, 0.7), transparent 62%),
     linear-gradient(160deg, #14030c, #071511);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-}
-#root .sl-comp-card__media::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: radial-gradient(color-mix(in srgb, var(--sl-fg) 14%, transparent) 1px, transparent 1.4px);
-  background-size: 16px 16px;
-  -webkit-mask-image: radial-gradient(75% 75% at 50% 50%, #000, transparent);
-  mask-image: radial-gradient(75% 75% at 50% 50%, #000, transparent);
 }
 #root .sl-comp-card__logo {
   position: relative;
@@ -388,6 +425,7 @@ html.sl-cine #root :is(.home-section-head, .section-head--group)[data-reveal="in
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .sl-scroll-progress { display: none; }
+  .sl-aura span,
   #root .sl-comp-card[data-status="active"] .sl-comp-card__status::before,
   html.sl-cine #root :is(.home-section-head, .section-head--group)[data-reveal="in"]::after { animation: none !important; }
   #root .sl-comp-card:hover .sl-comp-card__logo { transform: rotateY(-20deg) rotateX(7deg); }

@@ -1,0 +1,763 @@
+/* ==========================================================================
+   Street League — Back office (redesign sul modello dei template admin di 21st.dev:
+   AdminCN / Next Shadcn Admin). Sidebar a gruppi, barra superiore, KPI, card,
+   tabelle con badge di stato. Solo presentazione: nessuna logica qui.
+   Caricato per ultimo; i selettori #root .sl-admin battono gli stili legacy
+   di admin.css, admin-mobile.css e night-mode.css.
+   ========================================================================== */
+
+#root .sl-admin {
+  --adm-radius: 18px;
+  --adm-radius-sm: 10px;
+  --adm-card: color-mix(in srgb, var(--sl-surface) 88%, transparent);
+  --adm-card-solid: var(--sl-surface);
+  --adm-field: var(--sl-surface);
+  --adm-hover: color-mix(in srgb, var(--sl-fg) 5%, transparent);
+  --adm-muted: var(--sl-fg-muted);
+  --adm-active-bg: color-mix(in srgb, var(--sl-accent) 10%, transparent);
+  --adm-active-fg: var(--sl-accent-ink);
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr);
+  gap: 24px;
+  width: min(1520px, 100%);
+  margin: 0 auto;
+  padding: 20px clamp(16px, 2.4vw, 28px) 56px;
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--site-header-total-height));
+  color: var(--sl-fg);
+  font-family: var(--font-body);
+}
+html[data-theme="night"] #root .sl-admin {
+  --adm-card: color-mix(in srgb, var(--sl-surface) 82%, transparent);
+  --adm-field: var(--sl-surface-2);
+  --adm-active-bg: rgba(228, 34, 120, 0.14);
+  --adm-active-fg: var(--sl-pink-2);
+}
+#root .sl-admin *,
+#root .sl-admin *::before,
+#root .sl-admin *::after { box-sizing: border-box; }
+
+/* --------------------------------------------------------------------------
+   Sidebar
+   -------------------------------------------------------------------------- */
+#root .sl-admin__sidebar {
+  position: sticky;
+  top: calc(var(--site-header-total-height) + 16px);
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-height: calc(100vh - var(--site-header-total-height) - 32px);
+  padding: 18px 14px 14px;
+  border: 1px solid var(--sl-line);
+  border-radius: var(--adm-radius);
+  background: var(--adm-card);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: var(--sl-shadow-sm);
+}
+#root .sl-admin__brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 6px;
+}
+#root .sl-admin__brand img { height: 26px; width: auto; display: block; }
+html[data-theme="night"] #root .sl-admin__brand img,
+html[data-theme="night"] #root .sl-admin-login__logo { filter: brightness(0) invert(1); }
+#root .sl-admin__brand span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--adm-muted);
+  border: 1px solid var(--sl-line);
+  border-radius: 999px;
+  padding: 4px 9px;
+}
+#root .sl-admin__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--adm-hover);
+}
+#root .sl-admin__avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--sl-pink), var(--sl-pink-2));
+  box-shadow: var(--sl-shadow-glow);
+}
+#root .sl-admin__user div { display: grid; min-width: 0; }
+#root .sl-admin__user strong {
+  font-size: 13.5px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#root .sl-admin__user div span { font-size: 12px; color: var(--adm-muted); }
+
+#root .sl-admin__nav {
+  display: grid;
+  gap: 14px;
+  overflow-y: auto;
+  margin-right: -6px;
+  padding-right: 6px;
+  scrollbar-width: thin;
+}
+#root .sl-admin__group { display: grid; gap: 2px; }
+#root .sl-admin__group-title {
+  padding: 0 10px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sl-fg-subtle);
+}
+#root .sl-admin__nav-item,
+#root .sl-admin__logout {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--adm-radius-sm);
+  background: transparent;
+  color: var(--adm-muted);
+  font: 500 13.5px/1.25 var(--font-body);
+  letter-spacing: 0;
+  text-transform: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.18s var(--sl-ease), color 0.18s var(--sl-ease);
+}
+#root .sl-admin__nav-item:hover,
+#root .sl-admin__logout:hover { background: var(--adm-hover); color: var(--sl-fg); }
+#root .sl-admin__nav-item.is-active {
+  background: var(--adm-active-bg);
+  color: var(--adm-active-fg);
+  font-weight: 650;
+}
+#root .sl-admin__nav-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--sl-accent);
+}
+#root .sl-admin__nav-item:focus-visible,
+#root .sl-admin__logout:focus-visible {
+  outline: 2px solid var(--sl-accent);
+  outline-offset: 2px;
+}
+#root .sl-admin__icon { flex: none; width: 18px; height: 18px; }
+#root .sl-admin__logout {
+  margin-top: auto;
+  border-top: 1px solid var(--sl-line);
+  border-radius: 0 0 var(--adm-radius-sm) var(--adm-radius-sm);
+  padding-top: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Area principale: barra superiore, KPI, card
+   -------------------------------------------------------------------------- */
+#root .sl-admin__main { min-width: 0; display: grid; align-content: start; gap: 20px; }
+#root .sl-admin__topbar { padding: 6px 2px 0; }
+#root .sl-admin__crumb {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  color: var(--adm-muted);
+}
+#root .sl-admin__crumb span { margin: 0 4px; opacity: 0.6; }
+#root .sl-admin__topbar h1 {
+  margin: 0;
+  font-size: clamp(30px, 3.4vw, 44px) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--sl-fg) !important;
+  text-transform: uppercase;
+}
+#root .sl-admin__lead { margin: 8px 0 0; max-width: 64ch; font-size: 14.5px; line-height: 1.55; color: var(--adm-muted); }
+#root .sl-admin__content { min-width: 0; }
+
+#root .sl-admin__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+#root .sl-admin__stat {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 16px;
+  border: 1px solid var(--sl-line);
+  border-radius: 16px;
+  background: var(--adm-card);
+  box-shadow: var(--sl-shadow-sm);
+}
+#root .sl-admin__stat::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: -40px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--sl-accent) 14%, transparent), transparent);
+  pointer-events: none;
+}
+#root .sl-admin__stat span {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--adm-muted);
+}
+#root .sl-admin__stat strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--sl-fg);
+}
+#root .sl-admin__stat strong[data-tone="ok"] { color: #13865a; }
+html[data-theme="night"] #root .sl-admin__stat strong[data-tone="ok"] { color: #4ad295; }
+#root .sl-admin__stat strong[data-tone="muted"] { color: var(--adm-muted); }
+
+#root .sl-admin__card,
+#root .sl-admin .admin-help,
+#root .sl-admin .admin-awards__panel,
+#root .sl-admin .match-report-admin__team,
+#root .sl-admin .match-report-admin__events {
+  border: 1px solid var(--sl-line) !important;
+  border-radius: var(--adm-radius) !important;
+  background: var(--adm-card) !important;
+  color: var(--sl-fg) !important;
+  box-shadow: var(--sl-shadow-sm) !important;
+}
+#root .sl-admin__card { padding: 20px; margin-bottom: 20px; }
+#root .sl-admin__card--table { padding: 16px; }
+
+/* Intestazione del modulo dentro la card */
+#root .sl-admin .admin-resource__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 16px !important;
+  padding: 0 0 14px !important;
+  border-bottom: 1px solid var(--sl-line) !important;
+  background: transparent !important;
+  color: var(--sl-fg) !important;
+}
+#root .sl-admin .admin-resource__head .eyebrow {
+  font-size: 11.5px !important;
+  letter-spacing: 0.1em !important;
+  color: var(--adm-active-fg) !important;
+}
+#root .sl-admin .admin-resource__head h2 {
+  margin: 4px 0 0 !important;
+  font-size: 22px !important;
+  line-height: 1.1 !important;
+  color: var(--sl-fg) !important;
+}
+/* Nelle sezioni con intestazione propria, il titolo è già nella barra superiore */
+#root .sl-admin .admin-awards__heading h2,
+#root .sl-admin .match-report-admin > .admin-resource__head {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+}
+#root .sl-admin .admin-awards__heading p,
+#root .sl-admin .match-report-admin > .admin-help-text {
+  margin: 0 0 18px !important;
+  max-width: 72ch;
+  font-size: 14.5px !important;
+  line-height: 1.55 !important;
+  color: var(--adm-muted) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Moduli
+   -------------------------------------------------------------------------- */
+#root .sl-admin .admin-form {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#root .sl-admin .admin-form__grid {
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+  gap: 16px 18px !important;
+}
+#root .sl-admin :is(.admin-form label, .admin-awards__field, .match-report-admin__filters label) {
+  display: grid !important;
+  gap: 7px !important;
+  font: 600 12.5px/1.3 var(--font-body) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--adm-muted) !important;
+}
+#root .sl-admin .admin-awards > .admin-awards__field { max-width: 440px; }
+#root .sl-admin .admin-awards__field > span { font: inherit !important; color: inherit !important; text-transform: none !important; letter-spacing: 0 !important; }
+#root .sl-admin :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+  width: 100%;
+  min-height: 40px !important;
+  padding: 8px 12px !important;
+  border: 1px solid var(--sl-line-strong) !important;
+  border-radius: var(--adm-radius-sm) !important;
+  background: var(--adm-field) !important;
+  color: var(--sl-fg) !important;
+  font: 400 14px/1.4 var(--font-body) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  transition: border-color 0.18s var(--sl-ease), box-shadow 0.18s var(--sl-ease);
+}
+#root .sl-admin textarea { min-height: 120px !important; resize: vertical; }
+#root .sl-admin select[multiple] { min-height: 120px !important; padding: 6px !important; }
+#root .sl-admin :is(input, select, textarea):focus {
+  outline: none !important;
+  border-color: var(--sl-accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sl-accent) 20%, transparent) !important;
+}
+#root .sl-admin input::placeholder,
+#root .sl-admin textarea::placeholder { color: var(--sl-fg-subtle) !important; }
+#root .sl-admin input[type="file"] {
+  font: 400 12.5px/1.4 var(--font-body) !important;
+  color: var(--adm-muted) !important;
+  background: transparent !important;
+  border: 1px dashed var(--sl-line-strong) !important;
+  border-radius: var(--adm-radius-sm) !important;
+  padding: 7px !important;
+  min-height: 0 !important;
+}
+#root .sl-admin input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--adm-active-bg);
+  color: var(--adm-active-fg);
+  font: 600 12px/1 var(--font-body);
+  cursor: pointer;
+}
+#root .sl-admin .admin-help-text,
+#root .sl-admin .admin-fieldset__help {
+  font: 400 12.5px/1.5 var(--font-body) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--sl-fg-subtle) !important;
+}
+#root .sl-admin .admin-fieldset {
+  grid-column: 1 / -1;
+  border: 1px solid var(--sl-line) !important;
+  border-radius: 14px !important;
+  background: var(--adm-hover) !important;
+  padding: 14px 16px !important;
+}
+#root .sl-admin .admin-fieldset legend {
+  padding: 0 6px !important;
+  font: 600 12.5px/1 var(--font-body) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  color: var(--sl-fg) !important;
+}
+#root .sl-admin .admin-checkbox {
+  border-radius: 999px !important;
+  border: 1px solid var(--sl-line-strong) !important;
+  background: var(--adm-card-solid) !important;
+  color: var(--sl-fg) !important;
+  font: 500 13px/1 var(--font-body) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+#root .sl-admin .admin-checkbox:has(input:checked) {
+  border-color: var(--sl-accent) !important;
+  background: var(--adm-active-bg) !important;
+  color: var(--adm-active-fg) !important;
+}
+#root .sl-admin .admin-form > .btn { margin-top: 18px; }
+#root .sl-admin .rich-text-editor {
+  border: 1px solid var(--sl-line-strong) !important;
+  border-radius: var(--adm-radius-sm) !important;
+  background: var(--adm-field) !important;
+  color: var(--sl-fg) !important;
+  overflow: hidden;
+}
+#root .sl-admin .rich-text-editor__toolbar { background: var(--adm-hover) !important; border-color: var(--sl-line) !important; }
+
+/* Messaggi */
+#root .sl-admin .admin-message,
+#root .sl-admin .admin-error {
+  margin: 14px 0 0 !important;
+  padding: 10px 14px !important;
+  border-radius: var(--adm-radius-sm) !important;
+  font: 500 13px/1.45 var(--font-body) !important;
+}
+#root .sl-admin .admin-message {
+  background: var(--adm-active-bg) !important;
+  color: var(--adm-active-fg) !important;
+}
+#root .sl-admin .admin-table-wrap .admin-message { background: transparent !important; color: var(--adm-muted) !important; text-align: center; padding: 28px 14px !important; }
+#root .sl-admin .admin-error {
+  background: rgba(220, 38, 38, 0.1) !important;
+  color: #b42318 !important;
+}
+html[data-theme="night"] #root .sl-admin .admin-error { color: #ff8a80 !important; }
+#root .sl-admin .admin-help { padding: 18px 20px !important; margin: 0 0 18px !important; }
+#root .sl-admin .empty-state { border-radius: 14px !important; }
+
+/* --------------------------------------------------------------------------
+   Pulsanti
+   -------------------------------------------------------------------------- */
+#root .sl-admin .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 18px !important;
+  border-radius: 999px !important;
+  font: 600 13.5px/1 var(--font-body) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  transition: transform 0.18s var(--sl-ease), background-color 0.18s var(--sl-ease), box-shadow 0.18s var(--sl-ease);
+}
+#root .sl-admin .btn--primary {
+  background: var(--sl-accent) !important;
+  color: #fff !important;
+  border: 1px solid var(--sl-accent) !important;
+  box-shadow: var(--sl-shadow-glow) !important;
+}
+#root .sl-admin .btn--primary:hover { transform: translateY(-1px); background: var(--sl-accent-ink) !important; }
+#root .sl-admin .btn--ghost {
+  background: var(--adm-card-solid) !important;
+  color: var(--sl-fg) !important;
+  border: 1px solid var(--sl-line-strong) !important;
+  box-shadow: none !important;
+}
+#root .sl-admin .btn--ghost:hover { background: var(--adm-hover) !important; }
+#root .sl-admin .btn--danger {
+  background: transparent !important;
+  color: #c0264f !important;
+  border: 1px solid color-mix(in srgb, #c0264f 35%, transparent) !important;
+  box-shadow: none !important;
+}
+html[data-theme="night"] #root .sl-admin .btn--danger { color: #ff7aa2 !important; }
+#root .sl-admin .btn--danger:hover { background: rgba(192, 38, 79, 0.1) !important; }
+#root .sl-admin .btn--small { min-height: 32px; padding: 0 12px !important; font-size: 12.5px !important; }
+#root .sl-admin .btn:disabled { opacity: 0.55; transform: none; cursor: not-allowed; }
+
+/* --------------------------------------------------------------------------
+   Ricerca e tabella
+   -------------------------------------------------------------------------- */
+#root .sl-admin .admin-records { display: grid; gap: 14px; }
+#root .sl-admin .admin-search {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#root .sl-admin .admin-search__field { position: relative; flex: 1; max-width: 460px; }
+#root .sl-admin .admin-search__field input { padding-left: 38px !important; border-radius: 999px !important; }
+#root .sl-admin .admin-search__icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  font-size: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: var(--sl-fg-subtle);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.6-3.6'/></svg>") center / contain no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.6-3.6'/></svg>") center / contain no-repeat;
+}
+#root .sl-admin .admin-search__clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--adm-hover);
+  color: var(--adm-muted);
+  cursor: pointer;
+}
+#root .sl-admin .admin-search__count {
+  flex: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--adm-hover);
+  font: 600 12px/1 var(--font-body) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--adm-muted) !important;
+}
+#root .sl-admin .admin-table-wrap {
+  overflow: auto;
+  max-height: min(70vh, 760px);
+  border: 1px solid var(--sl-line) !important;
+  border-radius: 14px !important;
+  background: var(--adm-card-solid) !important;
+  box-shadow: none !important;
+}
+#root .sl-admin .admin-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: separate !important;
+  border-spacing: 0;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--sl-fg) !important;
+}
+#root .sl-admin .admin-table th,
+#root .sl-admin .admin-table td {
+  padding: 12px 14px !important;
+  text-align: left;
+  vertical-align: middle;
+  border: 0 !important;
+  border-bottom: 1px solid var(--sl-line) !important;
+  background: transparent !important;
+  font-family: var(--font-body) !important;
+}
+#root .sl-admin .admin-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: color-mix(in srgb, var(--sl-surface-2) 92%, transparent) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase;
+  color: var(--adm-muted) !important;
+  white-space: nowrap;
+}
+#root .sl-admin .admin-table td { font-size: 13.5px !important; color: var(--sl-fg) !important; }
+#root .sl-admin .admin-table tbody tr { background: transparent !important; transition: background-color 0.15s; }
+#root .sl-admin .admin-table tbody tr:hover { background: var(--adm-hover) !important; }
+#root .sl-admin .admin-table tbody tr:last-child td { border-bottom: 0 !important; }
+#root .sl-admin .admin-actions { text-align: right !important; white-space: nowrap; }
+#root .sl-admin .admin-actions .btn + .btn { margin-left: 4px; }
+#root .sl-admin .admin-actions .btn { margin: 0 !important; vertical-align: middle; }
+
+/* Badge di stato (competizioni e partite) */
+#root .sl-admin__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  background: var(--adm-hover);
+  color: var(--adm-muted);
+  white-space: nowrap;
+}
+#root .sl-admin__badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+#root .sl-admin__badge:is([data-status="active"], [data-status="live"]) { background: rgba(19, 134, 90, 0.12); color: #13865a; }
+#root .sl-admin__badge:is([data-status="upcoming"], [data-status="scheduled"]) { background: var(--adm-active-bg); color: var(--adm-active-fg); }
+#root .sl-admin__badge[data-status="postponed"] { background: rgba(196, 120, 0, 0.13); color: #a86400; }
+html[data-theme="night"] #root .sl-admin__badge:is([data-status="active"], [data-status="live"]) { color: #4ad295; }
+html[data-theme="night"] #root .sl-admin__badge[data-status="postponed"] { color: #f5b04a; }
+
+/* --------------------------------------------------------------------------
+   Voti/MVP e referti: stesse superfici e righe della tabella
+   -------------------------------------------------------------------------- */
+#root .sl-admin .admin-awards,
+#root .sl-admin .match-report-admin { display: grid; gap: 18px; color: var(--sl-fg) !important; }
+#root .sl-admin .admin-awards__panels { gap: 18px !important; }
+#root .sl-admin .admin-awards__panel,
+#root .sl-admin .match-report-admin__team,
+#root .sl-admin .match-report-admin__events { padding: 18px !important; }
+#root .sl-admin :is(.admin-awards__panel h3, .match-report-admin__section-head h3, .match-report-admin__team-title) {
+  font-size: 18px !important;
+  line-height: 1.15 !important;
+  color: var(--sl-fg) !important;
+}
+#root .sl-admin :is(.admin-awards__player, .match-report-admin__roster-row) {
+  border: 1px solid var(--sl-line) !important;
+  border-radius: 12px !important;
+  background: var(--adm-card-solid) !important;
+  color: var(--sl-fg) !important;
+}
+#root .sl-admin :is(.admin-awards__player, .match-report-admin__roster-row):hover { background: var(--adm-hover) !important; }
+#root .sl-admin .admin-awards__current {
+  border-radius: 12px !important;
+  background: var(--adm-active-bg) !important;
+  border: 1px solid color-mix(in srgb, var(--sl-accent) 30%, transparent) !important;
+  color: var(--sl-fg) !important;
+}
+#root .sl-admin .match-report-admin__filters {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 14px !important;
+  padding: 16px !important;
+  border: 1px solid var(--sl-line) !important;
+  border-radius: var(--adm-radius) !important;
+  background: var(--adm-card) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Accesso
+   -------------------------------------------------------------------------- */
+#root #main-content:has(.sl-admin-login) { background: transparent !important; }
+#root .sl-admin-login {
+  width: min(440px, 100%) !important;
+  padding: 32px !important;
+  border: 1px solid var(--sl-line) !important;
+  border-radius: 22px !important;
+  background: color-mix(in srgb, var(--sl-surface) 86%, transparent) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: var(--sl-shadow-md) !important;
+  color: var(--sl-fg) !important;
+}
+#root .sl-admin-login__logo { display: block; height: 30px; width: auto; margin-bottom: 22px; }
+#root .sl-admin-login .eyebrow { color: var(--sl-accent) !important; }
+#root .sl-admin-login h1 {
+  margin: 8px 0 10px !important;
+  font-size: clamp(36px, 6vw, 46px) !important;
+  line-height: 1 !important;
+  color: var(--sl-fg) !important;
+}
+#root .sl-admin-login p { color: var(--sl-fg-muted) !important; font-size: 14.5px; line-height: 1.55; }
+#root .sl-admin-login form { display: grid; gap: 14px; margin-top: 22px; }
+#root .sl-admin-login__field { display: grid; gap: 7px; font: 600 12.5px/1.3 var(--font-body) !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--sl-fg-muted) !important; }
+#root .sl-admin-login input {
+  min-height: 44px !important;
+  padding: 0 14px !important;
+  border: 1px solid var(--sl-line-strong) !important;
+  border-radius: 12px !important;
+  background: var(--sl-surface) !important;
+  color: var(--sl-fg) !important;
+  font: 400 14.5px/1 var(--font-body) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+html[data-theme="night"] #root .sl-admin-login input { background: var(--sl-surface-2) !important; }
+#root .sl-admin-login input:focus {
+  outline: none !important;
+  border-color: var(--sl-accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sl-accent) 20%, transparent) !important;
+}
+#root .sl-admin-login .btn {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 4px;
+  border-radius: 999px !important;
+  background: var(--sl-accent) !important;
+  border-color: var(--sl-accent) !important;
+  color: #fff !important;
+  font: 600 14.5px/1 var(--font-body) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  box-shadow: var(--sl-shadow-glow) !important;
+}
+#root .sl-admin-login .admin-error {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.1);
+  color: #b42318 !important;
+  font-size: 13px;
+}
+
+/* --------------------------------------------------------------------------
+   Tablet e mobile: la sidebar diventa una barra di sezioni scorrevole
+   -------------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+  #root .sl-admin__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 960px) {
+  #root .sl-admin { grid-template-columns: minmax(0, 1fr); gap: 16px; padding-top: 12px; }
+  #root .sl-admin__sidebar {
+    position: static;
+    max-height: none;
+    gap: 12px;
+    padding: 14px;
+  }
+  #root .sl-admin__user { display: none; }
+  #root .sl-admin__nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: 0 -14px;
+    padding: 0 14px 4px;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 24px), transparent);
+    mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 24px), transparent);
+  }
+  #root .sl-admin__nav::-webkit-scrollbar { display: none; }
+  #root .sl-admin__group { display: contents; }
+  #root .sl-admin__group-title { display: none; }
+  #root .sl-admin__nav-item {
+    flex: none;
+    width: auto;
+    border: 1px solid var(--sl-line);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  #root .sl-admin__nav-item.is-active { border-color: color-mix(in srgb, var(--sl-accent) 40%, transparent); }
+  #root .sl-admin__nav-item.is-active::before { display: none; }
+  #root .sl-admin__logout {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: auto;
+    min-height: 32px;
+    margin: 0;
+    padding: 6px 12px;
+    border: 1px solid var(--sl-line);
+    border-radius: 999px;
+  }
+  #root .sl-admin__sidebar { position: relative; top: auto; }
+  #root .sl-admin__brand { padding-right: 90px; justify-content: flex-start; }
+}
+@media (max-width: 600px) {
+  #root .sl-admin__card { padding: 16px; }
+  #root .sl-admin .admin-search { flex-direction: column; align-items: stretch; }
+  #root .sl-admin .admin-search__field { max-width: none; }
+  #root .sl-admin .admin-search__count { align-self: flex-start; }
+  #root .sl-admin .admin-resource__head { flex-wrap: wrap; }
+  #root .sl-admin-login { padding: 24px !important; }
+  #root .sl-admin .admin-table td { white-space: nowrap; }
+}

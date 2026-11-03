@@ -1522,9 +1522,7 @@ img.slm__logo { background: transparent; }
 #root .empty-state {
   border-radius: var(--sl-r-md) !important;
   border: 1px dashed var(--sl-line-strong) !important;
-  background:
-    repeating-linear-gradient(-45deg, transparent 0 12px, color-mix(in srgb, var(--sl-fg) 3%, transparent) 12px 13px),
-    var(--sl-surface) !important;
+  background: var(--sl-surface) !important;
 }
 #root .empty-state h3 {
   font-family: var(--font-display) !important;

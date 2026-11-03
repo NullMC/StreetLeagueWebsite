@@ -28,6 +28,47 @@ const nav: { key: AdminSection; label: string }[] = [
   { key: "transfer_market_entries", label: "Calcio mercato" },
 ];
 
+/* Raggruppamento della navigazione e testi della barra superiore (solo presentazione). */
+const navGroups: { title: string; items: AdminSection[] }[] = [
+  { title: "Torneo", items: ["competitions", "teams", "players", "matches"] },
+  { title: "Match day", items: ["reports", "match_awards"] },
+  { title: "Contenuti", items: ["player_of_month", "social_contents", "transfer_market_entries"] },
+  { title: "Partner", items: ["partners", "active_collaborations"] },
+];
+const sectionInfo: Partial<Record<AdminSection, string>> = {
+  competitions: "Stagioni, stato e gruppi di aggregazione delle competizioni.",
+  teams: "Squadre iscritte, loghi, colori e competizioni a cui partecipano.",
+  players: "Rose, numeri di maglia, ruoli e foto dei giocatori.",
+  matches: "Calendario, orari, risultati e gallerie delle partite.",
+  player_of_month: "POTM e Staff del mese con le card pubblicate.",
+  partners: "Sponsor mostrati nella pagina partner.",
+  active_collaborations: "Collaborazioni attive con volantino e CTA.",
+  social_contents: "Video, post e articoli in evidenza.",
+  transfer_market_entries: "Slot del calciomercato per ogni squadra.",
+};
+const roleLabels: Record<string, string> = { super_admin: "Super admin", admin: "Admin", operator: "Operatore" };
+const navIcons: Record<AdminSection, string> = {
+  competitions: "M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4ZM7 6H4a3 3 0 0 0 3 3M17 6h3a3 3 0 0 1-3 3",
+  teams: "M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6l-8-3Z",
+  players: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0",
+  matches: "M4 6h16v14H4zM4 10h16M9 3v4M15 3v4",
+  reports: "M9 4h6M8 4H6v17h12V4h-2M9 11h6M9 15h4",
+  match_awards: "M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.3 6.8 19.1l1-5.8L3.5 9.2l5.9-.9L12 3Z",
+  player_of_month: "M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12ZM8.5 14 7 21l5-3 5 3-1.5-7",
+  partners: "M3 12l4-4 5 5 5-5 4 4-9 9-9-9Z",
+  active_collaborations: "M8 12h8M12 8v8M4 4h16v16H4z",
+  social_contents: "M5 4h14v16H5zM10 9l5 3-5 3V9Z",
+  transfer_market_entries: "M7 7h13l-3-3M17 17H4l3 3",
+  events: "", mvp: "",
+};
+function NavIcon({ section }: { section: AdminSection }) {
+  return (
+    <svg className="sl-admin__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={navIcons[section]} />
+    </svg>
+  );
+}
+
 const labels: Record<Resource, string> = {
   competitions: "Competizioni", teams: "Squadre", players: "Giocatori", matches: "Partite",
   events: "Eventi", mvp: "MVP", player_of_month: "POTM & Staff del mese",
@@ -516,7 +557,7 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
       </>;
     }
     if (f === "player_id" && resource === "transfer_market_entries") { const opts = relationOptions(f, resource, form, lookups); return <><select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)}><option value="">Non registrato: compila i dati esterni sotto</option>{opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select><small className="admin-help-text">Puoi scegliere un giocatore già presente in piattaforma, anche da un’altra competizione. Per un nuovo giocatore lascia vuoto e inserisci nome e cognome nei campi successivi.</small></>; }    const rel = ["competition_id", "team_id", "home_team_id", "away_team_id", "match_id", "player_id", "related_player_id"]; if (rel.includes(f)) { const opts = relationOptions(f, resource, form, lookups); return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>; } if (f === "status") { const opts = resource === "competitions" ? options.competitionStatus : options.matchStatus; return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required><option value="">Seleziona</option>{opts.map((o) => <option key={o} value={o}>{o}</option>)}</select>; } if (options[f]) return <select value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)}><option value="">Seleziona</option>{options[f].map((o) => <option key={o} value={o}>{f === "event_type" && o === "presidential_penalty" ? "Rigore presidenziale" : f === "award_type" && o === "player" ? "POTM" : f === "award_type" && o === "staff" ? "Staff del mese" : o}</option>)}</select>; if (f === "slot_number") return <select value={String(v ?? 1)} onChange={(e) => setField(f, e.target.value)} required><option value="1">Slot 1</option><option value="2">Slot 2</option><option value="3">Slot 3</option><option value="4">Slot 4</option><option value="5">Slot 5</option><option value="6">Slot 6</option></select>; if (f === "statistics_group") return <><input type="text" value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} placeholder="es. Street Cup" /><small className="admin-help-text">Inserisci lo stesso nome in tutte le competizioni da riunire. Saranno mostrate sotto un’unica voce pubblica e aggregate nelle statistiche. Lascia vuoto per mantenerla separata.</small></> ; if (f === "description" || f === "article_body") return <RichTextEditor value={String(v ?? "")} onChange={(x) => setField(f, x)} />; if (f === "note") return <textarea rows={5} value={String(v ?? "")} onChange={(e) => setField(f, e.target.value)} />; const dt = f === "kickoff_at" || f === "published_at"; const date = f === "start_date" || f === "end_date"; const num = ["shirt_number", "home_score", "away_score", "minute", "sort_order", "external_shirt_number"].includes(f); const uploadable = isUploadableImage(f); const url = ["cta_url", "website_url", "content_url", "logo_url", "profile_image_url", "bg_less_image_url", "thumbnail_url", "flyer_url", "card_image_url", "activity_image_url", "external_photo_url"].includes(f); const input = <input type={dt ? "datetime-local" : date ? "date" : num ? "number" : url ? "url" : "text"} value={dt ? localDate(v) : v == null ? "" : String(v)} onChange={(e) => setField(f, e.target.value)} required={required[resource].includes(f)} min={f === "minute" ? 1 : num ? 0 : undefined} max={f === "minute" ? 50 : undefined} placeholder={f === "photo_drive_url" ? "Incolla il link alla galleria condivisa" : f === "month_label" ? "Settembre 2026" : undefined} />; if (!uploadable) return input; return <div className="admin-input-row">{input}<input className="file-input" type="file" accept="image/*" disabled={!canWrite || uploadingField === f} onChange={(e) => { const file = e.target.files?.[0]; if (file) void uploadFor(f, file); e.currentTarget.value = ""; }} />{uploadingField === f && <small className="admin-help-text">Caricamento…</small>}</div>; };
-  return <div className="admin-resource"><div className="admin-resource__head"><div><span className="eyebrow">CRUD / {labels[resource]}</span><h2>{editing ? "Modifica record" : "Nuovo record"}</h2></div>{editing && <button className="btn btn--ghost" type="button" onClick={cancelEdit}>Annulla</button>}</div>{canWrite ? <form className="admin-form" onSubmit={save}><div className="admin-form__grid">{fields[resource].map((f) => f === "competition_ids" ? <fieldset className="admin-fieldset" key={f}><legend>{labelize(f)}</legend><p className="admin-fieldset__help">Seleziona tutte le competizioni a cui partecipa la squadra.</p><div className="admin-checkbox-group">{lookups.competitions.map((competition) => { const selected = Array.isArray(form.competition_ids) && form.competition_ids.map(String).includes(competition.id); return <label className="admin-checkbox" key={competition.id}><input type="checkbox" checked={selected} onChange={() => { const current = Array.isArray(form.competition_ids) ? form.competition_ids.map(String) : []; setField("competition_ids", selected ? current.filter((id) => id !== competition.id) : [...current, competition.id]); }} /><span>{competition.name}</span></label>; })}</div></fieldset> : <label key={f}>{labelize(f)}{render(f)}</label>)}</div>{message && <p className="admin-message">{message}</p>}<button className="btn btn--primary" type="submit">{editing ? "Salva modifiche" : "Crea record"}</button></form> : <div className="empty-state"><div className="empty-state__mark">R</div><div><h3>Accesso in sola lettura</h3><p>Questo ruolo non può modificare questa sezione.</p></div></div>}<div className="admin-records">
+  return <div className="admin-resource"><div className="sl-admin__stats"><div className="sl-admin__stat"><span>Record totali</span><strong>{loading ? "—" : rows.length}</strong></div><div className="sl-admin__stat"><span>{normalizedSearch ? "Risultati ricerca" : "Visualizzati"}</span><strong>{loading ? "—" : filteredRows.length}</strong></div><div className="sl-admin__stat"><span>Modulo</span><strong>{editing ? "Modifica" : "Nuovo"}</strong></div><div className="sl-admin__stat"><span>Permessi</span><strong data-tone={canWrite ? "ok" : "muted"}>{canWrite ? "Scrittura" : "Sola lettura"}</strong></div></div><section className="sl-admin__card"><div className="admin-resource__head"><div><span className="eyebrow">CRUD / {labels[resource]}</span><h2>{editing ? "Modifica record" : "Nuovo record"}</h2></div>{editing && <button className="btn btn--ghost" type="button" onClick={cancelEdit}>Annulla</button>}</div>{canWrite ? <form className="admin-form" onSubmit={save}><div className="admin-form__grid">{fields[resource].map((f) => f === "competition_ids" ? <fieldset className="admin-fieldset" key={f}><legend>{labelize(f)}</legend><p className="admin-fieldset__help">Seleziona tutte le competizioni a cui partecipa la squadra.</p><div className="admin-checkbox-group">{lookups.competitions.map((competition) => { const selected = Array.isArray(form.competition_ids) && form.competition_ids.map(String).includes(competition.id); return <label className="admin-checkbox" key={competition.id}><input type="checkbox" checked={selected} onChange={() => { const current = Array.isArray(form.competition_ids) ? form.competition_ids.map(String) : []; setField("competition_ids", selected ? current.filter((id) => id !== competition.id) : [...current, competition.id]); }} /><span>{competition.name}</span></label>; })}</div></fieldset> : <label key={f}>{labelize(f)}{render(f)}</label>)}</div>{message && <p className="admin-message">{message}</p>}<button className="btn btn--primary" type="submit">{editing ? "Salva modifiche" : "Crea record"}</button></form> : <div className="empty-state"><div className="empty-state__mark">R</div><div><h3>Accesso in sola lettura</h3><p>Questo ruolo non può modificare questa sezione.</p></div></div>}</section><section className="sl-admin__card sl-admin__card--table"><div className="admin-records">
   <div className="admin-search">
     <div className="admin-search__field">
       <span className="admin-search__icon" aria-hidden="true">⌕</span>
@@ -551,7 +592,7 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
           {filteredRows.map((r) => (
             <tr key={String(r[keys[resource]])}>
               {fields[resource].slice(0, 6).map((f) => (
-                <td key={f}>{displayCellValue(resource, f, r, lookups)}</td>
+                <td key={f}>{f === "status" && r[f] ? <span className="sl-admin__badge" data-status={String(r[f])}>{displayCellValue(resource, f, r, lookups)}</span> : displayCellValue(resource, f, r, lookups)}</td>
               ))}
               <td className="admin-actions">
                 <button className="btn btn--ghost btn--small" type="button" onClick={() => edit(r)}>Modifica</button>{" "}
@@ -563,7 +604,7 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
       </table>
     )}
   </div>
-</div></div>;
+</div></section></div>;
 }
 
 function isUploadableImage(field: string) {
@@ -573,7 +614,7 @@ function isUploadableImage(field: string) {
     field.includes("thumbnail") || field === "flyer_url" || field === "card_image_url";
 }
 
-function Login({ onLogin }: { onLogin: (p: AdminProfile) => void }) { const [u, setU] = useState(""); const [c, setC] = useState(""); const [m, setM] = useState(""); const [busy, setBusy] = useState(false); const submit = async (e: FormEvent) => { e.preventDefault(); setBusy(true); setM(""); try { const r = await signInWithAccessCode(u, c); if (r.error) throw r.error; const p = await getAuthenticatedAdmin(); if (!p) throw new Error("Profilo amministratore non valido."); onLogin(p); } catch (e) { setM(errorMessage(e, "Accesso non riuscito.")); } finally { setBusy(false); } }; return <div className="admin-login"><span className="eyebrow">Street League / Admin</span><h1>Back office</h1><p>Accedi con username e codice permanente per gestire la piattaforma.</p>{m && <p className="admin-error">{m}</p>}<form onSubmit={submit}><input value={u} onChange={(e) => setU(e.target.value)} placeholder="Username" /><input type="password" value={c} onChange={(e) => setC(e.target.value)} placeholder="Codice di accesso" /><button className="btn btn--primary" disabled={busy}>{busy ? "Accesso…" : "Accedi"}</button></form></div>; }
+function Login({ onLogin }: { onLogin: (p: AdminProfile) => void }) { const [u, setU] = useState(""); const [c, setC] = useState(""); const [m, setM] = useState(""); const [busy, setBusy] = useState(false); const submit = async (e: FormEvent) => { e.preventDefault(); setBusy(true); setM(""); try { const r = await signInWithAccessCode(u, c); if (r.error) throw r.error; const p = await getAuthenticatedAdmin(); if (!p) throw new Error("Profilo amministratore non valido."); onLogin(p); } catch (e) { setM(errorMessage(e, "Accesso non riuscito.")); } finally { setBusy(false); } }; return <div className="admin-login sl-admin-login"><img className="sl-admin-login__logo" src="/assets/pittogrammaBlack.webp" alt="Street League" /><span className="eyebrow">Area riservata</span><h1>Back office</h1><p>Accedi con username e codice permanente per gestire la piattaforma.</p>{m && <p className="admin-error">{m}</p>}<form onSubmit={submit}><label className="sl-admin-login__field"><span>Username</span><input value={u} onChange={(e) => setU(e.target.value)} placeholder="Username" autoComplete="username" /></label><label className="sl-admin-login__field"><span>Codice di accesso</span><input type="password" value={c} onChange={(e) => setC(e.target.value)} placeholder="Codice di accesso" autoComplete="current-password" /></label><button className="btn btn--primary" disabled={busy}>{busy ? "Accesso…" : "Accedi"}</button></form></div>; }
 
 
 
@@ -581,7 +622,44 @@ export default function AdminDashboard() {
   const [profile, setProfile] = useState<AdminProfile | null>(null); const [resource, setResource] = useState<AdminSection>("competitions"); const [booting, setBooting] = useState(true);
   useEffect(() => { void getAuthenticatedAdmin().then(setProfile).catch(() => setProfile(null)).finally(() => setBooting(false)); }, []);
   const logout = async () => { await supabase?.auth.signOut(); setProfile(null); setResource("competitions"); };
-  if (!supabaseConfigured || booting) return <PageShell title="Admin" eyebrow="Street League"><div className="admin-help"><h3>Configurazione</h3><p>Verifica le variabili Supabase prima di accedere al back office.</p></div></PageShell>;
+  if (!supabaseConfigured || booting) return <PageShell title="Admin" eyebrow="Street League"><div className="admin-help sl-admin-login"><h3>Configurazione</h3><p>Verifica le variabili Supabase prima di accedere al back office.</p></div></PageShell>;
   if (!profile) return <PageShell title="Admin" eyebrow="Street League"><Login onLogin={setProfile} /></PageShell>;
-  return <PageShell title="Back office" eyebrow={profile.role}><div className="admin-layout"><aside className="admin-sidebar"><span className="eyebrow">Street League</span><h2>Back office</h2><p className="admin-user">{profile.full_name ?? profile.username ?? profile.email}</p><nav>{nav.map((item) => <button key={item.key} type="button" className={resource === item.key ? "active" : ""} onClick={() => setResource(item.key)}>{item.label}</button>)}</nav><button className="btn btn--ghost" type="button" onClick={() => void logout()}>Esci</button></aside><main className="admin-main">{resource === "match_awards" ? <AdminMatchAwards /> : resource === "reports" ? <AdminMatchReports /> : <Crud resource={resource} profile={profile} />}</main></div></PageShell>;
+  const userName = profile.full_name ?? profile.username ?? profile.email ?? "Admin";
+  const current = nav.find((item) => item.key === resource);
+  const currentGroup = navGroups.find((group) => group.items.includes(resource));
+  return <PageShell title="Back office" eyebrow={profile.role}>
+    <div className="sl-admin">
+      <aside className="sl-admin__sidebar">
+        <div className="sl-admin__brand"><img src="/assets/pittogrammaBlack.webp" alt="Street League" /><span>Back office</span></div>
+        <div className="sl-admin__user">
+          <span className="sl-admin__avatar" aria-hidden="true">{userName.trim().charAt(0).toUpperCase()}</span>
+          <div><strong>{userName}</strong><span>{roleLabels[profile.role] ?? profile.role}</span></div>
+        </div>
+        <nav className="sl-admin__nav" aria-label="Sezioni del back office">
+          {navGroups.map((group) => (
+            <div className="sl-admin__group" key={group.title}>
+              <span className="sl-admin__group-title">{group.title}</span>
+              {group.items.map((key) => {
+                const item = nav.find((entry) => entry.key === key);
+                if (!item) return null;
+                return <button key={item.key} type="button" className={`sl-admin__nav-item${resource === item.key ? " is-active" : ""}`} aria-current={resource === item.key ? "page" : undefined} onClick={() => setResource(item.key)}><NavIcon section={item.key} /><span>{item.label}</span></button>;
+              })}
+            </div>
+          ))}
+        </nav>
+        <button className="sl-admin__logout" type="button" onClick={() => void logout()}>
+          <svg className="sl-admin__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" /></svg>
+          <span>Esci</span>
+        </button>
+      </aside>
+      <section className="sl-admin__main">
+        <header className="sl-admin__topbar">
+          <p className="sl-admin__crumb">Back office <span aria-hidden="true">/</span> {currentGroup?.title}</p>
+          <h1>{current?.label}</h1>
+          {sectionInfo[resource] && <p className="sl-admin__lead">{sectionInfo[resource]}</p>}
+        </header>
+        <div className="sl-admin__content">{resource === "match_awards" ? <AdminMatchAwards /> : resource === "reports" ? <AdminMatchReports /> : <Crud resource={resource} profile={profile} />}</div>
+      </section>
+    </div>
+  </PageShell>;
 }

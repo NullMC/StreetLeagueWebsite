@@ -39,33 +39,6 @@
 }
 .sl-hero-fx__layer--rays { mix-blend-mode: screen; opacity: 0.85; }
 html:not([data-theme="night"]) .sl-hero-fx__layer--rays { mix-blend-mode: soft-light; opacity: 0.9; }
-/* Punti luce che salgono e svaniscono */
-.sl-hero-fx__glow {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-.sl-hero-fx__glow i {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-  width: var(--s, 6px);
-  height: var(--s, 6px);
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, var(--sl-pink-2, #ed7bab) 38%, transparent 70%);
-  box-shadow: 0 0 calc(var(--s, 6px) * 4) calc(var(--s, 6px) * 0.8) rgba(228, 34, 120, 0.55);
-  opacity: 0;
-  animation: sl-glow-drift var(--d, 9s) var(--delay, 0s) ease-in-out infinite;
-}
-html:not([data-theme="night"]) .sl-hero-fx__glow i {
-  box-shadow: 0 0 calc(var(--s, 6px) * 3) calc(var(--s, 6px) * 0.6) rgba(228, 34, 120, 0.35);
-}
-@keyframes sl-glow-drift {
-  0%, 100% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.6); }
-  30% { opacity: 0.95; }
-  50% { opacity: 0.8; transform: translate3d(var(--dx, 18px), var(--dy, -26px), 0) scale(1); }
-  75% { opacity: 0.35; }
-}
 /* Grana cinematografica */
 .sl-hero-fx__grain {
   position: absolute;
@@ -93,38 +66,9 @@ html[data-theme="night"] .sl-hero::before {
   html[data-theme="night"] .sl-hero::before { background: linear-gradient(to bottom, rgba(1, 10, 8, 0.35), rgba(1, 10, 8, 0.8) 55%, var(--sl-bg) 100%) !important; }
 }
 
-/* Atmosfera morbida in testa alle pagine indice (mesh gradient lento, vedi AmbientBackdrop) */
 #main-content {
   position: relative;
   isolation: isolate;
-}
-.sl-ambient {
-  position: absolute;
-  top: calc(-1 * var(--site-header-total-height));
-  left: 0;
-  right: 0;
-  height: min(76vh, 680px);
-  z-index: -1;
-  pointer-events: none;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
-  opacity: 0;
-  transition: opacity 1.6s var(--sl-ease);
-}
-.sl-ambient.is-ready { opacity: 0.8; }
-html[data-theme="night"] .sl-ambient.is-ready { opacity: 0.9; }
-.sl-ambient__layer {
-  position: absolute !important;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.sl-ambient::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, color-mix(in srgb, var(--sl-bg) 20%, transparent), color-mix(in srgb, var(--sl-bg) 65%, transparent));
 }
 
 /* --------------------------------------------------------------------------
@@ -472,7 +416,7 @@ html.sl-vt-theme::view-transition-new(root) { animation: sl-theme-reveal 680ms v
   .sl-hero__copy,
   .sl-hero__side,
   .sl-hero-fx,
-  .sl-hero-fx__glow i,
+  .sl-aura span,
   .sl-hero__bg,
   .sl-nav__limelight::before,
   html.sl-cine [data-reveal="in"] {

@@ -39,6 +39,7 @@ import "./styles/sl-fx.css";
 import "./styles/sl-type.css";
 // Livello di dettaglio uniforme: card, classifiche, azioni, sfondi e scroll.
 import "./styles/sl-polish.css";
+import "./styles/admin-console.css";
 import HomeRedesigned from "./pages/HomeRedesigned";
 import { AppLayout } from "./components/AppLayout";
 import { SkeletonCards } from "./components/ui/Skeleton";
