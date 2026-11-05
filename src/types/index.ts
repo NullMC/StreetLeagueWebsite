@@ -3,6 +3,7 @@ export type PartnerTier = "gold" | "silver" | "bronze";
 export type MatchStatus = "scheduled" | "live" | "finished" | "postponed";
 export type EventType =
   | "goal"
+  | "own_goal"
   | "assist"
   | "yellow_card"
   | "red_card"
@@ -127,6 +128,8 @@ export interface MatchEvent {
   player_id: string | null;
   /** Set instead of player_id when the event belongs to the match Wildcard. */
   wildcard_id?: string | null;
+  /** Own goals only: the team that scored into its own net (the author is optional). */
+  team_id?: string | null;
   related_player_id: string | null;
   event_type: EventType;
   minute: number | null;

@@ -11,12 +11,12 @@ import { isStaffPosition } from "../lib/awards";
 
 type DetailTab = "summary" | "lineups";
 const eventTitles: Record<string, string> = {
-  goal: "Gol", presidential_penalty: "Rigore presidenziale",
+  goal: "Gol", own_goal: "Autogol", presidential_penalty: "Rigore presidenziale",
   yellow_card: "Cartellino giallo", red_card: "Cartellino rosso",
   assist: "Assist", substitution: "Sostituzione",
 };
 const eventSymbols: Record<string, string> = {
-  goal: "⚽", presidential_penalty: "⚽",
+  goal: "⚽", own_goal: "⚽", presidential_penalty: "⚽",
   yellow_card: "▰", red_card: "▰", assist: "↗",
 };
 export default function MatchDetail() {
@@ -71,7 +71,7 @@ export default function MatchDetail() {
   };
   const hasReport = match?.status === "finished";
   const timelineEvents = events.filter((event) =>
-    ["goal", "presidential_penalty", "yellow_card", "red_card"].includes(event.event_type) &&
+    ["goal", "own_goal", "presidential_penalty", "yellow_card", "red_card"].includes(event.event_type) &&
     isValidMatchMinute(event.minute),
   ).sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
 
@@ -134,7 +134,7 @@ export default function MatchDetail() {
               <section className="match-experience__panel">
                 <div className="match-experience__panel-title">
                   <h2>Riepilogo partita</h2>
-                  <p>Gol, rigori presidenziali e provvedimenti disciplinari · 1′–{MATCH_DURATION_MINUTES}′</p>
+                  <p>Gol, autogol, rigori presidenziali e provvedimenti disciplinari · 1′–{MATCH_DURATION_MINUTES}′</p>
                 </div>
                 {hasReport && timelineEvents.length ? (
                   <div className="match-experience__timeline" aria-label={`Cronologia degli eventi dal 1° al ${MATCH_DURATION_MINUTES}° minuto`}>
@@ -142,14 +142,24 @@ export default function MatchDetail() {
                     {timelineEvents.map((event) => {
                       const player = findPlayer(event.player_id);
                       const wildcard = event.wildcard_id ? wildcards.find((entry) => entry.id === event.wildcard_id) : undefined;
-                      const side = (wildcard?.team_id ?? player?.team_id) === match.away_team_id ? "away" : "home";
+                      const authorTeam = event.event_type === "own_goal"
+                        ? event.team_id ?? wildcard?.team_id ?? player?.team_id
+                        : wildcard?.team_id ?? player?.team_id;
+                      // An own goal is shown on the side of the team that benefits from it.
+                      const scoringTeam = event.event_type === "own_goal"
+                        ? (authorTeam === match.home_team_id ? match.away_team_id : match.home_team_id)
+                        : authorTeam;
+                      const side = scoringTeam === match.away_team_id ? "away" : "home";
+                      const ownGoalTeamName = authorTeam === match.home_team_id ? home?.name : away?.name;
+                      const anonymousOwnGoal = event.event_type === "own_goal" && !wildcard && !player;
                       const title = eventTitles[event.event_type] ?? event.event_type;
                       return (
                         <div className={"match-experience__timeline-row match-experience__timeline-row--" + side} key={event.id}>
                           <div className="match-experience__timeline-entry">
                             {player?.profile_image_url && <img src={player.profile_image_url} alt="" />}
                             <div className="match-experience__event-text">
-                              <strong>{wildcard ? wildcard.full_name : playerName(event.player_id)}</strong>
+                              <strong>{anonymousOwnGoal ? "Autogol " + (ownGoalTeamName ?? "") : wildcard ? wildcard.full_name : playerName(event.player_id)}</strong>
+                              {event.event_type === "own_goal" && !anonymousOwnGoal && ownGoalTeamName && <small className="match-experience__wildcard-note">{ownGoalTeamName}</small>}
                               {wildcard && <small className="match-experience__wildcard-note">Wildcard</small>}
                               <span className={"match-experience__event-kind match-experience__event-kind--" + event.event_type}>
                                 <b aria-hidden="true">{eventSymbols[event.event_type] ?? "•"}</b> {title}

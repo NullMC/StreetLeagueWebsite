@@ -113,6 +113,7 @@ html[data-theme="night"] .match-experience__tabs button.active { background: var
 .match-experience__event-kind, .match-experience__event-text small { font-size: 11px; color: var(--report-muted); }
 .match-experience__event-kind b { color: var(--pink); }
 .match-experience__event-kind--yellow_card b { color: #cf9910; }
+.match-experience__event-kind--own_goal b { filter: grayscale(1) opacity(0.65); }
 .match-experience__event-kind--red_card b { color: #dc3447; }
 .match-experience__minute {
   grid-column: 2; grid-row: 1; z-index: 1; display: grid; place-items: center; font-weight: 900;
