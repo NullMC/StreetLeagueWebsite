@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { getActiveCompetitions, getMatches, getPlayers, getTeams } from "../lib/api";
+import { getActiveCompetitions, getMatchWildcards, getMatches, getPlayers, getTeams } from "../lib/api";
 import { ensureFreshAdminSession } from "../lib/admin";
 import { isGoalkeeperPosition, isStaffPosition } from "../lib/awards";
 import { supabase } from "../lib/supabase";
-import type { Competition, GoalkeeperMatchRating, Match, MatchMvp, Player, Team } from "../types";
+import type { Competition, GoalkeeperMatchRating, Match, MatchMvp, MatchWildcard, Player, Team } from "../types";
 
 type AwardData = {
   competitions: Competition[];
@@ -22,6 +22,8 @@ const matchStatus: Record<Match["status"], string> = {
 };
 const playerSearchable = (player: Player) =>
   (playerName(player) + " " + player.last_name + " " + player.first_name).toLocaleLowerCase("it");
+const wildcardMatches = (wildcard: MatchWildcard, search: string) =>
+  wildcard.full_name.toLocaleLowerCase("it").includes(search.trim().toLocaleLowerCase("it"));
 
 function errorText(error: unknown) {
   if (error && typeof error === "object" && "message" in error) {
@@ -39,6 +41,7 @@ export function AdminMatchAwards() {
   const [data, setData] = useState<AwardData | null>(null);
   const [ratings, setRatings] = useState<GoalkeeperMatchRating[]>([]);
   const [mvps, setMvps] = useState<MatchMvp[]>([]);
+  const [wildcards, setWildcards] = useState<MatchWildcard[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [competitionId, setCompetitionId] = useState("");
@@ -56,14 +59,16 @@ export function AdminMatchAwards() {
 
   async function refreshAwards() {
     if (!supabase) throw new Error("Supabase non configurato.");
-    const [ratingsResult, mvpResult] = await Promise.all([
+    const [ratingsResult, mvpResult, wildcardRows] = await Promise.all([
       supabase.from("goalkeeper_match_ratings").select("match_id,player_id,rating"),
-      supabase.from("match_mvp").select("match_id,player_id"),
+      supabase.from("match_mvp").select("*"),
+      getMatchWildcards(),
     ]);
     if (ratingsResult.error) throw ratingsResult.error;
     if (mvpResult.error) throw mvpResult.error;
     setRatings(ratingsResult.data as GoalkeeperMatchRating[]);
     setMvps((mvpResult.data ?? []) as MatchMvp[]);
+    setWildcards(wildcardRows);
   }
 
   useEffect(() => {
@@ -156,11 +161,20 @@ export function AdminMatchAwards() {
       !isStaffPosition(player.position, player.role),
     )
     .filter((player) => playerSearchable(player).includes(mvpSearch.trim().toLocaleLowerCase("it")));
+  // Wildcards of the selected match: goalkeepers get the rating, everyone can be MVP.
+  const keeperWildcards = wildcards.filter((wildcard) =>
+    wildcard.match_id === selectedMatch?.id && wildcard.position === "Portiere" &&
+    wildcardMatches(wildcard, keeperSearch));
+  const mvpWildcards = wildcards.filter((wildcard) =>
+    wildcard.match_id === selectedMvpMatch?.id && wildcardMatches(wildcard, mvpSearch));
   const currentMvp = mvps.find((item) => item.match_id === selectedMvpMatch?.id);
+  const currentMvpWildcard = currentMvp?.wildcard_id
+    ? wildcards.find((wildcard) => wildcard.id === currentMvp.wildcard_id) : undefined;
   const eligibleMvpMatchIds = new Set(competitionMatches
     .filter((match) => match.status === "finished").map((match) => match.id));
   const nominationCounts = new Map<string, number>();
   mvps.filter((item) => eligibleMvpMatchIds.has(item.match_id)).forEach((item) => {
+    if (!item.player_id) return;
     nominationCounts.set(item.player_id, (nominationCounts.get(item.player_id) ?? 0) + 1);
   });
   const selectedMvpMatchLabel = selectedMvpMatch
@@ -217,18 +231,51 @@ export function AdminMatchAwards() {
     }
   }
 
-  async function nominateMvp(player: Player) {
-    if (!supabase || !selectedMvpMatch || !canNominateMvp) return;
+  async function persistWildcardRating(wildcard: MatchWildcard, remove = false) {
+    if (!supabase || !selectedMatch || (!remove && !canRateMatch)) return;
+    const draftKey = selectedMatch.id + ":wc:" + wildcard.id;
+    const value = remove ? null : Number(draftRatings[draftKey] ?? wildcard.goalkeeper_rating ?? 0);
+    if (value !== null && (!Number.isInteger(value) || value < 1 || value > 5)) {
+      setError("Seleziona un voto da 1 a 5 per il portiere.");
+      return;
+    }
+    setBusyKey(draftKey);
+    setError(""); setMessage("");
+    try {
+      await ensureFreshAdminSession();
+      const { error: saveError } = await supabase.from("match_wildcards")
+        .update({ goalkeeper_rating: value }).eq("id", wildcard.id);
+      if (saveError) throw saveError;
+      if (remove) setDraftRatings((current) => {
+        const next = { ...current };
+        delete next[draftKey];
+        return next;
+      });
+      await refreshAwards();
+      setMessage(remove ? "Valutazione rimossa." : "Voto " + value + "/5 salvato per la Wildcard " + wildcard.full_name + ".");
+    } catch (caught) {
+      setError(errorText(caught));
+    } finally {
+      setBusyKey("");
+    }
+  }
+
+  async function nominateMvp(player: Player | null, wildcard?: MatchWildcard) {
+    if (!supabase || !selectedMvpMatch || !canNominateMvp || (!player && !wildcard)) return;
     setBusyKey("mvp");
     setError(""); setMessage("");
     try {
       await ensureFreshAdminSession();
+      // Clear the other reference only when needed, so this also works before migration 24.
+      const payload: Record<string, string | null> = wildcard
+        ? { match_id: selectedMvpMatch.id, player_id: null, wildcard_id: wildcard.id }
+        : { match_id: selectedMvpMatch.id, player_id: player!.id,
+            ...(currentMvp?.wildcard_id ? { wildcard_id: null } : {}) };
       const { error: saveError } = await supabase.from("match_mvp")
-        .upsert({ match_id: selectedMvpMatch.id, player_id: player.id },
-          { onConflict: "match_id" });
+        .upsert(payload, { onConflict: "match_id" });
       if (saveError) throw saveError;
       await refreshAwards();
-      setMessage("MVP assegnato a " + playerName(player) + " per " + selectedMvpMatchLabel + ".");
+      setMessage("MVP assegnato a " + (wildcard ? wildcard.full_name + " (Wildcard)" : playerName(player!)) + " per " + selectedMvpMatchLabel + ".");
     } catch (caught) {
       setError(errorText(caught));
     } finally {
@@ -259,7 +306,7 @@ export function AdminMatchAwards() {
     <section className="admin-awards">
       <header className="admin-awards__heading">
         <h2>Voti portieri e MVP</h2>
-        <p>Assegna a ogni partita terminata i voti dei portieri (da 1 a 5) e un MVP. La classifica portieri usa la media voto; la classifica MVP conta i riconoscimenti ottenuti nelle singole partite.</p>
+        <p>Assegna a ogni partita terminata i voti dei portieri (da 1 a 5) e un MVP, Wildcard comprese. La classifica portieri usa la media voto; la classifica MVP conta i riconoscimenti ottenuti nelle singole partite. Le Wildcard valgono solo per la loro partita e non entrano nelle classifiche.</p>
       </header>
 
       <label className="admin-awards__field">
@@ -357,7 +404,33 @@ export function AdminMatchAwards() {
                     </div>
                   );
                 })}
-                {!keeperPlayers.length && <p className="admin-help-text">Nessun portiere trovato per questa partita.</p>}
+                {keeperWildcards.map((wildcard) => {
+                  const ratingKey = selectedMatch.id + ":wc:" + wildcard.id;
+                  return (
+                    <div className="admin-awards__player admin-awards__player--wildcard" key={wildcard.id}>
+                      <div className="admin-awards__player-info">
+                        <strong>{wildcard.full_name} <span className="admin-awards__wildcard-tag">Wildcard</span></strong>
+                        <small>{teamNames.get(wildcard.team_id) ?? "—"} · Portiere esterno, voto valido solo per questa partita</small>
+                      </div>
+                      <div className="admin-awards__actions">
+                        <select
+                          aria-label={"Voto per " + wildcard.full_name}
+                          value={draftRatings[ratingKey] ?? String(wildcard.goalkeeper_rating ?? "")}
+                          onChange={(event) => setDraftRatings((current) => ({ ...current, [ratingKey]: event.target.value }))}
+                          disabled={!canRateMatch || Boolean(busyKey)}
+                        >
+                          <option value="">Voto</option>
+                          {[1, 2, 3, 4, 5].map((vote) => <option key={vote} value={vote}>{vote}/5</option>)}
+                        </select>
+                        <button className="btn btn--primary" type="button" onClick={() => void persistWildcardRating(wildcard)} disabled={Boolean(busyKey) || !canRateMatch}>
+                          {wildcard.goalkeeper_rating ? "Aggiorna" : "Salva"}
+                        </button>
+                        {wildcard.goalkeeper_rating ? <button className="btn btn--ghost" type="button" disabled={Boolean(busyKey)} onClick={() => void persistWildcardRating(wildcard, true)}>Rimuovi</button> : null}
+                      </div>
+                    </div>
+                  );
+                })}
+                {!keeperPlayers.length && !keeperWildcards.length && <p className="admin-help-text">Nessun portiere trovato per questa partita.</p>}
               </div>
             ) : null}
           </section>
@@ -395,10 +468,12 @@ export function AdminMatchAwards() {
             </label>
             {currentMvp && (
               <div className="admin-awards__current" role="status">
-                MVP di {selectedMvpMatchLabel}: <strong>{playerName((data?.players ?? []).find((player) => player.id === currentMvp.player_id) ?? {
-                  id: currentMvp.player_id, team_id: "", first_name: "Giocatore", last_name: "non disponibile",
-                  shirt_number: null, position: null, profile_image_url: null, bg_less_image_url: null,
-                })}</strong>
+                MVP di {selectedMvpMatchLabel}: <strong>{currentMvp.wildcard_id
+                  ? (currentMvpWildcard?.full_name ?? "Wildcard") + " (Wildcard)"
+                  : (() => {
+                    const player = (data?.players ?? []).find((entry) => entry.id === currentMvp.player_id);
+                    return player ? playerName(player) : "Giocatore non disponibile";
+                  })()}</strong>
                 <button className="btn btn--ghost" type="button" disabled={Boolean(busyKey)} onClick={() => void removeMvp()}>Rimuovi</button>
               </div>
             )}
@@ -426,7 +501,25 @@ export function AdminMatchAwards() {
                     </div>
                   </div>
                 ))}
-                {!mvpPlayers.length && <p className="admin-help-text">Nessun giocatore trovato tra le due squadre della partita.</p>}
+                {mvpWildcards.map((wildcard) => (
+                  <div className="admin-awards__player admin-awards__player--wildcard" key={wildcard.id}>
+                    <div className="admin-awards__player-info">
+                      <strong>{wildcard.full_name} <span className="admin-awards__wildcard-tag">Wildcard</span></strong>
+                      <small>{teamNames.get(wildcard.team_id) ?? "—"} · {wildcard.position}</small>
+                    </div>
+                    <div className="admin-awards__actions">
+                      <button
+                        className="btn btn--primary"
+                        type="button"
+                        disabled={Boolean(busyKey) || !canNominateMvp || currentMvp?.wildcard_id === wildcard.id}
+                        onClick={() => void nominateMvp(null, wildcard)}
+                      >
+                        {currentMvp?.wildcard_id === wildcard.id ? "MVP della partita ✓" : "Assegna MVP"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {!mvpPlayers.length && !mvpWildcards.length && <p className="admin-help-text">Nessun giocatore trovato tra le due squadre della partita.</p>}
               </div>
             ) : null}
           </section>

@@ -3,10 +3,11 @@ import { useParams } from "react-router-dom";
 import { PageShell } from "../components/PageShell";
 import { EmptyState } from "../components/EmptyState";
 import {
-  getMatch, getTeams, getMatchEvents, getMatchMvp, getPlayers, getMatchLineups,
+  getMatch, getTeams, getMatchEvents, getMatchMvp, getPlayers, getMatchLineups, getMatchWildcards,
 } from "../lib/api";
-import type { Match, Team, MatchEvent, MatchMvp, MatchLineup, Player } from "../types";
+import type { Match, Team, MatchEvent, MatchMvp, MatchLineup, MatchWildcard, Player } from "../types";
 import { MATCH_DURATION_MINUTES, isValidMatchMinute } from "../lib/matchDuration";
+import { isStaffPosition } from "../lib/awards";
 
 type DetailTab = "summary" | "lineups";
 const eventTitles: Record<string, string> = {
@@ -26,6 +27,7 @@ export default function MatchDetail() {
   const [events, setEvents] = useState<MatchEvent[]>([]);
   const [lineups, setLineups] = useState<MatchLineup[]>([]);
   const [mvp, setMvp] = useState<MatchMvp | null>(null);
+  const [wildcards, setWildcards] = useState<MatchWildcard[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [tab, setTab] = useState<DetailTab>("summary");
   const [loading, setLoading] = useState(true);
@@ -40,9 +42,9 @@ export default function MatchDetail() {
         if (!active) return;
         setMatch(currentMatch);
         if (!currentMatch) return;
-        const [teams, matchEvents, matchMvp, allPlayers, matchLineups] = await Promise.all([
+        const [teams, matchEvents, matchMvp, allPlayers, matchLineups, matchWildcards] = await Promise.all([
           getTeams(), getMatchEvents(matchId), getMatchMvp(matchId),
-          getPlayers(), getMatchLineups(matchId),
+          getPlayers(), getMatchLineups(matchId), getMatchWildcards(matchId),
         ]);
         if (!active) return;
         setHome(teams.find((team) => team.id === currentMatch.home_team_id) ?? null);
@@ -51,6 +53,7 @@ export default function MatchDetail() {
         setMvp(matchMvp);
         setPlayers(allPlayers);
         setLineups(matchLineups);
+        setWildcards(matchWildcards);
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : "Impossibile caricare la partita.");
       } finally {
@@ -166,7 +169,9 @@ export default function MatchDetail() {
                       : "Gli eventi verranno pubblicati al termine della partita."}</p>
                   </div>
                 )}
-                {mvp && <div className="match-experience__mvp">★ MVP della partita <strong>{playerName(mvp.player_id)}</strong></div>}
+                {mvp && <div className="match-experience__mvp">★ MVP della partita <strong>{mvp.wildcard_id
+                  ? (wildcards.find((entry) => entry.id === mvp.wildcard_id)?.full_name ?? "Wildcard") + " · Wildcard"
+                  : playerName(mvp.player_id)}</strong></div>}
               </section>
             )}
 
@@ -174,7 +179,7 @@ export default function MatchDetail() {
               <section className="match-experience__panel">
                 <div className="match-experience__panel-title">
                   <h2>Formazioni</h2>
-                  <p>Titolari e giocatori a disposizione delle due squadre</p>
+                  <p>Titolari, panchina, staff e wildcard delle due squadre</p>
                 </div>
                 <div className="match-experience__formations">
                   {[home, away].map((team, index) => {
@@ -182,30 +187,50 @@ export default function MatchDetail() {
                     const teamLineup = lineups.filter((entry) => entry.team_id === teamId)
                       .sort((a, b) => Number(b.starter) - Number(a.starter) ||
                         (a.shirt_number ?? 999) - (b.shirt_number ?? 999));
+                    const wildcard = wildcards.find((entry) => entry.team_id === teamId);
+                    const staffEntry = (entry: MatchLineup) => {
+                      const player = findPlayer(entry.player_id);
+                      return isStaffPosition(player?.position, player?.role);
+                    };
+                    const groups = [
+                      { key: "starters", title: "Titolari", members: teamLineup.filter((entry) => entry.starter && !staffEntry(entry)) },
+                      { key: "bench", title: "Panchina", members: teamLineup.filter((entry) => !entry.starter && !staffEntry(entry)) },
+                      { key: "staff", title: "Staff", members: teamLineup.filter(staffEntry) },
+                    ];
                     return (
                       <section className="match-experience__formation" key={teamId}>
                         <div className="match-experience__formation-head">
                           {team?.logo_url && <img className="match-experience__formation-logo" src={team.logo_url} alt="" />}
                           <h3>{team?.name ?? "Squadra"}</h3>
                         </div>
-                        {teamLineup.length ? (
+                        {teamLineup.length || wildcard ? (
                           <>
-                            {([true, false] as const).map((starter) => {
-                              const members = teamLineup.filter((entry) => entry.starter === starter);
-                              return members.length ? <div className="match-experience__formation-group" key={String(starter)}>
-                                <h4>{starter ? "Titolari" : "Panchina"}</h4>
+                            {groups.map(({ key, title, members }) => members.length ? (
+                              <div className="match-experience__formation-group" key={key}>
+                                <h4>{title}</h4>
                                 {members.map((entry) => {
                                   const player = findPlayer(entry.player_id);
+                                  const staff = key === "staff";
                                   return <div className="match-experience__formation-player" key={entry.id}>
                                     {player?.profile_image_url
                                       ? <img src={player.profile_image_url} alt="" />
-                                      : <span className="match-experience__avatar">#{entry.shirt_number ?? "—"}</span>}
+                                      : <span className="match-experience__avatar">{staff ? "ST" : "#" + (entry.shirt_number ?? "—")}</span>}
                                     <span>{playerName(entry.player_id)}</span>
-                                    <strong>#{entry.shirt_number ?? player?.shirt_number ?? "—"}</strong>
+                                    <strong>{staff ? "Staff" : "#" + (entry.shirt_number ?? player?.shirt_number ?? "—")}</strong>
                                   </div>;
                                 })}
-                              </div> : null;
-                            })}
+                              </div>
+                            ) : null)}
+                            {wildcard && (
+                              <div className="match-experience__formation-group">
+                                <h4>Wildcard</h4>
+                                <div className="match-experience__formation-player">
+                                  <span className="match-experience__avatar">WC</span>
+                                  <span>{wildcard.full_name}</span>
+                                  <strong>{wildcard.position}</strong>
+                                </div>
+                              </div>
+                            )}
                           </>
                         ) : <p className="match-experience__formation-empty">Formazione non ancora disponibile.</p>}
                       </section>

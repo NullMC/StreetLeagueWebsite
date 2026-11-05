@@ -10,6 +10,7 @@ import type {
   MatchEvent,
   MatchLineup,
   MatchMvp,
+  MatchWildcard,
   PlayerStats,
   StaffRankingEntry,
   StatisticsGroup,
@@ -261,6 +262,20 @@ export async function getMatchMvp(matchId: string): Promise<MatchMvp | null> {
     .maybeSingle();
   if (error) throw error;
   return data as MatchMvp | null;
+}
+
+/** Wildcards of one match, or of every match when no id is given. */
+export async function getMatchWildcards(matchId?: string): Promise<MatchWildcard[]> {
+  if (!supabase) return [];
+  let query = supabase.from("match_wildcards").select("*");
+  if (matchId) query = query.eq("match_id", matchId);
+  const { data, error } = await query;
+  // Before migration 24 the table does not exist: behave as if there were no Wildcards.
+  if (error) {
+    if (error.code === "42P01" || error.code === "PGRST205" || /match_wildcards/.test(error.message)) return [];
+    throw error;
+  }
+  return (data ?? []) as MatchWildcard[];
 }
 
 export async function getAllMatchLineups(): Promise<MatchLineup[]> {

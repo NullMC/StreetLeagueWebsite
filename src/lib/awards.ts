@@ -149,7 +149,8 @@ export async function getCompetitionAwardScores(
 
   const mvpCounts: Record<string, number> = {};
   ((mvpResponse.data ?? []) as MatchMvp[]).forEach((entry) => {
-    if (!finishedMatches.has(entry.match_id)) return;
+    // Wildcard MVPs count for their match only, not in the season ranking.
+    if (!finishedMatches.has(entry.match_id) || !entry.player_id) return;
     mvpCounts[entry.player_id] = (mvpCounts[entry.player_id] ?? 0) + 1;
   });
 

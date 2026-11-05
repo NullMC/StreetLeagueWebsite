@@ -57,6 +57,20 @@ export interface Match {
   photo_drive_url?: string | null;
 }
 
+export const WILDCARD_POSITIONS = ["Portiere", "Difensore", "Centrocampista", "Attaccante"] as const;
+export type WildcardPosition = (typeof WILDCARD_POSITIONS)[number];
+
+/** External player allowed for one match only: one per team, with a role. */
+export interface MatchWildcard {
+  id: string;
+  match_id: string;
+  team_id: string;
+  full_name: string;
+  position: WildcardPosition;
+  /** End-of-match rating (1-5), only when the Wildcard plays as goalkeeper. */
+  goalkeeper_rating: number | null;
+}
+
 export interface MatchLineup {
   id: string;
   match_id: string;
@@ -68,7 +82,9 @@ export interface MatchLineup {
 
 export interface MatchMvp {
   match_id: string;
-  player_id: string;
+  /** Registered player, or null when the MVP is the match Wildcard. */
+  player_id: string | null;
+  wildcard_id?: string | null;
 }
 
 export interface Partner {

@@ -83,7 +83,7 @@ function makeLineup(matches: Match[], teams: Team[], players: Player[], events: 
     if(event.event_type==="yellow_card") total.yellowCards+=1;
     if(event.event_type==="red_card") total.redCards+=1;
   });
-  mvps.forEach(entry=>{ if(matchIds.has(entry.match_id)){const total=totals.get(entry.player_id);if(total)total.mvps+=1;} });
+  mvps.forEach(entry=>{ if(entry.player_id&&matchIds.has(entry.match_id)){const total=totals.get(entry.player_id);if(total)total.mvps+=1;} });
 
   const candidates: Candidate[]=[];
   totals.forEach((total,playerId)=>{
