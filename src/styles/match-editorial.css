@@ -135,6 +135,8 @@ html[data-theme="night"] .match-experience__tabs button.active { background: var
 .match-experience__formation-player { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--report-line); font-size: 12px; }
 .match-experience__formation-player > img, .match-experience__avatar { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 50%; object-fit: cover; }
 .match-experience__avatar { display: grid; place-items: center; background: var(--report-paper); color: var(--report-ink); }
+/* Sigle (#numero, ST, WC) sempre su una riga: niente a capo né ingrandimento automatico del testo su mobile */
+.match-experience__avatar { overflow: hidden; white-space: nowrap; line-height: 1; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; text-align: center; -webkit-text-size-adjust: none; text-size-adjust: none; }
 .match-experience__formation-player span:nth-child(2) { min-width: 0; flex: 1; overflow-wrap: anywhere; }
 .match-experience__formation-player strong { color: var(--report-muted); }
 .match-experience__formation-empty { color: var(--report-muted); font-size: 12px; line-height: 1.6; }

@@ -125,6 +125,8 @@ export interface MatchEvent {
   id: string;
   match_id: string;
   player_id: string | null;
+  /** Set instead of player_id when the event belongs to the match Wildcard. */
+  wildcard_id?: string | null;
   related_player_id: string | null;
   event_type: EventType;
   minute: number | null;

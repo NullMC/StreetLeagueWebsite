@@ -26,6 +26,7 @@ const byRosterOrder = (a: Player, b: Player) =>
   (a.shirt_number ?? 999) - (b.shirt_number ?? 999) ||
   nameOf(a).localeCompare(nameOf(b), "it");
 const WILDCARD_MAX = 80;
+const WILDCARD_PREFIX = "wc:";
 type WildcardDraft = { name: string; position: WildcardPosition };
 const emptyWildcard: WildcardDraft = { name: "", position: "Centrocampista" };
 const wildcardDraftOf = (row?: MatchWildcard): WildcardDraft =>
@@ -159,8 +160,21 @@ export function AdminMatchReports() {
       ? isStaff(player)
       : lineups.some((entry) => entry.player_id === player.id) &&
         (kind !== "goal" || !isStaff(player))).sort(byRosterOrder);
-  const resolvedPlayerId = eligibleEventPlayers.some((player) => player.id === playerId)
-    ? playerId : (eligibleEventPlayers[0]?.id ?? "");
+  // The Wildcard of each team can score and be booked, never take the presidential goal.
+  const eligibleWildcards = kind === "presidential_penalty" ? [] : savedWildcards;
+  const actorIds = [
+    ...eligibleEventPlayers.map((player) => player.id),
+    ...eligibleWildcards.map((wildcard) => WILDCARD_PREFIX + wildcard.id),
+  ];
+  const resolvedPlayerId = actorIds.includes(playerId) ? playerId : (actorIds[0] ?? "");
+  const actorName = (entry: MatchEvent) => {
+    if (entry.wildcard_id) {
+      const wildcard = savedWildcards.find((row) => row.id === entry.wildcard_id);
+      return (wildcard?.full_name ?? "Wildcard") + " (Wildcard)";
+    }
+    const player = players.find((row) => row.id === entry.player_id);
+    return player ? nameOf(player) + (isStaff(player) ? " (Staff)" : "") : "—";
+  };
 
   async function saveLineup(teamId: string) {
     if (!selectedMatch || !supabase) return;
@@ -174,7 +188,7 @@ export function AdminMatchReports() {
     const savedWildcard = savedWildcards.find((row) => row.team_id === teamId);
     if (wildcardName && wildcardName.length < 2) { setError("Inserisci nome e cognome della Wildcard."); return; }
     if (!wildcardName && savedWildcard && !window.confirm(
-      "La Wildcard " + savedWildcard.full_name + " verrà rimossa dalla partita, insieme all'eventuale MVP e al voto da portiere. Continuare?")) return;
+      "La Wildcard " + savedWildcard.full_name + " verrà rimossa dalla partita, insieme all'eventuale MVP, al voto da portiere e ai suoi eventi nel referto. Continuare?")) return;
     setBusy(teamId); setMessage(""); setError("");
     try {
       await ensureFreshAdminSession();
@@ -228,8 +242,14 @@ export function AdminMatchReports() {
     setBusy("event"); setMessage(""); setError("");
     try {
       await ensureFreshAdminSession();
+      const isWildcard = resolvedPlayerId.startsWith(WILDCARD_PREFIX);
+      const editedEvent = events.find((entry) => entry.id === eventId);
       const payload = {
-        match_id: selectedMatch.id, player_id: resolvedPlayerId,
+        match_id: selectedMatch.id,
+        player_id: isWildcard ? null : resolvedPlayerId,
+        // Send wildcard_id only when it is involved, so player events keep working on older schemas.
+        ...(isWildcard ? { wildcard_id: resolvedPlayerId.slice(WILDCARD_PREFIX.length) }
+          : editedEvent?.wildcard_id ? { wildcard_id: null } : {}),
         event_type: kind, minute: numericMinute, note: note.trim() || null,
         related_player_id: null,
       };
@@ -363,13 +383,18 @@ export function AdminMatchReports() {
                 <input type="number" min={1} max={MATCH_DURATION_MINUTES} step={1} required value={minute}
                   disabled={!canRecordEvents} onChange={(e) => setMinute(e.target.value)} />
               </label>
-              <label>{kind === "presidential_penalty" ? "Membro STAFF" : kind === "goal" ? "Giocatore" : "Giocatore o STAFF"}
-                <select value={resolvedPlayerId} required disabled={!canRecordEvents || !eligibleEventPlayers.length}
+              <label>{kind === "presidential_penalty" ? "Membro STAFF" : kind === "goal" ? "Giocatore o Wildcard" : "Giocatore, STAFF o Wildcard"}
+                <select value={resolvedPlayerId} required disabled={!canRecordEvents || !actorIds.length}
                   onChange={(e) => setPlayerId(e.target.value)}>
-                  {!eligibleEventPlayers.length && <option value="">Nessun membro idoneo</option>}
+                  {!actorIds.length && <option value="">Nessun membro idoneo</option>}
                   {eligibleEventPlayers.map((player) => (
                     <option key={player.id} value={player.id}>
                       {teams.find((team) => team.id === player.team_id)?.name} · {nameOf(player)}{isStaff(player) ? " (Staff)" : ""}
+                    </option>
+                  ))}
+                  {eligibleWildcards.map((wildcard) => (
+                    <option key={wildcard.id} value={WILDCARD_PREFIX + wildcard.id}>
+                      {teams.find((team) => team.id === wildcard.team_id)?.name} · {wildcard.full_name} (Wildcard)
                     </option>
                   ))}
                 </select>
@@ -379,7 +404,7 @@ export function AdminMatchReports() {
               </label>
               <div className="match-report-admin__event-actions">
                 <button className="btn btn--primary" type="submit"
-                  disabled={!canRecordEvents || !eligibleEventPlayers.length || Boolean(busy)}>
+                  disabled={!canRecordEvents || !actorIds.length || Boolean(busy)}>
                   {eventId ? "Aggiorna evento" : "Aggiungi evento"}
                 </button>
                 {eventId && <button type="button" className="btn btn--ghost" onClick={resetEvent}>Annulla modifica</button>}
@@ -398,10 +423,10 @@ export function AdminMatchReports() {
                   <div className={"match-report-admin__event-item" + (!isValidMatchMinute(entry.minute) ? " match-report-admin__event-item--invalid" : "")} key={entry.id}>
                     <strong>{entry.minute ?? "—"}'</strong>
                     <span>{kinds.find((option) => option.value === entry.event_type)?.label ?? entry.event_type}{!isValidMatchMinute(entry.minute) ? " · Minuto da correggere" : ""}</span>
-                    <span>{players.find((player) => player.id === entry.player_id) ? nameOf(players.find((player) => player.id === entry.player_id)!) : "—"}</span>
+                    <span>{actorName(entry)}</span>
                     <button type="button" className="btn btn--ghost btn--small" disabled={Boolean(busy)} onClick={() => {
                       setEventId(entry.id); setKind(entry.event_type as EventKind);
-                      setMinute(String(entry.minute ?? 1)); setPlayerId(entry.player_id ?? ""); setNote(entry.note ?? "");
+                      setMinute(String(entry.minute ?? 1)); setPlayerId(entry.wildcard_id ? WILDCARD_PREFIX + entry.wildcard_id : entry.player_id ?? ""); setNote(entry.note ?? "");
                     }}>Modifica</button>
                     <button type="button" className="btn btn--danger btn--small" disabled={Boolean(busy)}
                       onClick={() => void deleteEvent(entry.id)}>Elimina</button>

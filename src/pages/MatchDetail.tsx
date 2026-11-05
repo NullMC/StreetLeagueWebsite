@@ -141,14 +141,16 @@ export default function MatchDetail() {
                     <span className="match-experience__timeline-boundary">1′ · Inizio partita</span>
                     {timelineEvents.map((event) => {
                       const player = findPlayer(event.player_id);
-                      const side = player?.team_id === match.away_team_id ? "away" : "home";
+                      const wildcard = event.wildcard_id ? wildcards.find((entry) => entry.id === event.wildcard_id) : undefined;
+                      const side = (wildcard?.team_id ?? player?.team_id) === match.away_team_id ? "away" : "home";
                       const title = eventTitles[event.event_type] ?? event.event_type;
                       return (
                         <div className={"match-experience__timeline-row match-experience__timeline-row--" + side} key={event.id}>
                           <div className="match-experience__timeline-entry">
                             {player?.profile_image_url && <img src={player.profile_image_url} alt="" />}
                             <div className="match-experience__event-text">
-                              <strong>{playerName(event.player_id)}</strong>
+                              <strong>{wildcard ? wildcard.full_name : playerName(event.player_id)}</strong>
+                              {wildcard && <small className="match-experience__wildcard-note">Wildcard</small>}
                               <span className={"match-experience__event-kind match-experience__event-kind--" + event.event_type}>
                                 <b aria-hidden="true">{eventSymbols[event.event_type] ?? "•"}</b> {title}
                               </span>
