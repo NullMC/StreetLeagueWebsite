@@ -157,10 +157,14 @@ export function AdminMatchAwards() {
     .filter((player) =>
       Boolean(selectedMvpMatch) &&
       [selectedMvpMatch?.home_team_id, selectedMvpMatch?.away_team_id].includes(player.team_id) &&
-      registeredTeamIds.has(player.team_id) &&
-      !isStaffPosition(player.position, player.role),
+      registeredTeamIds.has(player.team_id),
     )
-    .filter((player) => playerSearchable(player).includes(mvpSearch.trim().toLocaleLowerCase("it")));
+    .filter((player) => playerSearchable(player).includes(mvpSearch.trim().toLocaleLowerCase("it")))
+    // Every member can be MVP: players (goalkeepers included) first, then STAFF.
+    .sort((a, b) =>
+      Number(isStaffPosition(a.position, a.role)) - Number(isStaffPosition(b.position, b.role)) ||
+      (teamNames.get(a.team_id) ?? "").localeCompare(teamNames.get(b.team_id) ?? "", "it") ||
+      playerName(a).localeCompare(playerName(b), "it"));
   // Wildcards of the selected match: goalkeepers get the rating, everyone can be MVP.
   const keeperWildcards = wildcards.filter((wildcard) =>
     wildcard.match_id === selectedMatch?.id && wildcard.position === "Portiere" &&
@@ -437,7 +441,7 @@ export function AdminMatchAwards() {
 
           <section className="admin-awards__panel">
             <h3>MVP · per partita</h3>
-            <p className="admin-help-text">Ogni partita può avere un solo MVP, selezionato tra i giocatori delle due squadre. Filtra per giornata e poi scegli la partita: puoi correggere il nominativo senza duplicare il riconoscimento.</p>
+            <p className="admin-help-text">Ogni partita può avere un solo MVP, scelto tra tutti i membri delle due squadre: giocatori, portieri, STAFF e Wildcard. Filtra per giornata e poi scegli la partita: puoi correggere il nominativo senza duplicare il riconoscimento.</p>
             <label className="admin-awards__field">
               <span>Filtra per numero di giornata</span>
               <select value={mvpMatchday} disabled={matchesLoading} onChange={(event) => {
@@ -486,8 +490,8 @@ export function AdminMatchAwards() {
                 {mvpPlayers.map((player) => (
                   <div className="admin-awards__player" key={player.id}>
                     <div className="admin-awards__player-info">
-                      <strong>{playerName(player)}</strong>
-                      <small>{teamNames.get(player.team_id) ?? "—"} · Nomination MVP: <strong>{nominationCounts.get(player.id) ?? 0}</strong></small>
+                      <strong>{playerName(player)}{isStaffPosition(player.position, player.role) && <span className="admin-awards__wildcard-tag">Staff</span>}</strong>
+                      <small>{teamNames.get(player.team_id) ?? "—"}{player.position && !isStaffPosition(player.position, player.role) ? " · " + player.position : ""} · Nomination MVP: <strong>{nominationCounts.get(player.id) ?? 0}</strong></small>
                     </div>
                     <div className="admin-awards__actions">
                       <button

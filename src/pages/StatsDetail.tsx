@@ -71,7 +71,6 @@ export default function StatsDetail() {
         ]);
         const teamById = new Map<string, Team>(allTeams.map((team) => [team.id, team]));
         const players: RankedPlayer[] = playerRows
-          .filter((player) => !isStaff(player))
           .map((player) => ({ ...player, team_name: teamById.get(player.team_id)?.name ?? "—" }));
         if (mounted) {
           setData({
@@ -101,6 +100,8 @@ export default function StatsDetail() {
     key === "mvps" ? awards?.mvpCounts[player.id] ?? 0 :
     isKeeperRanking ? awards?.goalkeepers[player.id]?.average ?? 0 : 0;
   const playerRanking = validKey && key !== "staff" ? [...players]
+    // STAFF members only appear in the MVP ranking.
+    .filter((player) => key === "mvps" || !isStaff(player))
     .filter((player) => !isKeeperRanking || isGoalkeeperPosition(player.position))
     .filter((player) => score(player) > 0)
     .sort((a, b) =>

@@ -50,6 +50,8 @@ function BestStatsCard({ group, players, staff, awards, config }: {
     config.key === "mvps" ? awards.mvpCounts[player.id] ?? 0 :
     config.key === "goalkeepers" ? awards.goalkeepers[player.id]?.average ?? 0 : 0;
   const ranked = config.key === "staff" ? [] : [...players]
+    // STAFF members only appear in the MVP ranking.
+    .filter((player) => config.key === "mvps" || !isStaff(player))
     .filter((player) => config.key !== "goalkeepers" || isGoalkeeperPosition(player.position))
     .filter((player) => sortValue(player) > 0)
     .sort((a, b) =>
@@ -169,15 +171,15 @@ export default function Stats() {
           ]);
           const teamById = new Map<string, Team>();
           individualSets.flatMap((entry) => entry.teams).forEach((team) => teamById.set(team.id, team));
-          const withTeams = (rows: Array<Player & { stats: PlayerStats }>): RankedPlayer[] =>
-            rows.filter((player) => !isStaff(player)).map((player) => ({
+          const withTeams = (rows: Array<Player & { stats: PlayerStats }>, includeStaff = false): RankedPlayer[] =>
+            rows.filter((player) => includeStaff || !isStaff(player)).map((player) => ({
               ...player,
               team_name: teamById.get(player.team_id)?.name ?? "—",
             }));
 
           return {
             group,
-            players: withTeams(playerRows),
+            players: withTeams(playerRows, true),
             staff,
             awards,
             playersByCompetition: Object.fromEntries(
