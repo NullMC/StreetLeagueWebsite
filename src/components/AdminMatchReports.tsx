@@ -343,7 +343,7 @@ export function AdminMatchReports() {
               return (
                 <section className="match-report-admin__team" key={teamId}>
                   <div className="match-report-admin__team-title">
-                    {team?.logo_url && <img src={team.logo_url} alt="" />}
+                    {team?.logo_url && <img loading="lazy" decoding="async" src={team.logo_url} alt="" />}
                     <h4>{team?.name ?? "Squadra"}</h4>
                     <span>{lineups.filter((entry) => entry.team_id === teamId).length} registrati</span>
                   </div>

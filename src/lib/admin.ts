@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { optimizeImage } from "./imageCompress";
 
 export type AdminRole = "super_admin" | "admin" | "operator" | "viewer";
 
@@ -202,8 +203,13 @@ async function normalizeFunctionError(error: unknown) {
     : new Error("Errore durante la chiamata alla Edge Function.");
 }
 
-export async function uploadMedia(file: File, folder: string) {
+/** Files are uniquely named and never overwritten, so browsers and the CDN can keep them for a year. */
+const MEDIA_CACHE_SECONDS = "31536000";
+
+export async function uploadMedia(original: File, folder: string) {
   const client = sb();
+  // Resize and re-encode before upload: every byte served counts towards the Supabase egress quota.
+  const file = await optimizeImage(original, folder);
   const extension = file.name.split(".").pop()?.toLowerCase() || "bin";
   const safeName = crypto.randomUUID() + "." + extension;
   const path = folder + "/" + safeName;
@@ -214,7 +220,7 @@ export async function uploadMedia(file: File, folder: string) {
 
   let result = await bucket.upload(path, file, {
     upsert: false,
-    cacheControl: "3600",
+    cacheControl: MEDIA_CACHE_SECONDS,
   });
 
   // If the stored access token is stale, refresh it once and retry the upload.
@@ -222,7 +228,7 @@ export async function uploadMedia(file: File, folder: string) {
     await refreshAdminSession();
     result = await bucket.upload(path, file, {
       upsert: false,
-      cacheControl: "3600",
+      cacheControl: MEDIA_CACHE_SECONDS,
     });
   }
 

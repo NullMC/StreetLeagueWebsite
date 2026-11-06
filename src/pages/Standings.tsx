@@ -87,7 +87,7 @@ export default function Standings() {
                         <span className="position">{String(index + 1).padStart(2, "0")}</span>
                         <span className="standings-team">
                           {row.team.logo_url ? (
-                            <img src={row.team.logo_url} alt="" className="standings-team__logo" />
+                            <img loading="lazy" decoding="async" src={row.team.logo_url} alt="" className="standings-team__logo" />
                           ) : (
                             <span className="standings-team__logo standings-team__logo--placeholder" aria-hidden="true">
                               {row.team.name.slice(0, 1).toUpperCase()}

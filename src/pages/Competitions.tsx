@@ -74,8 +74,8 @@ export default function Competitions() {
               return (
                 <a className="sl-comp-card" key={listing.key} href={href} data-status={listing.status}>
                   <div className="sl-comp-card__media" aria-hidden="true">
-                    <img className="sl-comp-card__wordmark" src="/assets/scritta.png" alt="" onError={(event) => { event.currentTarget.style.opacity = "0"; }} />
-                    <img className="sl-comp-card__logo" src="/assets/logo.png" alt="" />
+                    <img loading="lazy" decoding="async" className="sl-comp-card__wordmark" src="/assets/scritta.png" alt="" onError={(event) => { event.currentTarget.style.opacity = "0"; }} />
+                    <img loading="lazy" decoding="async" className="sl-comp-card__logo" src="/assets/logo.png" alt="" />
                   </div>
                   <div className="sl-comp-card__body">
                     <span className="sl-comp-card__status">{listing.status}</span>

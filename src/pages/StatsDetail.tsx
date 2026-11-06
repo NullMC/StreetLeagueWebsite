@@ -163,7 +163,7 @@ export default function StatsDetail() {
                   <a className="table-row" href={"/giocatori/" + player.id} key={player.id}>
                     <span className="position">{String(index + 1).padStart(2, "0")}</span>
                     <span className="stats-detail-player">
-                      {photo ? <img src={photo} alt="" /> : <span className="stats-detail-player__placeholder">{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</span>}
+                      {photo ? <img loading="lazy" decoding="async" src={photo} alt="" /> : <span className="stats-detail-player__placeholder">{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</span>}
                       <span><strong>{player.first_name} {player.last_name}</strong><small>{player.position || "Staff"}</small></span>
                     </span>
                     <strong>{entry.presidential_penalties}</strong>
@@ -186,7 +186,7 @@ export default function StatsDetail() {
                   <a className="table-row" href={"/giocatori/" + player.id}>
                     <span className="position">{String(index + 1).padStart(2, "0")}</span>
                     <span className="stats-detail-player">
-                    {photo ? <img src={photo} alt="" /> : <span className="stats-detail-player__placeholder">{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</span>}
+                    {photo ? <img loading="lazy" decoding="async" src={photo} alt="" /> : <span className="stats-detail-player__placeholder">{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</span>}
                     <span><strong>{player.first_name} {player.last_name}</strong><small>{player.position || "Giocatore"}</small></span>
                   </span>
                   <span className="stats-detail-team">{player.team_name}</span>

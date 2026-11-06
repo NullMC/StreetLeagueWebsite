@@ -111,7 +111,7 @@ function PlayerSlot({candidate,label}:{candidate:Candidate|null;label:string}){
   return <a className="top-seven-player" href={"/giocatori/"+player.id}>
     <div className="top-seven-player__photo-wrap">
       <Avatar className="top-seven-player__avatar" src={photo} alt={player.first_name+" "+player.last_name}>{player.first_name.slice(0,1)}{player.last_name.slice(0,1)}</Avatar>
-      {candidate.team.logo_url?<img className="top-seven-player__team-logo" src={candidate.team.logo_url} alt=""/>:null}
+      {candidate.team.logo_url?<img loading="lazy" decoding="async" className="top-seven-player__team-logo" src={candidate.team.logo_url} alt=""/>:null}
     </div>
     <strong>{player.first_name} {player.last_name}</strong><small>{candidate.team.name}</small>
     <span className="top-seven-player__stats">{candidate.goals} gol · {candidate.assists} assist</span><small className="top-seven-player__role">{label}</small>

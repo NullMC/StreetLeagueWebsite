@@ -8,7 +8,7 @@ type LogoScrollerProps = {
 
 function PartnerItem({ partner }: { partner: Partner }) {
   const content = partner.logo_url ? (
-    <img src={partner.logo_url} alt={partner.name} />
+    <img loading="lazy" decoding="async" src={partner.logo_url} alt={partner.name} />
   ) : (
     <span>{partner.name}</span>
   );

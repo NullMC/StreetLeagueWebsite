@@ -48,7 +48,7 @@ function RosterCards({ members, staff = false }: { members: Player[]; staff?: bo
           >
             {image && (
               <span className="player-card__photo" aria-hidden="true">
-                <img
+                <img loading="lazy" decoding="async"
                   src={image}
                   alt=""
                   className={player.profile_image_url

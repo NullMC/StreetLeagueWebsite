@@ -156,7 +156,7 @@ export default function MatchDetail() {
                       return (
                         <div className={"match-experience__timeline-row match-experience__timeline-row--" + side} key={event.id}>
                           <div className="match-experience__timeline-entry">
-                            {player?.profile_image_url && <img src={player.profile_image_url} alt="" />}
+                            {player?.profile_image_url && <img loading="lazy" decoding="async" src={player.profile_image_url} alt="" />}
                             <div className="match-experience__event-text">
                               <strong>{anonymousOwnGoal ? "Autogol " + (ownGoalTeamName ?? "") : wildcard ? wildcard.full_name : playerName(event.player_id)}</strong>
                               {event.event_type === "own_goal" && !anonymousOwnGoal && ownGoalTeamName && <small className="match-experience__wildcard-note">{ownGoalTeamName}</small>}
@@ -212,7 +212,7 @@ export default function MatchDetail() {
                     return (
                       <section className="match-experience__formation" key={teamId}>
                         <div className="match-experience__formation-head">
-                          {team?.logo_url && <img className="match-experience__formation-logo" src={team.logo_url} alt="" />}
+                          {team?.logo_url && <img loading="lazy" decoding="async" className="match-experience__formation-logo" src={team.logo_url} alt="" />}
                           <h3>{team?.name ?? "Squadra"}</h3>
                         </div>
                         {teamLineup.length || wildcard ? (
@@ -225,7 +225,7 @@ export default function MatchDetail() {
                                   const staff = key === "staff";
                                   return <div className="match-experience__formation-player" key={entry.id}>
                                     {player?.profile_image_url
-                                      ? <img src={player.profile_image_url} alt="" />
+                                      ? <img loading="lazy" decoding="async" src={player.profile_image_url} alt="" />
                                       : <span className="match-experience__avatar">{staff ? "ST" : "#" + (entry.shirt_number ?? "—")}</span>}
                                     <span>{playerName(entry.player_id)}</span>
                                     <strong>{staff ? "Staff" : "#" + (entry.shirt_number ?? player?.shirt_number ?? "—")}</strong>
