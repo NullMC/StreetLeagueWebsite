@@ -7,6 +7,7 @@ import type {
   Partner,
   ActiveCollaboration,
   SocialContent,
+  GoalkeeperMatchRating,
   MatchEvent,
   MatchLineup,
   MatchMvp,
@@ -286,6 +287,11 @@ export async function getAllMatchLineups(): Promise<MatchLineup[]> {
 export async function getAllMatchMvps(): Promise<MatchMvp[]> {
   if (!supabase) return [];
   return getRows<MatchMvp>(supabase.from("match_mvp").select("*"));
+}
+
+export async function getAllGoalkeeperRatings(): Promise<GoalkeeperMatchRating[]> {
+  if (!supabase) return [];
+  return getRows<GoalkeeperMatchRating>(supabase.from("goalkeeper_match_ratings").select("match_id,player_id,rating"));
 }
 
 export async function getAllMatchEvents(): Promise<MatchEvent[]> {

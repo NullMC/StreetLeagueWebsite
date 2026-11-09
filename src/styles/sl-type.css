@@ -4,13 +4,13 @@
    paragrafi, etichette, dati, pulsanti, navigazione e tabelle usano Archivo.
    Voci dei titoli (pairing ispirato a ItalFUT):
    - Unbounded (wide, geometrico): hero, titoli di pagina e di sezione
-   - Instrument Serif corsivo: una parola d'accento dentro il titolo
+   - Sedgwick Ave Display (tag graffiti): l'accento rosa dentro il titolo
    - Barlow Condensed corsivo (la voce del logo): titoli di card e sottotitoli
    ========================================================================== */
 
 :root {
   --font-headline: "Unbounded Variable", "Unbounded", "Archivo Variable", system-ui, sans-serif;
-  --font-serif: "Instrument Serif", "Times New Roman", Georgia, serif;
+  --font-tag: "Sedgwick Ave Display", "Archivo Variable", system-ui, sans-serif;
   --font-sport: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
 }
 
@@ -64,11 +64,11 @@
     font-style: normal !important;
   }
 
-  /* Accento editoriale dentro un titolo: Instrument Serif corsivo */
+  /* Accento dentro un titolo: tag graffiti rosa */
   body :is(h1, h2, h3, h4, h5, h6) :is(.sl-word--accent, .sl-accent),
   body :is(h1, h2, h3, h4, h5, h6) :is(.sl-word--accent, .sl-accent) * {
-    font-family: var(--font-serif) !important;
-    font-style: italic !important;
+    font-family: var(--font-tag) !important;
+    font-style: normal !important;
   }
 }
 
@@ -109,13 +109,13 @@
 #root .match-experience__panel-title h2,
 #root .match-experience__panel h2 { font-size: clamp(20px, 2vw, 28px) !important; }
 
-/* Accento serif nei titoli: minuscolo, leggermente più grande, rosa */
+/* Accento graffiti nei titoli: rosa */
 #root :is(h1, h2, h3) .sl-accent {
   font-weight: 400;
   text-transform: none;
-  letter-spacing: -0.01em;
-  font-size: 1.16em;
-  line-height: 0.8;
+  letter-spacing: 0;
+  font-size: 1.08em;
+  line-height: 0.9;
   color: var(--sl-accent);
   padding-right: 0.08em;
 }
@@ -124,7 +124,7 @@ html[data-theme="night"] #root :is(h1, h2, h3) .sl-accent {
   text-shadow: 0 0 30px rgba(228, 34, 120, 0.5);
 }
 
-/* Hero: "La Street League" in Unbounded, "raccontata da vicino" in serif corsivo rosa */
+/* Hero: "La Street League" in Unbounded, "raccontata da vicino" come tag graffiti rosa */
 #root .sl-hero__title {
   font-weight: 800 !important;
   font-size: clamp(38px, 6.6vw, 104px) !important;
@@ -135,11 +135,13 @@ html[data-theme="night"] #root :is(h1, h2, h3) .sl-accent {
 #root .sl-word--accent {
   font-weight: 400;
   text-transform: none;
-  letter-spacing: -0.01em;
-  font-size: 1.18em;
-  line-height: 0.8;
+  letter-spacing: 0;
+  font-size: 1em;
+  line-height: 0.95;
   color: var(--sl-accent);
-  padding-right: 0.12em;
+  padding-right: 0.06em;
+  /* Leggera inclinazione da tag */
+  rotate: -3deg;
 }
 html[data-theme="night"] #root .sl-word--accent {
   color: var(--sl-pink-2);
@@ -211,14 +213,6 @@ html[data-theme="night"] #root .sl-word--accent {
 #root .standings-table .table-row.head { font-size: 11px !important; letter-spacing: 0.08em !important; }
 .sl-dock__item span { font-size: 10px; letter-spacing: 0.01em; }
 
-/* Navigazione: Archivo stretto, maiuscole leggere */
-.sl-nav__list a {
-  font-size: 12.5px;
-  font-weight: 600;
-  font-stretch: 85%;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
 /* Pulsanti: Archivo semi-condensato, deciso */
 .sl-btn {
   font-weight: 800;

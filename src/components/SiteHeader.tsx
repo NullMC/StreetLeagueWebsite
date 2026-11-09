@@ -18,7 +18,6 @@ import {
   faLock,
   faTrophy,
 } from "@fortawesome/free-solid-svg-icons";
-import { DesktopNav } from "./ui/DesktopNav";
 import { MobileDock } from "./ui/MobileDock";
 import { ThemeToggle } from "./ui/ThemeToggle";
 
@@ -31,8 +30,6 @@ const links = [
   { label: "Sponsor & collabora", to: "/partner", icon: faHandshake },
   { label: "Admin", to: "/admin", icon: faLock },
 ];
-
-const publicLinks = links.filter((link) => link.to !== "/admin");
 
 const dockLinks = [
   { label: "Home", to: "/", icon: faHouse },
@@ -80,8 +77,6 @@ export function SiteHeader() {
       >
         <div className="sl-header__inner">
           <Logo />
-
-          <DesktopNav items={publicLinks} />
 
           <div className="sl-header__actions">
             {!loading && profile && (

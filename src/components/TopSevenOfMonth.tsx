@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Avatar, Chip, CircularProgress, Paper, Typography } from "@mui/material";
-import { getAllMatchEvents, getAllMatchLineups, getAllMatchMvps, getActiveCompetitions, getMatches, getPlayers, getTeams, subscribeToCompetition } from "../lib/api";
-import type { Match, MatchEvent, MatchLineup, MatchMvp, Player, Team } from "../types";
+import { getAllGoalkeeperRatings, getAllMatchEvents, getAllMatchLineups, getAllMatchMvps, getActiveCompetitions, getMatches, getPlayers, getTeams, subscribeToCompetition } from "../lib/api";
+import type { GoalkeeperMatchRating, Match, MatchEvent, MatchLineup, MatchMvp, Player, Team } from "../types";
 
 type Role = "goalkeeper" | "defender" | "midfielder" | "attacker";
 type Candidate = {
   player: Player; team: Team; role: Role | null; appearances: number; goals: number; assists: number;
-  mvps: number; cleanSheets: number; yellowCards: number; redCards: number; points: number;
+  mvps: number; cleanSheets: number; yellowCards: number; redCards: number; keeperRatings: number; points: number;
 };
 type Lineup = { goalkeeper: Candidate | null; defenders: Array<Candidate | null>; midfielders: Array<Candidate | null>; attackers: Array<Candidate | null> };
 
@@ -52,7 +52,7 @@ function compareCandidates(a: Candidate, b: Candidate) {
     (a.player.last_name+" "+a.player.first_name).localeCompare(b.player.last_name+" "+b.player.first_name,"it");
 }
 
-function makeLineup(matches: Match[], teams: Team[], players: Player[], events: MatchEvent[], lineups: MatchLineup[], mvps: MatchMvp[], date: Date): Lineup {
+function makeLineup(matches: Match[], teams: Team[], players: Player[], events: MatchEvent[], lineups: MatchLineup[], mvps: MatchMvp[], ratings: GoalkeeperMatchRating[], date: Date): Lineup {
   const monthlyMatches = matches.filter(match => {
     const kickoff = new Date(match.kickoff_at);
     return kickoff.getFullYear()===date.getFullYear() && kickoff.getMonth()===date.getMonth() &&
@@ -62,9 +62,9 @@ function makeLineup(matches: Match[], teams: Team[], players: Player[], events: 
   const matchIds = new Set(monthlyMatches.map(match=>match.id));
   const teamById = new Map(teams.map(team=>[team.id,team] as const));
   const playerById = new Map(players.filter(player=>!isStaff(player)).map(player=>[player.id,player] as const));
-  type Totals = { appearances:number; goals:number; assists:number; mvps:number; cleanSheets:number; yellowCards:number; redCards:number };
+  type Totals = { appearances:number; goals:number; assists:number; mvps:number; cleanSheets:number; yellowCards:number; redCards:number; keeperRatings:number };
   const totals = new Map<string,Totals>();
-  playerById.forEach((player,id)=>{ if(teamById.has(player.team_id)) totals.set(id,{appearances:0,goals:0,assists:0,mvps:0,cleanSheets:0,yellowCards:0,redCards:0}); });
+  playerById.forEach((player,id)=>{ if(teamById.has(player.team_id)) totals.set(id,{appearances:0,goals:0,assists:0,mvps:0,cleanSheets:0,yellowCards:0,redCards:0,keeperRatings:0}); });
 
   lineups.forEach(entry=>{
     const match=byMatch.get(entry.match_id); const total=totals.get(entry.player_id); const player=playerById.get(entry.player_id);
@@ -84,25 +84,26 @@ function makeLineup(matches: Match[], teams: Team[], players: Player[], events: 
     if(event.event_type==="red_card") total.redCards+=1;
   });
   mvps.forEach(entry=>{ if(entry.player_id&&matchIds.has(entry.match_id)){const total=totals.get(entry.player_id);if(total)total.mvps+=1;} });
+  // End-of-match goalkeeper ratings (1-5): the main merit of a keeper, who rarely scores.
+  ratings.forEach(entry=>{ if(matchIds.has(entry.match_id)){const total=totals.get(entry.player_id);if(total)total.keeperRatings+=Number(entry.rating)||0;} });
 
   const candidates: Candidate[]=[];
   totals.forEach((total,playerId)=>{
     const player=playerById.get(playerId); const team=player?teamById.get(player.team_id):undefined;
-    if(!player||!team||(!total.appearances&&!total.goals&&!total.assists&&!total.mvps))return;
-    candidates.push({player,team,role:roleFromPosition(player.position),...total,points:total.goals*5+total.assists*3+total.mvps*4+total.cleanSheets*4+total.appearances-total.yellowCards-total.redCards*3});
+    if(!player||!team||(!total.appearances&&!total.goals&&!total.assists&&!total.mvps&&!total.keeperRatings))return;
+    candidates.push({player,team,role:roleFromPosition(player.position),...total,points:total.goals*5+total.assists*3+total.mvps*4+total.cleanSheets*4+total.keeperRatings+total.appearances-total.yellowCards-total.redCards*3});
   });
-  const bestByTeam=new Map<string,Candidate>();
-  candidates.sort(compareCandidates).forEach(candidate=>{if(!bestByTeam.has(candidate.team.id))bestByTeam.set(candidate.team.id,candidate);});
-  const available=Array.from(bestByTeam.values()).sort(compareCandidates);
+  // One player per team. Slots are filled from the best score down across every role,
+  // so a team's goalkeeper is not excluded just because a teammate has more points.
+  const slots:Record<Role,Candidate[]>={goalkeeper:[],defender:[],midfielder:[],attacker:[]};
+  const size:Record<Role,number>={goalkeeper:1,defender:2,midfielder:2,attacker:2};
   const usedTeams=new Set<string>();
-  function pick(role:Role,count:number):Array<Candidate|null>{
-    return Array.from({length:count},()=>{
-      const selected=available.find(candidate=>candidate.role===role&&!usedTeams.has(candidate.team.id));
-      if(!selected)return null;
-      usedTeams.add(selected.team.id);return selected;
-    });
-  }
-  return {goalkeeper:pick("goalkeeper",1)[0]||null,defenders:pick("defender",2),midfielders:pick("midfielder",2),attackers:pick("attacker",2)};
+  candidates.sort(compareCandidates).forEach(candidate=>{
+    if(!candidate.role||usedTeams.has(candidate.team.id)||slots[candidate.role].length>=size[candidate.role])return;
+    slots[candidate.role].push(candidate);usedTeams.add(candidate.team.id);
+  });
+  const fill=(role:Role)=>Array.from({length:size[role]},(_,index)=>slots[role][index]||null);
+  return {goalkeeper:slots.goalkeeper[0]||null,defenders:fill("defender"),midfielders:fill("midfielder"),attackers:fill("attacker")};
 }
 
 function PlayerSlot({candidate,label}:{candidate:Candidate|null;label:string}){
@@ -127,14 +128,14 @@ export function TopSevenOfMonth(){
       setLoading(true);
       try{
         const competitions=await getActiveCompetitions();
-        const [players,teamSets,matchSets,events,allLineups,mvps]=await Promise.all([
+        const [players,teamSets,matchSets,events,allLineups,mvps,ratings]=await Promise.all([
           getPlayers(),Promise.all(competitions.map(competition=>getTeams(competition.id))),
           Promise.all(competitions.map(competition=>getMatches(competition.id))),
-          getAllMatchEvents(),getAllMatchLineups(),getAllMatchMvps(),
+          getAllMatchEvents(),getAllMatchLineups(),getAllMatchMvps(),getAllGoalkeeperRatings(),
         ]);
         const teamsById=new Map<string,Team>();teamSets.flat().forEach(team=>teamsById.set(team.id,team));
         const matchesUnique=Array.from(new Map(matchSets.flat().map(match=>[match.id,match] as const)).values());
-        if(mounted)setLineup(makeLineup(matchesUnique,Array.from(teamsById.values()),players,events,allLineups,mvps,now));
+        if(mounted)setLineup(makeLineup(matchesUnique,Array.from(teamsById.values()),players,events,allLineups,mvps,ratings,now));
       }catch(error){console.error("Top 7 monthly data error:",error);if(mounted)setLineup(null);}
       finally{if(mounted)setLoading(false);}
     }
@@ -151,7 +152,7 @@ export function TopSevenOfMonth(){
     <div className="top-seven-heading"><div><Typography component="h2" variant="h2">Top 7 <span className="sl-accent">del mese</span></Typography>
       <Typography component="p" className="top-seven-subtitle">I migliori interpreti tra le competizioni attive · {monthLabel}</Typography></div>
     </div>
-    <Typography component="p" className="top-seven-method">Selezione mensile per squadra basata su presenze, gol, assist, MVP, clean sheet e cartellini registrati.</Typography>
+    <Typography component="p" className="top-seven-method">Selezione mensile per squadra basata su presenze, gol, assist, MVP, clean sheet, voti dei portieri e cartellini registrati.</Typography>
     {loading?<div className="top-seven-loading"><CircularProgress size={30}/></div>:<div className="top-seven-pitch">
       <div className="top-seven-row top-seven-row--attack">{current.attackers.map((candidate,index)=><PlayerSlot key={candidate?.player.id||"att-"+index} candidate={candidate} label="Attaccante"/>)}</div>
       <div className="top-seven-row top-seven-row--midfield">{current.midfielders.map((candidate,index)=><PlayerSlot key={candidate?.player.id||"mid-"+index} candidate={candidate} label="Centrocampista"/>)}</div>

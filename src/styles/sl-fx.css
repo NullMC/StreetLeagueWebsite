@@ -198,11 +198,6 @@ html[data-theme="night"] #root .platform-page-heading :is(h1, h2) {
   text-shadow: 0 0 42px rgba(228, 34, 120, 0.35), 0 0 2px rgba(255, 255, 255, 0.2);
 }
 .slm--live .slm__score { text-shadow: 0 0 22px color-mix(in srgb, var(--sl-accent) 60%, transparent); }
-.sl-nav__limelight::before { animation: sl-lamp 3.6s ease-in-out infinite; }
-@keyframes sl-lamp {
-  0%, 100% { box-shadow: 0 0 14px 2px color-mix(in srgb, var(--sl-accent) 70%, transparent); }
-  50% { box-shadow: 0 0 22px 5px color-mix(in srgb, var(--sl-accent) 85%, transparent); }
-}
 
 /* Pulsante primario: riflesso che attraversa il parallelogramma */
 .sl-btn--primary::after {
@@ -312,10 +307,12 @@ html[data-theme="night"] .sl-logo3d__face { filter: invert(1); }
   background-size: 300% 100%;
   background-position: 130% 0;
   transform: translateZ(2px);
-  mix-blend-mode: screen;
+  /* Niente mix-blend-mode: in Chrome/Edge appiattirebbe l'intero contesto 3D (spessore invisibile). */
   animation: sl-logo-sheen 7s ease-in-out 1.6s infinite;
 }
-html[data-theme="night"] .sl-logo3d__sheen { mix-blend-mode: overlay; }
+html[data-theme="night"] .sl-logo3d__sheen {
+  background-image: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.18) 47%, rgba(255, 214, 231, 0.28) 50%, transparent 60%);
+}
 @keyframes sl-logo-sheen {
   0%, 55% { background-position: 130% 0; }
   100% { background-position: -30% 0; }
@@ -418,7 +415,6 @@ html.sl-vt-theme::view-transition-new(root) { animation: sl-theme-reveal 680ms v
   .sl-hero-fx,
   .sl-aura span,
   .sl-hero__bg,
-  .sl-nav__limelight::before,
   html.sl-cine [data-reveal="in"] {
     animation: none !important;
   }

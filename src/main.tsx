@@ -12,7 +12,7 @@ import "@fontsource/barlow-condensed/800-italic.css";
 import "@fontsource/barlow-condensed/900-italic.css";
 import "@fontsource-variable/archivo/wdth.css";
 import "@fontsource-variable/unbounded/wght.css";
-import "@fontsource/instrument-serif/400-italic.css";
+import "@fontsource/sedgwick-ave-display/400.css";
 import "./styles/global.css";
 import "./styles/street.css";
 import "./styles/app-layout.css";
@@ -35,7 +35,7 @@ import "./styles/match-editorial.css";
 import "./styles/sl-system.css";
 // Effetti: shader, liquid glass, glow e cinematismo.
 import "./styles/sl-fx.css";
-// Tipografia: font display (Unbounded, Instrument Serif, Barlow Condensed) solo sui titoli, Archivo per il testo.
+// Tipografia: font display (Unbounded, Sedgwick Ave Display, Barlow Condensed) solo sui titoli, Archivo per il testo.
 import "./styles/sl-type.css";
 // Livello di dettaglio uniforme: card, classifiche, azioni, sfondi e scroll.
 import "./styles/sl-polish.css";
