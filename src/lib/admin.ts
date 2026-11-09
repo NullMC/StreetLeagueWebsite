@@ -238,3 +238,52 @@ export async function uploadMedia(original: File, folder: string) {
   return data.publicUrl;
 }
 
+
+const MEDIA_BUCKET = "street-league-media";
+
+/** Object path inside the media bucket ("logos/<uuid>.webp"), or null for any other URL. */
+export function mediaPathFromUrl(value: unknown): string | null {
+  if (typeof value !== "string" || !value) return null;
+  const marker = "/" + MEDIA_BUCKET + "/";
+  const index = value.indexOf(marker);
+  if (index < 0) return null;
+  const path = decodeURIComponent(value.slice(index + marker.length).split(/[?#]/)[0]);
+  return path && !path.includes("..") ? path : null;
+}
+
+/**
+ * Deletes the given media files, but only those that no record points to any more
+ * (checked on the database across every table). Never throws: a failed cleanup
+ * must not block saving or deleting a record. Returns the removed paths.
+ */
+export async function removeUnusedMedia(urls: unknown[]): Promise<string[]> {
+  const client = sb();
+  const paths = [...new Set(urls.map(mediaPathFromUrl).filter((path): path is string => Boolean(path)))];
+  const removable: string[] = [];
+  for (const path of paths) {
+    const { data, error } = await client.rpc("media_reference_count", { p_path: path });
+    // Without the helper (migration 27 missing) nothing is deleted.
+    if (error || typeof data !== "number") { if (error) console.warn("Controllo media non riuscito:", error.message); continue; }
+    if (data === 0) removable.push(path);
+  }
+  if (!removable.length) return [];
+  const { error } = await client.storage.from(MEDIA_BUCKET).remove(removable);
+  if (error) { console.warn("Eliminazione media non riuscita:", error.message); return []; }
+  return removable;
+}
+
+export type UnusedMedia = { name: string; size: number; created_at: string };
+
+/** Files older than one day that no record uses (admin only). */
+export async function listUnusedMedia(): Promise<UnusedMedia[]> {
+  const client = sb();
+  const { data, error } = await client.rpc("list_unused_media");
+  if (error) throw error;
+  return ((data ?? []) as UnusedMedia[]).map((row) => ({ ...row, size: Number(row.size) }));
+}
+
+/** Deletes files listed by listUnusedMedia, re-checking each one first. */
+export async function purgeUnusedMedia(names: string[]): Promise<number> {
+  const removed = await removeUnusedMedia(names.map((name) => "/" + MEDIA_BUCKET + "/" + name));
+  return removed.length;
+}

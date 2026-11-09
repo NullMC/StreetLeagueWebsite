@@ -1,10 +1,11 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { PageShell } from "../components/PageShell";
 import { RichTextEditor } from "../components/RichTextEditor";
 import { AdminMatchAwards } from "../components/AdminMatchAwards";
 import { AdminMatchReports } from "../components/AdminMatchReports";
+import { AdminMediaCleanup } from "../components/AdminMediaCleanup";
 import { supabase, supabaseConfigured } from "../lib/supabase";
-import { ensureFreshAdminSession, getAuthenticatedAdmin, signInWithAccessCode, uploadMedia, type AdminProfile } from "../lib/admin";
+import { ensureFreshAdminSession, getAuthenticatedAdmin, removeUnusedMedia, signInWithAccessCode, uploadMedia, type AdminProfile } from "../lib/admin";
 import { getCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
 import type { Competition, Match, Player, Team } from "../types";
 
@@ -12,7 +13,19 @@ type Resource = "competitions" | "teams" | "players" | "matches" | "events" | "m
 type Row = Record<string, any>;
 type Lookups = { competitions: Competition[]; teams: Team[]; players: Player[]; matches: Match[] };
 
-type AdminSection = Resource | "match_awards" | "reports";
+type AdminSection = Resource | "match_awards" | "reports" | "media";
+
+/** Every media URL of the bucket found in a record (single fields and images inside article bodies). */
+function mediaUrlsIn(row: Row | undefined): string[] {
+  if (!row) return [];
+  const urls: string[] = [];
+  Object.values(row).forEach((value) => {
+    if (typeof value !== "string") return;
+    const matches = value.match(/[^"'\s()<>]*\/street-league-media\/[^"'\s()<>?#&]+/g);
+    if (matches) urls.push(...matches);
+  });
+  return urls;
+}
 
 const nav: { key: AdminSection; label: string }[] = [
   { key: "competitions", label: "Competizioni" },
@@ -26,6 +39,7 @@ const nav: { key: AdminSection; label: string }[] = [
   { key: "active_collaborations", label: "Collab attive" },
   { key: "social_contents", label: "Social / Video" },
   { key: "transfer_market_entries", label: "Calcio mercato" },
+  { key: "media", label: "Media e spazio" },
 ];
 
 /* Raggruppamento della navigazione e testi della barra superiore (solo presentazione). */
@@ -34,6 +48,7 @@ const navGroups: { title: string; items: AdminSection[] }[] = [
   { title: "Match day", items: ["reports", "match_awards"] },
   { title: "Contenuti", items: ["player_of_month", "social_contents", "transfer_market_entries"] },
   { title: "Partner", items: ["partners", "active_collaborations"] },
+  { title: "Sistema", items: ["media"] },
 ];
 const sectionInfo: Partial<Record<AdminSection, string>> = {
   competitions: "Stagioni, stato e gruppi di aggregazione delle competizioni.",
@@ -45,6 +60,7 @@ const sectionInfo: Partial<Record<AdminSection, string>> = {
   active_collaborations: "Collaborazioni attive con volantino e CTA.",
   social_contents: "Video, post e articoli in evidenza.",
   transfer_market_entries: "Slot del calciomercato per ogni squadra.",
+  media: "File caricati nello storage: ricerca e rimozione delle immagini non più usate.",
 };
 const roleLabels: Record<string, string> = { super_admin: "Super admin", admin: "Admin", operator: "Operatore" };
 const navIcons: Record<AdminSection, string> = {
@@ -58,6 +74,7 @@ const navIcons: Record<AdminSection, string> = {
   partners: "M3 12l4-4 5 5 5-5 4 4-9 9-9-9Z",
   active_collaborations: "M8 12h8M12 8v8M4 4h16v16H4z",
   social_contents: "M5 4h14v16H5zM10 9l5 3-5 3V9Z",
+  media: "M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5M15 9.5a1.5 1.5 0 1 0 0-.01",
   transfer_market_entries: "M7 7h13l-3-3M17 17H4l3 3",
   events: "", mvp: "",
 };
@@ -413,6 +430,9 @@ function searchableRowText(resource: Resource, row: Row, l: Lookups) {
 function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile }) {
   const [rows, setRows] = useState<Row[]>([]); const [form, setForm] = useState<Row>(() => defaults(resource)); const [editing, setEditing] = useState<string | null>(null); const [loading, setLoading] = useState(true); const [message, setMessage] = useState(""); const [searchTerm, setSearchTerm] = useState(""); const [uploadingField, setUploadingField] = useState<string | null>(null); const [lookups, setLookups] = useState<Lookups>({ competitions: [], teams: [], players: [], matches: [] }); const [lookupsLoading, setLookupsLoading] = useState(true); const [lookupsError, setLookupsError] = useState("");
   const canWrite = profile.role === "super_admin" || profile.role === "admin" || (profile.role === "operator" && ["matches", "events", "mvp"].includes(resource));
+  // Files uploaded in this form but not saved yet: removed if the form is cancelled or the file is replaced.
+  const pendingUploads = useRef<string[]>([]);
+  const cleanupMedia = (urls: string[]) => { if (urls.length) void removeUnusedMedia(urls); };
   const refresh = async () => { setLoading(true); try { setRows(await readRows(resource)); } catch (e) { setMessage(errorMessage(e, "Errore di caricamento.")); } finally { setLoading(false); } };
   useEffect(() => { setForm(defaults(resource)); setEditing(null); setMessage(""); setSearchTerm(""); void refresh(); }, [resource]);
   const refreshLookups = async () => {
@@ -435,8 +455,8 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
   }, [resource]);
   const setField = (f: string, v: unknown) => setForm((p) => ({ ...p, [f]: v, ...(f === "award_type" && resource === "player_of_month" ? { player_id: "" } : {}), ...(f === "competition_id" ? { home_team_id: "", away_team_id: "", ...(resource === "transfer_market_entries" ? { team_id: "" } : {}) } : {}), ...(resource === "transfer_market_entries" && f === "player_id" && v ? { external_first_name: "", external_last_name: "", external_position: "", external_shirt_number: "", external_photo_url: "" } : {}), ...(f === "match_id" ? { team_id: "", player_id: "", related_player_id: "" } : {}) }));
   const edit = (r: Row) => { const n = { ...r }; setEditing(String(r[keys[resource]])); if (n.kickoff_at) n.kickoff_at = localDate(n.kickoff_at); if (n.published_at) n.published_at = localDate(n.published_at); setForm(n); setMessage(""); window.scrollTo({ top: 120, behavior: "smooth" }); };
-  const cancelEdit = () => { setEditing(null); setForm(defaults(resource)); setMessage(""); };
-  const uploadFor = async (field: string, file: File) => { if (!canWrite || !file) return; setUploadingField(field); setMessage(""); try { const folder = field === "activity_image_url" ? "partners/activity" : field === "card_image_url" ? "awards" : field === "external_photo_url" ? "players/market" : field === "flyer_url" ? "collaborations" : field.includes("logo") ? "logos" : field.includes("bg_less") ? "players/bg-less" : field.includes("profile") ? "players/profile" : field.includes("thumbnail") ? "social" : "media"; const url = await uploadMedia(file, folder); setForm((p) => ({ ...p, [field]: url })); setMessage("File caricato. Salva il record per applicare l'URL."); } catch (e) { setMessage(errorMessage(e, "Upload non riuscito.")); } finally { setUploadingField(null); } };
+  const cancelEdit = () => { cleanupMedia(pendingUploads.current); pendingUploads.current = []; setEditing(null); setForm(defaults(resource)); setMessage(""); };
+  const uploadFor = async (field: string, file: File) => { if (!canWrite || !file) return; setUploadingField(field); setMessage(""); try { const folder = field === "activity_image_url" ? "partners/activity" : field === "card_image_url" ? "awards" : field === "external_photo_url" ? "players/market" : field === "flyer_url" ? "collaborations" : field.includes("logo") ? "logos" : field.includes("bg_less") ? "players/bg-less" : field.includes("profile") ? "players/profile" : field.includes("thumbnail") ? "social" : "media"; const url = await uploadMedia(file, folder); const previous = form[field]; if (typeof previous === "string" && pendingUploads.current.includes(previous)) { pendingUploads.current = pendingUploads.current.filter((entry) => entry !== previous); cleanupMedia([previous]); } pendingUploads.current.push(url); setForm((p) => ({ ...p, [field]: url })); setMessage("File caricato. Salva il record per applicare l'URL."); } catch (e) { setMessage(errorMessage(e, "Upload non riuscito.")); } finally { setUploadingField(null); } };
   const save = async (e: FormEvent) => {
     e.preventDefault();
     if (!supabase || !canWrite) return;
@@ -452,6 +472,12 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
         }
       }
       if (resource === "partners" && !editing) p.tier = "gold";
+      // Record as it was before saving: its replaced images are deleted once nothing uses them.
+      const previousRow = editing
+        ? rows.find((row) => String(row[keys[resource]]) === editing)
+        : resource === "player_of_month"
+          ? rows.find((row) => row.month_label === p.month_label && row.award_type === p.award_type)
+          : undefined;
       validate(resource, { ...p, ...(resource === "teams" ? { competition_ids: form.competition_ids } : {}) }, lookups);
 
       if (resource === "players" && !editing) {
@@ -502,6 +528,8 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
       }
 
       setMessage(editing ? "Record aggiornato." : "Record creato.");
+      cleanupMedia([...mediaUrlsIn(previousRow), ...pendingUploads.current]);
+      pendingUploads.current = [];
       setEditing(null);
       setForm(defaults(resource));
       await refresh();
@@ -511,7 +539,7 @@ function Crud({ resource, profile }: { resource: Resource; profile: AdminProfile
       setMessage(errorMessage(e, "Operazione non riuscita."));
     }
   };
-  const remove = async (r: Row) => { if (!supabase || !canWrite) return; const k = r[keys[resource]]; if (!k || !confirm(`Eliminare ${rowLabel(resource, r, lookups)}?`)) return; try { await ensureFreshAdminSession(); const { error } = await supabase.from(tables[resource]).delete().eq(keys[resource], k); if (error) throw error; setMessage("Record eliminato."); await refresh(); try { await refreshLookups(); } catch (cause) { setLookupsError(errorMessage(cause, "Impossibile aggiornare i nomi collegati.")); } } catch (e) { setMessage(errorMessage(e, "Eliminazione non riuscita.")); } }; const normalizedSearch = normalizeSearch(searchTerm.trim()); const filteredRows = normalizedSearch ? rows.filter((r) => searchableRowText(resource, r, lookups).includes(normalizedSearch)) : rows;
+  const remove = async (r: Row) => { if (!supabase || !canWrite) return; const k = r[keys[resource]]; if (!k || !confirm(`Eliminare ${rowLabel(resource, r, lookups)}?`)) return; try { await ensureFreshAdminSession(); const { error } = await supabase.from(tables[resource]).delete().eq(keys[resource], k); if (error) throw error; cleanupMedia([...mediaUrlsIn(r), ...(resource === "teams" ? lookups.players.filter((player) => player.team_id === k).flatMap((player) => mediaUrlsIn(player)) : [])]); setMessage("Record eliminato."); await refresh(); try { await refreshLookups(); } catch (cause) { setLookupsError(errorMessage(cause, "Impossibile aggiornare i nomi collegati.")); } } catch (e) { setMessage(errorMessage(e, "Eliminazione non riuscita.")); } }; const normalizedSearch = normalizeSearch(searchTerm.trim()); const filteredRows = normalizedSearch ? rows.filter((r) => searchableRowText(resource, r, lookups).includes(normalizedSearch)) : rows;
   const render = (f: string) => {
     const v = form[f];
     if (f === "competition_ids") {
@@ -658,7 +686,7 @@ export default function AdminDashboard() {
           <h1>{current?.label}</h1>
           {sectionInfo[resource] && <p className="sl-admin__lead">{sectionInfo[resource]}</p>}
         </header>
-        <div className="sl-admin__content">{resource === "match_awards" ? <AdminMatchAwards /> : resource === "reports" ? <AdminMatchReports /> : <Crud resource={resource} profile={profile} />}</div>
+        <div className="sl-admin__content">{resource === "match_awards" ? <AdminMatchAwards /> : resource === "reports" ? <AdminMatchReports /> : resource === "media" ? <AdminMediaCleanup canDelete={profile.role === "super_admin" || profile.role === "admin"} /> : <Crud resource={resource} profile={profile} />}</div>
       </section>
     </div>
   </PageShell>;

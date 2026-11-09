@@ -1021,3 +1021,8 @@ html[data-theme="night"] #root .sl-admin-login input { background: var(--sl-surf
 @media (max-width: 340px) {
   #root .sl-admin .match-report-admin__roster-row { grid-template-columns: minmax(0, 1fr); gap: 6px !important; padding: 10px 12px !important; }
 }
+
+/* Media e spazio */
+#root .sl-admin .admin-media { display: grid; gap: 18px; }
+#root .sl-admin .admin-media__actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 6px; }
+#root .sl-admin .admin-media .admin-table td a { color: var(--sl-fg); text-decoration: underline; text-underline-offset: 2px; word-break: break-all; }
