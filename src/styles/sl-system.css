@@ -41,7 +41,8 @@
   --sl-on-accent: #ffffff;
   --sl-shadow-sm: 0 1px 2px rgba(1, 10, 8, 0.06), 0 2px 8px -2px rgba(1, 10, 8, 0.06);
   --sl-shadow-md: 0 2px 4px rgba(1, 10, 8, 0.04), 0 18px 40px -18px rgba(1, 10, 8, 0.22);
-  --sl-shadow-glow: 0 18px 50px -22px rgba(228, 34, 120, 0.55);
+  /* Niente bagliori: ombra asciutta, l'accento rosa lo da' lo spray (filtro #sl-spray) */
+  --sl-shadow-glow: 0 14px 30px -18px rgba(1, 10, 8, 0.45);
 
   /* Tipografia */
   --font-display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
@@ -78,7 +79,7 @@ html[data-theme="night"] {
   --sl-accent-soft: rgba(228, 34, 120, 0.16);
   --sl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --sl-shadow-md: 0 24px 50px -24px rgba(0, 0, 0, 0.8);
-  --sl-shadow-glow: 0 20px 60px -20px rgba(228, 34, 120, 0.6);
+  --sl-shadow-glow: 0 16px 34px -18px rgba(0, 0, 0, 0.6);
 }
 
 @media (max-width: 760px) {
@@ -187,6 +188,7 @@ html[data-theme="night"] .app {
 .sl-btn--primary::before {
   background: var(--sl-accent);
   box-shadow: var(--sl-shadow-glow);
+  filter: url("#sl-spray");
 }
 .sl-btn--primary:hover::before { background: var(--sl-accent-ink); }
 html[data-theme="night"] .sl-btn--primary:hover::before { background: #f0368a; }
@@ -1076,7 +1078,7 @@ img.slm__logo { background: transparent; }
 .slm__gallery:hover { background: var(--sl-accent); color: #fff !important; }
 
 /* Border Beam: solo le partite LIVE */
-.slm--live { border-color: transparent; box-shadow: var(--sl-shadow-glow); }
+.slm--live { border-color: transparent; box-shadow: var(--sl-shadow-glow); filter: url("#sl-spray"); }
 .slm__beam {
   position: absolute;
   inset: 0;
@@ -1178,7 +1180,7 @@ img.slm__logo { background: transparent; }
   border-radius: 50% !important;
   border: 0 !important;
   background: var(--sl-surface) !important;
-  box-shadow: 0 0 0 1px var(--sl-line), 0 10px 26px -14px var(--team-accent) !important;
+  box-shadow: 0 0 0 1px var(--sl-line), 0 10px 18px -14px rgba(1, 10, 8, 0.45) !important;
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 26px;
@@ -1314,6 +1316,7 @@ img.slm__logo { background: transparent; }
 #root a.monthly-award-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--sl-shadow-glow) !important;
+  filter: url("#sl-spray");
 }
 #root .monthly-award-card h3 {
   font-family: var(--font-display) !important;
@@ -1383,7 +1386,8 @@ img.slm__logo { background: transparent; }
 #root .top-seven-player .top-seven-player__avatar.MuiAvatar-root { transition: transform 260ms var(--sl-ease), box-shadow 260ms var(--sl-ease); }
 #root a.top-seven-player:hover .top-seven-player__avatar.MuiAvatar-root {
   transform: scale(1.08);
-  box-shadow: 0 0 0 4px rgba(228, 34, 120, 0.55), 0 10px 30px rgba(228, 34, 120, 0.45);
+  box-shadow: 0 0 0 3px var(--sl-accent);
+  filter: url("#sl-spray");
 }
 #root .top-seven-player strong { font-size: 13px !important; }
 #root .top-seven-player__stats { color: var(--sl-blush) !important; font-size: 11px !important; }
@@ -1561,6 +1565,8 @@ img.slm__logo { background: transparent; }
   background:
     radial-gradient(50% 70% at 85% 100%, rgba(228, 34, 120, 0.35), transparent 70%),
     radial-gradient(40% 50% at 10% 0%, rgba(237, 123, 171, 0.12), transparent 70%);
+  /* Macchie di vernice a spruzzo invece della luce sfumata */
+  filter: url("#sl-spray-cloud");
 }
 .sl-footer__inner {
   width: min(100% - 2 * var(--sl-gutter), var(--sl-max));

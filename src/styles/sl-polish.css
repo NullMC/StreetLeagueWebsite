@@ -103,7 +103,7 @@ html {
     pointer-events: none;
     transform-origin: 0 50%;
     background: linear-gradient(90deg, var(--sl-accent), var(--sl-accent-2));
-    box-shadow: 0 0 12px rgba(228, 34, 120, 0.6);
+    filter: url("#sl-spray");
     animation: sl-scroll-progress linear both;
     animation-timeline: scroll(root block);
   }
@@ -171,7 +171,8 @@ html[data-theme="night"] #root :is(.player-card, .best-stats-card, .stat-card, .
 }
 #root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card):hover {
   transform: translateY(-4px);
-  box-shadow: 0 24px 50px -24px rgba(228, 34, 120, 0.5), var(--sl-shadow-sm) !important;
+  box-shadow: var(--sl-shadow-glow), var(--sl-shadow-sm) !important;
+  filter: url("#sl-spray");
 }
 /* Immagini dentro le card: zoom lento al passaggio */
 #root :is(.home-feature-card__media img, .partner-editorial-card img:not([class*="logo"]), .player-card img) {
@@ -240,7 +241,7 @@ html[data-theme="night"] #root .sl-comp-card__media {
   filter: drop-shadow(0 18px 22px rgba(1, 10, 8, 0.28));
   transition: transform 700ms var(--sl-ease);
 }
-html[data-theme="night"] #root .sl-comp-card__logo { filter: invert(1) drop-shadow(0 0 26px rgba(228, 34, 120, 0.55)); }
+html[data-theme="night"] #root .sl-comp-card__logo { filter: invert(1) url("#sl-spray"); }
 #root .sl-comp-card:hover .sl-comp-card__logo { transform: rotateY(-4deg) rotateX(2deg) scale(1.06); }
 #root .sl-comp-card__wordmark {
   position: absolute;
@@ -349,7 +350,8 @@ html[data-theme="night"] #root .sl-comp-card[data-status="upcoming"] .sl-comp-ca
   background: var(--sl-accent) !important;
   border-color: var(--sl-accent) !important;
   color: #fff !important;
-  box-shadow: 0 10px 24px -10px rgba(228, 34, 120, 0.7) !important;
+  box-shadow: var(--sl-shadow-glow) !important;
+  filter: url("#sl-spray");
 }
 #root .sl-comp-card:hover .sl-comp-card__cta span { transform: translate(2px, -2px); }
 

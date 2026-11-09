@@ -119,9 +119,14 @@
   color: var(--sl-accent);
   padding-right: 0.08em;
 }
-html[data-theme="night"] #root :is(h1, h2, h3) .sl-accent {
-  color: var(--sl-pink-2);
-  text-shadow: 0 0 30px rgba(228, 34, 120, 0.5);
+html[data-theme="night"] #root :is(h1, h2, h3) .sl-accent { color: var(--sl-pink-2); }
+/* Spray sull'accento, se il titolo non ha gia' il suo (evita il doppio alone) */
+html[data-theme="night"] #root :is(h1, h2, h3):not(.sl-hero__title, .home-section-head *, .platform-page-heading *) .sl-accent {
+  filter: url("#sl-spray-text");
+}
+/* Tema chiaro: la tag rosa ha il suo spruzzo, come vernice su un muro */
+html:not([data-theme="night"]) #root :is(h1, h2, h3) :is(.sl-accent, .sl-word--accent) {
+  filter: url("#sl-spray-text");
 }
 
 /* Hero: "La Street League" in Unbounded, "raccontata da vicino" come tag graffiti rosa */
@@ -143,28 +148,7 @@ html[data-theme="night"] #root :is(h1, h2, h3) .sl-accent {
   /* Leggera inclinazione da tag */
   rotate: -3deg;
 }
-html[data-theme="night"] #root .sl-word--accent {
-  color: var(--sl-pink-2);
-  text-shadow: 0 0 34px rgba(228, 34, 120, 0.55);
-}
-/* Testo con riflesso che scorre sull'accento (Text Shimmer) */
-@supports (background-clip: text) or (-webkit-background-clip: text) {
-  #root .sl-word--accent .sl-word__inner {
-    background: linear-gradient(100deg, currentColor 0%, currentColor 40%, color-mix(in srgb, currentColor 30%, #fff) 50%, currentColor 60%, currentColor 100%);
-    background-size: 260% 100%;
-    background-position: 100% 0;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation:
-      sl-word-in 1.15s var(--sl-ease) calc(var(--i, 0) * 95ms + 120ms) backwards,
-      sl-shimmer-text 6s ease-in-out 2.4s infinite;
-  }
-}
-@keyframes sl-shimmer-text {
-  0%, 60% { background-position: 100% 0; }
-  100% { background-position: -60% 0; }
-}
+html[data-theme="night"] #root .sl-word--accent { color: var(--sl-pink-2); }
 @media (max-width: 520px) {
   #root .sl-hero__title { font-size: clamp(34px, 10.4vw, 52px) !important; }
 }
@@ -328,7 +312,8 @@ html[data-theme="night"] #root .sl-word--accent {
 #root .match-experience__tabs button.active {
   background: var(--sl-accent) !important;
   color: #fff !important;
-  box-shadow: 0 8px 24px -8px rgba(228, 34, 120, 0.7) !important;
+  box-shadow: var(--sl-shadow-glow) !important;
+  filter: url("#sl-spray");
 }
 
 /* Input: ricerca giocatori, login admin */
@@ -348,7 +333,8 @@ html[data-theme="night"] #root .sl-word--accent {
 #root .admin-login input:focus {
   outline: none !important;
   border-color: var(--sl-accent) !important;
-  box-shadow: 0 0 0 4px var(--sl-accent-soft), 0 0 24px -6px rgba(228, 34, 120, 0.55) !important;
+  box-shadow: 0 0 0 4px var(--sl-accent-soft) !important;
+  filter: url("#sl-spray");
 }
 #root .stats-player-search input::placeholder,
 #root .admin-login input::placeholder { color: var(--sl-fg-subtle); }
@@ -361,7 +347,7 @@ html[data-theme="night"] #root .sl-word--accent {
   background:
     linear-gradient(var(--sl-surface), var(--sl-surface)) padding-box,
     linear-gradient(140deg, color-mix(in srgb, var(--sl-accent) 70%, transparent), var(--sl-line) 40%, var(--sl-line) 70%, color-mix(in srgb, var(--sl-accent-2) 60%, transparent)) border-box !important;
-  box-shadow: 0 40px 90px -40px rgba(228, 34, 120, 0.45), var(--sl-shadow-md) !important;
+  box-shadow: var(--sl-shadow-md) !important;
 }
 #root .admin-login .eyebrow { color: var(--sl-accent-ink) !important; }
 #root .admin-login .btn--primary {
@@ -370,7 +356,8 @@ html[data-theme="night"] #root .sl-word--accent {
   font-weight: 700 !important;
   font-size: 15px !important;
   letter-spacing: 0.02em !important;
-  box-shadow: 0 14px 30px -12px rgba(228, 34, 120, 0.7) !important;
+  box-shadow: var(--sl-shadow-glow) !important;
+  filter: url("#sl-spray");
 }
 
 /* Timeline eventi partita: linea con nodi luminosi */
@@ -384,7 +371,7 @@ html[data-theme="night"] #root .sl-word--accent {
 /* Avatar: anello sfumato brand */
 #root .top-seven-player__avatar.MuiAvatar-root,
 #root .match-experience__avatar {
-  box-shadow: 0 0 0 2px var(--sl-bg), 0 0 0 4px var(--sl-accent), 0 10px 26px -10px rgba(228, 34, 120, 0.7) !important;
+  box-shadow: 0 0 0 2px var(--sl-bg), 0 0 0 4px var(--sl-accent), 0 10px 22px -12px rgba(1, 10, 8, 0.5) !important;
 }
 
 /* Tabella classifica: righe più ariose */
@@ -394,5 +381,6 @@ html[data-theme="night"] #root .sl-word--accent {
 /* Pagina partita e squadra: loghi grandi */
 #root .match-experience__logo,
 #root .detail-hero__team-logo {
-  box-shadow: 0 0 0 3px var(--sl-surface), 0 0 0 5px color-mix(in srgb, var(--sl-accent) 50%, transparent), 0 24px 50px -20px rgba(228, 34, 120, 0.6) !important;
+  box-shadow: 0 0 0 3px var(--sl-surface), 0 0 0 5px color-mix(in srgb, var(--sl-accent) 50%, transparent), 0 20px 36px -22px rgba(1, 10, 8, 0.55) !important;
+  filter: url("#sl-spray");
 }

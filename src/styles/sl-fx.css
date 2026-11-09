@@ -146,7 +146,8 @@ html.sl-liquid .sl-btn--ghost::before {
   box-shadow: 0 6px 18px -6px rgba(1, 10, 8, 0.45), 0 0 0 1px color-mix(in srgb, var(--sl-accent) 30%, transparent);
 }
 html[data-theme="night"] #root .home-matchday-tab[aria-pressed="true"] {
-  box-shadow: 0 0 24px -4px rgba(228, 34, 120, 0.55);
+  box-shadow: none;
+  filter: url("#sl-spray");
 }
 
 @media (prefers-reduced-transparency: reduce) {
@@ -188,16 +189,23 @@ html[data-theme="night"] #root .home-matchday-tab[aria-pressed="true"] {
 }
 #root :is(.stat-card, .best-stats-card, .partner-editorial-card, .competition-list-card, .player-card):hover {
   transform: translateY(-4px);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sl-accent) 45%, transparent), 0 24px 50px -22px rgba(228, 34, 120, 0.55) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sl-accent) 45%, transparent), var(--sl-shadow-glow) !important;
+  filter: url("#sl-spray");
 }
 
-/* Luce d'accento: titoli e LIVE in tema notte */
+/* Bomboletta spray (filtri in LiquidGlassDefs): alone di vernice rosa con grana e puntini,
+   al posto dei bagliori. Titoli e LIVE in tema notte. */
+.sl-spray-paint { flood-color: var(--sl-accent); flood-opacity: 0.85; }
+html[data-theme="night"] .sl-spray-paint { flood-color: #ff2f8a; flood-opacity: 0.9; }
+.sl-spray-paint--text { flood-opacity: 0.6; }
+html[data-theme="night"] .sl-spray-paint--text { flood-opacity: 0.75; }
 html[data-theme="night"] #root .sl-hero__title,
 html[data-theme="night"] #root .home-section-head :is(h1, h2),
 html[data-theme="night"] #root .platform-page-heading :is(h1, h2) {
-  text-shadow: 0 0 42px rgba(228, 34, 120, 0.35), 0 0 2px rgba(255, 255, 255, 0.2);
+  text-shadow: none;
+  filter: url("#sl-spray-text");
 }
-.slm--live .slm__score { text-shadow: 0 0 22px color-mix(in srgb, var(--sl-accent) 60%, transparent); }
+.slm--live .slm__score { filter: url("#sl-spray"); }
 
 /* Pulsante primario: riflesso che attraversa il parallelogramma */
 .sl-btn--primary::after {
@@ -322,8 +330,9 @@ html[data-theme="night"] .sl-logo3d__sheen {
   position: absolute;
   inset: 4% 10%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(228, 34, 120, 0.45), rgba(237, 123, 171, 0.18) 55%, transparent 75%);
-  filter: blur(26px);
+  background: radial-gradient(closest-side, rgba(228, 34, 120, 0.42), rgba(237, 123, 171, 0.2) 50%, transparent 72%);
+  /* Nuvola di vernice spruzzata dietro al logo (non piu' una luce sfocata) */
+  filter: url("#sl-spray-cloud");
   animation: sl-logo-halo 10s ease-in-out infinite;
 }
 @keyframes sl-logo-halo {
@@ -341,7 +350,7 @@ html[data-theme="night"] .sl-logo3d__sheen {
   filter: blur(6px);
   animation: sl-logo-shadow 10s ease-in-out infinite;
 }
-html[data-theme="night"] .sl-logo3d__shadow { background: radial-gradient(closest-side, rgba(228, 34, 120, 0.45), transparent); }
+html[data-theme="night"] .sl-logo3d__shadow { background: radial-gradient(closest-side, rgba(228, 34, 120, 0.45), transparent); filter: url("#sl-spray-cloud"); }
 @keyframes sl-logo-shadow {
   0%, 100% { transform: scaleX(1); opacity: 1; }
   50% { transform: scaleX(0.82); opacity: 0.6; }
