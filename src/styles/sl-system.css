@@ -1559,11 +1559,8 @@ img.slm__logo { background: transparent; }
   position: absolute;
   inset: 0;
   z-index: -1;
-  /* Macchie di vernice spray con colature, al posto della luce sfumata */
-  background:
-    url("/assets/spray/spray-2.svg") right 3% top -40px / min(460px, 44%) auto no-repeat,
-    url("/assets/spray/spray-blush-1.svg") left -70px bottom -150px / min(340px, 34%) auto no-repeat;
-  opacity: 0.32;
+  /* Footer pulito: nessun alone ne' macchia */
+  display: none;
 }
 .sl-footer__inner {
   width: min(100% - 2 * var(--sl-gutter), var(--sl-max));

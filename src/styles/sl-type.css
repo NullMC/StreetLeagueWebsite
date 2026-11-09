@@ -454,12 +454,5 @@ html[data-theme="night"] #root .sl-word--accent { color: var(--sl-pink-2); }
 #root .stats-best-cards-grid .best-stats-card__leader-data { min-width: 0; flex: 1 1 auto; }
 #root .stats-best-cards-grid .best-stats-card h3 { line-height: 1.1 !important; }
 
-/* Il vecchio alone sfocato nell'angolo delle card diventa una piccola macchia spray, sotto i dati */
+/* Card statistiche pulite: niente alone ne' macchia nell'angolo */
 #root .stat-card::after { display: none !important; }
-#root .stat-card {
-  background-image: url("/assets/spray/spray-1-soft.svg") !important;
-  background-repeat: no-repeat !important;
-  background-position: right -90px bottom -150px !important;
-  background-size: 230px auto !important;
-}
-html[data-theme="night"] #root .stat-card { background-image: url("/assets/spray/spray-3-soft.svg") !important; }
