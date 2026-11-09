@@ -60,33 +60,10 @@ export function LiquidGlassDefs() {
       </filter>
 
       {/*
-        Bomboletta spray: al posto dei bagliori morbidi, vernice nebulizzata con grana
-        e puntini (overspray), come una tag su un muro.
-        - sl-spray: alone di vernice rosa attorno alla sagoma (testi, pulsanti, card, loghi)
-        - sl-spray-cloud: sfuma a spruzzo una macchia di colore (aloni di sfondo)
+        Bomboletta spray sulle scritte (titoli e accenti): nebbia di vernice rosa dal bordo
+        irregolare con pochi puntini di overspray, al posto del bagliore.
+        Le macchie di vernice con colature degli sfondi sono immagini: public/assets/spray/.
       */}
-      <filter
-        id="sl-spray"
-        x="-25%"
-        y="-60%"
-        width="150%"
-        height="220%"
-        colorInterpolationFilters="sRGB"
-      >
-        <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="thick" />
-        <feGaussianBlur in="thick" stdDeviation="5" result="mist" />
-        <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="4" result="grain" />
-        <feDisplacementMap in="mist" in2="grain" scale="20" xChannelSelector="R" yChannelSelector="G" result="scatter" />
-        <feColorMatrix in="grain" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3.2 0 0 0 -1.25" result="dots" />
-        <feComposite in="scatter" in2="dots" operator="arithmetic" k1="1.15" k2="0.3" result="spray" />
-        <feFlood className="sl-spray-paint" result="paint" />
-        <feComposite in="paint" in2="spray" operator="in" result="painted" />
-        <feMerge>
-          <feMergeNode in="painted" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-      {/* Variante per le scritte: quasi solo puntini, così la tag resta leggibile */}
       <filter
         id="sl-spray-text"
         x="-10%"
@@ -96,30 +73,20 @@ export function LiquidGlassDefs() {
         colorInterpolationFilters="sRGB"
       >
         <feMorphology in="SourceAlpha" operator="dilate" radius="1" result="thick" />
-        <feGaussianBlur in="thick" stdDeviation="4" result="mist" />
-        <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="2" result="grain" />
-        <feDisplacementMap in="mist" in2="grain" scale="16" xChannelSelector="R" yChannelSelector="G" result="scatter" />
-        <feColorMatrix in="grain" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3.4 0 0 0 -1.5" result="dots" />
-        <feComposite in="scatter" in2="dots" operator="arithmetic" k1="1" k2="0.06" result="spray" />
+        <feGaussianBlur in="thick" stdDeviation="6" result="mist" />
+        {/* Bordo irregolare della nebbia di vernice (rumore a bassa frequenza) */}
+        <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="2" result="blotch" />
+        <feDisplacementMap in="mist" in2="blotch" scale="14" xChannelSelector="R" yChannelSelector="G" result="cloud" />
+        {/* Pochi puntini fini di overspray */}
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="6" result="grain" />
+        <feColorMatrix in="grain" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  6 0 0 0 -3.9" result="dots" />
+        <feComposite in="cloud" in2="dots" operator="arithmetic" k1="0.8" k2="0.55" result="spray" />
         <feFlood className="sl-spray-paint sl-spray-paint--text" result="paint" />
         <feComposite in="paint" in2="spray" operator="in" result="painted" />
         <feMerge>
           <feMergeNode in="painted" />
           <feMergeNode in="SourceGraphic" />
         </feMerge>
-      </filter>
-      <filter
-        id="sl-spray-cloud"
-        x="-15%"
-        y="-15%"
-        width="130%"
-        height="130%"
-        colorInterpolationFilters="sRGB"
-      >
-        <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="1" seed="9" result="grain" />
-        <feDisplacementMap in="SourceGraphic" in2="grain" scale="42" xChannelSelector="R" yChannelSelector="G" result="scatter" />
-        <feColorMatrix in="grain" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3.2 0 0 0 -1.25" result="dots" />
-        <feComposite in="scatter" in2="dots" operator="arithmetic" k1="1.1" k2="0.35" />
       </filter>
     </svg>
   );

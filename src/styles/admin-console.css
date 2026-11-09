@@ -96,7 +96,6 @@ html[data-theme="night"] #root .sl-admin-login__logo { filter: brightness(0) inv
   color: #fff;
   background: linear-gradient(135deg, var(--sl-pink), var(--sl-pink-2));
   box-shadow: var(--sl-shadow-glow);
-  filter: url("#sl-spray");
 }
 #root .sl-admin__user div { display: grid; min-width: 0; }
 #root .sl-admin__user strong {
@@ -468,7 +467,6 @@ html[data-theme="night"] #root .sl-admin .admin-error { color: #ff8a80 !importan
   color: #fff !important;
   border: 1px solid var(--sl-accent) !important;
   box-shadow: var(--sl-shadow-glow) !important;
-  filter: url("#sl-spray");
 }
 #root .sl-admin .btn--primary:hover { transform: translateY(-1px); background: var(--sl-accent-ink) !important; }
 #root .sl-admin .btn--ghost {
@@ -943,7 +941,6 @@ html[data-theme="night"] #root .sl-admin-login input { background: var(--sl-surf
   letter-spacing: 0 !important;
   text-transform: none !important;
   box-shadow: var(--sl-shadow-glow) !important;
-  filter: url("#sl-spray");
 }
 #root .sl-admin-login .admin-error {
   padding: 10px 14px;

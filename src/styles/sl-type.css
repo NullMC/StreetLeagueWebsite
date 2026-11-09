@@ -313,7 +313,6 @@ html[data-theme="night"] #root .sl-word--accent { color: var(--sl-pink-2); }
   background: var(--sl-accent) !important;
   color: #fff !important;
   box-shadow: var(--sl-shadow-glow) !important;
-  filter: url("#sl-spray");
 }
 
 /* Input: ricerca giocatori, login admin */
@@ -334,7 +333,6 @@ html[data-theme="night"] #root .sl-word--accent { color: var(--sl-pink-2); }
   outline: none !important;
   border-color: var(--sl-accent) !important;
   box-shadow: 0 0 0 4px var(--sl-accent-soft) !important;
-  filter: url("#sl-spray");
 }
 #root .stats-player-search input::placeholder,
 #root .admin-login input::placeholder { color: var(--sl-fg-subtle); }
@@ -357,7 +355,6 @@ html[data-theme="night"] #root .sl-word--accent { color: var(--sl-pink-2); }
   font-size: 15px !important;
   letter-spacing: 0.02em !important;
   box-shadow: var(--sl-shadow-glow) !important;
-  filter: url("#sl-spray");
 }
 
 /* Timeline eventi partita: linea con nodi luminosi */
@@ -382,5 +379,62 @@ html[data-theme="night"] #root .sl-word--accent { color: var(--sl-pink-2); }
 #root .match-experience__logo,
 #root .detail-hero__team-logo {
   box-shadow: 0 0 0 3px var(--sl-surface), 0 0 0 5px color-mix(in srgb, var(--sl-accent) 50%, transparent), 0 20px 36px -22px rgba(1, 10, 8, 0.55) !important;
-  filter: url("#sl-spray");
+}
+
+/* --------------------------------------------------------------------------
+   8. Classifiche su mobile
+   Le dimensioni "da desktop" sopra (posizione e punti 20px, nomi 15px, loghi 30px)
+   su schermi stretti sovrapponevano la posizione al logo e tagliavano i nomi.
+   -------------------------------------------------------------------------- */
+@media (max-width: 700px) {
+  #root .standings-table .table-row {
+    grid-template-columns: 26px minmax(0, 1fr) repeat(5, 28px) !important;
+    gap: 2px !important;
+    padding: 8px 8px 8px 10px !important;
+    min-height: 52px;
+  }
+  #root .standings-table .table-row.head {
+    font-size: 9.5px !important;
+    letter-spacing: 0.04em !important;
+    min-height: 0;
+  }
+  #root .leaderboard .position {
+    font-size: 15px !important;
+    letter-spacing: -0.02em;
+    overflow: visible;
+  }
+  #root .standings-table .table-row:not(.head) > strong {
+    min-width: 26px !important;
+    height: 26px !important;
+    padding: 0 4px !important;
+    font-size: 15px !important;
+  }
+  #root .standings-table .table-row > span:not(.position):not(.standings-team) { font-size: 11.5px; }
+  #root .standings-table .standings-team { gap: 7px !important; }
+  #root .standings-table .standings-team__logo {
+    width: 22px !important;
+    height: 22px !important;
+    flex: 0 0 22px !important;
+  }
+  /* Nome squadra su due righe invece di essere tagliato */
+  #root .standings-table .table-row > .standings-team strong {
+    font-size: 12.5px !important;
+    line-height: 1.15;
+    white-space: normal !important;
+    overflow: hidden;
+    text-overflow: clip;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 380px) {
+  #root .standings-table .table-row {
+    grid-template-columns: 22px minmax(0, 1fr) repeat(5, 25px) !important;
+    padding-inline: 6px !important;
+  }
+  #root .leaderboard .position { font-size: 13.5px !important; }
+  #root .standings-table .table-row:not(.head) > strong { min-width: 23px !important; font-size: 13.5px !important; }
+  #root .standings-table .table-row > .standings-team strong { font-size: 11.5px !important; }
 }

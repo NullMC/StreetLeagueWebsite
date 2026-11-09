@@ -103,7 +103,6 @@ html {
     pointer-events: none;
     transform-origin: 0 50%;
     background: linear-gradient(90deg, var(--sl-accent), var(--sl-accent-2));
-    filter: url("#sl-spray");
     animation: sl-scroll-progress linear both;
     animation-timeline: scroll(root block);
   }
@@ -172,7 +171,6 @@ html[data-theme="night"] #root :is(.player-card, .best-stats-card, .stat-card, .
 #root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card):hover {
   transform: translateY(-4px);
   box-shadow: var(--sl-shadow-glow), var(--sl-shadow-sm) !important;
-  filter: url("#sl-spray");
 }
 /* Immagini dentro le card: zoom lento al passaggio */
 #root :is(.home-feature-card__media img, .partner-editorial-card img:not([class*="logo"]), .player-card img) {
@@ -218,15 +216,15 @@ html[data-theme="night"] #root .sl-comp-card { box-shadow: inset 0 1px 0 rgba(25
   perspective: 900px;
   isolation: isolate;
   background:
-    radial-gradient(70% 90% at 86% 6%, rgba(228, 34, 120, 0.5), transparent 62%),
-    radial-gradient(60% 80% at 4% 100%, rgba(237, 123, 171, 0.55), transparent 62%),
+    url("/assets/spray/spray-1-soft.svg") right -16% top -34% / 58% auto no-repeat,
+    url("/assets/spray/spray-blush-2.svg") left -14% bottom -70% / 46% auto no-repeat,
     linear-gradient(160deg, #fff6f9, #ffe3ee);
   box-shadow: inset 0 0 0 1px rgba(1, 10, 8, 0.05);
 }
 html[data-theme="night"] #root .sl-comp-card__media {
   background:
-    radial-gradient(70% 90% at 86% 6%, rgba(228, 34, 120, 0.45), transparent 62%),
-    radial-gradient(60% 80% at 4% 100%, rgba(122, 20, 70, 0.7), transparent 62%),
+    url("/assets/spray/spray-3-soft.svg") right -16% top -34% / 58% auto no-repeat,
+    url("/assets/spray/spray-1-soft.svg") left -14% bottom -70% / 46% auto no-repeat,
     linear-gradient(160deg, #14030c, #071511);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
@@ -241,7 +239,7 @@ html[data-theme="night"] #root .sl-comp-card__media {
   filter: drop-shadow(0 18px 22px rgba(1, 10, 8, 0.28));
   transition: transform 700ms var(--sl-ease);
 }
-html[data-theme="night"] #root .sl-comp-card__logo { filter: invert(1) url("#sl-spray"); }
+html[data-theme="night"] #root .sl-comp-card__logo { filter: invert(1); }
 #root .sl-comp-card:hover .sl-comp-card__logo { transform: rotateY(-4deg) rotateX(2deg) scale(1.06); }
 #root .sl-comp-card__wordmark {
   position: absolute;
@@ -351,7 +349,6 @@ html[data-theme="night"] #root .sl-comp-card[data-status="upcoming"] .sl-comp-ca
   border-color: var(--sl-accent) !important;
   color: #fff !important;
   box-shadow: var(--sl-shadow-glow) !important;
-  filter: url("#sl-spray");
 }
 #root .sl-comp-card:hover .sl-comp-card__cta span { transform: translate(2px, -2px); }
 
@@ -475,12 +472,10 @@ html.sl-cine #root :is(.home-section-head, .section-head--group)[data-reveal="in
   width: min(520px, 90vw);
   height: 70%;
   transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--sl-accent) 22%, transparent), transparent 75%);
-  filter: blur(18px);
+  background: url("/assets/spray/spray-1-soft.svg") center top / contain no-repeat;
 }
 html[data-theme="night"] #root .team-detail-hero::after {
-  background: radial-gradient(closest-side, rgba(228, 34, 120, 0.32), transparent 75%);
+  background-image: url("/assets/spray/spray-3-soft.svg");
 }
 /* Più respiro tra la fascia e i quattro pulsanti delle sezioni */
 #root .team-detail-page .team-detail-shortcuts {

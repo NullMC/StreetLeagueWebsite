@@ -397,7 +397,7 @@
 }
 .partner-editorial-card__media-fallback {
   background:
-    radial-gradient(circle at 82% 18%, rgba(237, 123, 171, 0.24), transparent 42%),
+    url("/assets/spray/spray-3-soft.svg") right -12% top -30% / 60% auto no-repeat,
     linear-gradient(135deg, #3a1025 0%, #010a08 100%);
 }
 .partner-editorial-card__media-shade {

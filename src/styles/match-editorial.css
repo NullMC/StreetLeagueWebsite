@@ -41,7 +41,7 @@ html[data-theme="night"] .match-experience {
 .match-experience__hero {
   padding: clamp(24px, 5vw, 58px) max(22px, calc((100vw - 1100px) / 2));
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(228, 34, 120, .11), transparent 64%),
+    url("/assets/spray/spray-1-soft.svg") center -120px / min(520px, 90%) auto no-repeat,
     linear-gradient(180deg, #fff 0%, #f7f7f4 100%);
   border-bottom: 1px solid var(--report-line);
   color: var(--report-ink);
@@ -49,7 +49,7 @@ html[data-theme="night"] .match-experience {
 }
 html[data-theme="night"] .match-experience__hero {
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(228, 34, 120, .19), transparent 64%),
+    url("/assets/spray/spray-3-soft.svg") center -120px / min(520px, 90%) auto no-repeat,
     linear-gradient(180deg, #0b100e 0%, #080d0a 100%);
   border-bottom-color: var(--report-line);
   color: var(--report-ink);
