@@ -176,3 +176,27 @@ export interface MatchdayMvpVote {
   created_at?: string;
   updated_at?: string;
 }
+
+export type TopSevenSlot = "goalkeeper" | "defender" | "midfielder" | "attacker";
+
+/** One player of a compiled Top 7, with the statistics frozen when it was compiled. */
+export interface TopSevenEntry {
+  slot: TopSevenSlot;
+  player_id: string;
+  team_id: string;
+  goals: number;
+  assists: number;
+  appearances: number;
+  /** Goalkeepers only: average of every end-of-match rating received so far. */
+  keeper_average?: number | null;
+  keeper_votes?: number;
+}
+
+export interface MonthlyTopSeven {
+  id: string;
+  /** First day of the month the selection refers to (YYYY-MM-DD). */
+  period_month: string;
+  players: TopSevenEntry[];
+  compiled_at: string;
+  compiled_by?: string | null;
+}

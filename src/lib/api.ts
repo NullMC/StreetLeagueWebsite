@@ -12,6 +12,7 @@ import type {
   MatchLineup,
   MatchMvp,
   MatchWildcard,
+  MonthlyTopSeven,
   PlayerStats,
   StaffRankingEntry,
   StatisticsGroup,
@@ -292,6 +293,22 @@ export async function getAllMatchMvps(): Promise<MatchMvp[]> {
 export async function getAllGoalkeeperRatings(): Promise<GoalkeeperMatchRating[]> {
   if (!supabase) return [];
   return getRows<GoalkeeperMatchRating>(supabase.from("goalkeeper_match_ratings").select("match_id,player_id,rating"));
+}
+
+/** Latest Top 7 compiled from the back office, or null if none (or the table is missing). */
+export async function getLatestTopSeven(): Promise<MonthlyTopSeven | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("monthly_top_seven")
+    .select("*")
+    .order("compiled_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    if (error.code === "42P01" || error.code === "PGRST205" || /monthly_top_seven/.test(error.message)) return null;
+    throw error;
+  }
+  return (data as MonthlyTopSeven | null) ?? null;
 }
 
 export async function getAllMatchEvents(): Promise<MatchEvent[]> {

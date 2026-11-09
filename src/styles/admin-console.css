@@ -1026,3 +1026,10 @@ html[data-theme="night"] #root .sl-admin-login input { background: var(--sl-surf
 #root .sl-admin .admin-media { display: grid; gap: 18px; }
 #root .sl-admin .admin-media__actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 6px; }
 #root .sl-admin .admin-media .admin-table td a { color: var(--sl-fg); text-decoration: underline; text-underline-offset: 2px; word-break: break-all; }
+
+/* Top 7 del mese (sezione POTM & Staff) */
+#root .sl-admin .admin-top-seven { margin-bottom: 18px; }
+#root .sl-admin .admin-top-seven__actions { align-items: flex-end; }
+#root .sl-admin .admin-top-seven__month { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--sl-fg-muted); }
+#root .sl-admin .admin-top-seven__month input { min-height: 42px; padding: 0 12px; border-radius: var(--sl-r-sm); border: 1px solid var(--sl-line-strong); background: var(--sl-surface); color: var(--sl-fg); font: 500 14px/1.2 var(--font-body); }
+#root .sl-admin .admin-top-seven .admin-table-wrap { margin-top: 10px; }

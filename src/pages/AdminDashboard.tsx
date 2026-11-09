@@ -4,6 +4,7 @@ import { RichTextEditor } from "../components/RichTextEditor";
 import { AdminMatchAwards } from "../components/AdminMatchAwards";
 import { AdminMatchReports } from "../components/AdminMatchReports";
 import { AdminMediaCleanup } from "../components/AdminMediaCleanup";
+import { AdminTopSeven } from "../components/AdminTopSeven";
 import { supabase, supabaseConfigured } from "../lib/supabase";
 import { ensureFreshAdminSession, getAuthenticatedAdmin, removeUnusedMedia, signInWithAccessCode, uploadMedia, type AdminProfile } from "../lib/admin";
 import { getCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
@@ -55,7 +56,7 @@ const sectionInfo: Partial<Record<AdminSection, string>> = {
   teams: "Squadre iscritte, loghi, colori e competizioni a cui partecipano.",
   players: "Rose, numeri di maglia, ruoli e foto dei giocatori.",
   matches: "Calendario, orari, risultati e gallerie delle partite.",
-  player_of_month: "POTM e Staff del mese con le card pubblicate.",
+  player_of_month: "Top 7 del mese, POTM e Staff del mese con le card pubblicate.",
   partners: "Sponsor mostrati nella pagina partner.",
   active_collaborations: "Collaborazioni attive con volantino e CTA.",
   social_contents: "Video, post e articoli in evidenza.",
@@ -686,7 +687,7 @@ export default function AdminDashboard() {
           <h1>{current?.label}</h1>
           {sectionInfo[resource] && <p className="sl-admin__lead">{sectionInfo[resource]}</p>}
         </header>
-        <div className="sl-admin__content">{resource === "match_awards" ? <AdminMatchAwards /> : resource === "reports" ? <AdminMatchReports /> : resource === "media" ? <AdminMediaCleanup canDelete={profile.role === "super_admin" || profile.role === "admin"} /> : <Crud resource={resource} profile={profile} />}</div>
+        <div className="sl-admin__content">{resource === "match_awards" ? <AdminMatchAwards /> : resource === "reports" ? <AdminMatchReports /> : resource === "media" ? <AdminMediaCleanup canDelete={profile.role === "super_admin" || profile.role === "admin"} /> : resource === "player_of_month" ? <><AdminTopSeven canWrite={profile.role === "super_admin" || profile.role === "admin"} /><Crud resource={resource} profile={profile} /></> : <Crud resource={resource} profile={profile} />}</div>
       </section>
     </div>
   </PageShell>;
