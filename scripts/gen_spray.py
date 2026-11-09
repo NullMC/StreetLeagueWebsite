@@ -35,10 +35,13 @@ def drip(rng, x, y, length, w):
     sway = rng.uniform(-6, 6)
     end_y = y + length
     w2 = w * rng.uniform(0.55, 0.75)
-    d = (f"M{x - w / 2:.1f} {y - 8:.1f} "
-         f"C{x - w / 2:.1f} {y + length * 0.35:.1f} {x - w2 / 2 + sway:.1f} {y + length * 0.6:.1f} {x - w2 / 2 + sway:.1f} {end_y:.1f} "
+    root = w * 1.9
+    d = (f"M{x - root / 2:.1f} {y - 34:.1f} "
+         f"C{x - w / 2:.1f} {y + 4:.1f} {x - w / 2:.1f} {y + length * 0.3:.1f} {x - w2 / 2 + sway:.1f} {y + length * 0.62:.1f} "
+         f"L{x - w2 / 2 + sway:.1f} {end_y:.1f} "
          f"L{x + w2 / 2 + sway:.1f} {end_y:.1f} "
-         f"C{x + w2 / 2 + sway:.1f} {y + length * 0.6:.1f} {x + w / 2:.1f} {y + length * 0.35:.1f} {x + w / 2:.1f} {y - 8:.1f} Z")
+         f"L{x + w2 / 2 + sway:.1f} {y + length * 0.62:.1f} "
+         f"C{x + w / 2:.1f} {y + length * 0.3:.1f} {x + w / 2:.1f} {y + 4:.1f} {x + root / 2:.1f} {y - 34:.1f} Z")
     drop_r = w2 * rng.uniform(0.85, 1.15)
     return d, (x + sway, end_y + drop_r * 0.6, drop_r)
 
@@ -58,7 +61,12 @@ def splat(seed, color, opacity, drips=3):
         '<feComposite in="b" in2="m" operator="in"/>'
         "</filter>",
         '<filter id="haze"><feGaussianBlur stdDeviation="22"/></filter>',
-        '<filter id="wet"><feGaussianBlur stdDeviation="0.7"/></filter>',
+        '<filter id="wet" x="-50%" y="-10%" width="200%" height="120%">'
+        '<feGaussianBlur stdDeviation="1.4" result="b"/>'
+        f'<feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="3" seed="{seed}" result="n"/>'
+        '<feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0.62" result="m"/>'
+        '<feComposite in="b" in2="m" operator="in"/>'
+        "</filter>",
         "</defs>",
         f'<g fill="{color}" opacity="{opacity}">',
         f'<path d="{mist}" opacity="0.32" filter="url(#haze)"/>',
@@ -79,21 +87,24 @@ def splat(seed, color, opacity, drips=3):
         o = max(0.18, rng.uniform(0.45, 0.95) * (1 - 0.6 * far))
         dots.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r:.2f}" opacity="{o:.2f}"/>')
     parts.append("<g>" + "".join(dots) + "</g>")
-    # Drips from the lower edge of the core.
+    # Drips from the lower edge of the core, painted as part of the same layer.
     used = []
+    drip_shapes = []
     for _ in range(drips):
         for _attempt in range(20):
             t = rng.uniform(math.radians(55), math.radians(125))
             if all(abs(t - u) > 0.22 for u in used):
                 break
         used.append(t)
-        edge = edge_radius(t, phases, amps, freqs, R) * 0.9
+        edge = edge_radius(t, phases, amps, freqs, R) * 0.82
         x = CX + edge * math.cos(t)
         y = CY + edge * 0.92 * math.sin(t)
         length = rng.uniform(70, 230)
         w = rng.uniform(12, 21)
         d, (dx, dy, dr) = drip(rng, x, y, length, w)
-        parts.append(f'<g filter="url(#wet)" opacity="0.88"><path d="{d}"/><circle cx="{dx:.1f}" cy="{dy:.1f}" r="{dr:.1f}"/></g>')
+        drip_shapes.append(f'<path d="{d}"/><circle cx="{dx:.1f}" cy="{dy:.1f}" r="{dr:.1f}"/>')
+    if drip_shapes:
+        parts.append('<g filter="url(#wet)" opacity="0.9">' + "".join(drip_shapes) + "</g>")
     parts.append("</g></svg>")
     return "".join(parts)
 
@@ -108,6 +119,9 @@ files = {
     "spray-blush-2.svg": splat(71, BLUSH, 1, 3),
     # Lighter passes for backgrounds behind content
     "spray-1-soft.svg": splat(11, PINK, 0.5, 3),
+    # Senza colature: dietro al logo dell'hero
+    "spray-halo.svg": splat(11, PINK, 0.5, 0),
+    "spray-halo-night.svg": splat(11, PINK, 1, 0),
     "spray-3-soft.svg": splat(43, PINK, 0.45, 4),
 }
 for name, svg in files.items():

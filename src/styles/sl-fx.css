@@ -325,10 +325,10 @@ html[data-theme="night"] .sl-logo3d__sheen {
   position: absolute;
   inset: 4% 10%;
   border-radius: 50%;
-  /* Macchia di vernice spray con colature dietro al logo (non piu' una luce sfocata) */
-  inset: -6% 6% -30%;
+  /* Macchia di vernice spray dietro al logo, senza colature (non piu' una luce sfocata) */
+  inset: -14% 4% -14%;
   border-radius: 0;
-  background: url("/assets/spray/spray-1-soft.svg") center top / contain no-repeat;
+  background: url("/assets/spray/spray-halo.svg") center 30% / contain no-repeat;
   animation: sl-logo-halo 10s ease-in-out infinite;
 }
 @keyframes sl-logo-halo {
@@ -347,7 +347,7 @@ html[data-theme="night"] .sl-logo3d__sheen {
   animation: sl-logo-shadow 10s ease-in-out infinite;
 }
 html[data-theme="night"] .sl-logo3d__shadow { background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6), transparent); }
-html[data-theme="night"] .sl-logo3d__halo { background-image: url("/assets/spray/spray-1.svg"); opacity: 0.75; }
+html[data-theme="night"] .sl-logo3d__halo { background-image: url("/assets/spray/spray-halo-night.svg"); opacity: 0.75; }
 @keyframes sl-logo-shadow {
   0%, 100% { transform: scaleX(1); opacity: 1; }
   50% { transform: scaleX(0.82); opacity: 0.6; }
@@ -355,15 +355,16 @@ html[data-theme="night"] .sl-logo3d__halo { background-image: url("/assets/spray
 
 /* Parallasse dell'hero guidata dallo scroll (browser che la supportano) */
 @supports (animation-timeline: scroll()) {
+  /* Parte quando l'hero è già in buona parte scrollato, ed è leggera */
   .sl-hero__copy {
     animation: sl-par-copy linear both;
     animation-timeline: scroll(root block);
-    animation-range: 0 85vh;
+    animation-range: 35vh 110vh;
   }
   .sl-hero__side {
     animation: sl-par-side linear both;
     animation-timeline: scroll(root block);
-    animation-range: 0 85vh;
+    animation-range: 35vh 110vh;
   }
   .sl-hero-fx,
   .sl-hero__bg {
@@ -371,8 +372,8 @@ html[data-theme="night"] .sl-logo3d__halo { background-image: url("/assets/spray
     animation-timeline: scroll(root block);
     animation-range: 0 100vh;
   }
-  @keyframes sl-par-copy { to { transform: translate3d(0, -90px, 0); opacity: 0.1; filter: blur(5px); } }
-  @keyframes sl-par-side { to { transform: translate3d(0, -170px, 0) scale(0.92); opacity: 0.15; } }
+  @keyframes sl-par-copy { to { transform: translate3d(0, -50px, 0); opacity: 0.55; filter: blur(1.5px); } }
+  @keyframes sl-par-side { to { transform: translate3d(0, -90px, 0) scale(0.96); opacity: 0.6; } }
   @keyframes sl-par-bg { to { transform: scale(1.14) translate3d(0, 50px, 0); } }
 }
 

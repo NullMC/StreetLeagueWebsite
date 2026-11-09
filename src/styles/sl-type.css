@@ -438,3 +438,28 @@ html[data-theme="night"] #root .sl-word--accent { color: var(--sl-pink-2); }
   #root .standings-table .table-row:not(.head) > strong { min-width: 23px !important; font-size: 13.5px !important; }
   #root .standings-table .table-row > .standings-team strong { font-size: 11.5px !important; }
 }
+
+/* --------------------------------------------------------------------------
+   9. Card della pagina Statistiche: mai più strette di 250px
+   (con 4 colonne fisse su schermi medi nomi e valori risultavano schiacciati)
+   -------------------------------------------------------------------------- */
+#root .stats-best-cards-grid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+  gap: 16px !important;
+}
+@media (max-width: 560px) {
+  #root .stats-best-cards-grid { grid-template-columns: 1fr !important; }
+}
+#root .stats-best-cards-grid .best-stats-card__leader { gap: 14px; }
+#root .stats-best-cards-grid .best-stats-card__leader-data { min-width: 0; flex: 1 1 auto; }
+#root .stats-best-cards-grid .best-stats-card h3 { line-height: 1.1 !important; }
+
+/* Il vecchio alone sfocato nell'angolo delle card diventa una piccola macchia spray, sotto i dati */
+#root .stat-card::after { display: none !important; }
+#root .stat-card {
+  background-image: url("/assets/spray/spray-1-soft.svg") !important;
+  background-repeat: no-repeat !important;
+  background-position: right -90px bottom -150px !important;
+  background-size: 230px auto !important;
+}
+html[data-theme="night"] #root .stat-card { background-image: url("/assets/spray/spray-3-soft.svg") !important; }

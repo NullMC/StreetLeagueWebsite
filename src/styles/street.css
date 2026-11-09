@@ -218,13 +218,12 @@ main:focus {
   border-radius: 5px !important;
 }
 
+/* stat-card e team-card esclusi: "inherit" rendeva trasparente lo sfondo della card in hover */
 .hero-match:hover,
 .hero-standing:hover,
 .match-card:hover,
-.stat-card:hover,
 .partner-card:hover,
 .video-card:hover,
-.team-card:hover,
 .sponsorship-card:hover {
   background: inherit !important;
   transform: none !important;

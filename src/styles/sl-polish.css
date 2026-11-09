@@ -129,28 +129,13 @@ html {
 }
 
 /* --------------------------------------------------------------------------
-   3. Card: stesso bordo, stessa luce, stesso sollevamento e bordo luminoso che segue il puntatore
+   3. Card: stesso bordo e stesso sollevamento
    -------------------------------------------------------------------------- */
 #root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card, .monthly-award-card, .player-card, .best-stats-card, .partner-editorial-card, .match-experience__panel, .standings-table) {
   position: relative;
 }
-#root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card, .monthly-award-card, .player-card, .best-stats-card, .partner-editorial-card, .standings-table)::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  padding: 1px;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%), var(--sl-accent), color-mix(in srgb, var(--sl-accent-2) 40%, transparent) 40%, transparent 72%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 320ms var(--sl-ease);
-}
-#root :is(.sl-comp-card, .team-card, .potm-card, .staff-month-card, .monthly-award-card, .player-card, .best-stats-card, .partner-editorial-card, .standings-table):hover::after { opacity: 1; }
+/* Il bordo luminoso che seguiva il puntatore e' stato rimosso: la maschera non lo limitava al bordo
+   e disegnava un cerchio rosa sopra i dati delle card. */
 
 /* Stessa geometria per tutte le card informative */
 #root :is(.player-card, .best-stats-card, .stat-card, .team-card, .potm-card, .staff-month-card, .monthly-award-card, .partner-editorial-card, .match-experience__panel) {
