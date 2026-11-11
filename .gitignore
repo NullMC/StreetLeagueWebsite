@@ -1,3 +1,6 @@
 node_modules
 
 backup/
+
+# Liste tesserati settimanali (si rigenerano con npm run tesserati)
+stampa/tesserati-*.pdf

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tesserati": "node scripts/tesserati.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
