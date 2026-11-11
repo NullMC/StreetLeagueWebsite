@@ -26,6 +26,19 @@ const byRosterOrder = (a: Player, b: Player) =>
   Number(isStaff(a)) - Number(isStaff(b)) ||
   (a.shirt_number ?? 999) - (b.shirt_number ?? 999) ||
   nameOf(a).localeCompare(nameOf(b), "it");
+/** Lowercase, no accents, single spaces: "Nicolò  Rossi" matches "nicolo rossi". */
+const normalizeSearch = (value: string) =>
+  value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+/** Name (either order) or shirt number ("10", "#10"). */
+const matchesPlayerSearch = (player: Player, query: string) => {
+  const q = normalizeSearch(query).replace(/^#/, "");
+  if (!q) return true;
+  const name = normalizeSearch(player.first_name + " " + player.last_name);
+  const reversed = normalizeSearch(player.last_name + " " + player.first_name);
+  return name.includes(q) || reversed.includes(q) ||
+    (/^\d+$/.test(q) && String(player.shirt_number ?? "") === q) ||
+    (q === "staff" && isStaff(player));
+};
 const WILDCARD_MAX = 80;
 const WILDCARD_PREFIX = "wc:";
 type WildcardDraft = { name: string; position: WildcardPosition };
@@ -58,6 +71,9 @@ export function AdminMatchReports() {
   const [playerId, setPlayerId] = useState("");
   const [ownGoalTeam, setOwnGoalTeam] = useState("");
   const [note, setNote] = useState("");
+  // Search boxes: one per team roster, one for the event author.
+  const [rosterSearch, setRosterSearch] = useState<Record<string, string>>({});
+  const [eventSearch, setEventSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [matchLoading, setMatchLoading] = useState(false);
   const [busy, setBusy] = useState("");
@@ -182,6 +198,36 @@ export function AdminMatchReports() {
   const resolvedPlayerId = isOwnGoal
     ? (ownGoalActorIds.includes(playerId) ? playerId : "")
     : actorIds.includes(playerId) ? playerId : (actorIds[0] ?? "");
+  // Event author search: the selected option stays visible, the first match is picked while typing.
+  const eventQuery = normalizeSearch(eventSearch);
+  // In the event form the team name counts too ("squicity", "gazzosa sedicina").
+  const matchesEventSearch = (player: Player, value: string) => matchesPlayerSearch(player, value) ||
+    normalizeSearch((teams.find((team) => team.id === player.team_id)?.name ?? "") + " " + player.first_name + " " + player.last_name)
+      .includes(normalizeSearch(value));
+  const wildcardMatches = (name: string) => !eventQuery || normalizeSearch(name).includes(eventQuery);
+  const visibleEventPlayers = eventQuery
+    ? eligibleEventPlayers.filter((player) => player.id === resolvedPlayerId || matchesEventSearch(player, eventSearch))
+    : eligibleEventPlayers;
+  const visibleEventWildcards = eligibleWildcards.filter((wildcard) =>
+    WILDCARD_PREFIX + wildcard.id === resolvedPlayerId || wildcardMatches(wildcard.full_name));
+  const visibleOwnGoalPlayers = eventQuery
+    ? ownGoalPlayers.filter((player) => player.id === resolvedPlayerId || matchesEventSearch(player, eventSearch))
+    : ownGoalPlayers;
+  const visibleOwnGoalWildcards = ownGoalWildcards.filter((wildcard) =>
+    WILDCARD_PREFIX + wildcard.id === resolvedPlayerId || wildcardMatches(wildcard.full_name));
+  function searchEventAuthor(value: string) {
+    setEventSearch(value);
+    if (!normalizeSearch(value)) return;
+    const pool = isOwnGoal ? ownGoalPlayers : eligibleEventPlayers;
+    const wildcardPool = isOwnGoal ? ownGoalWildcards : eligibleWildcards;
+    const player = pool.find((entry) => matchesEventSearch(entry, value));
+    const wildcard = wildcardPool.find((entry) => normalizeSearch(entry.full_name).includes(normalizeSearch(value)));
+    if (player) setPlayerId(player.id);
+    else if (wildcard) setPlayerId(WILDCARD_PREFIX + wildcard.id);
+  }
+  const eventSearchNoMatch = Boolean(eventQuery) &&
+    !(isOwnGoal ? ownGoalPlayers : eligibleEventPlayers).some((player) => matchesEventSearch(player, eventSearch)) &&
+    !(isOwnGoal ? ownGoalWildcards : eligibleWildcards).some((wildcard) => wildcardMatches(wildcard.full_name));
   const teamName = (id?: string | null) => teams.find((team) => team.id === id)?.name ?? "Squadra";
   const actorName = (entry: MatchEvent) => {
     if (entry.event_type === "own_goal" && !entry.wildcard_id && !entry.player_id) {
@@ -248,7 +294,7 @@ export function AdminMatchReports() {
   }
 
   function resetEvent() {
-    setEventId(""); setKind("goal"); setMinute("1"); setPlayerId(""); setOwnGoalTeam(""); setNote("");
+    setEventId(""); setKind("goal"); setMinute("1"); setPlayerId(""); setOwnGoalTeam(""); setNote(""); setEventSearch("");
   }
   async function saveEvent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -340,6 +386,8 @@ export function AdminMatchReports() {
             {[selectedMatch.home_team_id, selectedMatch.away_team_id].map((teamId) => {
               const team = teams.find((entry) => entry.id === teamId);
               const roster = players.filter((player) => player.team_id === teamId).sort(byRosterOrder);
+              const query = rosterSearch[teamId] ?? "";
+              const visibleRoster = roster.filter((player) => matchesPlayerSearch(player, query));
               return (
                 <section className="match-report-admin__team" key={teamId}>
                   <div className="match-report-admin__team-title">
@@ -359,9 +407,20 @@ export function AdminMatchReports() {
                       {WILDCARD_POSITIONS.map((position) => <option key={position} value={position}>{position}</option>)}
                     </select>
                   </fieldset>
+                  {!matchLoading && roster.length > 0 && (
+                    <div className="match-report-admin__search">
+                      <input type="search" value={query} autoComplete="off"
+                        aria-label={"Cerca nella rosa di " + (team?.name ?? "squadra")}
+                        placeholder="Cerca per nome, cognome o numero…"
+                        onChange={(e) => setRosterSearch((old) => ({ ...old, [teamId]: e.target.value }))}
+                        onKeyDown={(e) => { if (e.key === "Escape") setRosterSearch((old) => ({ ...old, [teamId]: "" })); }} />
+                      {query.trim() && <small>{visibleRoster.length} di {roster.length}</small>}
+                    </div>
+                  )}
                   {matchLoading ? <p>Caricamento…</p> : roster.length ? (
                     <div className="match-report-admin__roster">
-                      {roster.map((player) => (
+                      {!visibleRoster.length && <p className="admin-help-text">Nessun membro trovato per “{query.trim()}”.</p>}
+                      {visibleRoster.map((player) => (
                         <div className={"match-report-admin__roster-row" + (isStaff(player) ? " is-staff" : "")} key={player.id}>
                           <label>
                             <input type="checkbox" checked={draft[player.id]?.selected ?? false}
@@ -415,14 +474,20 @@ export function AdminMatchReports() {
                   </select>
                 </label>
               )}
+              <label className="match-report-admin__event-search">Cerca giocatore
+                <input type="search" value={eventSearch} autoComplete="off" disabled={!canRecordEvents}
+                  placeholder="Nome, cognome o numero" onChange={(e) => searchEventAuthor(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Escape") setEventSearch(""); }} />
+                {eventSearchNoMatch && <small>Nessun membro idoneo trovato</small>}
+              </label>
               {isOwnGoal ? (
                 <label>Autore (facoltativo)
                   <select value={resolvedPlayerId} disabled={!canRecordEvents} onChange={(e) => setPlayerId(e.target.value)}>
                     <option value="">Nessun giocatore indicato</option>
-                    {ownGoalPlayers.map((player) => (
+                    {visibleOwnGoalPlayers.map((player) => (
                       <option key={player.id} value={player.id}>{nameOf(player)}{isStaff(player) ? " (Staff)" : ""}</option>
                     ))}
-                    {ownGoalWildcards.map((wildcard) => (
+                    {visibleOwnGoalWildcards.map((wildcard) => (
                       <option key={wildcard.id} value={WILDCARD_PREFIX + wildcard.id}>{wildcard.full_name} (Wildcard)</option>
                     ))}
                   </select>
@@ -432,12 +497,12 @@ export function AdminMatchReports() {
                 <select value={resolvedPlayerId} required disabled={!canRecordEvents || !actorIds.length}
                   onChange={(e) => setPlayerId(e.target.value)}>
                   {!actorIds.length && <option value="">Nessun membro idoneo</option>}
-                  {eligibleEventPlayers.map((player) => (
+                  {visibleEventPlayers.map((player) => (
                     <option key={player.id} value={player.id}>
                       {teams.find((team) => team.id === player.team_id)?.name} · {nameOf(player)}{isStaff(player) ? " (Staff)" : ""}
                     </option>
                   ))}
-                  {eligibleWildcards.map((wildcard) => (
+                  {visibleEventWildcards.map((wildcard) => (
                     <option key={wildcard.id} value={WILDCARD_PREFIX + wildcard.id}>
                       {teams.find((team) => team.id === wildcard.team_id)?.name} · {wildcard.full_name} (Wildcard)
                     </option>

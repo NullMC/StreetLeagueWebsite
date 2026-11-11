@@ -1033,3 +1033,10 @@ html[data-theme="night"] #root .sl-admin-login input { background: var(--sl-surf
 #root .sl-admin .admin-top-seven__month { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--sl-fg-muted); }
 #root .sl-admin .admin-top-seven__month input { min-height: 42px; padding: 0 12px; border-radius: var(--sl-r-sm); border: 1px solid var(--sl-line-strong); background: var(--sl-surface); color: var(--sl-fg); font: 500 14px/1.2 var(--font-body); }
 #root .sl-admin .admin-top-seven .admin-table-wrap { margin-top: 10px; }
+
+/* Ricerca giocatori in Formazioni e referti */
+#root .sl-admin .match-report-admin__search { display: flex; align-items: center; gap: 10px; margin: 12px 0 8px; }
+#root .sl-admin .match-report-admin__search input { flex: 1 1 auto; min-width: 0; }
+#root .sl-admin .match-report-admin__search small { flex: 0 0 auto; font-size: 12px; color: var(--sl-fg-muted); }
+#root .sl-admin .match-report-admin__event-search small { display: block; margin-top: 4px; font-size: 12px; color: var(--sl-fg-muted); }
+
