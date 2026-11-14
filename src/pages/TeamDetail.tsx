@@ -11,6 +11,7 @@ import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { MatchCard } from "../components/MatchCard";
+import { PersonName, nameLengthStyle } from "../components/PersonName";
 import { getActiveCompetitions, getTeams, getPlayers, getTeamMatches } from "../lib/api";
 import type { Team, Player, Match } from "../types";
 
@@ -61,10 +62,8 @@ function RosterCards({ members, staff = false }: { members: Player[]; staff?: bo
               <span className="eyebrow">
                 {staff ? "Membro staff" : `#${player.shirt_number ?? "—"} / ${player.position || "Giocatore"}`}
               </span>
-              <h3>
-                {player.first_name}
-                <br />
-                {player.last_name}
+              <h3 style={nameLengthStyle(player.first_name, player.last_name)}>
+                <PersonName first={player.first_name} last={player.last_name} stacked />
               </h3>
             </div>
           </a>

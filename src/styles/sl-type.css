@@ -456,3 +456,45 @@ html[data-theme="night"] #root .sl-word--accent { color: var(--sl-pink-2); }
 
 /* Card statistiche pulite: niente alone ne' macchia nell'angolo */
 #root .stat-card::after { display: none !important; }
+
+/* --------------------------------------------------------------------------
+   10. Nomi di giocatori e staff
+   Doppio nome ("Marco Antonio") e doppio cognome ("De Santis") restano su una riga:
+   si va a capo solo tra nome e cognome (componente PersonName).
+   -------------------------------------------------------------------------- */
+.sl-name-part { white-space: nowrap; }
+/* Nomi su due righe nelle card grandi: il carattere si riduce se la riga più lunga non entra
+   (--name-chars = lettere della riga più lunga, 100cqi = larghezza del contenitore) */
+#root :is(.transfer-slot, .team-roster-card) .player-card__content { container-type: inline-size; }
+#root :is(.transfer-slot, .team-roster-card) .player-card__content h3 {
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  font-size: min(clamp(28px, 2.6vw, 38px), calc(100cqi / (var(--name-chars, 10) * 0.5))) !important;
+  line-height: 1.05 !important;
+}
+#root .detail-hero__inner:has(> .player-detail-name) { container-type: inline-size; }
+#root .detail-hero h1.player-detail-name {
+  overflow-wrap: normal !important;
+  font-size: min(clamp(34px, 5.2vw, 72px), calc(100cqi / (var(--name-chars, 10) * 0.86))) !important;
+}
+
+/* --------------------------------------------------------------------------
+   11. Card acquisti del calciomercato: foto in alto a destra, nome sotto a tutta larghezza
+   (prima il nome stava in una colonna stretta accanto alla foto e veniva spezzato)
+   -------------------------------------------------------------------------- */
+#root .transfer-slot { flex-basis: clamp(260px, 26vw, 330px) !important; }
+#root .transfer-slot--filled .player-card__content {
+  padding-right: 0 !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+}
+#root .transfer-slot--filled .player-card__content .eyebrow {
+  padding-right: 118px;
+  min-height: 104px;
+}
+@media (max-width: 760px) {
+  #root .transfer-slot { flex-basis: min(80vw, 300px) !important; }
+}
+

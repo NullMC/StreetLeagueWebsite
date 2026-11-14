@@ -1,5 +1,6 @@
 import type { PlayerOfMonth } from "../lib/playerOfMonth";
 import type { Team } from "../types";
+import { PersonName } from "./PersonName";
 
 export function PlayerOfMonthCard({
   item,
@@ -38,7 +39,7 @@ export function PlayerOfMonthCard({
       <span className="monthly-award-card__badge">POTM</span>
       <div className="monthly-award-card__content">
         <span className="eyebrow">Player of the Month · {item.month_label}</span>
-        <h3>{player.first_name} {player.last_name}</h3>
+        <h3><PersonName first={player.first_name} last={player.last_name} /></h3>
         <div className="monthly-award-card__meta">
           {player.shirt_number != null ? <span>#{player.shirt_number}</span> : null}
           {player.position ? <span>{player.position}</span> : null}

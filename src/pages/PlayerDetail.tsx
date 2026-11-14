@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
+import { PersonName, nameLengthStyle } from "../components/PersonName";
 import { getActiveCompetitions, getPlayers, getTeams, getPlayerStatsForCompetitions } from "../lib/api";
 import type { Player, Team, PlayerStats } from "../types";
 
@@ -106,12 +107,10 @@ export default function PlayerDetail() {
                 Profilo giocatore 
               </span>
 
-              <h1>
+              <h1 className="player-detail-name" style={nameLengthStyle(player.first_name, player.last_name)}>
                 #{player.shirt_number ?? "—"}
                 <br />
-                {player.first_name}
-                <br />
-                {player.last_name}
+                <PersonName first={player.first_name} last={player.last_name} stacked />
               </h1>
 
               <div className="detail-meta">

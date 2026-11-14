@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
+import { PersonName } from "../components/PersonName";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 import {
   getActiveCompetitions,
@@ -97,7 +98,7 @@ function BestStatsCard({ group, players, staff, awards, config }: {
               />
             ) : null}
             <div className="best-stats-card__leader-data">
-              <h3>{name}</h3>
+              <h3>{player ? <PersonName first={player.first_name} last={player.last_name} /> : name}</h3>
               <div className="best-stats-card__record">
                 <strong className="stat-card__value">{displayValue}</strong>
                 <span className="best-stats-card__unit">{config.unit}</span>
@@ -275,7 +276,7 @@ export default function Stats() {
                       <tr key={competition.id + "-" + player.id}>
                         <td>{group.name !== competition.name ? group.name + " · " + competition.name : competition.name}</td>
                         <td>{player.shirt_number ?? "—"}</td>
-                        <td><a href={"/giocatori/" + player.id}>{player.first_name} {player.last_name}</a></td>
+                        <td><a href={"/giocatori/" + player.id}><PersonName first={player.first_name} last={player.last_name} /></a></td>
                         <td>{player.team_name}</td>
                         <td>{player.stats.goals}</td>
                         <td>{player.stats.assists}</td>

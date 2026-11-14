@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { PageShell } from "../components/PageShell";
 import { EmptyState } from "../components/EmptyState";
+import { PersonName } from "../components/PersonName";
 import {
   getMatch, getTeams, getMatchEvents, getMatchMvp, getPlayers, getMatchLineups, getMatchWildcards,
 } from "../lib/api";
@@ -67,7 +68,7 @@ export default function MatchDetail() {
   const findPlayer = (id: string | null) => players.find((player) => player.id === id);
   const playerName = (id: string | null) => {
     const player = findPlayer(id);
-    return player ? player.first_name + " " + player.last_name : "Giocatore";
+    return player ? <PersonName first={player.first_name} last={player.last_name} /> : "Giocatore";
   };
   const hasReport = match?.status === "finished";
   const timelineEvents = events.filter((event) =>

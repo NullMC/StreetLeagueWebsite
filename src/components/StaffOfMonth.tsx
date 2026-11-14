@@ -1,4 +1,5 @@
 import type { StaffOfMonth } from "../lib/playerOfMonth";
+import { PersonName } from "./PersonName";
 
 export function StaffOfMonthCard({
   item,
@@ -36,7 +37,7 @@ export function StaffOfMonthCard({
       <span className="monthly-award-card__badge">STAFF OF THE MONTH</span>
       <div className="monthly-award-card__content">
         <span className="eyebrow">Staff of the Month · {item.month_label}</span>
-        <h3>{staff.first_name} {staff.last_name}</h3>
+        <h3><PersonName first={staff.first_name} last={staff.last_name} /></h3>
         <div className="monthly-award-card__meta">
           <span>STAFF</span>
           {staff.position && staff.position.toUpperCase() !== "STAFF" ? <span>{staff.position}</span> : null}

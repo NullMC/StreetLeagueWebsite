@@ -4,6 +4,7 @@ import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
 import { TeamCarousel } from "../components/TeamCarousel";
 import { getTeams } from "../lib/api";
+import { PersonName, nameLengthStyle } from "../components/PersonName";
 import { supabase } from "../lib/supabase";
 import type { Player, Team } from "../types";
 
@@ -68,10 +69,8 @@ function TransferPlayerCard({
         <span className="eyebrow">
           {"#" + (shirtNumber ?? "—") + " / " + (position || "Giocatore")}
         </span>
-        <h3>
-          {firstName}
-          <br />
-          {lastName}
+        <h3 style={nameLengthStyle(firstName, lastName)}>
+          <PersonName first={firstName} last={lastName} stacked />
         </h3>
       </div>
     </>

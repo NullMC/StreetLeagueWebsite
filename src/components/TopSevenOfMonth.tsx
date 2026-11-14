@@ -3,6 +3,7 @@ import { Avatar, CircularProgress, Paper, Typography } from "@mui/material";
 import { getLatestTopSeven, getPlayers, getTeams } from "../lib/api";
 import { formatTopSevenMonth, TOP_SEVEN_LABELS, TOP_SEVEN_SLOTS } from "../lib/topSeven";
 import { formatKeeperAverage } from "../lib/awards";
+import { PersonName } from "./PersonName";
 import type { Player, Team, TopSevenEntry, TopSevenSlot } from "../types";
 
 type Slot = { entry: TopSevenEntry; player: Player; team: Team | undefined } | null;
@@ -29,7 +30,7 @@ function PlayerSlot({ slot, role }: { slot: Slot; role: TopSevenSlot }) {
       <Avatar className="top-seven-player__avatar" src={photo} alt={player.first_name + " " + player.last_name}>{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</Avatar>
       {team?.logo_url ? <img loading="lazy" decoding="async" className="top-seven-player__team-logo" src={team.logo_url} alt="" /> : null}
     </div>
-    <strong>{player.first_name} {player.last_name}</strong><small>{team?.name ?? ""}</small>
+    <strong><PersonName first={player.first_name} last={player.last_name} /></strong><small>{team?.name ?? ""}</small>
     <span className="top-seven-player__stats">{stats}</span><small className="top-seven-player__role">{label}</small>
   </a>;
 }

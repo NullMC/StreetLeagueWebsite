@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { PageShell } from "../components/PageShell";
 import { SectionTitle } from "../components/SectionTitle";
 import { EmptyState } from "../components/EmptyState";
+import { PersonName } from "../components/PersonName";
 import { SponsorWatermarkStrip } from "../components/SponsorWatermarkStrip";
 import {
   getActiveCompetitions,
@@ -164,7 +165,7 @@ export default function StatsDetail() {
                     <span className="position">{String(index + 1).padStart(2, "0")}</span>
                     <span className="stats-detail-player">
                       {photo ? <img loading="lazy" decoding="async" src={photo} alt="" /> : <span className="stats-detail-player__placeholder">{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</span>}
-                      <span><strong>{player.first_name} {player.last_name}</strong><small>{player.position || "Staff"}</small></span>
+                      <span><strong><PersonName first={player.first_name} last={player.last_name} /></strong><small>{player.position || "Staff"}</small></span>
                     </span>
                     <strong>{entry.presidential_penalties}</strong>
                   </a>
@@ -187,7 +188,7 @@ export default function StatsDetail() {
                     <span className="position">{String(index + 1).padStart(2, "0")}</span>
                     <span className="stats-detail-player">
                     {photo ? <img loading="lazy" decoding="async" src={photo} alt="" /> : <span className="stats-detail-player__placeholder">{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</span>}
-                    <span><strong>{player.first_name} {player.last_name}</strong><small>{player.position || "Giocatore"}</small></span>
+                    <span><strong><PersonName first={player.first_name} last={player.last_name} /></strong><small>{player.position || "Giocatore"}</small></span>
                   </span>
                   <span className="stats-detail-team">{player.team_name}</span>
                   <strong className="stats-detail-keeper-score">{displayScore(player)}{isKeeperRanking && (
