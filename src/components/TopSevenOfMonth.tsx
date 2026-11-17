@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Avatar, CircularProgress, Paper, Typography } from "@mui/material";
 import { getLatestTopSeven, getPlayers, getTeams } from "../lib/api";
 import { formatTopSevenMonth, TOP_SEVEN_LABELS, TOP_SEVEN_SLOTS } from "../lib/topSeven";
-import { formatKeeperAverage } from "../lib/awards";
+import { formatKeeperPoints } from "../lib/awards";
 import { PersonName } from "./PersonName";
 import type { Player, Team, TopSevenEntry, TopSevenSlot } from "../types";
 
@@ -12,6 +12,10 @@ type Loaded = { pitch: Pitch; periodMonth: string };
 
 const EMPTY_PITCH: Pitch = { goalkeeper: [null], defender: [null, null], midfielder: [null, null], attacker: [null, null] };
 
+/** Points of a keeper; older compilations only stored the average (votes are whole numbers). */
+const keeperPoints = (entry: TopSevenEntry) => entry.keeper_points ??
+  (entry.keeper_average != null ? Math.round(entry.keeper_average * (entry.keeper_votes ?? 0)) : null);
+
 function PlayerSlot({ slot, role }: { slot: Slot; role: TopSevenSlot }) {
   const label = TOP_SEVEN_LABELS[role];
   if (!slot) {
@@ -19,10 +23,10 @@ function PlayerSlot({ slot, role }: { slot: Slot; role: TopSevenSlot }) {
   }
   const { entry, player, team } = slot;
   const photo = player.profile_image_url || player.bg_less_image_url || undefined;
-  // Goalkeepers: average of all their end-of-match ratings instead of goals and assists.
+  // Goalkeepers: total of all their end-of-match ratings instead of goals and assists.
   const stats = role === "goalkeeper"
-    ? (entry.keeper_average != null
-      ? `Media voto ${formatKeeperAverage(entry.keeper_average)} · ${entry.keeper_votes ?? 0} ${entry.keeper_votes === 1 ? "partita" : "partite"}`
+    ? (keeperPoints(entry) != null
+      ? `${formatKeeperPoints(keeperPoints(entry) ?? 0)} punti voto · ${entry.keeper_votes ?? 0} ${entry.keeper_votes === 1 ? "partita" : "partite"}`
       : "Nessun voto")
     : `${entry.goals} gol · ${entry.assists} assist`;
   return <a className="top-seven-player" href={"/giocatori/" + player.id}>

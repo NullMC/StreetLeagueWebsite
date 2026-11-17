@@ -176,7 +176,7 @@ function selectTopSeven(
     });
   });
 
-  // Average of every rating the goalkeeper has received so far (all matches, not only this month).
+  // Total of every rating the goalkeeper has received so far (all matches, not only this month).
   const keeperHistory = new Map<string, { sum: number; count: number }>();
   ratings.forEach((entry) => {
     const current = keeperHistory.get(entry.player_id) ?? { sum: 0, count: 0 };
@@ -200,7 +200,7 @@ function selectTopSeven(
       assists: candidate.assists,
       appearances: candidate.appearances,
       ...(role === "goalkeeper" ? {
-        keeper_average: history?.count ? Math.round((history.sum / history.count) * 100) / 100 : null,
+        keeper_points: history?.count ? history.sum : null,
         keeper_votes: history?.count ?? 0,
       } : {}),
     });

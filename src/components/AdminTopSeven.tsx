@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getLatestTopSeven, getPlayers, getTeams } from "../lib/api";
 import { ensureFreshAdminSession } from "../lib/admin";
-import { formatKeeperAverage } from "../lib/awards";
+import { formatKeeperPoints } from "../lib/awards";
 import { computeTopSeven, formatTopSevenMonth, monthKey, saveTopSeven, TOP_SEVEN_LABELS } from "../lib/topSeven";
 import type { MonthlyTopSeven, Player, Team, TopSevenSlot } from "../types";
 
@@ -101,7 +101,7 @@ export function AdminTopSeven({ canWrite }: { canWrite: boolean }) {
                     <td>{teamName(entry.team_id)}</td>
                     <td>
                       {entry.slot === "goalkeeper"
-                        ? (entry.keeper_average != null ? `Media voto ${formatKeeperAverage(entry.keeper_average)} (${entry.keeper_votes ?? 0})` : "Nessun voto")
+                        ? ((entry.keeper_points ?? (entry.keeper_average != null ? Math.round(entry.keeper_average * (entry.keeper_votes ?? 0)) : null)) != null ? `${formatKeeperPoints(entry.keeper_points ?? Math.round((entry.keeper_average ?? 0) * (entry.keeper_votes ?? 0)))} punti voto (${entry.keeper_votes ?? 0} partite)` : "Nessun voto")
                         : `${entry.goals} gol · ${entry.assists} assist`}
                       {` · ${entry.appearances} pres.`}
                     </td>

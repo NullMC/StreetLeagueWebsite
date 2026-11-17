@@ -13,7 +13,7 @@ import {
   getTeams,
 } from "../lib/api";
 import type { Player, PlayerStats, StaffRankingEntry, StatisticsGroup, Team } from "../types";
-import { compareGoalkeeperScores, formatKeeperAverage, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
+import { compareGoalkeeperScores, formatKeeperPoints, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
 
 type StatCategory = "goals" | "mvps" | "goalkeepers" | "staff";
 type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
@@ -28,7 +28,7 @@ type GroupStats = {
 const cards: Array<{ key: StatCategory; title: string; unit: string }> = [
   { key: "goals", title: "Miglior marcatore", unit: "gol" },
   { key: "mvps", title: "Miglior giocatore (MVP)", unit: "MVP totali" },
-  { key: "goalkeepers", title: "Miglior portiere", unit: "media voto / 5" },
+  { key: "goalkeepers", title: "Miglior portiere", unit: "punti voto totali" },
   { key: "staff", title: "Miglior membro staff", unit: "gol presidenziali" },
 ];
 
@@ -49,7 +49,7 @@ function BestStatsCard({ group, players, staff, awards, config }: {
   const sortValue = (player: RankedPlayer): number =>
     config.key === "goals" ? player.stats.goals :
     config.key === "mvps" ? awards.mvpCounts[player.id] ?? 0 :
-    config.key === "goalkeepers" ? awards.goalkeepers[player.id]?.average ?? 0 : 0;
+    config.key === "goalkeepers" ? awards.goalkeepers[player.id]?.total ?? 0 : 0;
   const ranked = config.key === "staff" ? [] : [...players]
     // STAFF members only appear in the MVP ranking.
     .filter((player) => config.key === "mvps" || !isStaff(player))
@@ -76,7 +76,7 @@ function BestStatsCard({ group, players, staff, awards, config }: {
       : sortValue(leader as RankedPlayer)
     : 0;
   const displayValue = config.key === "goalkeepers"
-    ? formatKeeperAverage(value)
+    ? formatKeeperPoints(value)
     : String(value);
   const keeperRecord = config.key === "goalkeepers" && player
     ? awards.goalkeepers[player.id]
@@ -107,8 +107,8 @@ function BestStatsCard({ group, players, staff, awards, config }: {
           </div>
           {keeperRecord ? (
             <span className="best-stats-card__keeper-meta">
-              Ultima partita: {keeperRecord.votes[0]?.rating ?? "—"}/5 ·
-              {keeperRecord.count} {keeperRecord.count === 1 ? "voto" : "voti"} ·
+              Ultima partita: {keeperRecord.votes[0]?.rating ?? "—"}/5 ·{" "}
+              {keeperRecord.count} {keeperRecord.count === 1 ? "voto" : "voti"} ·{" "}
               GS/partita: {keeperRecord.goalsConcededPerMatch === null
                 ? "n/d"
                 : keeperRecord.goalsConcededPerMatch.toLocaleString("it-IT", { maximumFractionDigits: 2 })}

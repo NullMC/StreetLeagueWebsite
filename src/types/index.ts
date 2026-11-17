@@ -187,7 +187,9 @@ export interface TopSevenEntry {
   goals: number;
   assists: number;
   appearances: number;
-  /** Goalkeepers only: average of every end-of-match rating received so far. */
+  /** Goalkeepers only: sum of every end-of-match rating received so far. */
+  keeper_points?: number | null;
+  /** Older compilations stored the average instead of the total. */
   keeper_average?: number | null;
   keeper_votes?: number;
 }

@@ -13,7 +13,7 @@ import {
   getTeams,
 } from "../lib/api";
 import type { Player, PlayerStats, StaffRankingEntry, StatisticsGroup, Team } from "../types";
-import { compareGoalkeeperScores, formatKeeperAverage, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
+import { compareGoalkeeperScores, formatKeeperPoints, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
 
 type DetailKey = "goals" | "mvps" | "goalkeepers" | "clean_sheets" | "staff";
 type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
@@ -28,8 +28,8 @@ type DetailData = {
 const config: Record<DetailKey, { title: string; unit: string }> = {
   goals: { title: "Miglior marcatore", unit: "gol" },
   mvps: { title: "Classifica MVP", unit: "MVP partita" },
-  goalkeepers: { title: "Miglior portiere", unit: "media voto / 5" },
-  clean_sheets: { title: "Miglior portiere", unit: "media voto / 5" },
+  goalkeepers: { title: "Miglior portiere", unit: "punti voto totali" },
+  clean_sheets: { title: "Miglior portiere", unit: "punti voto totali" },
   staff: { title: "Classifica staff", unit: "gol" },
 };
 
@@ -99,7 +99,7 @@ export default function StatsDetail() {
   const score = (player: RankedPlayer): number =>
     key === "goals" ? player.stats.goals :
     key === "mvps" ? awards?.mvpCounts[player.id] ?? 0 :
-    isKeeperRanking ? awards?.goalkeepers[player.id]?.average ?? 0 : 0;
+    isKeeperRanking ? awards?.goalkeepers[player.id]?.total ?? 0 : 0;
   const playerRanking = validKey && key !== "staff" ? [...players]
     // STAFF members only appear in the MVP ranking.
     .filter((player) => key === "mvps" || !isStaff(player))
@@ -114,7 +114,7 @@ export default function StatsDetail() {
     ) : [];
   const displayScore = (player: RankedPlayer): string =>
     isKeeperRanking
-      ? formatKeeperAverage(score(player))
+      ? formatKeeperPoints(score(player))
       : String(score(player));
   const staffRanking = [...(data?.staff ?? [])].sort((a, b) =>
     b.presidential_penalties - a.presidential_penalties ||
@@ -130,7 +130,7 @@ export default function StatsDetail() {
             {key === "mvps"
               ? "Numero di riconoscimenti MVP ottenuti nelle singole partite delle competizioni attive selezionate."
               : isKeeperRanking
-                ? "Media dei voti da 1 a 5 ricevuti per partita, non somma. A parità di media voto, prevale chi ha subito meno gol per partita nelle gare valutate; i risultati mancanti non vengono contati come zero."
+                ? "Somma dei voti da 1 a 5 ricevuti a fine partita: ogni gara valutata aggiunge i suoi punti al totale. A parità di punti prevale chi ha subito meno gol per partita, poi chi ha giocato meno gare; i risultati mancanti non vengono contati come zero."
                 : "Classifica completa della statistica, calcolata sui dati registrati per le competizioni attive selezionate."}
           </p>
           <a className="stats-detail-back" href="/statistiche">← Torna alle statistiche</a>
@@ -193,7 +193,7 @@ export default function StatsDetail() {
                   <span className="stats-detail-team">{player.team_name}</span>
                   <strong className="stats-detail-keeper-score">{displayScore(player)}{isKeeperRanking && (
                     <small className="stats-detail-rating-count">
-                      {awards?.goalkeepers[player.id]?.count ?? 0} voti · GS/gara: {awards?.goalkeepers[player.id]?.goalsConcededPerMatch === null
+                      {awards?.goalkeepers[player.id]?.count ?? 0} {(awards?.goalkeepers[player.id]?.count ?? 0) === 1 ? "voto" : "voti"} · GS/gara: {awards?.goalkeepers[player.id]?.goalsConcededPerMatch === null
                         ? "n/d"
                         : (awards?.goalkeepers[player.id]?.goalsConcededPerMatch ?? 0).toLocaleString("it-IT", { maximumFractionDigits: 2 })}
                     </small>

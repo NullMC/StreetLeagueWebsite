@@ -310,7 +310,7 @@ export function AdminMatchAwards() {
     <section className="admin-awards">
       <header className="admin-awards__heading">
         <h2>Voti portieri e MVP</h2>
-        <p>Assegna a ogni partita terminata i voti dei portieri (da 1 a 5) e un MVP, Wildcard comprese. La classifica portieri usa la media voto; la classifica MVP conta i riconoscimenti ottenuti nelle singole partite. Le Wildcard valgono solo per la loro partita e non entrano nelle classifiche.</p>
+        <p>Assegna a ogni partita terminata i voti dei portieri (da 1 a 5) e un MVP, Wildcard comprese. La classifica portieri somma i voti di tutte le partite; la classifica MVP conta i riconoscimenti ottenuti nelle singole partite. Le Wildcard valgono solo per la loro partita e non entrano nelle classifiche.</p>
       </header>
 
       <label className="admin-awards__field">
@@ -381,14 +381,12 @@ export function AdminMatchAwards() {
                     entry.player_id === player.id &&
                     competitionMatches.some((match) => match.id === entry.match_id),
                   );
-                  const average = playerScores.length
-                    ? (playerScores.reduce((sum, row) => sum + Number(row.rating), 0) / playerScores.length).toFixed(1)
-                    : "—";
+                  const total = playerScores.reduce((sum, row) => sum + Number(row.rating), 0);
                   return (
                     <div className="admin-awards__player" key={player.id}>
                       <div className="admin-awards__player-info">
                         <strong>{playerName(player)}</strong>
-                        <small>{teamNames.get(player.team_id) ?? "—"} · Media {average} ({playerScores.length} voti)</small>
+                        <small>{teamNames.get(player.team_id) ?? "—"} · Totale {total} punti ({playerScores.length} voti)</small>
                       </div>
                       <div className="admin-awards__actions">
                         <select

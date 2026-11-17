@@ -39,9 +39,10 @@ export function isStaffPosition(position: string | null | undefined, role?: stri
 }
 
 /**
- * Rank by average *per-match* vote, never by the sum of votes.
- * Equal averages are resolved by fewer goals conceded per rated match.
- * Use only rated matches with a recorded final score (unknown scores are not zeros).
+ * Rank by the *sum* of the end-of-match votes: every rated match adds its points.
+ * Equal totals are resolved by fewer goals conceded per rated match, then by fewer
+ * matches needed to reach the total. Only rated matches with a recorded final score
+ * count for goals conceded (unknown scores are not zeros).
  */
 export function compareGoalkeeperScores(
   first: GoalkeeperVoteSummary | undefined,
@@ -50,7 +51,7 @@ export function compareGoalkeeperScores(
   if (!first && !second) return 0;
   if (!first) return 1;
   if (!second) return -1;
-  if (first.average !== second.average) return second.average - first.average;
+  if (first.total !== second.total) return second.total - first.total;
 
   const a = first.goalsConcededPerMatch;
   const b = second.goalsConcededPerMatch;
@@ -61,16 +62,14 @@ export function compareGoalkeeperScores(
     return a - b;
   }
 
-  // If the rate is tied, reward fewer total goals conceded, then more ratings.
+  // Same total and rate: fewer goals conceded, then fewer matches to reach the total.
   return first.goalsConceded - second.goalsConceded ||
-    second.count - first.count;
+    first.count - second.count;
 }
 
-export function formatKeeperAverage(value: number): string {
-  return value.toLocaleString("it-IT", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+/** Total keeper points ("14"), whole numbers without decimals. */
+export function formatKeeperPoints(value: number): string {
+  return value.toLocaleString("it-IT", { maximumFractionDigits: 1 });
 }
 
 /** Scores for one competition or a user-selected group of active competitions. */
