@@ -13,7 +13,7 @@ import {
   getTeams,
 } from "../lib/api";
 import type { Player, PlayerStats, StaffRankingEntry, StatisticsGroup, Team } from "../types";
-import { compareGoalkeeperScores, formatKeeperPoints, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
+import { TIEBREAK_NOTE, compareGoalkeeperScores, compareTiebreak, formatKeeperPoints, formatTiebreak, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
 
 type DetailKey = "goals" | "mvps" | "goalkeepers" | "clean_sheets" | "staff";
 type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
@@ -107,6 +107,8 @@ export default function StatsDetail() {
     .filter((player) => score(player) > 0)
     .sort((a, b) =>
       score(b) - score(a) ||
+      // Tie: bonus for goals, penalty for cards (same rule on every ranking).
+      compareTiebreak(a.stats, b.stats) ||
       (isKeeperRanking
         ? compareGoalkeeperScores(awards?.goalkeepers[a.id], awards?.goalkeepers[b.id])
         : 0) ||
@@ -118,6 +120,8 @@ export default function StatsDetail() {
       : String(score(player));
   const staffRanking = [...(data?.staff ?? [])].sort((a, b) =>
     b.presidential_penalties - a.presidential_penalties ||
+    compareTiebreak({ goals: a.presidential_penalties, yellow_cards: a.yellow_cards, red_cards: a.red_cards },
+      { goals: b.presidential_penalties, yellow_cards: b.yellow_cards, red_cards: b.red_cards }) ||
     (a.player.last_name + " " + a.player.first_name).localeCompare(b.player.last_name + " " + b.player.first_name, "it"),
   );
 
@@ -128,10 +132,12 @@ export default function StatsDetail() {
           <SectionTitle as="h1" eyebrow={data?.group.name ?? "Statistiche"} title={validKey ? config[key].title : "Classifica"} />
           <p>
             {key === "mvps"
-              ? "Numero di riconoscimenti MVP ottenuti nelle singole partite delle competizioni attive selezionate."
+              ? "Numero di riconoscimenti MVP ottenuti nelle singole partite delle competizioni attive selezionate. " + TIEBREAK_NOTE
               : isKeeperRanking
-                ? "Somma dei voti da 1 a 5 ricevuti a fine partita: ogni gara valutata aggiunge i suoi punti al totale. A parità di punti prevale chi ha subito meno gol per partita, poi chi ha giocato meno gare; i risultati mancanti non vengono contati come zero."
-                : "Classifica completa della statistica, calcolata sui dati registrati per le competizioni attive selezionate."}
+                ? "Somma dei voti da 1 a 5 ricevuti a fine partita: ogni gara valutata aggiunge i suoi punti al totale. " + TIEBREAK_NOTE + " Se resta la parità, prevale chi ha subito meno gol per partita, poi chi ha giocato meno gare."
+                : key === "staff"
+                  ? "Gol presidenziali segnati dai membri dello staff. A parità, conta il malus dei cartellini: −0,5 per ogni ammonizione, −2 per ogni espulsione."
+                  : "Classifica completa della statistica, calcolata sui dati registrati per le competizioni attive selezionate. " + TIEBREAK_NOTE}
           </p>
           <a className="stats-detail-back" href="/statistiche">← Torna alle statistiche</a>
         </header>
@@ -165,7 +171,7 @@ export default function StatsDetail() {
                     <span className="position">{String(index + 1).padStart(2, "0")}</span>
                     <span className="stats-detail-player">
                       {photo ? <img loading="lazy" decoding="async" src={photo} alt="" /> : <span className="stats-detail-player__placeholder">{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</span>}
-                      <span><strong><PersonName first={player.first_name} last={player.last_name} /></strong><small>{player.position || "Staff"}</small></span>
+                      <span><strong><PersonName first={player.first_name} last={player.last_name} /></strong><small>{player.position || "Staff"} · {entry.yellow_cards ?? 0} amm. · {entry.red_cards ?? 0} esp.</small></span>
                     </span>
                     <strong>{entry.presidential_penalties}</strong>
                   </a>
@@ -188,7 +194,7 @@ export default function StatsDetail() {
                     <span className="position">{String(index + 1).padStart(2, "0")}</span>
                     <span className="stats-detail-player">
                     {photo ? <img loading="lazy" decoding="async" src={photo} alt="" /> : <span className="stats-detail-player__placeholder">{player.first_name.slice(0, 1)}{player.last_name.slice(0, 1)}</span>}
-                    <span><strong><PersonName first={player.first_name} last={player.last_name} /></strong><small>{player.position || "Giocatore"}</small></span>
+                    <span><strong><PersonName first={player.first_name} last={player.last_name} /></strong><small>{player.position || "Giocatore"} · {formatTiebreak(player.stats)}</small></span>
                   </span>
                   <span className="stats-detail-team">{player.team_name}</span>
                   <strong className="stats-detail-keeper-score">{displayScore(player)}{isKeeperRanking && (

@@ -13,7 +13,7 @@ import {
   getTeams,
 } from "../lib/api";
 import type { Player, PlayerStats, StaffRankingEntry, StatisticsGroup, Team } from "../types";
-import { compareGoalkeeperScores, formatKeeperPoints, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
+import { compareGoalkeeperScores, compareTiebreak, formatKeeperPoints, getCompetitionAwardScores, isGoalkeeperPosition, type CompetitionAwardScores } from "../lib/awards";
 
 type StatCategory = "goals" | "mvps" | "goalkeepers" | "staff";
 type RankedPlayer = Player & { stats: PlayerStats; team_name: string };
@@ -57,6 +57,8 @@ function BestStatsCard({ group, players, staff, awards, config }: {
     .filter((player) => sortValue(player) > 0)
     .sort((a, b) =>
       sortValue(b) - sortValue(a) ||
+      // Tie: bonus for goals, penalty for cards (same rule on every ranking).
+      compareTiebreak(a.stats, b.stats) ||
       (config.key === "goalkeepers"
         ? compareGoalkeeperScores(awards.goalkeepers[a.id], awards.goalkeepers[b.id])
         : 0) ||

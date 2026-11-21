@@ -67,6 +67,34 @@ export function compareGoalkeeperScores(
     first.count - second.count;
 }
 
+/**
+ * Tie-break shared by every individual ranking (marcatori, MVP, portieri, staff).
+ * When the main value is equal, goals scored are a bonus and cards a penalty:
+ * +1 per goal, -0.5 per yellow card (light), -2 per red card (heavier).
+ */
+export const TIEBREAK_WEIGHTS = { goal: 1, yellow: -0.5, red: -2 } as const;
+
+export type TiebreakStats = { goals?: number; yellow_cards?: number; red_cards?: number };
+
+export function tiebreakScore(stats: TiebreakStats | undefined): number {
+  if (!stats) return 0;
+  return (stats.goals ?? 0) * TIEBREAK_WEIGHTS.goal +
+    (stats.yellow_cards ?? 0) * TIEBREAK_WEIGHTS.yellow +
+    (stats.red_cards ?? 0) * TIEBREAK_WEIGHTS.red;
+}
+
+/** Higher bonus first (more goals, fewer cards). */
+export function compareTiebreak(first: TiebreakStats | undefined, second: TiebreakStats | undefined): number {
+  return tiebreakScore(second) - tiebreakScore(first);
+}
+
+export const TIEBREAK_NOTE = "A parità, conta il bonus/malus: +1 per ogni gol segnato, −0,5 per ogni ammonizione, −2 per ogni espulsione.";
+
+/** "2 gol · 1 amm. · 0 esp." for the ranking rows. */
+export function formatTiebreak(stats: TiebreakStats | undefined): string {
+  return `${stats?.goals ?? 0} gol · ${stats?.yellow_cards ?? 0} amm. · ${stats?.red_cards ?? 0} esp.`;
+}
+
 /** Total keeper points ("14"), whole numbers without decimals. */
 export function formatKeeperPoints(value: number): string {
   return value.toLocaleString("it-IT", { maximumFractionDigits: 1 });

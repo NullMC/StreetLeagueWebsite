@@ -349,9 +349,12 @@ export async function getStaffRankingForCompetitions(
     scopedMatches.map((match) => [match.id, match]),
   );
   const counts = new Map(staffPlayers.map((player) => [player.id, 0]));
+  const yellows = new Map<string, number>();
+  const reds = new Map<string, number>();
 
   events.forEach((event) => {
-    if (event.event_type !== "presidential_penalty" || !event.player_id) return;
+    const isCard = event.event_type === "yellow_card" || event.event_type === "red_card";
+    if ((event.event_type !== "presidential_penalty" && !isCard) || !event.player_id) return;
     if (!staffIds.has(event.player_id)) return;
     const match = competitionMatches.get(event.match_id);
     if (!match) return;
@@ -364,17 +367,23 @@ export async function getStaffRankingForCompetitions(
       ) return;
     }
 
-    counts.set(event.player_id, (counts.get(event.player_id) ?? 0) + 1);
+    if (event.event_type === "yellow_card") yellows.set(event.player_id, (yellows.get(event.player_id) ?? 0) + 1);
+    else if (event.event_type === "red_card") reds.set(event.player_id, (reds.get(event.player_id) ?? 0) + 1);
+    else counts.set(event.player_id, (counts.get(event.player_id) ?? 0) + 1);
   });
 
   return staffPlayers
     .map((player) => ({
       player,
       presidential_penalties: counts.get(player.id) ?? 0,
+      yellow_cards: yellows.get(player.id) ?? 0,
+      red_cards: reds.get(player.id) ?? 0,
     }))
     .sort(
       (a, b) =>
         b.presidential_penalties - a.presidential_penalties ||
+        // Tie: goals are already equal, so fewer cards wins (-0.5 yellow, -2 red).
+        (b.yellow_cards * -0.5 + b.red_cards * -2) - (a.yellow_cards * -0.5 + a.red_cards * -2) ||
         a.player.last_name.localeCompare(b.player.last_name, "it") ||
         a.player.first_name.localeCompare(b.player.first_name, "it"),
     );

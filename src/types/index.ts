@@ -157,6 +157,9 @@ export interface StatisticsGroup {
 export interface StaffRankingEntry {
   player: Player;
   presidential_penalties: number;
+  /** Cards received in the same scope: penalties in case of a tie. */
+  yellow_cards?: number;
+  red_cards?: number;
 }
 
 /** Rating given to one goalkeeper for one completed match (1–5). */
