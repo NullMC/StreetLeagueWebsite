@@ -335,16 +335,21 @@ export async function getStaffRankingForCompetitions(
   const competitionTeamIds = new Set(
     memberships.map((membership) => membership.team_id),
   );
+  const scopedMatches = matches.filter((match) =>
+    ids.includes(match.competition_id),
+  );
+  // Staff of the competition's teams, plus staff with events in its matches who later changed team.
+  const scopedMatchIds = new Set(scopedMatches.map((match) => match.id));
+  const actedHere = new Set(events
+    .filter((event) => event.player_id && scopedMatchIds.has(event.match_id))
+    .map((event) => event.player_id as string));
   const staffPlayers = players.filter(
     (player) =>
-      competitionTeamIds.has(player.team_id) &&
+      (competitionTeamIds.has(player.team_id) || actedHere.has(player.id)) &&
       (player.role?.trim().toUpperCase() === "STAFF" ||
         player.position?.trim().toUpperCase() === "STAFF"),
   );
   const staffIds = new Set(staffPlayers.map((player) => player.id));
-  const scopedMatches = matches.filter((match) =>
-    ids.includes(match.competition_id),
-  );
   const competitionMatches = new Map(
     scopedMatches.map((match) => [match.id, match]),
   );
@@ -487,8 +492,14 @@ export async function getPlayerStatsForCompetitions(
     );
   }
 
+  // Players of the competition's teams, plus anyone who played in its matches and was later
+  // transferred elsewhere: their past stats stay in the rankings of that competition.
+  const playedHere = new Set<string>([
+    ...scopedLineups.map((lineup) => lineup.player_id),
+    ...scopedEvents.map((event) => event.player_id).filter((id): id is string => Boolean(id)),
+  ]);
   const scopedPlayers = teamIds
-    ? players.filter((player) => teamIds.has(player.team_id))
+    ? players.filter((player) => teamIds.has(player.team_id) || playedHere.has(player.id))
     : players;
 
   const finishedMatches = new Map(

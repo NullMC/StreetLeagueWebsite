@@ -159,6 +159,7 @@ export default function Stats() {
       try {
         const activeCompetitions = await getActiveCompetitions();
         const groups = await getStatisticsGroups(activeCompetitions);
+        const allTeams = await getTeams();
         const result = await Promise.all(groups.map(async (group) => {
           const [playerRows, staff, awards, individualSets] = await Promise.all([
             getPlayerStatsForCompetitions(group.competition_ids),
@@ -172,7 +173,7 @@ export default function Stats() {
               return { competitionId: competition.id, players, teams };
             })),
           ]);
-          const teamById = new Map<string, Team>();
+          const teamById = new Map<string, Team>(allTeams.map((team) => [team.id, team]));
           individualSets.flatMap((entry) => entry.teams).forEach((team) => teamById.set(team.id, team));
           const withTeams = (rows: Array<Player & { stats: PlayerStats }>, includeStaff = false): RankedPlayer[] =>
             rows.filter((player) => includeStaff || !isStaff(player)).map((player) => ({
