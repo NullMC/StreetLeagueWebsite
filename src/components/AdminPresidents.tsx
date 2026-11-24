@@ -62,7 +62,7 @@ export function AdminPresidents() {
           {busy === "all" ? "Creazione…" : missing ? "Crea credenziali mancanti (" + missing + ")" : "Tutte le squadre hanno le credenziali"}
         </button>
       </header>
-      <p className="admin-help-text">Un account per ogni squadra iscritta a una competizione attiva. Il presidente accede da <a href="/presidente" target="_blank" rel="noreferrer">/presidente</a> e può soltanto registrare le formazioni della propria squadra fino al calcio d'inizio. Le password vengono mostrate una sola volta: salvale o consegnale subito.</p>
+      <p className="admin-help-text">Un account per ogni squadra iscritta a una competizione attiva. Il presidente accede da <a href="/presidente" target="_blank" rel="noreferrer">/presidente</a> e può soltanto registrare le formazioni della propria squadra fino a 15 minuti prima del calcio d'inizio. Le password vengono mostrate una sola volta: salvale o consegnale subito.</p>
       {error && <p className="admin-error" role="alert">{error}</p>}
       {message && <p className="admin-message" role="status">{message}</p>}
 

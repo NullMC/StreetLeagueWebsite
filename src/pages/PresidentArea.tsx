@@ -31,8 +31,12 @@ const kickoffLabel = (iso: string) => new Intl.DateTimeFormat("it-IT", {
 const shortDateTime = (iso: string) => new Intl.DateTimeFormat("it-IT", {
   day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: ROME,
 }).format(new Date(iso));
-function timeLeft(iso: string, now: number) {
-  const ms = new Date(iso).getTime() - now;
+// Presidents can send or edit a lineup until 15 minutes before kickoff (checked again on the server).
+const LINEUP_CLOSE_MINUTES = 15;
+const deadlineOf = (kickoffIso: string) => new Date(kickoffIso).getTime() - LINEUP_CLOSE_MINUTES * 60_000;
+const deadlineIso = (kickoffIso: string) => new Date(deadlineOf(kickoffIso)).toISOString();
+function timeLeft(kickoffIso: string, now: number) {
+  const ms = deadlineOf(kickoffIso) - now;
   if (ms <= 0) return "Chiusa";
   const minutes = Math.floor(ms / 60_000);
   const days = Math.floor(minutes / 1440);
@@ -126,7 +130,7 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
   const keepers = useMemo(() => roster.filter(isKeeper).sort(byShirt), [roster]);
   const fieldPlayers = useMemo(() => roster.filter((player) => !isStaff(player) && !isKeeper(player)).sort(byShirt), [roster]);
   const staff = useMemo(() => roster.filter(isStaff).sort(byShirt), [roster]);
-  const locked = now >= new Date(match.kickoff_at).getTime() || match.status !== "scheduled";
+  const locked = now >= deadlineOf(match.kickoff_at) || match.status !== "scheduled";
   const hasSubmission = Boolean(submission);
 
   const load = useCallback(async () => {
@@ -168,7 +172,7 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
   async function save(event: FormEvent) {
     event.preventDefault();
     setMessage(""); setError("");
-    if (locked) { setError("Il calcio d'inizio è passato: la formazione non è più modificabile."); return; }
+    if (locked) { setError("La formazione si è chiusa 15 minuti prima del calcio d'inizio: non è più modificabile."); return; }
     if (!keeperMode) { setError("Indica se il portiere è interno (tesserato) o esterno."); return; }
     if (keeperMode === "internal" && !keepers.some((player) => player.id === keeperId)) {
       setError("Scegli il portiere tra quelli tesserati."); return;
@@ -195,7 +199,7 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
         wildcardName: wildcardMode === "yes" ? (first + " " + last).slice(0, 80) : "",
         wildcardStarter,
       });
-      setMessage("Formazione inviata. Puoi modificarla fino al calcio d'inizio.");
+      setMessage("Formazione inviata. Puoi modificarla fino a 15 minuti prima del calcio d'inizio.");
       onSaved();
     } catch (cause) { setError(describe(cause)); }
     finally { setBusy(false); }
@@ -211,8 +215,8 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
         <p>{competition?.name ?? "Competizione"}{match.matchday ? " · " + (/^\d+$/.test(match.matchday.trim()) ? "Giornata " + match.matchday.trim() : match.matchday) : ""} · {kickoffLabel(match.kickoff_at)}{match.venue ? " · " + match.venue : ""}</p>
       </div>
       {locked
-        ? <p className="admin-error" role="status">Il calcio d'inizio è passato: la formazione è chiusa e non è più modificabile.</p>
-        : <p className="admin-help-text">Puoi inviare e modificare la formazione fino al calcio d'inizio ({shortDateTime(match.kickoff_at)}). {timeLeft(match.kickoff_at, now)}.</p>}
+        ? <p className="admin-error" role="status">La formazione si è chiusa 15 minuti prima del calcio d'inizio e non è più modificabile.</p>
+        : <p className="admin-help-text">Puoi inviare e modificare la formazione fino a 15 minuti prima del calcio d'inizio: entro le {shortDateTime(deadlineIso(match.kickoff_at))}. {timeLeft(match.kickoff_at, now)}.</p>}
       {submission && <p className="admin-help-text">Ultimo invio: {shortDateTime(submission.submitted_at)}.</p>}
       {error && <p className="admin-error" role="alert">{error}</p>}
       {message && <p className="admin-message" role="status">{message}</p>}
@@ -390,7 +394,7 @@ export default function PresidentArea() {
       .sort((a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime());
   }, [matches, competitions, now]);
   const selected = upcoming.find((match) => match.id === selectedId) ??
-    upcoming.find((match) => new Date(match.kickoff_at).getTime() > now) ?? upcoming[0];
+    upcoming.find((match) => deadlineOf(match.kickoff_at) > now) ?? upcoming[0];
 
   const logout = async () => {
     await supabase?.auth.signOut();
@@ -435,7 +439,7 @@ export default function PresidentArea() {
               </button>
               <button type="button" className="btn btn--ghost" onClick={() => void logout()}>Esci</button>
             </div>
-            <p className="sl-admin__lead">Registra le formazioni delle partite in programma. Ogni formazione si può inviare e modificare fino all'orario esatto del calcio d'inizio.</p>
+            <p className="sl-admin__lead">Registra le formazioni delle partite in programma. Ogni formazione si può inviare e modificare fino a 15 minuti prima del calcio d'inizio.</p>
           </header>
           {notice && <p className="admin-message" role="status">{notice}</p>}
           {error && <p className="admin-error" role="alert">{error}</p>}
@@ -449,7 +453,7 @@ export default function PresidentArea() {
                 {upcoming.map((match) => {
                   const opponent = match.home_team_id === teamId ? match.away_team_id : match.home_team_id;
                   const sent = submissions.find((row) => row.match_id === match.id);
-                  const closed = new Date(match.kickoff_at).getTime() <= now;
+                  const closed = deadlineOf(match.kickoff_at) <= now;
                   return (
                     <button type="button" role="listitem" key={match.id}
                       className={"president-area__match" + (selected?.id === match.id ? " is-active" : "")}
