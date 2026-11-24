@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { PageShell } from "../components/PageShell";
 import { getActiveCompetitions, getMatchLineups, getMatchWildcards, getPlayers, getTeamMatches, getTeams } from "../lib/api";
 import { isGoalkeeperPosition, isStaffPosition } from "../lib/awards";
@@ -11,6 +11,7 @@ import type { Competition, Match, MatchLineupSubmission, Player, Team } from "..
 type Draft = Record<string, { selected: boolean; starter: boolean }>;
 type KeeperMode = "" | "internal" | "external";
 type WildcardMode = "" | "yes" | "no";
+type Invalid = "" | "keeper" | "players" | "wildcard";
 
 const ROME = "Europe/Rome";
 const nameOf = (player: Player) => player.first_name + " " + player.last_name;
@@ -126,6 +127,12 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [invalid, setInvalid] = useState<Invalid>("");
+  const [savedSnapshot, setSavedSnapshot] = useState("");
+  const keeperRef = useRef<HTMLElement>(null);
+  const playersRef = useRef<HTMLElement>(null);
+  const wildcardRef = useRef<HTMLElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
 
   const keepers = useMemo(() => roster.filter(isKeeper).sort(byShirt), [roster]);
   const fieldPlayers = useMemo(() => roster.filter((player) => !isStaff(player) && !isKeeper(player)).sort(byShirt), [roster]);
@@ -152,6 +159,7 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
       setWildcardFirst(first); setWildcardLast(rest.join(" "));
       setWildcardStarter(wildcard?.starter !== false);
       setWildcardMode(wildcard ? "yes" : mine.length || hasSubmission ? "no" : "");
+      setSavedSnapshot("");
     } catch (cause) { setError(describe(cause)); }
     finally { setLoading(false); }
   }, [match.id, team.id, roster, keepers, hasSubmission]);
@@ -169,39 +177,68 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
     (wildcardMode === "yes" && !wildcardStarter ? 1 : 0);
   const staffPresent = staff.filter((member) => draft[member.id]?.selected).length;
 
+  // What the president sees now vs. what was last loaded or sent: unsent edits are flagged.
+  const snapshot = JSON.stringify([
+    Object.entries(draft).filter(([, entry]) => entry.selected).map(([id, entry]) => id + ":" + entry.starter).sort(),
+    keeperMode, keeperMode === "internal" ? keeperId : "", wildcardMode,
+    wildcardMode === "yes" ? [cleanName(wildcardFirst), cleanName(wildcardLast), wildcardStarter] : null,
+  ]);
+  useEffect(() => { if (!loading && !savedSnapshot) setSavedSnapshot(snapshot); }, [loading, savedSnapshot, snapshot]);
+  const dirty = !loading && Boolean(savedSnapshot) && snapshot !== savedSnapshot;
+
+  useEffect(() => {
+    if (!dirty || locked) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty, locked]);
+
+  // Feedback sits next to the button and the problem is scrolled into view: on a phone the top
+  // of the form is far away, and a message shown only there looked like a successful send.
+  function fail(text: string, where: Invalid = "") {
+    setError(text); setInvalid(where);
+    const target = where === "keeper" ? keeperRef.current : where === "players" ? playersRef.current
+      : where === "wildcard" ? wildcardRef.current : feedbackRef.current;
+    window.requestAnimationFrame(() => target?.scrollIntoView({ behavior: "smooth", block: "center" }));
+  }
+
   async function save(event: FormEvent) {
     event.preventDefault();
-    setMessage(""); setError("");
-    if (locked) { setError("La formazione si è chiusa 15 minuti prima del calcio d'inizio: non è più modificabile."); return; }
-    if (!keeperMode) { setError("Indica se il portiere è interno (tesserato) o esterno."); return; }
+    setMessage(""); setError(""); setInvalid("");
+    if (locked) { fail("La formazione si è chiusa 15 minuti prima del calcio d'inizio: non è più modificabile."); return; }
+    if (!keeperMode) { fail("Formazione NON inviata: indica se il portiere è interno (tesserato) o esterno.", "keeper"); return; }
     if (keeperMode === "internal" && !keepers.some((player) => player.id === keeperId)) {
-      setError("Scegli il portiere tra quelli tesserati."); return;
+      fail("Formazione NON inviata: scegli il portiere tra quelli tesserati.", "keeper"); return;
     }
-    if (!wildcardMode) { setError("Indica se schieri una Wildcard."); return; }
+    if (!wildcardMode) { fail("Formazione NON inviata: indica se schieri una Wildcard (Sì o Nessuna Wildcard).", "wildcard"); return; }
     const first = cleanName(wildcardFirst);
     const last = cleanName(wildcardLast);
     if (wildcardMode === "yes" && (first.length < 2 || last.length < 2)) {
-      setError("Inserisci nome e cognome della Wildcard."); return;
+      fail("Formazione NON inviata: inserisci nome e cognome della Wildcard.", "wildcard"); return;
     }
     const players = [...fieldPlayers, ...staff]
       .filter((player) => draft[player.id]?.selected)
       .map((player) => ({ player_id: player.id, starter: isStaff(player) ? false : draft[player.id]?.starter ?? true }));
     if (!players.some((entry) => fieldPlayers.some((player) => player.id === entry.player_id)) &&
       keeperMode !== "internal" && wildcardMode !== "yes") {
-      setError("Seleziona almeno un giocatore."); return;
+      fail("Formazione NON inviata: seleziona almeno un giocatore.", "players"); return;
     }
     setBusy(true);
     try {
-      await savePresidentLineup({
+      const result = await savePresidentLineup({
         matchId: match.id,
         players,
         keeperId: keeperMode === "internal" ? keeperId : null,
         wildcardName: wildcardMode === "yes" ? (first + " " + last).slice(0, 80) : "",
         wildcardStarter,
       });
-      setMessage("Formazione inviata. Puoi modificarla fino a 15 minuti prima del calcio d'inizio.");
+      setSavedSnapshot(snapshot);
+      setMessage("Formazione registrata alle " + shortDateTime(result.submitted_at ?? new Date().toISOString()) + ": " +
+        result.members + (result.members === 1 ? " membro" : " membri") + (result.wildcard ? " + Wildcard " + result.wildcard : "") +
+        ". Puoi modificarla fino a 15 minuti prima del calcio d'inizio.");
+      window.requestAnimationFrame(() => feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
       onSaved();
-    } catch (cause) { setError(describe(cause)); }
+    } catch (cause) { fail("Formazione NON inviata: " + describe(cause)); }
     finally { setBusy(false); }
   }
 
@@ -217,18 +254,19 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
       {locked
         ? <p className="admin-error" role="status">La formazione si è chiusa 15 minuti prima del calcio d'inizio e non è più modificabile.</p>
         : <p className="admin-help-text">Puoi inviare e modificare la formazione fino a 15 minuti prima del calcio d'inizio: entro le {shortDateTime(deadlineIso(match.kickoff_at))}. {timeLeft(match.kickoff_at, now)}.</p>}
-      {submission && <p className="admin-help-text">Ultimo invio: {shortDateTime(submission.submitted_at)}.</p>}
-      {error && <p className="admin-error" role="alert">{error}</p>}
-      {message && <p className="admin-message" role="status">{message}</p>}
+      {submission
+        ? <p className="president-area__state is-sent">Formazione inviata · ultimo invio {shortDateTime(submission.submitted_at)}</p>
+        : !locked && <p className="president-area__state">Formazione non ancora inviata: compila e premi “Invia formazione” in fondo alla pagina.</p>}
       {loading ? <p className="admin-help">Caricamento formazione…</p> : (
         <fieldset className="president-area__fields" disabled={locked || busy}>
-          <section className="match-report-admin__team">
-            <div className="match-report-admin__team-title"><h4>Portiere</h4></div>
+          <section ref={keeperRef} className={"match-report-admin__team" + (invalid === "keeper" ? " is-invalid" : "")}>
+            <div className="match-report-admin__team-title"><h4>Portiere</h4>{!keeperMode && <span>Scelta obbligatoria</span>}</div>
+            {invalid === "keeper" && <p className="admin-error president-area__feedback">{error}</p>}
             <div className="president-area__choice" role="radiogroup" aria-label="Portiere">
               <label><input type="radio" name="keeper" checked={keeperMode === "internal"} disabled={!keepers.length}
-                onChange={() => { setKeeperMode("internal"); if (!keeperId) setKeeperId(keepers[0]?.id ?? ""); }} /> Interno (tesserato)</label>
+                onChange={() => { setKeeperMode("internal"); setInvalid(""); if (!keeperId) setKeeperId(keepers[0]?.id ?? ""); }} /> Interno (tesserato)</label>
               <label><input type="radio" name="keeper" checked={keeperMode === "external"}
-                onChange={() => setKeeperMode("external")} /> Esterno</label>
+                onChange={() => { setKeeperMode("external"); setInvalid(""); }} /> Esterno</label>
             </div>
             {keeperMode === "internal" && (
               <select aria-label="Portiere tesserato" value={keeperId} onChange={(e) => setKeeperId(e.target.value)}>
@@ -240,11 +278,12 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
               : "Nessun portiere tesserato in rosa: il portiere sarà esterno."}</p>
           </section>
 
-          <section className="match-report-admin__team">
+          <section ref={playersRef} className={"match-report-admin__team" + (invalid === "players" ? " is-invalid" : "")}>
             <div className="match-report-admin__team-title">
               <h4>Giocatori</h4>
               <span>{starters} titolari · {bench} in panchina</span>
             </div>
+            {invalid === "players" && <p className="admin-error president-area__feedback">{error}</p>}
             {fieldPlayers.length > 6 && (
               <div className="match-report-admin__search">
                 <input type="search" value={search} autoComplete="off" aria-label="Cerca nella rosa"
@@ -292,11 +331,12 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
             </div>
           </section>
 
-          <section className="match-report-admin__team">
-            <div className="match-report-admin__team-title"><h4>Wildcard</h4></div>
+          <section ref={wildcardRef} className={"match-report-admin__team" + (invalid === "wildcard" ? " is-invalid" : "")}>
+            <div className="match-report-admin__team-title"><h4>Wildcard</h4>{!wildcardMode && <span>Scelta obbligatoria</span>}</div>
+            {invalid === "wildcard" && <p className="admin-error president-area__feedback">{error}</p>}
             <div className="president-area__choice" role="radiogroup" aria-label="Wildcard">
-              <label><input type="radio" name="wildcard" checked={wildcardMode === "yes"} onChange={() => setWildcardMode("yes")} /> Sì, schiero una Wildcard</label>
-              <label><input type="radio" name="wildcard" checked={wildcardMode === "no"} onChange={() => setWildcardMode("no")} /> Nessuna Wildcard</label>
+              <label><input type="radio" name="wildcard" checked={wildcardMode === "yes"} onChange={() => { setWildcardMode("yes"); setInvalid(""); }} /> Sì, schiero una Wildcard</label>
+              <label><input type="radio" name="wildcard" checked={wildcardMode === "no"} onChange={() => { setWildcardMode("no"); setInvalid(""); }} /> Nessuna Wildcard</label>
             </div>
             {wildcardMode === "yes" && (
               <div className="president-area__wildcard">
@@ -316,7 +356,10 @@ function LineupEditor({ match, team, opponent, roster, competition, submission, 
             )}
           </section>
 
-          <div className="president-area__actions">
+          <div className="president-area__actions" ref={feedbackRef}>
+            {error && <p className="admin-error president-area__feedback" role="alert">{error}</p>}
+            {message && <p className="admin-message president-area__feedback is-ok" role="status">{message}</p>}
+            {!error && !message && dirty && <p className="president-area__feedback is-pending" role="status">Modifiche non ancora inviate: premi “{submission ? "Aggiorna formazione" : "Invia formazione"}” per registrarle.</p>}
             <button type="submit" className="btn btn--primary" disabled={locked || busy}>
               {busy ? "Invio in corso…" : submission ? "Aggiorna formazione" : "Invia formazione"}
             </button>

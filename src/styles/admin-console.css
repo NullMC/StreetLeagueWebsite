@@ -1092,7 +1092,14 @@ html[data-theme="night"] #root .sl-admin-login input { background: var(--sl-surf
 #root .sl-admin--president .president-area__choice label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
 #root .sl-admin--president .president-area__choice input { width: 18px; height: 18px; accent-color: var(--sl-accent); }
 #root .sl-admin--president .president-area__wildcard { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 10px; }
-#root .sl-admin--president .president-area__actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+#root .sl-admin--president .president-area__actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+#root .sl-admin--president .president-area__feedback { flex: 1 1 100%; margin: 0 !important; padding: 12px 14px !important; border-radius: 12px; font-size: 14px !important; line-height: 1.45; }
+#root .sl-admin--president .president-area__feedback.admin-error { background: color-mix(in srgb, #d32f2f 12%, transparent) !important; border: 1px solid color-mix(in srgb, #d32f2f 45%, transparent); }
+#root .sl-admin--president .president-area__feedback.is-ok { background: color-mix(in srgb, #2e7d32 14%, transparent) !important; border: 1px solid color-mix(in srgb, #2e7d32 45%, transparent); color: inherit !important; font-weight: 700; }
+#root .sl-admin--president .president-area__feedback.is-pending { background: color-mix(in srgb, #f9a825 16%, transparent); border: 1px solid color-mix(in srgb, #f9a825 50%, transparent); font-weight: 600; }
+#root .sl-admin--president .match-report-admin__team.is-invalid { outline: 2px solid #d32f2f; outline-offset: 2px; }
+#root .sl-admin--president .president-area__state { margin: 0; padding: 10px 14px; border-radius: 12px; font-weight: 700; font-size: 14px; background: color-mix(in srgb, #f9a825 16%, transparent); border: 1px solid color-mix(in srgb, #f9a825 50%, transparent); }
+#root .sl-admin--president .president-area__state.is-sent { background: color-mix(in srgb, #2e7d32 14%, transparent); border-color: color-mix(in srgb, #2e7d32 45%, transparent); }
 #root .sl-admin--president .president-area__actions .btn { min-width: 220px; }
 @media (max-width: 640px) {
   #root .sl-admin--president .president-area__top { grid-template-columns: minmax(0, 1fr); }

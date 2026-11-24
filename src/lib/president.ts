@@ -64,9 +64,11 @@ export type PresidentLineupInput = {
   wildcardStarter: boolean;
 };
 
+export type PresidentSaveResult = { members: number; wildcard: string | null; submitted_at: string };
+
 /** Every check (team, deadline, roster) runs again on the server. */
-export async function savePresidentLineup(input: PresidentLineupInput) {
-  const { error } = await sb().rpc("president_save_lineup", {
+export async function savePresidentLineup(input: PresidentLineupInput): Promise<PresidentSaveResult> {
+  const { data, error } = await sb().rpc("president_save_lineup", {
     p_match_id: input.matchId,
     p_players: input.players,
     p_keeper_id: input.keeperId,
@@ -74,6 +76,8 @@ export async function savePresidentLineup(input: PresidentLineupInput) {
     p_wildcard_starter: input.wildcardStarter,
   });
   if (error) throw new Error(error.message);
+  if (!data || typeof data !== "object") throw new Error("Il server non ha confermato il salvataggio: riprova.");
+  return data as PresidentSaveResult;
 }
 
 export async function changePresidentPassword(password: string) {
