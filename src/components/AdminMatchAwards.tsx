@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { getActiveCompetitions, getMatchWildcards, getMatches, getPlayers, getTeams } from "../lib/api";
+import { getActiveCompetitions, getAllMatchLineups, getMatchWildcards, getMatches, getPlayers, getTeams } from "../lib/api";
 import { ensureFreshAdminSession } from "../lib/admin";
 import { isGoalkeeperPosition, isStaffPosition } from "../lib/awards";
 import { supabase } from "../lib/supabase";
-import type { Competition, GoalkeeperMatchRating, Match, MatchMvp, MatchWildcard, Player, Team } from "../types";
+import type { Competition, GoalkeeperMatchRating, Match, MatchLineup, MatchMvp, MatchWildcard, Player, Team } from "../types";
 
 type AwardData = {
   competitions: Competition[];
@@ -42,6 +42,7 @@ export function AdminMatchAwards() {
   const [ratings, setRatings] = useState<GoalkeeperMatchRating[]>([]);
   const [mvps, setMvps] = useState<MatchMvp[]>([]);
   const [wildcards, setWildcards] = useState<MatchWildcard[]>([]);
+  const [lineups, setLineups] = useState<MatchLineup[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [competitionId, setCompetitionId] = useState("");
@@ -59,16 +60,18 @@ export function AdminMatchAwards() {
 
   async function refreshAwards() {
     if (!supabase) throw new Error("Supabase non configurato.");
-    const [ratingsResult, mvpResult, wildcardRows] = await Promise.all([
+    const [ratingsResult, mvpResult, wildcardRows, lineupRows] = await Promise.all([
       supabase.from("goalkeeper_match_ratings").select("match_id,player_id,rating"),
       supabase.from("match_mvp").select("*"),
       getMatchWildcards(),
+      getAllMatchLineups(),
     ]);
     if (ratingsResult.error) throw ratingsResult.error;
     if (mvpResult.error) throw mvpResult.error;
     setRatings(ratingsResult.data as GoalkeeperMatchRating[]);
     setMvps((mvpResult.data ?? []) as MatchMvp[]);
     setWildcards(wildcardRows);
+    setLineups(lineupRows);
   }
 
   useEffect(() => {
@@ -146,13 +149,25 @@ export function AdminMatchAwards() {
   );
   const registeredTeamIds = new Set(registeredTeams.map((team) => team.id));
   const teamNames = new Map((data?.teams ?? []).map((team) => [team.id, team.name]));
-  const keeperPlayers = (data?.players ?? [])
-    .filter((player) =>
-      Boolean(selectedMatch) &&
-      [selectedMatch?.home_team_id, selectedMatch?.away_team_id].includes(player.team_id) &&
-      isGoalkeeperPosition(player.position) && !isStaffPosition(player.position, player.role),
-    )
-    .filter((player) => playerSearchable(player).includes(keeperSearch.trim().toLocaleLowerCase("it")));
+  // Only the goalkeepers saved in this match's lineup (starters or bench), home team first.
+  // A team with no goalkeeper in its lineup (e.g. an external keeper) shows nothing.
+  // A keeper who already has a vote for this match stays listed, so the vote can be changed or removed.
+  const matchLineup = lineups.filter((entry) => entry.match_id === selectedMatch?.id);
+  const keeperPlayers = [selectedMatch?.home_team_id, selectedMatch?.away_team_id].flatMap((teamId) => {
+    if (!selectedMatch || !teamId) return [];
+    const inLineup = (data?.players ?? []).filter((player) => {
+      const entry = matchLineup.find((row) => row.player_id === player.id && row.team_id === teamId);
+      const rated = ratings.some((row) => row.match_id === selectedMatch.id && row.player_id === player.id) && player.team_id === teamId;
+      return (Boolean(entry) || rated) &&
+        isGoalkeeperPosition(player.position) && !isStaffPosition(player.position, player.role);
+    });
+    const starter = (player: Player) => matchLineup.find((row) => row.player_id === player.id)?.starter ?? false;
+    return inLineup.sort((a, b) => Number(starter(b)) - Number(starter(a)) || playerName(a).localeCompare(playerName(b), "it"));
+  }).filter((player) => playerSearchable(player).includes(keeperSearch.trim().toLocaleLowerCase("it")));
+  const lineupLabel = (player: Player) => {
+    const entry = matchLineup.find((row) => row.player_id === player.id);
+    return entry ? (entry.starter ? "Titolare" : "Panchina") : "Non in formazione (voto già salvato)";
+  };
   const mvpPlayers = (data?.players ?? [])
     .filter((player) =>
       Boolean(selectedMvpMatch) &&
@@ -386,7 +401,7 @@ export function AdminMatchAwards() {
                     <div className="admin-awards__player" key={player.id}>
                       <div className="admin-awards__player-info">
                         <strong>{playerName(player)}</strong>
-                        <small>{teamNames.get(player.team_id) ?? "—"} · Totale {total} punti ({playerScores.length} voti)</small>
+                        <small>{teamNames.get(player.team_id) ?? "—"} · {lineupLabel(player)} · Totale {total} punti ({playerScores.length} {playerScores.length === 1 ? "voto" : "voti"})</small>
                       </div>
                       <div className="admin-awards__actions">
                         <select
@@ -432,7 +447,9 @@ export function AdminMatchAwards() {
                     </div>
                   );
                 })}
-                {!keeperPlayers.length && !keeperWildcards.length && <p className="admin-help-text">Nessun portiere trovato per questa partita.</p>}
+                {!keeperPlayers.length && !keeperWildcards.length && <p className="admin-help-text">{keeperSearch.trim()
+                  ? "Nessun portiere trovato per questa ricerca."
+                  : "Nessun portiere salvato nelle formazioni di questa partita: i portieri compaiono qui dopo averli inseriti in Formazioni e referti."}</p>}
               </div>
             ) : null}
           </section>
