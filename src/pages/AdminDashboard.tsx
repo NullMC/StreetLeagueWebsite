@@ -5,6 +5,7 @@ import { AdminMatchAwards } from "../components/AdminMatchAwards";
 import { AdminMatchReports } from "../components/AdminMatchReports";
 import { AdminMediaCleanup } from "../components/AdminMediaCleanup";
 import { AdminTopSeven } from "../components/AdminTopSeven";
+import { AdminPresidents } from "../components/AdminPresidents";
 import { supabase, supabaseConfigured } from "../lib/supabase";
 import { ensureFreshAdminSession, getAuthenticatedAdmin, removeUnusedMedia, signInWithAccessCode, uploadMedia, type AdminProfile } from "../lib/admin";
 import { getCompetitions, getTeams, getPlayers, getMatches } from "../lib/api";
@@ -733,7 +734,7 @@ export default function AdminDashboard() {
           <h1>{current?.label}</h1>
           {sectionInfo[resource] && <p className="sl-admin__lead">{sectionInfo[resource]}</p>}
         </header>
-        <div className="sl-admin__content">{resource === "match_awards" ? <AdminMatchAwards /> : resource === "reports" ? <AdminMatchReports /> : resource === "media" ? <AdminMediaCleanup canDelete={profile.role === "super_admin" || profile.role === "admin"} /> : resource === "player_of_month" ? <><AdminTopSeven canWrite={profile.role === "super_admin" || profile.role === "admin"} /><Crud resource={resource} profile={profile} /></> : <Crud resource={resource} profile={profile} />}</div>
+        <div className="sl-admin__content">{resource === "match_awards" ? <AdminMatchAwards /> : resource === "reports" ? <AdminMatchReports /> : resource === "media" ? <AdminMediaCleanup canDelete={profile.role === "super_admin" || profile.role === "admin"} /> : resource === "player_of_month" ? <><AdminTopSeven canWrite={profile.role === "super_admin" || profile.role === "admin"} /><Crud resource={resource} profile={profile} /></> : resource === "teams" && profile.role === "super_admin" ? <><Crud resource={resource} profile={profile} /><AdminPresidents /></> : <Crud resource={resource} profile={profile} />}</div>
       </section>
     </div>
   </PageShell>;

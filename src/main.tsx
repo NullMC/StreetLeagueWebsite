@@ -57,6 +57,7 @@ const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
 const TransferMarket = lazy(() => import("./pages/TransferMarket"));
 const Partners = lazy(() => import("./pages/Partners"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const PresidentArea = lazy(() => import("./pages/PresidentArea"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function PageFallback() {
@@ -99,6 +100,7 @@ function App() {
         <Route path="/partner" element={<Partners />} />
         <Route path="/collabora" element={<Navigate to="/partner#collabora" replace />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/presidente" element={<PresidentArea />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>

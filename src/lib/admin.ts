@@ -165,7 +165,7 @@ function responseStatus(error: unknown) {
   return context instanceof Response ? context.status : undefined;
 }
 
-async function normalizeFunctionError(error: unknown) {
+export async function normalizeFunctionError(error: unknown) {
   const status = responseStatus(error);
 
   if (error && typeof error === "object" && "context" in error) {

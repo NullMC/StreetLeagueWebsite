@@ -67,9 +67,19 @@ export interface MatchWildcard {
   match_id: string;
   team_id: string;
   full_name: string;
-  position: WildcardPosition;
-  /** End-of-match rating (1-5), only when the Wildcard plays as goalkeeper. */
+  /** Starter (titolare) or reserve (riserva). */
+  starter: boolean;
+  /** Role of Wildcards saved before migration 30 only; new Wildcards have no role. */
+  position: WildcardPosition | null;
+  /** End-of-match rating (1-5), only for a Wildcard saved as goalkeeper before migration 30. */
   goalkeeper_rating: number | null;
+}
+
+export interface MatchLineupSubmission {
+  match_id: string;
+  team_id: string;
+  submitted_by: string | null;
+  submitted_at: string;
 }
 
 export interface MatchLineup {

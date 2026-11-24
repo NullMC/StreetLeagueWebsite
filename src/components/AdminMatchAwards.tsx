@@ -524,7 +524,7 @@ export function AdminMatchAwards() {
                   <div className="admin-awards__player admin-awards__player--wildcard" key={wildcard.id}>
                     <div className="admin-awards__player-info">
                       <strong>{wildcard.full_name} <span className="admin-awards__wildcard-tag">Wildcard</span></strong>
-                      <small>{teamNames.get(wildcard.team_id) ?? "—"} · {wildcard.position}</small>
+                      <small>{teamNames.get(wildcard.team_id) ?? "—"} · {wildcard.starter === false ? "Riserva" : "Titolare"}</small>
                     </div>
                     <div className="admin-awards__actions">
                       <button

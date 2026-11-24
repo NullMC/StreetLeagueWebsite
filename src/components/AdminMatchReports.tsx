@@ -3,8 +3,8 @@ import { getActiveCompetitions, getMatchWildcards, getMatches, getPlayers, getTe
 import { ensureFreshAdminSession } from "../lib/admin";
 import { isStaffPosition } from "../lib/awards";
 import { supabase } from "../lib/supabase";
-import { WILDCARD_POSITIONS } from "../types";
-import type { Competition, Match, MatchEvent, MatchLineup, MatchWildcard, Player, Team, WildcardPosition } from "../types";
+import { getLineupSubmissions } from "../lib/president";
+import type { Competition, Match, MatchEvent, MatchLineup, MatchLineupSubmission, MatchWildcard, Player, Team } from "../types";
 import { MATCH_DURATION_MINUTES, isValidMatchMinute } from "../lib/matchDuration";
 
 type EventKind = "goal" | "own_goal" | "presidential_penalty" | "yellow_card" | "red_card";
@@ -41,10 +41,13 @@ const matchesPlayerSearch = (player: Player, query: string) => {
 };
 const WILDCARD_MAX = 80;
 const WILDCARD_PREFIX = "wc:";
-type WildcardDraft = { name: string; position: WildcardPosition };
-const emptyWildcard: WildcardDraft = { name: "", position: "Centrocampista" };
+type WildcardDraft = { name: string; starter: boolean };
+const emptyWildcard: WildcardDraft = { name: "", starter: true };
 const wildcardDraftOf = (row?: MatchWildcard): WildcardDraft =>
-  row ? { name: row.full_name, position: row.position } : emptyWildcard;
+  row ? { name: row.full_name, starter: row.starter !== false } : emptyWildcard;
+const submittedLabel = (iso: string) => new Intl.DateTimeFormat("it-IT", {
+  day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Rome",
+}).format(new Date(iso));
 const dayOf = (match: Match) => match.matchday?.trim() ?? "";
 const dayLabel = (day: string) => /^\d+$/.test(day) ? "Giornata " + day : day;
 const describeError = (error: unknown) =>
@@ -63,6 +66,7 @@ export function AdminMatchReports() {
   const [lineups, setLineups] = useState<MatchLineup[]>([]);
   const [draft, setDraft] = useState<Record<string, { selected: boolean; starter: boolean }>>({});
   const [savedWildcards, setSavedWildcards] = useState<MatchWildcard[]>([]);
+  const [submissions, setSubmissions] = useState<MatchLineupSubmission[]>([]);
   const [wildcards, setWildcards] = useState<Record<string, WildcardDraft>>({});
   const [events, setEvents] = useState<MatchEvent[]>([]);
   const [eventId, setEventId] = useState("");
@@ -111,11 +115,13 @@ export function AdminMatchReports() {
 
   async function refreshMatch(id: string, savedTeamId?: string) {
     if (!supabase) return;
-    const [l, e, w] = await Promise.all([
+    const [l, e, w, s] = await Promise.all([
       supabase.from("match_lineups").select("*").eq("match_id", id),
       supabase.from("match_events").select("*").eq("match_id", id).order("minute"),
       getMatchWildcards(id),
+      getLineupSubmissions(id),
     ]);
+    setSubmissions(s);
     if (l.error) throw l.error;
     if (e.error) throw e.error;
     const updated = (l.data ?? []) as MatchLineup[];
@@ -141,7 +147,7 @@ export function AdminMatchReports() {
 
   useEffect(() => {
     let active = true;
-    setLineups([]); setEvents([]); setDraft({}); setSavedWildcards([]); setWildcards({});
+    setLineups([]); setEvents([]); setDraft({}); setSavedWildcards([]); setWildcards({}); setSubmissions([]);
     setEventId(""); setPlayerId(""); setOwnGoalTeam(""); setKind("goal"); setMinute("1"); setNote("");
     if (!selectedMatchId) { setMatchLoading(false); return; }
     setMatchLoading(true);
@@ -149,7 +155,8 @@ export function AdminMatchReports() {
       supabase!.from("match_lineups").select("*").eq("match_id", selectedMatchId),
       supabase!.from("match_events").select("*").eq("match_id", selectedMatchId).order("minute"),
       getMatchWildcards(selectedMatchId),
-    ]).then(([l, e, w]) => {
+      getLineupSubmissions(selectedMatchId),
+    ]).then(([l, e, w, s]) => {
       if (l.error) throw l.error;
       if (e.error) throw e.error;
       if (!active) return;
@@ -159,6 +166,7 @@ export function AdminMatchReports() {
         [item.player_id, { selected: true, starter: item.starter }])));
       setEvents((e.data ?? []) as MatchEvent[]);
       setSavedWildcards(w);
+      setSubmissions(s);
       setWildcards(Object.fromEntries(w.map((row) => [row.team_id, wildcardDraftOf(row)])));
     }).catch((cause) => { if (active) setError(describeError(cause)); })
       .finally(() => { if (active) setMatchLoading(false); });
@@ -260,9 +268,9 @@ export function AdminMatchReports() {
       if (!wildcardName && savedWildcard) {
         const { error: wildcardError } = await supabase.from("match_wildcards").delete().eq("id", savedWildcard.id);
         if (wildcardError) throw wildcardError;
-      } else if (wildcardName && (wildcardName !== savedWildcard?.full_name || wildcard.position !== savedWildcard?.position)) {
+      } else if (wildcardName && (wildcardName !== savedWildcard?.full_name || wildcard.starter !== (savedWildcard?.starter !== false))) {
         const { error: wildcardError } = await supabase.from("match_wildcards").upsert({
-          match_id: selectedMatch.id, team_id: teamId, full_name: wildcardName, position: wildcard.position,
+          match_id: selectedMatch.id, team_id: teamId, full_name: wildcardName, starter: wildcard.starter,
         }, { onConflict: "match_id,team_id" });
         if (wildcardError) throw wildcardError;
       }
@@ -395,16 +403,20 @@ export function AdminMatchReports() {
                     <h4>{team?.name ?? "Squadra"}</h4>
                     <span>{lineups.filter((entry) => entry.team_id === teamId).length} registrati</span>
                   </div>
+                  {submissions.some((row) => row.team_id === teamId) && (
+                    <p className="admin-help-text">Formazione inviata dal presidente il {submittedLabel(submissions.find((row) => row.team_id === teamId)!.submitted_at)}. Puoi comunque modificarla da qui.</p>
+                  )}
                   <fieldset className="match-report-admin__wildcard" disabled={matchLoading}>
                     <legend>Wildcard <small>facoltativa · giocatore esterno per questa partita</small></legend>
                     <input aria-label={"Nome della Wildcard di " + (team?.name ?? "squadra")}
                       value={(wildcards[teamId] ?? emptyWildcard).name} maxLength={WILDCARD_MAX}
                       placeholder="Nome e cognome" autoComplete="off"
                       onChange={(e) => setWildcards((old) => ({ ...old, [teamId]: { ...(old[teamId] ?? emptyWildcard), name: e.target.value } }))} />
-                    <select aria-label={"Ruolo della Wildcard di " + (team?.name ?? "squadra")}
-                      value={(wildcards[teamId] ?? emptyWildcard).position}
-                      onChange={(e) => setWildcards((old) => ({ ...old, [teamId]: { ...(old[teamId] ?? emptyWildcard), position: e.target.value as WildcardPosition } }))}>
-                      {WILDCARD_POSITIONS.map((position) => <option key={position} value={position}>{position}</option>)}
+                    <select aria-label={"Titolare o riserva: Wildcard di " + (team?.name ?? "squadra")}
+                      value={(wildcards[teamId] ?? emptyWildcard).starter ? "starter" : "reserve"}
+                      onChange={(e) => setWildcards((old) => ({ ...old, [teamId]: { ...(old[teamId] ?? emptyWildcard), starter: e.target.value === "starter" } }))}>
+                      <option value="starter">Titolare</option>
+                      <option value="reserve">Riserva</option>
                     </select>
                   </fieldset>
                   {!matchLoading && roster.length > 0 && (

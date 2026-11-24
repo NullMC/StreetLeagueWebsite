@@ -132,6 +132,11 @@ function getSeo(pathname: string): SeoConfig {
     title: `Sponsor e collaborazioni | ${SITE_NAME}`,
     description: "Scopri gli sponsor della Street League Bari e le opportunità di collaborazione con il torneo.",
   };
+  if (path === "/presidente") return {
+    title: `Area presidenti | ${SITE_NAME}`,
+    description: "Area riservata ai presidenti delle squadre Street League per registrare le formazioni.",
+    indexable: false,
+  };
   if (path === "/admin" || path.startsWith("/admin/")) return {
     title: `Area riservata | ${SITE_NAME}`,
     description: "Area operativa riservata Street League.",

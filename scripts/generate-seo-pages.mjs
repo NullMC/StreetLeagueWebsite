@@ -44,6 +44,7 @@ const staticPages = [
   { path: "/statistiche", title: "Statistiche dei giocatori | Street League Bari", description: "Marcatori, MVP, clean sheet e statistiche disciplinari delle competizioni Street League Bari." },
   { path: "/partner", title: "Sponsor e collaborazioni | Street League Bari", description: "Scopri gli sponsor della Street League Bari e le opportunità di collaborazione con il torneo." },
   { path: "/admin", title: "Area riservata | Street League Bari", description: "Area operativa riservata Street League.", indexable: false },
+  { path: "/presidente", title: "Area presidenti | Street League Bari", description: "Area riservata ai presidenti delle squadre Street League per registrare le formazioni.", indexable: false },
   { path: "/collabora", title: "Collabora con Street League | Street League Bari", description: "Contatta Street League Bari per valutare una collaborazione o una sponsorizzazione.", indexable: false },
 ];
 
@@ -307,7 +308,7 @@ function sitemapEntry(route, page = {}) {
 function buildSitemap(entries) {
   const seen = new Set();
   const rows = entries
-    .filter((entry) => entry.route !== "/admin" && !entry.route.startsWith("/admin/"))
+    .filter((entry) => entry.route !== "/admin" && !entry.route.startsWith("/admin/") && entry.route !== "/presidente")
     .filter((entry) => !seen.has(entry.route) && seen.add(entry.route))
     .map((entry) => {
       const parts = [`<loc>${xmlEscape(canonicalFor(entry.route))}</loc>`];

@@ -1040,3 +1040,77 @@ html[data-theme="night"] #root .sl-admin-login input { background: var(--sl-surf
 #root .sl-admin .match-report-admin__search small { flex: 0 0 auto; font-size: 12px; color: var(--sl-fg-muted); }
 #root .sl-admin .match-report-admin__event-search small { display: block; margin-top: 4px; font-size: 12px; color: var(--sl-fg-muted); }
 
+
+/* --------------------------------------------------------------------------
+   Area presidenti (/presidente): stessa grafica del back office, una colonna
+   -------------------------------------------------------------------------- */
+#root .sl-admin--president { grid-template-columns: minmax(0, 1fr); width: min(1080px, 100%); }
+#root .sl-admin--president .president-area__top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 16px; align-items: center; }
+#root .sl-admin--president .president-area__top .sl-admin__lead { grid-column: 1 / -1; margin: 0; }
+#root .sl-admin--president .president-area__team { display: flex; align-items: center; gap: 14px; min-width: 0; }
+#root .sl-admin--president .president-area__team img { width: 52px; height: 52px; object-fit: contain; flex: none; }
+#root .sl-admin--president .president-area__team h1 { margin: 0; overflow-wrap: anywhere; }
+#root .sl-admin--president .president-area__team .sl-admin__crumb { margin: 0 0 4px; }
+#root .sl-admin--president .president-area__account { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+#root .sl-admin--president .president-area__password {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; align-items: end;
+  padding: 16px; border: 1px solid var(--sl-line); border-radius: var(--adm-radius); background: var(--adm-card);
+}
+#root .sl-admin--president .president-area__password .admin-error { grid-column: 1 / -1; }
+#root .sl-admin--president :is(.president-area__password, .president-area__wildcard) label {
+  display: grid; gap: 6px; font: 600 12.5px/1.3 var(--font-body); color: var(--adm-muted);
+}
+#root .sl-admin--president :is(.president-area__password, .president-area__wildcard, .match-report-admin__team) :is(input:not([type="checkbox"]):not([type="radio"]), select) {
+  width: 100%; min-width: 0; min-height: 42px; padding: 0 12px; border: 1px solid var(--sl-line-strong);
+  border-radius: var(--adm-radius-sm); background: var(--adm-field); color: var(--sl-fg); font: 400 14px/1 var(--font-body);
+}
+#root .sl-admin--president .president-area__matches {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 10px;
+}
+#root .sl-admin--president .president-area__match {
+  display: grid; gap: 4px; padding: 14px 16px; text-align: left; cursor: pointer;
+  border: 1px solid var(--sl-line); border-radius: var(--adm-radius); background: var(--adm-card); color: var(--sl-fg);
+  font: 400 13px/1.35 var(--font-body);
+}
+#root .sl-admin--president .president-area__match:hover { background: var(--adm-hover); }
+#root .sl-admin--president .president-area__match.is-active { border-color: var(--sl-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--sl-accent) 24%, transparent); }
+#root .sl-admin--president .president-area__match strong { font-size: 15px; }
+#root .sl-admin--president .president-area__match span { color: var(--adm-muted); }
+#root .sl-admin--president .president-area__match em { font-style: normal; font-weight: 600; font-size: 12px; color: var(--sl-accent); }
+#root .sl-admin--president .president-area__match em.is-sent { color: #15803d; }
+#root .sl-admin--president .president-area__match em.is-closed { color: var(--adm-muted); }
+#root .sl-admin--president .president-area__editor { display: grid; gap: 12px; }
+#root .sl-admin--president .president-area__fields {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start;
+  margin: 0; padding: 0; border: 0; min-width: 0;
+}
+#root .sl-admin--president .president-area__fields:disabled { opacity: 0.7; }
+#root .sl-admin--president .president-area__fields .match-report-admin__team { display: grid; gap: 12px; align-content: start; }
+#root .sl-admin--president .president-area__fields .match-report-admin__team-title { margin-bottom: 0 !important; display: flex; justify-content: space-between; align-items: baseline; }
+#root .sl-admin--president .president-area__fields .match-report-admin__team-title span { font-size: 12.5px; color: var(--adm-muted); }
+#root .sl-admin--president .president-area__choice { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+#root .sl-admin--president .president-area__choice label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+#root .sl-admin--president .president-area__choice input { width: 18px; height: 18px; accent-color: var(--sl-accent); }
+#root .sl-admin--president .president-area__wildcard { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 10px; }
+#root .sl-admin--president .president-area__actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+#root .sl-admin--president .president-area__actions .btn { min-width: 220px; }
+@media (max-width: 640px) {
+  #root .sl-admin--president .president-area__top { grid-template-columns: minmax(0, 1fr); }
+  #root .sl-admin--president .president-area__account { justify-content: flex-start; }
+  #root .sl-admin--president .president-area__actions .btn { width: 100%; }
+}
+
+/* Back office: credenziali presidenti (sezione Squadre) */
+#root .sl-admin .admin-presidents { display: grid; gap: 14px; margin-top: 28px; }
+#root .sl-admin .admin-presidents__credentials {
+  display: grid; gap: 10px; padding: 16px; border: 1px dashed var(--sl-accent); border-radius: var(--adm-radius);
+  background: color-mix(in srgb, var(--sl-accent) 6%, transparent);
+}
+#root .sl-admin .admin-presidents__credentials ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+#root .sl-admin .admin-presidents__credentials li { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: center; font-size: 13.5px; }
+#root .sl-admin .admin-presidents__credentials code { font: 600 13px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; user-select: all; }
+#root .sl-admin .admin-presidents__credential-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 640px) {
+  #root .sl-admin .admin-presidents__credentials li { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  #root .sl-admin .admin-presidents__credentials li span { grid-column: 1 / -1; font-weight: 600; }
+}

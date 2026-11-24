@@ -16,6 +16,7 @@ import {
   faHouse,
   faListOl,
   faLock,
+  faClipboardList,
   faTrophy,
 } from "@fortawesome/free-solid-svg-icons";
 import { MobileDock } from "./ui/MobileDock";
@@ -28,6 +29,7 @@ const links = [
   { label: "Statistiche Giocatori", to: "/statistiche", icon: faChartLine },
   { label: "Calciomercato", to: "/calciomercato", icon: faArrowsRotate },
   { label: "Sponsor & collabora", to: "/partner", icon: faHandshake },
+  { label: "Area presidenti", to: "/presidente", icon: faClipboardList },
   { label: "Admin", to: "/admin", icon: faLock },
 ];
 

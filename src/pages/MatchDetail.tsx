@@ -240,7 +240,7 @@ export default function MatchDetail() {
                                 <div className="match-experience__formation-player">
                                   <span className="match-experience__avatar">WC</span>
                                   <span>{wildcard.full_name}</span>
-                                  <strong>{wildcard.position}</strong>
+                                  <strong>{wildcard.starter === false ? "Riserva" : "Titolare"}</strong>
                                 </div>
                               </div>
                             )}
